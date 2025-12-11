@@ -1,0 +1,15 @@
+div{
+    width: 25%;
+    align-items: center;
+    margin: auto;
+    text-align: center;
+    margin-top: 15%;
+}
+
+p{
+    text-align: left;
+}
+
+label, input[type="checkbox"]{
+    float: left;
+}

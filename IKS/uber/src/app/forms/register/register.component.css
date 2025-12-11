@@ -1,0 +1,23 @@
+#container{
+    width:50%;
+    margin: auto;
+    text-align: center;
+    margin-top: 10%;
+}
+
+#grid{
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto auto auto auto;
+    grid-auto-flow: column;
+}
+
+.invisible{
+    visibility: hidden;
+}
+
+#bottom{
+    display: grid;
+    grid-template-columns: auto auto;
+    text-align: left;
+}

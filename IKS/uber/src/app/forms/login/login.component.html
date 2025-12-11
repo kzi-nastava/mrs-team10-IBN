@@ -1,0 +1,15 @@
+<div>
+    <h1>Login</h1>
+    <form [formGroup]="loginForm">
+        <input type="text" formControlName="email" placeholder="E-mail">
+        <br/>
+        <input type="password" formControlName="password" placeholder="Password">
+        <p>Forgot your password? <a>Click Here!</a> </p>
+        <hr/>
+        <input type="checkbox" id="loggedin">
+        <label for="loggedin">Keep me logged in</label>
+        <br/>
+        <button>Sign In</button>
+        <p>You don't have an account? <a [routerLink]="['/register']">Sign Up!</a></p>
+    </form>
+</div>
