@@ -1,0 +1,118 @@
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-account',
+  imports: [FormsModule, RouterLink],
+  templateUrl: './account.component.html',
+  styleUrl: './account.component.css',
+})
+export class AccountComponent implements OnInit {
+  originalData = {
+    firstName: 'Bojana',
+    lastName: 'Paunovic',
+    address: 'Kopernikova 23, Novi Sad',
+    phone: '0612018550',
+    email: 'paunovicboka@gmail.com',
+  };
+
+  formData = {
+    firstName: 'Bojana',
+    lastName: 'Paunovic',
+    address: 'Kopernikova 23, Novi Sad',
+    phone: '0612018550',
+    email: 'paunovicboka@gmail.com',
+  };
+
+  ngOnInit() {
+    this.initParticles();
+  }
+
+  hasChanges(): boolean {
+    return (
+      this.formData.firstName !== this.originalData.firstName ||
+      this.formData.lastName !== this.originalData.lastName ||
+      this.formData.address !== this.originalData.address ||
+      this.formData.phone !== this.originalData.phone
+    );
+  }
+
+  saveChanges() {
+    console.log('Saving:', this.formData);
+    this.originalData = { ...this.formData };
+  }
+  initParticles() {
+    const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: any[] = [];
+    const particleCount = 50;
+    const icons = ['🚕', '🚖'];
+
+    class Particle {
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+      icon: string;
+      opacity: number;
+
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 40 + 30;
+        this.speedX = Math.random() * 0.8 - 0.25;
+        this.speedY = Math.random() * 0.8 - 0.25;
+        this.icon = icons[Math.floor(Math.random() * icons.length)];
+        this.opacity = Math.random() * 0.4 + 0.3;
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.font = `${this.size}px Arial`;
+        ctx.globalAlpha = this.opacity;
+        ctx.fillText(this.icon, this.x, this.y);
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle) => {
+        particle.update();
+        particle.draw();
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  }
+}
