@@ -1,0 +1,93 @@
+<app-nav-bar></app-nav-bar>
+<div class="requests-container">
+  <div class="header-card">
+    <h1>Change Requests</h1>
+  </div>
+
+  <div class="table-card">
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Driver</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (request of requests; track request.id) {
+        <tr class="table-row">
+          <td>
+            <div class="type-cell">
+              <span
+                class="icon"
+                [class.profile-icon]="request.type === 'profile'"
+                [class.vehicle-icon]="request.type === 'vehicle'"
+              >
+                {{ request.type === 'profile' ? '👤' : '🚗' }}
+              </span>
+            </div>
+          </td>
+          <td>{{ request.driverName }}</td>
+          <td>
+            <div class="date-cell">
+              <span class="clock-icon"></span>
+              {{ request.requestDate }}
+            </div>
+          </td>
+          <td>
+            <button class="view-btn" (click)="openRequestDetails(request)">Review</button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (selectedRequest) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2>Request details</h2>
+          <p class="modal-subtitle">
+            {{ selectedRequest.driverName }}
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        @for (key of getChangeKeys(); track key) {
+        <div class="change-item">
+          <div class="change-label">{{ key }}:</div>
+          <div class="change-comparison">
+            <div class="change-old">
+              <div class="change-subtitle">Old:</div>
+              <div class="change-value old-value">
+                {{ selectedRequest.changes.oldData[key] }}
+              </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="change-new">
+              <div class="change-subtitle">New:</div>
+              <div class="change-value new-value">
+                {{ selectedRequest.changes.newData[key] }}
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+        @if (selectedRequest.status === 'pending') {
+        <button class="btn btn-danger" (click)="handleReject(selectedRequest.id)">Reject</button>
+        <button class="btn btn-success" (click)="handleApprove(selectedRequest.id)">Accept</button>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>
+<router-outlet></router-outlet>
