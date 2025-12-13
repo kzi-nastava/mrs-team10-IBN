@@ -1,56 +1,48 @@
 <mat-sidenav-container>
-
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
+    <div class="item" [routerLink]="['/account']">
+      <mat-icon>account_circle</mat-icon>
+      <span>My account</span>
+    </div>
 
-  <div class="item"  [routerLink]="['/home']">
-    <mat-icon>account_circle</mat-icon>
-    <span>My account</span>
-  </div>
+    <div class="separator"></div>
 
-  <div class="separator"></div>
+    <div class="item">
+      <mat-icon>chat_bubble</mat-icon>
+      <span>Chat support</span>
+    </div>
 
-  <div class="item">
-    <mat-icon>chat_bubble</mat-icon>
-    <span>Chat support</span>
-  </div>
+    <div class="separator"></div>
 
-  <div class="separator"></div>
+    <div class="item">
+      <mat-icon>map</mat-icon>
+      <span>History of rides</span>
+    </div>
 
-  <div class="item">
-    <mat-icon>map</mat-icon>
-    <span>History of rides</span>
-  </div>
+    <div class="separator"></div>
 
-  <div class="separator"></div>
+    <div class="item">
+      <mat-icon>directions_car</mat-icon>
+      <span>Tracking ride</span>
+    </div>
 
-  <div class="item">
-    <mat-icon>directions_car</mat-icon>
-    <span>Tracking ride</span>
-  </div>
+    <div class="separator"></div>
 
-  <div class="separator"></div>
-
-  <button class="logout-btn">Log out</button>
-
-</mat-sidenav>
+    <button class="logout-btn">Log out</button>
+  </mat-sidenav>
 
   <mat-sidenav-content class="content">
-
     <mat-toolbar color="primary">
-
       <button mat-icon-button (click)="drawer.toggle()">
-        <mat-icon style="color: antiquewhite; ">menu</mat-icon>
+        <mat-icon style="color: antiquewhite">menu</mat-icon>
       </button>
 
-      <img class = "nav-logo" src="logo.png"/>
+      <img class="nav-logo" src="logo.png" />
       <span class="example-spacer"></span>
 
-      <div class = "notification">
-      <mat-icon>notifications</mat-icon>
+      <div class="notification">
+        <mat-icon>notifications</mat-icon>
       </div>
-
     </mat-toolbar>
-
   </mat-sidenav-content>
-
 </mat-sidenav-container>

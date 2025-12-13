@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './forms/login/login.component';
 import { RegisterComponent } from './forms/register/register.component';
-import {HomeComponent} from './layout/home/home.component';
+import { HomeComponent } from './layout/home/home.component';
+import { AccountComponent } from './layout/account/account.component';
 
 export const routes: Routes = [
   {
@@ -10,10 +11,13 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    component: RegisterComponent
+    component: RegisterComponent,
+  },
+  {
+    path: 'account',
+    component: AccountComponent,
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' }
+  { path: '**', redirectTo: 'home' },
 ];
-
