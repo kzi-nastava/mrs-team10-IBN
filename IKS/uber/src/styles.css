@@ -6,14 +6,20 @@ h1, p, label{
     color: white;
 }
 
+p, label{
+  font-family: "Mandali";
+}
+
 button {
   margin: 10px;
-  padding: 10px;
   border-radius: 10px;
   border: none;
   color: white;
-  height: 50px;
-  width: 120px;
+  height: 40px;
+  width: 100px;
+  font-family: "Mandali";
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .form-button-one {
@@ -21,7 +27,7 @@ button {
 }
 
 input[type='text'],
-input[type='image'],
+input[type='file'],
 input[type='password'] {
   margin: 10px;
   margin-left: 0;
@@ -31,6 +37,8 @@ input[type='password'] {
   border-radius: 20px;
   border: none;
   background-color: white;
+  font-family: "Mandali";
+  font-size: 20px;
 }
 
 a {
@@ -42,6 +50,6 @@ input[type='password']:focus {
   outline: none;
 }
 
-input[type='image'] {
+input[type='file'] {
   color: gray;
 }

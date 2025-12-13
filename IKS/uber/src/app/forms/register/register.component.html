@@ -1,11 +1,11 @@
 <div id="container">
-    <h1>Register</h1>
+    <img src="register.svg" alt="Register"/>
     <form [formGroup]="registerForm">
         <div id="grid">
             <input type="text" formControlName="email" placeholder="E-mail">
             <input type="password" formControlName="password" placeholder="Password">
             <input type="password" formControlName="confirmPassword" placeholder="Confirm Password">
-            <input type="image" formControlName="image">
+            <input type="file" formControlName="image" accept=".jpg, .png">
             <input type="text" class="invisible">
             <input type="text" formControlName="name" placeholder="Name">
             <input type="text" formControlName="lastName" placeholder="Last Name">

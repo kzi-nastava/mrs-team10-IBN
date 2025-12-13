@@ -1,17 +1,27 @@
-div {
+#container {
   width: 25%;
   align-items: center;
   margin: auto;
   text-align: center;
-  margin-top: 10%;
+}
+
+img{
+  width:400px;
+  height: auto;
+}
+
+#loggedin-div{
+  text-align: left;
 }
 
 p {
   text-align: left;
+  font-size: 12px;
 }
 
 button {
-  margin: 20px;
+  margin: 30px;
+  margin-top: 15px;
   margin-bottom: 0;
 }
 
@@ -20,13 +30,4 @@ input[type='checkbox'] {
   height: 20px;
   border-radius: 2px;
   margin-left: 15px;
-}
-
-label[for='loggedin'] {
-  margin: 5px;
-}
-
-label,
-input[type='checkbox'] {
-  float: left;
 }

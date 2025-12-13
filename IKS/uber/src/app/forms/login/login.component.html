@@ -1,13 +1,15 @@
-<div>
-    <h1>Login</h1>
+<div id="container">
+    <img src="login.svg" alt="Login"/>
     <form [formGroup]="loginForm">
         <input type="text" formControlName="email" placeholder="E-mail">
         <br/>
         <input type="password" formControlName="password" placeholder="Password">
         <p>Forgot your password? <a>Click Here!</a> </p>
         <hr/>
-        <input type="checkbox" id="loggedin">
-        <label for="loggedin">Keep me logged in</label>
+        <div id="loggedin-div">
+            <input type="checkbox" id="loggedin">
+            <label for="loggedin">Keep me logged in</label>
+        </div>
         <br/>
         <button class="form-button-one">Sign In</button>
         <p>You don't have an account? <a [routerLink]="['/register']">Sign Up!</a></p>
