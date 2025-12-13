@@ -11,7 +11,7 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
   styleUrls: ['./account.component.css'],
 })
 export class AccountComponent implements OnInit {
-  userRole: 'user' | 'driver' | 'admin' = 'admin';
+  userRole: 'user' | 'driver' | 'admin' = 'driver';
   originalData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
@@ -28,6 +28,9 @@ export class AccountComponent implements OnInit {
     email: 'paunovicboka@gmail.com',
   };
 
+  hoursWorkedToday = 7;
+  maxHoursPerDay = 8;
+
   ngOnInit() {
     this.initParticles();
   }
@@ -39,6 +42,10 @@ export class AccountComponent implements OnInit {
       this.formData.address !== this.originalData.address ||
       this.formData.phone !== this.originalData.phone
     );
+  }
+
+  getProgressPercentage(): number {
+    return (this.hoursWorkedToday / this.maxHoursPerDay) * 100;
   }
 
   saveChanges() {
@@ -78,6 +85,29 @@ export class AccountComponent implements OnInit {
       ],
     };
     return [...(roleMenus[this.userRole] || []), ...commonItems];
+  }
+
+  showVehicleModal = false;
+  vehicleData = {
+    model: '',
+    type: 'standard',
+    licensePlate: '',
+    seats: 4,
+    babyTransport: false,
+    petTransport: false,
+  };
+
+  openVehicleModal() {
+    this.showVehicleModal = true;
+  }
+
+  closeVehicleModal() {
+    this.showVehicleModal = false;
+  }
+
+  saveVehicleInfo() {
+    console.log('Vehicle data:', this.vehicleData);
+    this.closeVehicleModal();
   }
 
   initParticles() {

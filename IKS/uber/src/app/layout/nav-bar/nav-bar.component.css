@@ -2,6 +2,10 @@
   flex: 1 1 auto;
 }
 
+.content {
+  height: 100vh;
+}
+
 .sidebar {
   width: 20vw;
   max-width: 300px;
@@ -13,14 +17,12 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden !important;
-  z-index: 1000 !important;
 }
 
 .mat-toolbar {
   display: flex;
   height: 8vw;
   padding-right: 2rem;
-  z-index: 1000 !important;
 }
 
 mat-toolbar mat-icon {
@@ -59,11 +61,8 @@ mat-toolbar mat-icon {
   border-radius: 2rem;
   cursor: pointer;
   width: 10vw;
-  margin: 1rem auto;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
+  margin: 1rem 3rem 1rem 3rem;
 }
 
 .nav-logo {
@@ -104,14 +103,6 @@ mat-toolbar mat-icon {
     width: 25vw;
   }
 }
-
 mat-sidenav-container {
   position: absolute;
-  width: 98%;
-  height: 20vh;
-  transition: height 0.1s;
-}
-
-mat-sidenav-container.sidebar-opened {
-  height: 70vh;
 }
