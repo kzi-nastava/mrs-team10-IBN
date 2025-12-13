@@ -1,0 +1,31 @@
+#container{
+    width:50%;
+    margin: auto;
+    text-align: center;
+}
+
+#grid{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto auto auto auto;
+    grid-auto-flow: column;
+}
+
+img{
+  width:400px;
+  height: auto;
+}
+
+.invisible{
+    visibility: hidden;
+}
+
+#bottom{
+    display: grid;
+    grid-template-columns: auto auto;
+    text-align: left;
+}
+
+#signin{
+  margin: 0;
+}
