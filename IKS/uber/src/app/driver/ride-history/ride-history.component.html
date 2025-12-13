@@ -1,0 +1,33 @@
+
+
+<div class="container">
+  @for (ride of rides(); track ride.id) {
+    <div class="ride-card">
+        <button class="fav-btn">❤️</button>
+
+        <div class="locations">
+            <div class="location">
+            <span class="pin red"></span>
+            <input type="text" placeholder={{ride.name}} readonly />
+            </div>
+
+            <div class="location">
+            <span class="pin green"></span>
+            <input type="text" placeholder="Destination" />
+            </div>
+        </div>
+
+        <div class="avatars">
+            <img src="corgo1.jpeg" />
+            <img src="corgo3.jpg" />
+            <img src="corgo2.jpeg" />
+        </div>
+        <div class="time">
+            <div class="time-box">13:00</div>
+            <div class="time-box">13:13</div>
+        </div>
+        <div class="price">824.00 RSD</div>
+</div>
+
+  }
+</div>

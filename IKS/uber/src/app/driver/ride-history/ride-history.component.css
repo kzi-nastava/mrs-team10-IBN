@@ -1,0 +1,102 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 4rem;              
+  padding: 4rem 4rem 4rem 2rem;
+  box-sizing: border-box;
+}
+
+.ride-card {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  min-width: 200px;
+  background: #d9d9d9;
+  border-radius: 2rem;
+  padding: 1rem;
+  font-family: "Mandali";
+  margin: auto;
+}
+
+.fav-btn {
+  position: absolute;
+  top: -20px;
+  right: -12px;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.locations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.location input {
+  flex: 1;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.4rem;
+  background: #eee;
+  font-size: 0.9rem;
+}
+
+.pin {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pin.red { background: #d32f2f; }
+.pin.green { background: #388e3c; }
+
+.avatars img {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 2px solid #d9d9d9;
+  margin-left: -1rem;
+}
+
+.avatars img:first-child {
+  margin-left: 0;
+}
+
+.time{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.time-box {
+  background: #eaeaea;
+  margin: auto;
+  padding: 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.price {
+  margin: 1.2rem ;
+  margin-left: 10rem;
+  background: #7cb342;
+  color: #000;
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+
