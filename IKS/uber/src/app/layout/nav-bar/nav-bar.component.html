@@ -1,6 +1,6 @@
-<mat-sidenav-container>
+<mat-sidenav-container [class.sidebar-opened]="drawer.opened">
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
-    <div class="item" [routerLink]="['/account']">
+    <div class="item" [routerLink]="['/account']" (click)="drawer.close()">
       <mat-icon>account_circle</mat-icon>
       <span>My account</span>
     </div>
@@ -36,10 +36,8 @@
       <button mat-icon-button (click)="drawer.toggle()">
         <mat-icon style="color: antiquewhite">menu</mat-icon>
       </button>
-
-      <img class="nav-logo" src="logo.png" />
       <span class="example-spacer"></span>
-
+      <img class="nav-logo" src="logo.png" />
       <div class="notification">
         <mat-icon>notifications</mat-icon>
       </div>

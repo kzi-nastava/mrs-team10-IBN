@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { NavBarComponent } from '../nav-bar/nav-bar.component';
 
 @Component({
   selector: 'app-account',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CommonModule, NavBarComponent, RouterOutlet],
   templateUrl: './account.component.html',
-  styleUrl: './account.component.css',
+  styleUrls: ['./account.component.css'],
 })
 export class AccountComponent implements OnInit {
+  userRole: 'user' | 'driver' | 'admin' = 'admin';
   originalData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
@@ -42,6 +45,41 @@ export class AccountComponent implements OnInit {
     console.log('Saving:', this.formData);
     this.originalData = { ...this.formData };
   }
+
+  get menuItems() {
+    const commonItems = [
+      {
+        icon: '🔑',
+        label: 'Change password',
+        route: '/change-password',
+      },
+      {
+        icon: '🗑️',
+        label: 'Delete account',
+        route: '/delete-account',
+      },
+    ];
+
+    const roleMenus = {
+      user: [
+        { icon: '⭐', label: 'Favorites', route: '/favorites' },
+        { icon: '📊', label: 'My statistics', route: '/statistics/user' },
+      ],
+
+      driver: [
+        { icon: '🚗', label: 'My vehicle', route: '/my-vehicle' },
+        { icon: '📊', label: 'My statistics', route: '/statistics/driver' },
+      ],
+
+      admin: [
+        { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
+        { icon: '📥', label: 'Requests', route: '/requests' },
+        { icon: '👥', label: 'Manage users', route: '/manage-users' },
+      ],
+    };
+    return [...(roleMenus[this.userRole] || []), ...commonItems];
+  }
+
   initParticles() {
     const canvas = document.getElementById('particles-canvas') as HTMLCanvasElement;
     if (!canvas) return;
