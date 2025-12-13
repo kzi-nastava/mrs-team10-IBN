@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './forms/login/login.component';
 import { RegisterComponent } from './forms/register/register.component';
-import {HomeComponent} from './layout/home/home.component';
+import { HomeComponent } from './layout/home/home.component';
+import { AccountComponent } from './layout/account/account.component';
 import { RideHistoryComponent } from './driver/ride-history/ride-history.component';
 
 export const routes: Routes = [
@@ -11,7 +12,11 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    component: RegisterComponent
+    component: RegisterComponent,
+  },
+  {
+    path: 'account',
+    component: AccountComponent,
   },
   {
     path: 'ride-history',
@@ -19,6 +24,5 @@ export const routes: Routes = [
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' }
+  { path: '**', redirectTo: 'home' },
 ];
-
