@@ -1,10 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { NavBarComponent } from '../layout/nav-bar/nav-bar.component';
-import { Router, RouterLink } from '@angular/router';
+import { NavBarComponent } from '../nav-bar/nav-bar.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tracking-route',
-  imports: [NavBarComponent, RouterLink],
+  imports: [NavBarComponent],
   templateUrl: './tracking-route.component.html',
   styleUrl: './tracking-route.component.css',
 })
