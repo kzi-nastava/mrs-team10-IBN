@@ -1,3 +1,15 @@
+<div class="top">
+  <button mat-icon-button (click)="drawer.toggle()">
+      <mat-icon style="color: antiquewhite; ">menu</mat-icon>
+  </button>
+  <img class="nav-logo" src="logo.svg" [routerLink] ="[ '/home']"/>
+  <span class="example-spacer"></span>
+
+  <div class="notification">
+    <mat-icon>notifications</mat-icon>
+  </div>
+</div>
+
 <mat-sidenav-container>
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
     <div class="item" [routerLink]="['/account']">
@@ -14,7 +26,7 @@
 
     <div class="separator"></div>
 
-    <div class="item">
+    <div class="item" [routerLink]="['/ride-history']">
       <mat-icon>map</mat-icon>
       <span>History of rides</span>
     </div>
@@ -32,7 +44,9 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="content">
+<!--
     <mat-toolbar color="primary">
+
       <button mat-icon-button (click)="drawer.toggle()">
         <mat-icon style="color: antiquewhite">menu</mat-icon>
       </button>
@@ -44,5 +58,6 @@
         <mat-icon>notifications</mat-icon>
       </div>
     </mat-toolbar>
+-->
   </mat-sidenav-content>
 </mat-sidenav-container>

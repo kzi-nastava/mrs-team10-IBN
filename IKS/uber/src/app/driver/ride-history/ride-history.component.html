@@ -1,0 +1,42 @@
+<app-nav-bar></app-nav-bar>
+
+<div class="date-container">
+<mat-form-field>
+  <mat-label>Choose a date</mat-label>
+  <input matInput [matDatepicker]="picker">
+  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
+</div>
+
+<div class="container">
+  @for (ride of rides(); track ride.id) {
+    <div class="ride-card" (click)="openRideDialog(ride)">
+        <button class="fav-btn">❤️</button>
+
+        <div class="locations">
+            <div class="location">
+            <span class="pin red"></span>
+            <input type="text" placeholder={{ride.startLocation}} readonly />
+            </div>
+
+            <div class="location">
+            <span class="pin green"></span>
+            <input type="text" placeholder="{{ride.destination}}" readonly />
+            </div>
+        </div>
+
+        <div class="avatars">
+            <img src="corgo1.jpeg" />
+            <img src="corgo3.jpg" />
+            <img src="corgo2.jpeg" />
+        </div>
+        <div class="time">
+            <div class="time-box">{{ ride.startTime | date:'HH:mm' }}</div>
+            <div class="time-box">{{ ride.endTime | date:'HH:mm' }}</div>
+        </div>
+        <div class="price">{{ride.price}}.00 RSD</div>
+</div>
+
+  }
+</div>

@@ -53,3 +53,15 @@ input[type='password']:focus {
 input[type='file'] {
   color: gray;
 }
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 3rem !important;
+  background-color: #d3d3d3 !important;
+}
+
+.dialog-container {
+  background-color: transparent !important;
+}
+
+
+

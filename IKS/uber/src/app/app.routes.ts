@@ -4,6 +4,7 @@ import { RegisterComponent } from './forms/register/register.component';
 import { IncomingRideComponent } from './layout/incoming-ride/incoming-ride.component';
 import { HomeComponent } from './layout/home/home.component';
 import { AccountComponent } from './layout/account/account.component';
+import { RideHistoryComponent } from './driver/ride-history/ride-history.component';
 import { RequestsComponent } from './layout/requests/requests.component';
 import { TrackingRouteComponent } from './tracking-route/tracking-route.component';
 
@@ -20,6 +21,10 @@ export const routes: Routes = [
   {
     path: 'account',
     component: AccountComponent,
+  },
+  {
+    path: 'ride-history',
+    component: RideHistoryComponent
   },
   {
     path: 'requests',
