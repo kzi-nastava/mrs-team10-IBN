@@ -3,7 +3,7 @@
 }
 
 .content {
-  height: 20vh;
+  height: 70vh;
 }
 
 .sidebar {
@@ -64,6 +64,10 @@ mat-toolbar mat-icon {
   width: 10vw;
   text-align: center;
   margin: 1rem 3rem 1rem 3rem;
+}
+
+mat-sidenav-container{
+  position:absolute;
 }
 
 .nav-logo {

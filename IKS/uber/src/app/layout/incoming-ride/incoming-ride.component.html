@@ -1,0 +1,19 @@
+<div id="container">
+    <h1>Incoming Ride</h1>
+    <div id="places">
+        <mat-icon>place</mat-icon><p>Start Location: {{ startloc }}</p>
+        <br/>
+        <mat-icon>place</mat-icon><p>Final Destination: {{ finaldest }}</p>
+        <br/>
+    </div>
+    <dialog #declineDialog>
+        <h2>Reason for decline</h2>
+        <textarea placeholder="Enter your reason for declining this ride..."></textarea>
+        <button (click)="declineDialog.close()">Send</button>
+    </dialog>
+    <img src="map-example.png" alt="Map Example"/>
+    <div>
+        <button id="accept">Accept</button>
+        <button (click)="declineDialog.show()">Decline</button>
+    </div>
+</div>

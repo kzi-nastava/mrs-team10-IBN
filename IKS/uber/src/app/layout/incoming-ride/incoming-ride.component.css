@@ -1,0 +1,71 @@
+div{
+    width:70%;
+    margin: auto;
+    align-items: center;
+    text-align: center;
+}
+
+#container{
+    padding-top: 10%;
+}
+
+#places{
+    padding-left:30%;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+mat-icon, p{
+    color:white;
+    display: inline;
+    font-size: 20px;
+}
+
+img{
+    height:300px;
+    width: auto;
+}
+
+h1, p{
+    line-height: 10px;
+}
+
+h2{
+    margin: 0;
+}
+
+h1{
+    margin: 20px;
+    font-family: "Squada One";
+    font-size: 60px;
+}
+
+#accept{
+    background-color: #A85F5F;
+}
+
+button{
+    background-color: #691D1D;
+}
+
+dialog, textarea{
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    padding:10px;
+    height:50%;
+}
+
+dialog{
+    background-color: #D9D9D9;
+    text-align: center;
+    background-blend-mode: difference;
+    width:40%;
+    height: 40%;
+}
+
+textarea{
+    width:60%;
+    display:block;
+    margin: auto;
+}
