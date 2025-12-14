@@ -22,7 +22,7 @@ app-nav-bar {
   left: 0;
   width: 100%;
   height: 70px;
-  z-index: 10000 !important;
+  z-index: 100000 !important;
 }
 
 .container {
@@ -180,7 +180,9 @@ h1 {
   font-size: 0.9rem;
 }
 
-.save-changes {
+.save-changes,
+.send-changes,
+.send-vehicle-changes {
   width: 100%;
   padding: 0.8rem;
   margin-top: 1rem;
@@ -196,25 +198,33 @@ h1 {
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.save-changes:hover {
+.save-changes:hover,
+.send-changes:hover,
+.send-vehicle-changes:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   background-color: #45a049;
 }
 
-.save-changes:active {
+.save-changes:active,
+.send-changes:active,
+.send-vehicle-changes:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.save-changes:disabled {
+.save-changes:disabled,
+.send-changes:disabled,
+.send-vehicle-changes:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
   opacity: 0.6;
   transform: none;
 }
 
-.save-changes:disabled:hover {
+.save-changes:disabled:hover,
+.send-changes:disabled:hover,
+.send-vehicle-changes:disabled:hover {
   transform: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   background-color: #cccccc;
@@ -481,4 +491,14 @@ h1 {
 .modal-body .save-changes {
   padding: 0.6rem 1rem;
   font-size: 0.9rem;
+}
+.success {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
 }

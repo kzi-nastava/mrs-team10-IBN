@@ -17,8 +17,15 @@
       <div class="account-wrapper">
         <div class="card profile-card">
           <div class="profile-pic">
-            <img src="accountpic.png" alt="Profile Picture" />
-            <div class="edit-icon">📷</div>
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              style="display: none"
+            />
+            <img [src]="userProfileImage" alt="Profile Picture" />
+            <div class="edit-icon" (click)="fileInput.click()">📷</div>
           </div>
 
           <h2>{{ formData.firstName }} {{ formData.lastName }}</h2>
@@ -72,10 +79,21 @@
           <input type="text" [(ngModel)]="formData.phone" placeholder="Phone" />
           <input type="email" [(ngModel)]="formData.email" placeholder="Email" readonly />
 
+          @if (userRole === 'driver') {
+          <button class="send-changes" [disabled]="!hasChanges()" (click)="sendChanges()">
+            Send changes
+          </button>
+          } @else {
           <button class="save-changes" [disabled]="!hasChanges()" (click)="saveChanges()">
             Save changes
           </button>
+          }
         </div>
+        @if (successMessage) {
+        <div class="success">
+          {{ successMessage }}
+        </div>
+        }
       </div>
       @if (showVehicleModal) {
       <div class="modal-overlay" (click)="closeVehicleModal()">
@@ -121,9 +139,16 @@
                 <span class="checkbox-text"> 🐾 Pet transport available </span>
               </label>
             </div>
-            <button class="save-changes" (click)="saveVehicleInfo()">Save Vehicle Info</button>
+            <button class="send-vehicle-changes" (click)="sendVehicleChanges()">
+              Send Changes
+            </button>
           </div>
         </div>
+        @if (successMessage) {
+        <div class="success">
+          {{ successMessage }}
+        </div>
+        }
       </div>
       }
     </div>
