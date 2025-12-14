@@ -6,7 +6,7 @@ h1, p, label{
     color: white;
 }
 
-p, label{
+p, label, h2, textarea{
   font-family: "Mandali";
 }
 
