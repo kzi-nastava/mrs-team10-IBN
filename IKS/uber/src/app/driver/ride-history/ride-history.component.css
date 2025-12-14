@@ -1,3 +1,58 @@
+div.date-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5vh;
+}
+
+mat-form-field {
+  background-color: white;      
+  padding: 0.5rem 1rem;         
+  border-radius: 1rem;          
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  width: 15rem;
+}
+
+mat-form-field input {
+  background-color: white;    
+  border-radius: 1rem;
+}
+
+.mat-datepicker-toggle {
+  background-color: white;
+  border-radius: 0.5rem;
+}
+
+.mat-datepicker-content {
+  background-color: white;      
+  border-radius: 1rem;
+  height: 20rem;
+}
+
+::ng-deep .mat-calendar {
+  background-color: white !important;
+  color: black !important; 
+   min-height: 25rem;
+}
+
+::ng-deep .mat-calendar-body-cell-content {
+  color: black !important; 
+}
+
+::ng-deep .mat-calendar-header {
+  color: black !important; 
+}
+
+::ng-deep .mat-calendar-previous-button,
+::ng-deep .mat-calendar-next-button {
+  color: black !important; 
+}
+
+::ng-deep .mat-calendar-table-header {
+  color: black !important; 
+}
+
+
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

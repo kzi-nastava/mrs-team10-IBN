@@ -1,8 +1,17 @@
 <app-nav-bar></app-nav-bar>
 
+<div class="date-container">
+<mat-form-field>
+  <mat-label>Choose a date</mat-label>
+  <input matInput [matDatepicker]="picker">
+  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
+</div>
+
 <div class="container">
   @for (ride of rides(); track ride.id) {
-    <div class="ride-card">
+    <div class="ride-card" (click)="openRideDialog(ride)">
         <button class="fav-btn">❤️</button>
 
         <div class="locations">

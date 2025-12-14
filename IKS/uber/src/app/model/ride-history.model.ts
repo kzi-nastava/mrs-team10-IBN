@@ -7,6 +7,8 @@ export interface Ride {
   destination: string;
   startTime: Date;
   endTime: Date;
-  price: number
-  users: Signal<User[]>
+  price: number;
+  users: Signal<User[]>;
+  canceled: boolean;
+  panic: boolean
 }

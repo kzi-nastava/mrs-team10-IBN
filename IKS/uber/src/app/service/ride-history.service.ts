@@ -42,7 +42,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 2,
@@ -51,7 +53,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 3,
@@ -60,7 +64,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 4,
@@ -69,7 +75,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 5,
@@ -78,7 +86,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 6,
@@ -87,7 +97,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 7,
@@ -96,7 +108,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       {
         id: 8,
@@ -105,7 +119,9 @@ export class RideService {
         startTime: new Date('2025-12-14T10:30:00'),
         endTime: new Date('2025-12-14T10:44:00'),
         price: 824.00,
-        users: this.users
+        users: this.users,
+        canceled: false,
+        panic:false
       },
       
       
