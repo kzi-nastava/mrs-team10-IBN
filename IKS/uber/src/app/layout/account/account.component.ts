@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-account',
@@ -11,7 +12,7 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
   styleUrls: ['./account.component.css'],
 })
 export class AccountComponent implements OnInit {
-  userRole: 'user' | 'driver' | 'admin' = 'driver';
+  userRole: 'user' | 'driver' | 'admin' = 'admin';
   originalData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
@@ -48,9 +49,29 @@ export class AccountComponent implements OnInit {
     return (this.hoursWorkedToday / this.maxHoursPerDay) * 100;
   }
 
+  successMessage: string | null = null;
+
+  showSuccess(message: string) {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
+  }
+
   saveChanges() {
     console.log('Saving:', this.formData);
     this.originalData = { ...this.formData };
+    this.showSuccess('Changes saved successfully.');
+  }
+
+  sendChanges() {
+    console.log('Sent to admin:', this.formData);
+    this.showSuccess('Changes sent to admin successfully.');
+  }
+
+  sendVehicleChanges() {
+    console.log('Sent to admin:', this.vehicleData);
+    this.showSuccess('Vehicle changes sent to admin successfully.');
   }
 
   get menuItems() {
@@ -182,5 +203,22 @@ export class AccountComponent implements OnInit {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
+  }
+
+  userProfileImage: string = 'accountpic.png';
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.userProfileImage = e.target.result;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }

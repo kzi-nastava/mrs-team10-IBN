@@ -11,8 +11,8 @@ import {Router, RouterModule} from '@angular/router';
  */
 @Component({
   selector: 'app-nav-bar',
-  templateUrl: 'nav-bar.component.html',
-  styleUrl: 'nav-bar.component.css',
+  templateUrl: './nav-bar.component.html',
+  styleUrl: './nav-bar.component.css',
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, RouterModule],
 })
 export class NavBarComponent {

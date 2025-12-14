@@ -1,4 +1,4 @@
-
+<app-nav-bar></app-nav-bar>
 
 <div class="container">
   @for (ride of rides(); track ride.id) {
@@ -8,12 +8,12 @@
         <div class="locations">
             <div class="location">
             <span class="pin red"></span>
-            <input type="text" placeholder={{ride.name}} readonly />
+            <input type="text" placeholder={{ride.startLocation}} readonly />
             </div>
 
             <div class="location">
             <span class="pin green"></span>
-            <input type="text" placeholder="Destination" />
+            <input type="text" placeholder="{{ride.destination}}" readonly />
             </div>
         </div>
 
@@ -23,10 +23,10 @@
             <img src="corgo2.jpeg" />
         </div>
         <div class="time">
-            <div class="time-box">13:00</div>
-            <div class="time-box">13:13</div>
+            <div class="time-box">{{ ride.startTime | date:'HH:mm' }}</div>
+            <div class="time-box">{{ ride.endTime | date:'HH:mm' }}</div>
         </div>
-        <div class="price">824.00 RSD</div>
+        <div class="price">{{ride.price}}.00 RSD</div>
 </div>
 
   }
