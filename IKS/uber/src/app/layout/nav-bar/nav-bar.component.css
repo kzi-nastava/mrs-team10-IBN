@@ -6,8 +6,12 @@
   height: 100vh;
 }
 
+mat-sidenav-container{
+  position: absolute;
+  height: 100vh;
+}
+
 .sidebar {
-  width: 20vw;
   max-width: 300px;
   min-width: 150px;
   background: #d9d9d9;
@@ -17,6 +21,7 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden !important;
+  z-index: 2;
 }
 
 .mat-toolbar {
@@ -53,7 +58,6 @@ mat-toolbar mat-icon {
 }
 
 .logout-btn {
-  padding: 1rem;
   background: #a43434;
   border: none;
   color: white;
@@ -65,12 +69,19 @@ mat-toolbar mat-icon {
   margin: 1rem 3rem 1rem 3rem;
 }
 
-.nav-logo {
-  height: 50%;
-  width: auto;
-  object-fit: contain;
-  display: block;
+.top {
+  display: flex;              
+  align-items: center;        
+  height: 64px;              
+  padding: 0 16px;
 }
+
+.nav-logo {
+  height: 70%;               
+  margin-left: 12px;
+  cursor: pointer;
+}
+
 
 .notification {
   color: yellow;
