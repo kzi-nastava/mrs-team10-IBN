@@ -8,6 +8,7 @@ import { RideHistoryComponent } from './driver/ride-history/ride-history.compone
 import { RequestsComponent } from './layout/requests/requests.component';
 import { TrackingRouteComponent } from './layout/tracking-route/tracking-route.component';
 import { VerifyAccountComponent } from './forms/verify-account/verify-account.component';
+import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password.component';
 
 
 export const routes: Routes = [
@@ -22,6 +23,10 @@ export const routes: Routes = [
   {
     path: 'verify',
     component: VerifyAccountComponent,
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
   },
   {
     path: 'account',

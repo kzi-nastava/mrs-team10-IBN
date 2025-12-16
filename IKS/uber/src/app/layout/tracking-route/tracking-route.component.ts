@@ -14,7 +14,6 @@ export class TrackingRouteComponent {
   time: String = "17:16";
   routeStarted: Boolean = false;
   firstButtonText: String = "Start";
-  timeText: String = "departure";
 
   changeState(){
     if(this.routeStarted){

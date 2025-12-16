@@ -19,4 +19,9 @@ export class RegisterComponent {
     address: new FormControl("", Validators.required),
     phone: new FormControl("", Validators.required)
   })
+  filename: String = "Profile Picture (Optional)";
+
+  onFileSelected(event: any) {
+    this.filename = event.target.files[0].name;
+  }
 }
