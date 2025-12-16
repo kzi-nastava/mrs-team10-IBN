@@ -74,7 +74,7 @@ public class HomeActivity extends AppCompatActivity {
             boolean isTopLevelDestination = topLevelDestinations.contains(id);
 
             if (!isTopLevelDestination) {
-                if (id == R.id.blank_fragment) {
+                if (id == R.id.ride_history) {
 
                 } else if (id == R.id.my_account) {
                 } else if (id == R.id.chat) {

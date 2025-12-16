@@ -4,12 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/base_navigation"
-    app:startDestination="@id/blank_fragment"
+    app:startDestination="@id/ride_history"
     >
     <fragment
-        android:id="@+id/blank_fragment"
-        android:name="com.example.ubercorp.fragments.BlankFragment"
+        android:id="@+id/ride_history"
+        android:name="com.example.ubercorp.fragments.RideHistoryFragment"
         android:label="Blank"
-        tools:layout="@layout/fragment_blank"
+        tools:layout="@layout/fragment_ride_history"
         />
 </navigation>

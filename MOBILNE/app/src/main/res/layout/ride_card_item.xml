@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="#D3CFCF">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:id="@+id/ride_card_item"
+        >
+
+        <!-- HEART ICON -->
+        <ImageView
+            android:id="@+id/heartIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_favorite"
+            android:background="@drawable/ic_circle"
+            android:padding="6dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- START PIN -->
+        <View
+            android:id="@+id/startDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_circle_red"
+            app:layout_constraintTop_toTopOf="@id/startInput"
+            app:layout_constraintBottom_toBottomOf="@id/startInput"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <!-- START LOCATION -->
+        <TextView
+            android:id="@+id/startInput"
+            android:layout_width="250dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@color/white"
+            android:hint="Start location"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/startDot"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- DESTINATION PIN -->
+        <View
+            android:id="@+id/endDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_circle_green"
+            app:layout_constraintTop_toTopOf="@id/endInput"
+            app:layout_constraintBottom_toBottomOf="@id/endInput"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <!-- DESTINATION -->
+        <TextView
+            android:id="@+id/endInput"
+            android:layout_width="250dp"
+            android:layout_height="40dp"
+            android:hint="Destination"
+            android:background="@color/white"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/endDot"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startInput"/>
+
+        <!-- AVATARS -->
+        <LinearLayout
+            android:id="@+id/avatars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/endInput"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/ic_circle"/>
+            <!--android:src="@drawable/avatar1"-->
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="-12dp"
+                android:background="@drawable/ic_circle"/>
+            <!--android:src="@drawable/avatar2"-->
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="-12dp"
+                android:background="@drawable/ic_circle"/>
+            <!--android:src="@drawable/avatar3"-->
+
+        </LinearLayout>
+
+        <!-- START TIME -->
+        <TextView
+            android:id="@+id/startTime"
+            android:layout_width="60dp"
+            android:layout_height="32dp"
+            android:text="13:00"
+            android:gravity="center"
+            android:background="@color/white"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/avatars"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <!-- END TIME -->
+        <TextView
+            android:id="@+id/endTime"
+            android:layout_width="60dp"
+            android:layout_height="32dp"
+            android:text="13:13"
+            android:gravity="center"
+            android:background="@color/white"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/startTime"
+            app:layout_constraintTop_toTopOf="@id/startTime"/>
+
+        <!-- PRICE -->
+        <TextView
+            android:id="@+id/price"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="824.00 RSD"
+            android:paddingHorizontal="12dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:background="@color/green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/startTime"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
