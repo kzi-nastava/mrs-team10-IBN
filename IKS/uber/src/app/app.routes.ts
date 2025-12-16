@@ -7,6 +7,7 @@ import { AccountComponent } from './layout/account/account.component';
 import { RideHistoryComponent } from './driver/ride-history/ride-history.component';
 import { RequestsComponent } from './layout/requests/requests.component';
 import { TrackingRouteComponent } from './layout/tracking-route/tracking-route.component';
+import { VerifyAccountComponent } from './forms/verify-account/verify-account.component';
 
 
 export const routes: Routes = [
@@ -17,6 +18,10 @@ export const routes: Routes = [
   {
     path: 'register',
     component: RegisterComponent,
+  },
+  {
+    path: 'verify',
+    component: VerifyAccountComponent,
   },
   {
     path: 'account',
