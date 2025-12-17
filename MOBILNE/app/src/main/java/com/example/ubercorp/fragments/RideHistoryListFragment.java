@@ -1,30 +1,23 @@
 package com.example.ubercorp.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.ListFragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.example.ubercorp.R;
-import com.example.ubercorp.databinding.FragmentRideHistoryBinding;
 import com.example.ubercorp.databinding.FragmentRideHistoryListBinding;
-import com.example.ubercorp.fragments.placeholder.PlaceholderContent;
+import com.example.ubercorp.interfaces.onRideClickListener;
 import com.example.ubercorp.model.Ride;
 import com.example.ubercorp.adapters.RideHistoryListAdapter;
-
 import java.util.ArrayList;
 
 
-public class RideHistoryListFragment extends ListFragment {
+public class RideHistoryListFragment extends ListFragment implements onRideClickListener {
 
     private RideHistoryListAdapter adapter;
     private static final String ARG_PARAM = "param";
@@ -50,7 +43,7 @@ public class RideHistoryListFragment extends ListFragment {
 
         if (getArguments() != null) {
             mRides = getArguments().getParcelableArrayList(ARG_PARAM);
-            adapter = new RideHistoryListAdapter(getActivity(), mRides);
+            adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
             setListAdapter(adapter);
         }
     }
@@ -61,13 +54,21 @@ public class RideHistoryListFragment extends ListFragment {
                              @Nullable Bundle savedInstanceState) {
 
         binding = FragmentRideHistoryListBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-        return root;
+        return binding.getRoot();
     }
 
     @Override
     public void onDestroyView(){
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onRideClick(Ride ride) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("ride",ride);
+
+        NavController navController = NavHostFragment.findNavController(this);
+        navController.navigate(R.id.action_history_to_details, bundle);
     }
 }

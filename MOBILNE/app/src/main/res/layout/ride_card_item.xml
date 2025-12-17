@@ -30,8 +30,8 @@
         <!-- START PIN -->
         <View
             android:id="@+id/startDot"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/ic_circle_red"
             app:layout_constraintTop_toTopOf="@id/startInput"
             app:layout_constraintBottom_toBottomOf="@id/startInput"
@@ -40,11 +40,11 @@
         <!-- START LOCATION -->
         <TextView
             android:id="@+id/startInput"
-            android:layout_width="250dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="12dp"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
             android:background="@color/white"
-            android:hint="Start location"
+            android:hint="@string/start_location"
             android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/startDot"
@@ -53,8 +53,8 @@
         <!-- DESTINATION PIN -->
         <View
             android:id="@+id/endDot"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/ic_circle_green"
             app:layout_constraintTop_toTopOf="@id/endInput"
             app:layout_constraintBottom_toBottomOf="@id/endInput"
@@ -63,13 +63,13 @@
         <!-- DESTINATION -->
         <TextView
             android:id="@+id/endInput"
-            android:layout_width="250dp"
-            android:layout_height="40dp"
-            android:hint="Destination"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:hint="@string/destination"
             android:background="@color/white"
             android:padding="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="12dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="5dp"
             app:layout_constraintStart_toEndOf="@id/endDot"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/startInput"/>
@@ -111,7 +111,6 @@
             android:id="@+id/startTime"
             android:layout_width="60dp"
             android:layout_height="32dp"
-            android:text="13:00"
             android:gravity="center"
             android:background="@color/white"
             android:layout_marginTop="12dp"
@@ -123,7 +122,6 @@
             android:id="@+id/endTime"
             android:layout_width="60dp"
             android:layout_height="32dp"
-            android:text="13:13"
             android:gravity="center"
             android:background="@color/white"
             android:layout_marginStart="8dp"
@@ -135,7 +133,6 @@
             android:id="@+id/price"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:text="824.00 RSD"
             android:paddingHorizontal="12dp"
             android:gravity="center"
             android:textStyle="bold"

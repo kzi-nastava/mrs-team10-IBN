@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,16 +14,21 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.interfaces.onRideClickListener;
 import com.example.ubercorp.model.Ride;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
 
     private ArrayList<Ride> aRides;
-    public RideHistoryListAdapter(@NonNull Context context, ArrayList<Ride> rides) {
+    private onRideClickListener listener;
+    public RideHistoryListAdapter(@NonNull Context context, ArrayList<Ride> rides, onRideClickListener listener) {
         super(context, R.layout.ride_card_item, rides);
         aRides = rides;
+        this.listener = listener;
     }
 
 
@@ -65,17 +68,21 @@ public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
         if(ride != null) {
             startLocation.setText(ride.getStartLocation());
             destination.setText(ride.getDestination());
-            start.setText(ride.getStart().toString());
-            end.setText(ride.getEnd().toString());
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            start.setText(sdf.format(ride.getStart()));
+            end.setText(sdf.format(ride.getEnd()));
             price.setText(ride.getPrice().toString());
             // Handle click on the item at 'position'
             rideCard.setOnClickListener(v -> {
-
+                if (listener != null) {
+                    listener.onRideClick(ride);
+                }
                 Log.i("UberComp", "Clicked: " + ride.getStartLocation() + ", id: " +
                         ride.getId().toString());
                 Toast.makeText(getContext(), "Clicked: " + ride.getStartLocation() +
                         ", id: " + ride.getId().toString(), Toast.LENGTH_SHORT).show();
             });
+
         }
 
         return convertView;

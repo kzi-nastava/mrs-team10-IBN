@@ -6,10 +6,27 @@
     android:id="@+id/base_navigation"
     app:startDestination="@id/ride_history"
     >
+
+    <fragment
+        android:id="@+id/my_account"
+        android:name="com.example.ubercorp.fragments.BlankFragment"
+        tools:layout="@layout/fragment_blank">
+    </fragment>
     <fragment
         android:id="@+id/ride_history"
         android:name="com.example.ubercorp.fragments.RideHistoryFragment"
-        android:label="Blank"
-        tools:layout="@layout/fragment_ride_history"
-        />
+        tools:layout="@layout/fragment_ride_history">
+        <action
+            android:id="@+id/action_history_to_details"
+            app:destination="@id/rideDetailsFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/rideDetailsFragment"
+        android:name="com.example.ubercorp.fragments.RideDetailsFragment"
+        tools:layout="@layout/fragment_ride_details">
+        <action
+            android:id="@+id/action_details_to_history"
+            app:destination="@id/ride_history"/>
+    </fragment>
 </navigation>
+
