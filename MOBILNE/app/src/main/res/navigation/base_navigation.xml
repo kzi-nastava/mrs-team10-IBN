@@ -12,4 +12,11 @@
         android:label="Blank"
         tools:layout="@layout/fragment_blank"
         />
+
+    <fragment
+        android:id="@+id/my_account"
+        android:name="com.example.ubercorp.fragments.AccountFragment"
+        android:label="@string/my_account"
+        tools:layout="@layout/fragment_account"
+        />
 </navigation>
