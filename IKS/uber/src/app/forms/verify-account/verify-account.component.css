@@ -1,0 +1,16 @@
+#container {
+  width: 25%;
+  align-items: center;
+  margin: auto;
+  padding-top: 10%;
+  text-align: center;
+}
+
+img{
+  width:400px;
+  height: auto;
+}
+
+button{
+    width: 50%;
+}

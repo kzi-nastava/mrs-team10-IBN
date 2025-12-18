@@ -11,4 +11,10 @@
     <string name="language">Language</string>
     <string name="notification">Notification</string>
     <string name="divider">Divider</string>
+    <string name="favorites">Favorites</string>
+    <string name="order">Order</string>
+    <string name="canceled">Canceled</string>
+    <string name="panic">Panic</string>
+    <string name="start_location">Start location</string>
+    <string name="destination">Destination</string>
 </resources>
