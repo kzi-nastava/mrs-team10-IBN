@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Ride implements Parcelable {
@@ -16,17 +17,18 @@ public class Ride implements Parcelable {
     private Date end;
     private Double price;
 
-    public Ride(){
+    private ArrayList<User> passengers;
 
-    }
+    public Ride(){}
 
-    public Ride(Long id, String startLocation, String destination, Date start, Date end, Double price){
+    public Ride(Long id, String startLocation, String destination, Date start, Date end, Double price, ArrayList<User> passengers){
         this.id = id;
         this.startLocation = startLocation;
         this.destination = destination;
         this.start = start;
         this.end = end;
         this.price = price;
+        this.passengers = passengers;
     }
 
     protected Ride(Parcel in){
@@ -52,6 +54,10 @@ public class Ride implements Parcelable {
     public Double getPrice(){return this.price;}
 
     public void setPrice(Double price) {this.price = price;}
+
+    public ArrayList<User> getPassengers() {
+        return passengers;
+    }
 
     @Override
     public int describeContents() {

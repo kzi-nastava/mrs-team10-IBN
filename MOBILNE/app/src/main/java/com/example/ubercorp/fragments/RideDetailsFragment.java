@@ -8,10 +8,17 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
 import com.example.ubercorp.model.Ride;
+import com.example.ubercorp.model.User;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -52,7 +59,25 @@ public class RideDetailsFragment extends Fragment {
             binding.startTimeDetail.setText(sdf.format(ride.getStart()));
             binding.endTimeDetail.setText(sdf.format(ride.getEnd()));
             binding.priceDetail.setText(ride.getPrice()+" RSD");
+            // passengers
+            GridLayout passengersLayout = binding.passengers;
+            passengersLayout.removeAllViews();
+
+            List<User> passengers = ride.getPassengers();
+
+            for (int i = 0; i < passengers.size(); i++) {
+                User user = passengers.get(i);
+
+                view = LayoutInflater.from(getContext())
+                        .inflate(R.layout.passenger, passengersLayout, false);
+
+                ((TextView) view.findViewById(R.id.user_name)).setText(user.getName());
+                ((TextView) view.findViewById(R.id.phone_number)).setText(user.getPhoneNumber());
+
+                passengersLayout.addView(view);
+            }
         }
+
     }
 
     @Override

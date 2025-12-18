@@ -45,22 +45,10 @@ public class HomeActivity extends AppCompatActivity {
 
         drawer = binding.drawerLayout;
         navigationView = binding.navView;
-        toolbar = binding.activityHomeBase.toolbar;
 
+        toolbar = binding.activityHomeBase.toolbar;
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
-
-        if(actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_hamburger);
-            actionBar.setHomeButtonEnabled(false);
-        }
-
-        actionBarDrawerToggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
-        drawer.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
 
         topLevelDestinations.add(R.id.notification);
         topLevelDestinations.add(R.id.nav_settings);
@@ -69,29 +57,10 @@ public class HomeActivity extends AppCompatActivity {
 
         navController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
             Log.i("UberComp", "Destination Changed");
-
-            int id = navDestination.getId();
-            boolean isTopLevelDestination = topLevelDestinations.contains(id);
-
-            if (!isTopLevelDestination) {
-                if (id == R.id.ride_history) {
-//                    navController.navigate(R.id.ride_history);
-
-                } else if (id == R.id.my_account) {
-                } else if (id == R.id.chat) {
-                }
-                drawer.closeDrawers();
-            } else {
-                if (id == R.id.nav_settings) {
-                    Toast.makeText(HomeActivity.this, "Settings", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.notification) {
-                    Toast.makeText(HomeActivity.this, "Notification", Toast.LENGTH_SHORT).show();
-                }
-            }
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.my_account, R.id.chat, R.id.ride_history  , R.id.tracking_ride, R.id.nav_settings, R.id.notification)
+                .Builder(R.id.my_account, R.id.chat, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -110,16 +79,6 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        int id = item.getItemId();
-//        switch (id) {
-//            case R.id.nav_settings:
-//                Toast.makeText(HomeActivity.this, "Settings", Toast.LENGTH_SHORT).show();
-//                break;
-//            case R.id.nav_language:
-//                Toast.makeText(HomeActivity.this, "Language", Toast.LENGTH_SHORT).show();
-//                break;
-//        }
-
         return NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
     }
 

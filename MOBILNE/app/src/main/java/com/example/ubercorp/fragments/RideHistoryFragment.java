@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideHistoryBinding;
 import com.example.ubercorp.model.Ride;
+import com.example.ubercorp.model.User;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,14 +53,19 @@ public class RideHistoryFragment extends Fragment {
 
     private void prepareRidesList(ArrayList<Ride> rides){
         rides.clear();
-        rides.add(new Ride(1L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(2L, "Alekse Santica 4, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(3L, "Alekse Santica 3, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(4L, "Alekse Santica 2, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(5L, "Alekse Santica 1, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(6L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(7L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(8L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
-        rides.add(new Ride(9L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00));
+        ArrayList<User> users = new ArrayList<>();
+        users.add(new User(1L, "Ivana Ignjatic", "066 066 00 00"));
+        users.add(new User(1L, "Niksa Cvorovic", "066 066 00 00"));
+        users.add(new User(1L, "Bojana Paunovic", "066 066 00 00"));
+
+        rides.add(new Ride(1L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(2L, "Alekse Santica 4, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(3L, "Alekse Santica 3, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(4L, "Alekse Santica 2, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(5L, "Alekse Santica 1, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(6L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(7L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(8L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
+        rides.add(new Ride(9L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
     }
 }
