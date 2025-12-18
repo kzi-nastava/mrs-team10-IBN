@@ -1,0 +1,10 @@
+<div id="container">
+    <img src="verify.svg" alt="Verify"/>
+    <form [formGroup]="verifyForm">
+        <input type="password" formControlName="password" placeholder="Password">
+        <br/>
+        <input type="password" formControlName="confirm" placeholder="Confirm Password">
+        <br/>
+        <button class="form-button-one" (click)="verify()">Verify Account</button>
+    </form>
+</div>
