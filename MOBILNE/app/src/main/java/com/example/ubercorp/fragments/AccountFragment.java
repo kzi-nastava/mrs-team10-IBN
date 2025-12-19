@@ -1,126 +1,311 @@
 package com.example.ubercorp.fragments;
 
+import android.animation.ObjectAnimator;
+import android.graphics.Path;
 import android.os.Bundle;
-
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.example.ubercorp.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class AccountFragment extends Fragment {
-
+    // Header & Profile
+    private FrameLayout headerBackground;
     private LinearLayout userInfoSection;
     private FloatingActionButton fabEditProfile;
-    private FrameLayout profilePictureSection;
-    private MaterialCardView editFormCard;
-    private MaterialCardView menuCard;
-    private MaterialButton btnCancel;
-    private MaterialButton btnSaveChanges;
-    private TextView tvUserName;
-    private TextView tvUserEmail;
-    private TextInputEditText etFirstName;
-    private TextInputEditText etLastName;
-    private TextInputEditText etEmail;
+    private TextView tvUserName, tvUserEmail;
 
-    public AccountFragment() {
-        // Required empty public constructor
-    }
+    // Cards
+    private MaterialCardView editFormCard, menuCard, editVehicleCard;
+
+    // Profile Edit
+    private TextInputEditText etFirstName, etLastName, etEmail;
+    private MaterialButton btnCancel, btnSaveChanges;
+
+    // Vehicle Edit
+    private RadioGroup rgVehicleType;
+    private TextInputEditText etNumberOfSeats;
+    private MaterialCheckBox cbBabyTransport, cbPetTransport;
+    private MaterialButton btnCancelVehicle, btnSaveVehicle;
+
+    // Driver Progress
+    private LinearLayout drivingHoursSection;
+    private ProgressBar driverProgress;
+    private TextView tvDrivingHoursProgress;
+
+    // Menu Items
+    private LinearLayout menuPlatformStats, menuRequests, menuManageUsers,
+            menuChangePassword, menuDeleteAccount, menuFavorites,
+            menuUserStat, menuDriverStat, menuVehicle;
 
     public static AccountFragment newInstance() {
         return new AccountFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
-        // Inicijalizuj views
-        fabEditProfile = view.findViewById(R.id.fabEditProfile);
-        profilePictureSection = view.findViewById(R.id.profilePictureSection);
-        editFormCard = view.findViewById(R.id.editFormCard);
-        menuCard = view.findViewById(R.id.menuCard);
-        btnCancel = view.findViewById(R.id.btnCancel);
-        btnSaveChanges = view.findViewById(R.id.btnSaveChanges);
-        tvUserName = view.findViewById(R.id.tvUserName);
-        tvUserEmail = view.findViewById(R.id.tvUserEmail);
-        etFirstName = view.findViewById(R.id.etFirstName);
-        etLastName = view.findViewById(R.id.etLastName);
-        etEmail = view.findViewById(R.id.etEmail);
-        userInfoSection = view.findViewById(R.id.userInfoSection);
-
-        // Postavi listeners
+        setupMenuItems(view);
+        initializeViews(view);
         setupListeners();
+        configureMenuForRole("driver");
+        startFlyingTaxiAnimation();
 
         return view;
     }
 
+    private void initializeViews(View view) {
+        // Header & Profile
+        headerBackground = view.findViewById(R.id.headerBackground);
+        userInfoSection = view.findViewById(R.id.userInfoSection);
+        fabEditProfile = view.findViewById(R.id.fabEditProfile);
+        tvUserName = view.findViewById(R.id.tvUserName);
+        tvUserEmail = view.findViewById(R.id.tvUserEmail);
+
+        // Cards
+        editFormCard = view.findViewById(R.id.editFormCard);
+        menuCard = view.findViewById(R.id.menuCard);
+        editVehicleCard = view.findViewById(R.id.editVehicleCard);
+
+        // Profile Edit
+        etFirstName = view.findViewById(R.id.etFirstName);
+        etLastName = view.findViewById(R.id.etLastName);
+        etEmail = view.findViewById(R.id.etEmail);
+        btnCancel = view.findViewById(R.id.btnCancel);
+        btnSaveChanges = view.findViewById(R.id.btnSaveChanges);
+
+        // Vehicle Edit
+        rgVehicleType = view.findViewById(R.id.rgVehicleType);
+        etNumberOfSeats = view.findViewById(R.id.etNumberOfSeats);
+        cbBabyTransport = view.findViewById(R.id.cbBabyTransport);
+        cbPetTransport = view.findViewById(R.id.cbPetTransport);
+        btnCancelVehicle = view.findViewById(R.id.btnCancelVehicle);
+        btnSaveVehicle = view.findViewById(R.id.btnSaveVehicle);
+
+        // Driver Progress
+        drivingHoursSection = view.findViewById(R.id.drivingHoursSection);
+        driverProgress = view.findViewById(R.id.progressDrivingHours);
+        tvDrivingHoursProgress = view.findViewById(R.id.tvDrivingHoursProgress);
+
+        // Menu Items
+        menuPlatformStats = view.findViewById(R.id.menuPlatformStats);
+        menuRequests = view.findViewById(R.id.menuRequests);
+        menuManageUsers = view.findViewById(R.id.menuManageUsers);
+        menuChangePassword = view.findViewById(R.id.menuChangePassword);
+        menuDeleteAccount = view.findViewById(R.id.menuDeleteAccount);
+        menuFavorites = view.findViewById(R.id.menuFavorites);
+        menuUserStat = view.findViewById(R.id.menuMyStatistics);
+        menuDriverStat = view.findViewById(R.id.menuDriverStatistics);
+        menuVehicle = view.findViewById(R.id.menuVehicle);
+    }
+
     private void setupListeners() {
-        // Klik na FAB - prikaži formu
-        fabEditProfile.setOnClickListener(new View.OnClickListener() {
+        // Profile Edit
+        fabEditProfile.setOnClickListener(v -> showEditProfile());
+        btnCancel.setOnClickListener(v -> hideEditProfile());
+        btnSaveChanges.setOnClickListener(v -> saveProfileChanges());
+
+        // Vehicle Edit
+        menuVehicle.setOnClickListener(v -> showEditVehicle());
+        btnCancelVehicle.setOnClickListener(v -> hideEditVehicle());
+        btnSaveVehicle.setOnClickListener(v -> saveVehicleChanges());
+    }
+
+    private void setupMenuItems(View view) {
+        setupMenuItem(view.findViewById(R.id.menuPlatformStats), "📊",
+                "Platform Statistics", "Get reports", true);
+        setupMenuItem(view.findViewById(R.id.menuRequests), "📥",
+                "Requests", "Manage change requests", true);
+        setupMenuItem(view.findViewById(R.id.menuManageUsers), "👥",
+                "Manage Users", "Add or remove users", true);
+        setupMenuItem(view.findViewById(R.id.menuChangePassword), "🔑",
+                "Change Password", "Update your password", true);
+        setupMenuItem(view.findViewById(R.id.menuDeleteAccount), "🗑️",
+                "Delete Account", "Permanently delete your account", false);
+        setupMenuItem(view.findViewById(R.id.menuFavorites), "⭐",
+                "Favorites", "Manage favorite routes", true);
+        setupMenuItem(view.findViewById(R.id.menuMyStatistics), "📊",
+                "My Statistics", "Get reports", true);
+        setupMenuItem(view.findViewById(R.id.menuDriverStatistics), "📊",
+                "Driver Statistics", "Get reports", true);
+        setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
+                "My Vehicle", "Manage your vehicle", true);
+    }
+
+    private void configureMenuForRole(String userRole) {
+        hideAllMenuItems();
+
+        switch (userRole) {
+            case "admin":
+                showViews(menuPlatformStats, menuRequests, menuManageUsers,
+                        menuChangePassword, menuDeleteAccount);
+                break;
+
+            case "driver":
+                showViews(menuVehicle, menuDriverStat, menuChangePassword, menuDeleteAccount);
+                tvUserEmail.setVisibility(View.GONE);
+                drivingHoursSection.setVisibility(View.VISIBLE);
+                updateDriverHours(5.5f);
+                break;
+
+            case "user":
+                showViews(menuFavorites, menuUserStat, menuChangePassword, menuDeleteAccount);
+                break;
+        }
+    }
+
+    private void hideAllMenuItems() {
+        hideViews(menuPlatformStats, menuRequests, menuManageUsers, menuChangePassword,
+                menuDeleteAccount, menuFavorites, menuUserStat, menuVehicle, menuDriverStat,
+                drivingHoursSection);
+    }
+
+    private void showViews(View... views) {
+        for (View view : views) view.setVisibility(View.VISIBLE);
+    }
+
+    private void hideViews(View... views) {
+        for (View view : views) view.setVisibility(View.GONE);
+    }
+
+    // Edit Profile
+    private void showEditProfile() {
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+        showViews(editFormCard);
+    }
+
+    private void hideEditProfile() {
+        hideViews(editFormCard);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+    }
+
+    private void saveProfileChanges() {
+        String fullName = etFirstName.getText() + " " + etLastName.getText();
+        tvUserName.setText(fullName);
+        tvUserEmail.setText(etEmail.getText());
+        hideEditProfile();
+    }
+
+    // Edit Vehicle
+    private void showEditVehicle() {
+        hideViews(userInfoSection, menuCard, driverProgress, tvDrivingHoursProgress);
+        showViews(editVehicleCard);
+    }
+
+    private void hideEditVehicle() {
+        hideViews(editVehicleCard);
+        showViews(userInfoSection, menuCard, driverProgress, tvDrivingHoursProgress);
+    }
+
+    private void saveVehicleChanges() {
+        int selectedId = rgVehicleType.getCheckedRadioButtonId();
+        String vehicleType = selectedId == R.id.rbStandard ? "Standard" :
+                selectedId == R.id.rbLuxury ? "Luxury" : "Van";
+
+        String seats = etNumberOfSeats.getText().toString();
+        boolean babyTransport = cbBabyTransport.isChecked();
+        boolean petTransport = cbPetTransport.isChecked();
+
+        hideEditVehicle();
+    }
+
+    private void updateDriverHours(float hoursWorked) {
+        driverProgress.setMax(8);
+        driverProgress.setProgress((int) hoursWorked);
+        tvDrivingHoursProgress.setText(String.format("%.1f / 8 hours", hoursWorked));
+    }
+
+    private void setupMenuItem(View menuItem, String emoji, String title, String subtitle, boolean showDivider) {
+        TextView tvIcon = menuItem.findViewById(R.id.tvIcon);
+        TextView tvTitle = menuItem.findViewById(R.id.tvTitle);
+        TextView tvSubtitle = menuItem.findViewById(R.id.tvSubtitle);
+        View divider = menuItem.findViewById(R.id.divider);
+
+        tvIcon.setText(emoji);
+        tvTitle.setText(title);
+        tvSubtitle.setText(subtitle);
+        divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
+    }
+
+    private void startFlyingTaxiAnimation() {
+        for (int i = 0; i < 10; i++) {
+            headerBackground.postDelayed(this::addFlyingTaxi, i * 750L);
+        }
+    }
+
+    private void addFlyingTaxi() {
+        if (getContext() == null) return;
+
+        TextView taxi = new TextView(getContext());
+
+        String[] taxiEmojis = {"🚕", "🚖"};
+        String randomTaxi = taxiEmojis[(int)(Math.random() * taxiEmojis.length)];
+        taxi.setText(randomTaxi);
+
+        int size = 80 + (int)(Math.random() * 70);
+        taxi.setTextSize(size / 3);
+        taxi.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        headerBackground.addView(taxi);
+
+        int width = headerBackground.getWidth();
+        int height = headerBackground.getHeight();
+
+        if (width == 0 || height == 0) {
+            headerBackground.postDelayed(() -> {
+                headerBackground.removeView(taxi);
+                addFlyingTaxi();
+            }, 100);
+            return;
+        }
+
+        animateTaxi(taxi, width, height);
+    }
+
+    private void animateTaxi(TextView taxi, int width, int height) {
+        float startX = (float)(Math.random() * width);
+        float startY = (float)(Math.random() * height);
+        float endX = (float)(Math.random() * width);
+        float endY = (float)(Math.random() * height);
+
+        taxi.setX(startX);
+        taxi.setY(startY);
+
+        Path path = new Path();
+        path.moveTo(startX, startY);
+        path.cubicTo(
+                (float)(Math.random() * width), (float)(Math.random() * height),
+                (float)(Math.random() * width), (float)(Math.random() * height),
+                endX, endY
+        );
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(taxi, View.X, View.Y, path);
+        animator.setDuration(5000 + (int)(Math.random() * 5000));
+        animator.setInterpolator(new LinearInterpolator());
+        animator.addListener(new android.animation.AnimatorListenerAdapter() {
             @Override
-            public void onClick(View v) {
-                // Slika ostaje vidljiva, sakrivamo samo ime i email
-                userInfoSection.setVisibility(View.GONE);
-                editFormCard.setVisibility(View.VISIBLE);
-                menuCard.setVisibility(View.GONE);
+            public void onAnimationEnd(android.animation.Animator animation) {
+                headerBackground.removeView(taxi);
+                addFlyingTaxi();
             }
         });
-
-        // Klik na Cancel - sakrij formu
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editFormCard.setVisibility(View.GONE);
-                userInfoSection.setVisibility(View.VISIBLE);
-                menuCard.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // Klik na Save - sačuvaj i sakrij formu
-        btnSaveChanges.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String firstName = etFirstName.getText().toString();
-                String lastName = etLastName.getText().toString();
-                String email = etEmail.getText().toString();
-
-                // TODO: Sačuvaj podatke u bazu/API
-
-                // Ažuriraj prikaz
-                tvUserName.setText(firstName + " " + lastName);
-                tvUserEmail.setText(email);
-
-                // Sakrij formu
-                editFormCard.setVisibility(View.GONE);
-                userInfoSection.setVisibility(View.VISIBLE);
-                menuCard.setVisibility(View.VISIBLE);
-            }
-        });
-
-        // Opciono: Klik na sliku za promenu slike
-        profilePictureSection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: Otvori galeriju ili kameru za izbor nove slike
-            }
-        });
-
+        animator.start();
     }
 }

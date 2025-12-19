@@ -12,7 +12,7 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./account.component.css'],
 })
 export class AccountComponent implements OnInit {
-  userRole: 'user' | 'driver' | 'admin' = 'admin';
+  userRole: 'user' | 'driver' | 'admin' = 'driver';
   originalData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
