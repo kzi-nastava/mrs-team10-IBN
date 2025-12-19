@@ -46,6 +46,12 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
+        forgotPasswordButton.setOnClickListener((v) -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
+
         Button continueButton = findViewById(R.id.continueButton);
         continueButton.setOnClickListener((v) -> {
             Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
