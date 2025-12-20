@@ -4,8 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/base_navigation"
-    app:startDestination="@id/ride_history"
-    >
+    app:startDestination="@id/ride_history">
+
     <fragment
         android:id="@+id/ride_history"
         android:name="com.example.ubercorp.fragments.RideHistoryFragment"
@@ -14,6 +14,7 @@
             android:id="@+id/action_history_to_details"
             app:destination="@id/rideDetailsFragment"/>
     </fragment>
+
     <fragment
         android:id="@+id/rideDetailsFragment"
         android:name="com.example.ubercorp.fragments.RideDetailsFragment"
@@ -22,9 +23,20 @@
             android:id="@+id/action_details_to_history"
             app:destination="@id/ride_history"/>
     </fragment>
+
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.example.ubercorp.fragments.AccountFragment"
-        tools:layout="@layout/fragment_account" />
-</navigation>
+        tools:layout="@layout/fragment_account">
 
+        <action
+            android:id="@+id/action_account_to_changeRequests"
+            app:destination="@id/changeRequestsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/changeRequestsFragment"
+        android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
+        tools:layout="@layout/fragment_change_requests"/>
+
+</navigation>
