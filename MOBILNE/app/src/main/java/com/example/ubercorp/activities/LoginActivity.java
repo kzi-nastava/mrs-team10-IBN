@@ -2,6 +2,7 @@ package com.example.ubercorp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -32,17 +33,29 @@ public class LoginActivity extends AppCompatActivity {
 
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener((v) -> {
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            String popupText = "Email: " + emailField.getText() + "\n" + "Password: " + passwordField.getText();
-            Toast toast = Toast.makeText(getApplicationContext(), popupText, Toast.LENGTH_SHORT);
-            toast.show();
-            startActivity(intent);
-            this.finish();
+            String email = emailField.getText().toString();
+            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                String popupText = "Email: " + email + "\n" + "Password: " + passwordField.getText();
+                Toast toast = Toast.makeText(getApplicationContext(), popupText, Toast.LENGTH_SHORT);
+                toast.show();
+                startActivity(intent);
+                this.finish();
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(), "Improper E-mail Format!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         });
 
         Button registerButton = findViewById(R.id.registerButton);
         registerButton.setOnClickListener((v) -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+
+        Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
+        forgotPasswordButton.setOnClickListener((v) -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
 
