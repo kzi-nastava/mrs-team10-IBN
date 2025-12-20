@@ -5,8 +5,11 @@
             <input type="text" formControlName="email" placeholder="E-mail">
             <input type="password" formControlName="password" placeholder="Password">
             <input type="password" formControlName="confirmPassword" placeholder="Confirm Password">
-            <input type="file" formControlName="image" accept=".jpg, .png">
-            <input type="text" class="invisible">
+            <div>
+                <div id="edit-icon" (click)="fileInput.click()">📷</div>
+                <p>{{ filename }}</p>
+            </div>
+            <input type="file" #fileInput class="invisible" (change)="onFileSelected($event)">
             <input type="text" formControlName="name" placeholder="Name">
             <input type="text" formControlName="lastName" placeholder="Last Name">
             <input type="text" formControlName="address" placeholder="Address">
