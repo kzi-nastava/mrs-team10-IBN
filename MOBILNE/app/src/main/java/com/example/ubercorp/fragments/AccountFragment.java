@@ -25,7 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class AccountFragment extends Fragment {
     // Header & Profile
-    private FrameLayout headerBackground;
+    private FrameLayout headerBackground, changePassword;
     private LinearLayout userInfoSection;
     private FloatingActionButton fabEditProfile;
     private TextView tvUserName, tvUserEmail;
@@ -35,7 +35,7 @@ public class AccountFragment extends Fragment {
 
     // Profile Edit
     private TextInputEditText etFirstName, etLastName, etEmail;
-    private MaterialButton btnCancel, btnSaveChanges, btnSendChanges;
+    private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
 
     // Vehicle Edit
     private RadioGroup rgVehicleType;
@@ -64,7 +64,7 @@ public class AccountFragment extends Fragment {
         setupMenuItems(view);
         initializeViews(view);
         setupListeners();
-        configureMenuForRole("user");
+        configureMenuForRole("admin");
         startFlyingTaxiAnimation();
 
         return view;
@@ -82,6 +82,7 @@ public class AccountFragment extends Fragment {
         editFormCard = view.findViewById(R.id.editFormCard);
         menuCard = view.findViewById(R.id.menuCard);
         editVehicleCard = view.findViewById(R.id.editVehicleCard);
+        changePassword = view.findViewById(R.id.changePassword);
 
         // Profile Edit
         etFirstName = view.findViewById(R.id.etFirstName);
@@ -90,6 +91,8 @@ public class AccountFragment extends Fragment {
         btnCancel = view.findViewById(R.id.btnCancel);
         btnSaveChanges = view.findViewById(R.id.btnSaveChanges);
         btnSendChanges = view.findViewById(R.id.btnSendChanges);
+        btnSavePassword = view.findViewById(R.id.btnSavePassword);
+        btnCancelPassword = view.findViewById(R.id.btnCancelPassword);
 
         // Vehicle Edit
         rgVehicleType = view.findViewById(R.id.rgVehicleType);
@@ -122,6 +125,8 @@ public class AccountFragment extends Fragment {
         btnCancel.setOnClickListener(v -> hideEditProfile());
         btnSaveChanges.setOnClickListener(v -> saveProfileChanges());
         btnSendChanges.setOnClickListener(v -> sendProfileChanges());
+        btnSavePassword.setOnClickListener(v -> savePassword());
+        btnCancelPassword.setOnClickListener(v -> hideChangePassword());
 
         // Vehicle Edit
         menuVehicle.setOnClickListener(v -> showEditVehicle());
@@ -130,6 +135,8 @@ public class AccountFragment extends Fragment {
 
         // Navigate to Change Requests
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
+
+        menuChangePassword.setOnClickListener(v -> showChangePassword());
     }
 
     private void setupMenuItems(View view) {
@@ -185,6 +192,7 @@ public class AccountFragment extends Fragment {
                 menuDeleteAccount, menuFavorites, menuUserStat, menuVehicle, menuDriverStat,
                 drivingHoursSection);
         btnSendChanges.setVisibility(View.GONE);
+        changePassword.setVisibility(View.GONE);
     }
 
     private void showViews(View... views) {
@@ -199,6 +207,20 @@ public class AccountFragment extends Fragment {
     private void showEditProfile() {
         hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
         showViews(editFormCard);
+    }
+
+    private void showChangePassword() {
+        changePassword.setVisibility(View.VISIBLE);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+    }
+
+    private void hideChangePassword() {
+        changePassword.setVisibility(View.GONE);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+    }
+
+    private void savePassword() {
+        hideChangePassword();
     }
 
     private void hideEditProfile() {
