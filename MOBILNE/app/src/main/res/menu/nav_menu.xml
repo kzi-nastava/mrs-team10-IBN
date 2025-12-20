@@ -4,7 +4,7 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/my_account"
+        <item android:id="@+id/accountFragment"
             android:title="@string/my_account"
             android:icon="@drawable/ic_account"
             android:orderInCategory="100" />
