@@ -2,6 +2,7 @@
   padding: 2rem;
   background-color: #e0dcdc;
   font-family: 'Mandali';
+  overflow: hidden;
 }
 
 .top {
