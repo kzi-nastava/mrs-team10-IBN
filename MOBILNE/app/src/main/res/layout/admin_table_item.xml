@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Type Icon -->
+    <TextView
+        android:id="@+id/tvTypeIcon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="👤"
+        android:textSize="15sp"
+        android:gravity="center"/>
+
+    <!-- Driver Name -->
+    <TextView
+        android:id="@+id/tvDriverName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:text="Driver Name"
+        android:textColor="#212121"
+        android:textSize="16sp"
+        android:layout_marginStart="8dp"/>
+
+    <!-- Request Date -->
+    <TextView
+        android:id="@+id/tvRequestDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:text="🕐 2024-12-15"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_marginStart="8dp"/>
+
+    <!-- Review Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnReview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:text="Review"
+        android:textSize="10sp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="@color/btn_color_1"
+        android:textColor="@color/btn_color_1"
+        android:layout_marginStart="8dp"/>
+
+</LinearLayout>
