@@ -143,6 +143,11 @@
 
         <include layout="@layout/edit_vehicle" />
 
+        <include
+            layout="@layout/change_password"
+            android:id="@+id/changePassword"
+            />
+
         <!-- Menu Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/menuCard"

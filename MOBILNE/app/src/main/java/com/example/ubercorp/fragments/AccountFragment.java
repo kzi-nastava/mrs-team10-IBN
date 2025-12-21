@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator;
 import android.graphics.Path;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class AccountFragment extends Fragment {
     // Header & Profile
-    private FrameLayout headerBackground;
+    private FrameLayout headerBackground, changePassword;
     private LinearLayout userInfoSection;
     private FloatingActionButton fabEditProfile;
     private TextView tvUserName, tvUserEmail;
@@ -33,7 +35,7 @@ public class AccountFragment extends Fragment {
 
     // Profile Edit
     private TextInputEditText etFirstName, etLastName, etEmail;
-    private MaterialButton btnCancel, btnSaveChanges;
+    private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
 
     // Vehicle Edit
     private RadioGroup rgVehicleType;
@@ -62,7 +64,7 @@ public class AccountFragment extends Fragment {
         setupMenuItems(view);
         initializeViews(view);
         setupListeners();
-        configureMenuForRole("driver");
+        configureMenuForRole("admin");
         startFlyingTaxiAnimation();
 
         return view;
@@ -80,6 +82,7 @@ public class AccountFragment extends Fragment {
         editFormCard = view.findViewById(R.id.editFormCard);
         menuCard = view.findViewById(R.id.menuCard);
         editVehicleCard = view.findViewById(R.id.editVehicleCard);
+        changePassword = view.findViewById(R.id.changePassword);
 
         // Profile Edit
         etFirstName = view.findViewById(R.id.etFirstName);
@@ -87,6 +90,9 @@ public class AccountFragment extends Fragment {
         etEmail = view.findViewById(R.id.etEmail);
         btnCancel = view.findViewById(R.id.btnCancel);
         btnSaveChanges = view.findViewById(R.id.btnSaveChanges);
+        btnSendChanges = view.findViewById(R.id.btnSendChanges);
+        btnSavePassword = view.findViewById(R.id.btnSavePassword);
+        btnCancelPassword = view.findViewById(R.id.btnCancelPassword);
 
         // Vehicle Edit
         rgVehicleType = view.findViewById(R.id.rgVehicleType);
@@ -118,11 +124,19 @@ public class AccountFragment extends Fragment {
         fabEditProfile.setOnClickListener(v -> showEditProfile());
         btnCancel.setOnClickListener(v -> hideEditProfile());
         btnSaveChanges.setOnClickListener(v -> saveProfileChanges());
+        btnSendChanges.setOnClickListener(v -> sendProfileChanges());
+        btnSavePassword.setOnClickListener(v -> savePassword());
+        btnCancelPassword.setOnClickListener(v -> hideChangePassword());
 
         // Vehicle Edit
         menuVehicle.setOnClickListener(v -> showEditVehicle());
         btnCancelVehicle.setOnClickListener(v -> hideEditVehicle());
         btnSaveVehicle.setOnClickListener(v -> saveVehicleChanges());
+
+        // Navigate to Change Requests
+        menuRequests.setOnClickListener(v -> navigateToChangeRequests());
+
+        menuChangePassword.setOnClickListener(v -> showChangePassword());
     }
 
     private void setupMenuItems(View view) {
@@ -145,7 +159,10 @@ public class AccountFragment extends Fragment {
         setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
                 "My Vehicle", "Manage your vehicle", true);
     }
-
+    private void navigateToChangeRequests() {
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_account_to_changeRequests);
+    }
     private void configureMenuForRole(String userRole) {
         hideAllMenuItems();
 
@@ -160,6 +177,8 @@ public class AccountFragment extends Fragment {
                 tvUserEmail.setVisibility(View.GONE);
                 drivingHoursSection.setVisibility(View.VISIBLE);
                 updateDriverHours(5.5f);
+                btnSaveChanges.setVisibility(View.GONE);
+                btnSendChanges.setVisibility(View.VISIBLE);
                 break;
 
             case "user":
@@ -172,6 +191,8 @@ public class AccountFragment extends Fragment {
         hideViews(menuPlatformStats, menuRequests, menuManageUsers, menuChangePassword,
                 menuDeleteAccount, menuFavorites, menuUserStat, menuVehicle, menuDriverStat,
                 drivingHoursSection);
+        btnSendChanges.setVisibility(View.GONE);
+        changePassword.setVisibility(View.GONE);
     }
 
     private void showViews(View... views) {
@@ -188,6 +209,20 @@ public class AccountFragment extends Fragment {
         showViews(editFormCard);
     }
 
+    private void showChangePassword() {
+        changePassword.setVisibility(View.VISIBLE);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+    }
+
+    private void hideChangePassword() {
+        changePassword.setVisibility(View.GONE);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+    }
+
+    private void savePassword() {
+        hideChangePassword();
+    }
+
     private void hideEditProfile() {
         hideViews(editFormCard);
         showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
@@ -197,6 +232,9 @@ public class AccountFragment extends Fragment {
         String fullName = etFirstName.getText() + " " + etLastName.getText();
         tvUserName.setText(fullName);
         tvUserEmail.setText(etEmail.getText());
+        hideEditProfile();
+    }
+    private void sendProfileChanges() {
         hideEditProfile();
     }
 
@@ -280,10 +318,10 @@ public class AccountFragment extends Fragment {
     }
 
     private void animateTaxi(TextView taxi, int width, int height) {
-        float startX = (float)(Math.random() * width);
-        float startY = (float)(Math.random() * height);
-        float endX = (float)(Math.random() * width);
-        float endY = (float)(Math.random() * height);
+        float startX = (float) (Math.random() * width);
+        float startY = (float) (Math.random() * height);
+        float endX = (float) (Math.random() * width);
+        float endY = (float) (Math.random() * height);
 
         taxi.setX(startX);
         taxi.setY(startY);
@@ -291,13 +329,13 @@ public class AccountFragment extends Fragment {
         Path path = new Path();
         path.moveTo(startX, startY);
         path.cubicTo(
-                (float)(Math.random() * width), (float)(Math.random() * height),
-                (float)(Math.random() * width), (float)(Math.random() * height),
+                (float) (Math.random() * width), (float) (Math.random() * height),
+                (float) (Math.random() * width), (float) (Math.random() * height),
                 endX, endY
         );
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(taxi, View.X, View.Y, path);
-        animator.setDuration(5000 + (int)(Math.random() * 5000));
+        animator.setDuration(5000 + (int) (Math.random() * 5000));
         animator.setInterpolator(new LinearInterpolator());
         animator.addListener(new android.animation.AnimatorListenerAdapter() {
             @Override
