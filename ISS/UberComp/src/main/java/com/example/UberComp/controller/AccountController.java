@@ -1,7 +1,10 @@
 package com.example.UberComp.controller;
 
 
-import com.example.UberComp.dto.AccountDTO;
+import com.example.UberComp.dto.CreateAccountDTO;
+import com.example.UberComp.dto.GetAccountDTO;
+import com.example.UberComp.dto.UpdateAccountDTO;
+import com.example.UberComp.dto.UpdatedAccountDTO;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import org.springframework.http.HttpStatus;
@@ -16,36 +19,37 @@ import java.util.Collection;
 @RequestMapping("/api/account")
 class AccountController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<AccountDTO>> getAccounts(){
-        ArrayList<AccountDTO> accounts = new ArrayList<AccountDTO>();
+    public ResponseEntity<Collection<GetAccountDTO>> getAccounts(){
+        ArrayList<GetAccountDTO> accounts = new ArrayList<GetAccountDTO>();
 
-        AccountDTO acc1 = new AccountDTO("user@gmail.com", "password", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
-        AccountDTO acc2 = new AccountDTO("niksa@gmail.com", "niksa", AccountType.PASSENGER, AccountStatus.VERIFIED, null);
+        GetAccountDTO acc1 = new GetAccountDTO("user@gmail.com", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
+        GetAccountDTO acc2 = new GetAccountDTO("niksa@gmail.com", AccountType.PASSENGER, AccountStatus.VERIFIED, null);
 
         accounts.add(acc1);
         accounts.add(acc2);
 
-        return new ResponseEntity<Collection<AccountDTO>>(accounts,HttpStatus.OK);
+        return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDTO> getAccount(@PathVariable("id") Long id){
-        AccountDTO acc = new AccountDTO("user@gmail.com", "password", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
-        return new ResponseEntity<AccountDTO>(acc, HttpStatus.OK);
+    public ResponseEntity<GetAccountDTO> getAccount(@PathVariable("id") Long id){
+        GetAccountDTO acc = new GetAccountDTO("user@gmail.com", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
+        return new ResponseEntity<GetAccountDTO>(acc, HttpStatus.OK);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO account) throws Exception{
-        return new ResponseEntity<AccountDTO>(account, HttpStatus.CREATED);
+    public ResponseEntity<CreateAccountDTO> createAccount(@RequestBody CreateAccountDTO account) throws Exception{
+        return new ResponseEntity<CreateAccountDTO>(account, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AccountDTO> updateAccount(@RequestBody AccountDTO account, @PathVariable("id") Long id) throws Exception{
-        return new ResponseEntity<AccountDTO>(account, HttpStatus.OK);
+    public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
+        UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
+        return new ResponseEntity<UpdatedAccountDTO>(updated, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteGreeting(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteAccount(@PathVariable("id") Long id) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

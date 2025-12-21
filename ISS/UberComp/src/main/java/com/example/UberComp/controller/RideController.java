@@ -1,5 +1,6 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.GetAccountDTO;
 import com.example.UberComp.dto.GetRideDTO;
 import com.example.UberComp.dto.GetRideDetailsDTO;
 import com.example.UberComp.service.RideService;
@@ -9,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 @RestController
@@ -35,5 +35,10 @@ public class RideController {
         GetRideDetailsDTO ride = rideService.getRide(id);
 
         return new ResponseEntity<GetRideDetailsDTO>(ride, HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> deleteRide(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -7,10 +7,10 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AccountDTO {
-    public String email;
-    public String password;
-    public AccountType accountType;
-    public AccountStatus accountStatus;
-    public String blockingReason;
+public class CreateAccountDTO {
+    private String email;
+    private String password;
+    private AccountType accountType;
+    private AccountStatus accountStatus;
+    private String blockingReason;
 }
