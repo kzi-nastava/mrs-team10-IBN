@@ -1,4 +1,4 @@
-package com.example.UberComp.dto;
+package com.example.UberComp.dto.ride;
 
 import com.example.UberComp.model.Route;
 import com.example.UberComp.model.User;
@@ -19,4 +19,6 @@ public class GetRideDetailsDTO {
     private Route route;
     private List<User> passengers;
     private Double price;
+    private Boolean isCanceled;
+    private Boolean isPanic;
 }

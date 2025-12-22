@@ -1,10 +1,8 @@
 package com.example.UberComp.service;
 
-import com.example.UberComp.dto.GetRideDTO;
-import com.example.UberComp.dto.GetRideDetailsDTO;
-import com.example.UberComp.repoInterfaces.IRideRepository;
+import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.repository.RideRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +13,13 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class RideService {
 
-    private IRideRepository iRideRepository;
+    private RideRepository iRideRepository;
     public Collection<GetRideDTO> getRides(Long driverId){
         return java.util.List.of();
     }
     public GetRideDetailsDTO getRide(Long rideId){
         return new GetRideDetailsDTO();
     }
+    public UpdatedStatusRideDTO endOfRide(UpdatestatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
+    public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
 }
