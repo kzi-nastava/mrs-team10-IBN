@@ -1,4 +1,4 @@
-package com.example.UberComp.dto;
+package com.example.UberComp.dto.account;
 
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
