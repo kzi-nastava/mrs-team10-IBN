@@ -1,4 +1,4 @@
-package com.example.UberComp.model.enums;
+package com.example.UberComp.enums;
 
 public enum RideStatus {
     Pending,

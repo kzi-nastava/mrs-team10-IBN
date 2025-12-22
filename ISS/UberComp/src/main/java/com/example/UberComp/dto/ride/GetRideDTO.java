@@ -1,4 +1,4 @@
-package com.example.UberComp.dto;
+package com.example.UberComp.dto.ride;
 
 import lombok.Data;
 import lombok.Getter;

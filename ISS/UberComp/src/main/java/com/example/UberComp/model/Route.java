@@ -11,5 +11,5 @@ import java.util.List;
 @Data
 public class Route {
     private Long id;
-    private List<Route> stations;
+    private List<Coordinate> stations;
 }
