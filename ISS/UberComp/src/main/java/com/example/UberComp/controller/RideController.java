@@ -67,14 +67,6 @@ public class RideController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping(value = "/cancel/{id}")
-    public ResponseEntity<UpdatedStatusRideDTO> cancelRide(@PathVariable Long id) {
-        UpdatedStatusRideDTO cancelledRide = new UpdatedStatusRideDTO();
-        cancelledRide.setId(id);
-        cancelledRide.setRideStatus(RideStatus.CancelledByPassenger);
-        return new ResponseEntity<UpdatedStatusRideDTO>(cancelledRide, HttpStatus.OK);
-    }
-
     @PutMapping(value = "/stop/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StoppedRideDTO> stopRide(@RequestBody StopRideDTO ride, @PathVariable("id") Long id){
         StoppedRideDTO finished = new StoppedRideDTO(id, ride.getPassed(), ride.getFinishTime(), 0.0);
@@ -82,10 +74,11 @@ public class RideController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UpdatedStatusRideDTO> endOfRide(@RequestBody UpdatestatusRideDTO ride, @PathVariable Long id)
+    public ResponseEntity<UpdatedStatusRideDTO> updateRideStatus(@RequestBody UpdatestatusRideDTO ride, @PathVariable Long id)
             throws Exception {
-        UpdatedStatusRideDTO updatedRide = rideService.endOfRide(ride);
-
+        UpdatedStatusRideDTO updatedRide = new UpdatedStatusRideDTO();
+        updatedRide.setId(id);
+        updatedRide.setRideStatus(ride.getRideStatus());
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 }

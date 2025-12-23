@@ -1,5 +1,6 @@
 package com.example.UberComp.model;
 
+import com.example.UberComp.enums.DriverStatus;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +9,7 @@ import lombok.Setter;
 @Setter
 @Data
 public class Driver extends User {
-    private Boolean isOnline;
-    private Boolean isDriving;
+    private DriverStatus status;
     private Integer uptime;
     private Vehicle vehicle;
 }
