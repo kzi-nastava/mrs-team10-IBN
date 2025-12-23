@@ -54,4 +54,21 @@ public class RideController {
 
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new GetRideDTO());
+    }
+
+    @PostMapping("/favorites/{id}/order")
+    public ResponseEntity<GetRideDTO> orderFromFavorite(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new GetRideDTO());
+    }
+
+    @PutMapping("/{id}/start")
+    public ResponseEntity<Void> startRide(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -1,10 +1,7 @@
 package com.example.UberComp.controller;
 
 
-import com.example.UberComp.dto.CreateAccountDTO;
-import com.example.UberComp.dto.GetAccountDTO;
-import com.example.UberComp.dto.UpdateAccountDTO;
-import com.example.UberComp.dto.UpdatedAccountDTO;
+import com.example.UberComp.dto.account.*;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import org.springframework.http.HttpStatus;
@@ -51,5 +48,16 @@ class AccountController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable("id") Long id) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/setup-password")
+    public ResponseEntity<Void> setupPassword(@RequestBody SetupPasswordDTO dto) {
+        //accountService.setupPassword(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
+        return ResponseEntity.ok().build();
     }
 }
