@@ -1,14 +1,14 @@
 package com.example.UberComp.controller;
 
 import com.example.UberComp.dto.GetVehiclePositionDTO;
+import com.example.UberComp.dto.driver.DriverStatusDTO;
+import com.example.UberComp.dto.driver.UpdatedStatusDriverDTO;
 import com.example.UberComp.service.DriverService;
 import jdk.jfr.Registered;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +22,11 @@ public class DriverController {
     public ResponseEntity<List<GetVehiclePositionDTO>> getVehiclePosition() {
         List<GetVehiclePositionDTO> vehiclePositions = driverService.getVehiclePosition();
         return ResponseEntity.ok(vehiclePositions);
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UpdatedStatusDriverDTO> updateDriverStatus(@RequestBody DriverStatusDTO status, @PathVariable("id") Long id) {
+        UpdatedStatusDriverDTO updatedDriver = new UpdatedStatusDriverDTO(id, status.getStatus());
+        return ResponseEntity.ok(updatedDriver);
     }
 }
