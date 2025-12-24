@@ -32,7 +32,7 @@ public class DriverController {
         DriverDTO newDriver = driverService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newDriver);
     }
-}
+
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdatedStatusDriverDTO> updateDriverStatus(@RequestBody DriverStatusDTO status, @PathVariable("id") Long id) {
         UpdatedStatusDriverDTO updatedDriver = new UpdatedStatusDriverDTO(id, status.getStatus());

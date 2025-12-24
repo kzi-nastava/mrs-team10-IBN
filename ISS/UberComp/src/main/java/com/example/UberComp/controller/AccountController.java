@@ -1,10 +1,7 @@
 package com.example.UberComp.controller;
 
 
-import com.example.UberComp.dto.account.CreateAccountDTO;
-import com.example.UberComp.dto.account.GetAccountDTO;
-import com.example.UberComp.dto.account.UpdateAccountDTO;
-import com.example.UberComp.dto.account.UpdatedAccountDTO;
+import com.example.UberComp.dto.account.*;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import org.springframework.http.HttpStatus;
