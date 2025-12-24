@@ -1,23 +1,17 @@
 package com.example.ubercorp.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -30,6 +24,7 @@ import java.net.URI;
 public class RegisterActivity extends AppCompatActivity {
     final int MEDIA_IMAGES_PERMISSION = 100;
     final int SELECT_IMAGE = 200;
+    private String ImagePermission;
     ImageView profilePicture;
 
     private void selectImage(){
@@ -49,12 +44,16 @@ public class RegisterActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            ImagePermission = Manifest.permission.READ_MEDIA_IMAGES;
+        else
+            ImagePermission = Manifest.permission.READ_EXTERNAL_STORAGE;
         profilePicture = findViewById(R.id.profilePicture);
         Button selectImageButton = findViewById(R.id.selectImageButton);
         selectImageButton.setOnClickListener((v) -> {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+            if (ContextCompat.checkSelfPermission(this, ImagePermission)
                     != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, MEDIA_IMAGES_PERMISSION);
+                requestPermissions(new String[]{ImagePermission}, MEDIA_IMAGES_PERMISSION);
             } else {
                 selectImage();
             }
