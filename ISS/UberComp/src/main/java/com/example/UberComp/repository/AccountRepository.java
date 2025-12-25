@@ -4,5 +4,5 @@ import com.example.UberComp.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    public Account findOneByEmail(String email);
+    Account findByEmail(String email);
 }

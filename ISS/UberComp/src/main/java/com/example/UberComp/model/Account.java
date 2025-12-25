@@ -20,10 +20,12 @@ public class Account {
     @Column(nullable = false)
     private String password;
 
-    @Column
+    @Column(name = "account_type", columnDefinition = "varchar")
+    @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    @Column
+    @Column(name = "account_status", columnDefinition = "varchar")
+    @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
 
     @Column

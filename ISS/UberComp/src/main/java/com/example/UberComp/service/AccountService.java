@@ -13,7 +13,7 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     public Account register(CreateAccountDTO account){
-        if (accountRepository.findOneByEmail(account.getEmail()) != null){
+        if (accountRepository.findByEmail(account.getEmail()) == null){
             Account newAccount = new Account(account.getEmail(),account.getPassword(), account.getType());
             return accountRepository.save(newAccount);
         } else {
@@ -22,7 +22,7 @@ public class AccountService {
     }
 
     public Account login(LogAccountDTO accountDTO) {
-        Account account = accountRepository.findOneByEmail(accountDTO.getEmail());
+        Account account = accountRepository.findByEmail(accountDTO.getEmail());
         if (account.getPassword().equals(accountDTO.getPassword())){
             return account;
         } else {

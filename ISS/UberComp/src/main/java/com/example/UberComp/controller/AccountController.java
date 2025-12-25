@@ -34,7 +34,7 @@ class AccountController {
         return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetAccountDTO> getAccount(@RequestBody LogAccountDTO creds) throws Exception{
         Account loggedIn = accountService.login(creds);
         if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
