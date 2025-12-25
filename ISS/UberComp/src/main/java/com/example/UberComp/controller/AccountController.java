@@ -4,6 +4,9 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.account.*;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
+import com.example.UberComp.model.Account;
+import com.example.UberComp.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/api/account")
 class AccountController {
+    @Autowired
+    private AccountService accountService;
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetAccountDTO>> getAccounts(){
         ArrayList<GetAccountDTO> accounts = new ArrayList<GetAccountDTO>();
@@ -28,15 +34,19 @@ class AccountController {
         return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAccountDTO> getAccount(@PathVariable("id") Long id){
-        GetAccountDTO acc = new GetAccountDTO("user@gmail.com", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
-        return new ResponseEntity<GetAccountDTO>(acc, HttpStatus.OK);
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAccountDTO> getAccount(@RequestBody LogAccountDTO creds) throws Exception{
+        Account loggedIn = accountService.login(creds);
+        if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        GetAccountDTO account = new GetAccountDTO(loggedIn);
+        return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CreateAccountDTO> createAccount(@RequestBody CreateAccountDTO account) throws Exception{
-        return new ResponseEntity<CreateAccountDTO>(account, HttpStatus.CREATED);
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetAccountDTO> createAccount(@RequestBody CreateAccountDTO account) throws Exception{
+        Account registered = accountService.register(account);
+        GetAccountDTO registeredDTO = new GetAccountDTO(registered);
+        return new ResponseEntity<GetAccountDTO>(registeredDTO, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
