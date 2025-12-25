@@ -17,4 +17,7 @@
     <string name="panic">Panic</string>
     <string name="start_location">Start location</string>
     <string name="destination">Destination</string>
+    <string name="describe_your_problem">Describe your problem</string>
+    <string name="type_here">Type here...</string>
+    <string name="report">Report</string>
 </resources>

@@ -9,6 +9,7 @@ import { RequestsComponent } from './layout/requests/requests.component';
 import { TrackingRouteComponent } from './layout/tracking-route/tracking-route.component';
 import { VerifyAccountComponent } from './forms/verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password.component';
+import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
 
 
 export const routes: Routes = [
@@ -48,7 +49,12 @@ export const routes: Routes = [
     path: 'tracking-route',
     component: TrackingRouteComponent
   },
+    {
+    path: 'complaint',
+    component: ComplaintDialogComponent
+  },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
+
 ];
