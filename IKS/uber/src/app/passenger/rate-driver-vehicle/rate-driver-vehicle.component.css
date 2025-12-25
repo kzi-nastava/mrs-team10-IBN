@@ -1,0 +1,71 @@
+.dialog-container {
+    width: 35%;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    background-color: #e0dcdc !important;
+    font-family: 'Mandali';
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.label1 {
+    color: #2c2a2a;
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.textarea1 {
+    width: 90%;
+    resize: none;
+
+    border: none;
+    border-radius: 1rem;
+    padding: 1rem;
+
+    font-family: 'Mandali';
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.textarea1::placeholder {
+    color: #9a9a9a;
+}
+
+.button1 {
+    background-color: #1b8950;
+    color: white;
+
+    border: none;
+    border-radius: 1rem;
+    padding: 0rem;
+
+    font-family: 'Mandali';
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.button1:hover {
+    background-color: #3f633f;
+}
+
+.rating {
+  font-size: 2rem;  
+}
+
+.rating span {
+  cursor: pointer;
+  font-size: 2rem;
+}
+
+.rating span.filled mat-icon {
+  color: rgb(196, 174, 48);
+}
+
+
+

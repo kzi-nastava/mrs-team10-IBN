@@ -1,0 +1,37 @@
+<div class="dialog-container">
+    <label class="label1">Rate us:</label>
+
+    <div style="display: flex; flex-direction: row;">
+        <label class="label1">Rate Driver:</label>
+        <div class="rating">
+            <span *ngFor="let star of stars; let i = index"
+                (click)="rateDriver(i + 1)"
+                (mouseenter)="hoverDriver(i + 1)"
+                (mouseleave)="hoverDriver(0)">
+            <mat-icon [ngStyle]="{'color': i < (driverHover || driverRating) ? 'gold' : 'black'}">
+                {{ i < (driverHover || driverRating) ? 'star' : 'star_border' }}
+            </mat-icon>
+            </span>
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: row;">
+        <label class="label1">Rate Vehicle:</label>
+        <div class="rating">
+            <span *ngFor="let star of stars; let i = index"
+                (click)="rateVehicle(i + 1)"
+                (mouseenter)="hoverVehicle(i + 1)"
+                (mouseleave)="hoverVehicle(0)">
+            <mat-icon [ngStyle]="{'color': i < (vehicleHover || vehicleRating) ? 'gold' : 'black'}">
+                {{ i < (vehicleHover || vehicleRating) ? 'star' : 'star_border' }}
+            </mat-icon>
+            </span>
+        </div>
+    </div>
+
+
+
+    <textarea class="textarea1" placeholder="Leave a comment..." rows="2"></textarea>
+    <button class="button1">Submit</button>
+
+</div>
