@@ -10,6 +10,7 @@ import { TrackingRouteComponent } from './layout/tracking-route/tracking-route.c
 import { VerifyAccountComponent } from './forms/verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password.component';
 import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
+import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate-driver-vehicle.component';
 
 
 export const routes: Routes = [
@@ -52,6 +53,10 @@ export const routes: Routes = [
     {
     path: 'complaint',
     component: ComplaintDialogComponent
+  },
+  {
+    path:'rating',
+    component: RateDriverVehicleComponent
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

@@ -60,7 +60,7 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.chat, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification)
                 .setOpenableLayout(drawer)
                 .build();
 

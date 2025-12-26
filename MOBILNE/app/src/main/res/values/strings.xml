@@ -20,4 +20,9 @@
     <string name="describe_your_problem">Describe your problem</string>
     <string name="type_here">Type here...</string>
     <string name="report">Report</string>
+    <string name="rate_us">Rate us:</string>
+    <string name="leave_a_comment">Leave a comment...</string>
+    <string name="submit">Submit</string>
+    <string name="driver">Driver:</string>
+    <string name="vehicle">Vehicle:</string>
 </resources>
