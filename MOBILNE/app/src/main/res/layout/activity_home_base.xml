@@ -34,6 +34,19 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <Button
+        android:id="@+id/orderRideButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/btn_color_2"
+        android:padding="16dp"
+        android:text="Order a Ride"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
     <include layout="@layout/activity_home_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
