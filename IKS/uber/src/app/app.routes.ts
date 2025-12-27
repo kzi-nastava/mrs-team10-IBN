@@ -11,7 +11,7 @@ import { VerifyAccountComponent } from './forms/verify-account/verify-account.co
 import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password.component';
 import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
 import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate-driver-vehicle.component';
-
+import { OrderRideComponent } from './layout/order-ride/order-ride.component';
 
 export const routes: Routes = [
   {
@@ -36,7 +36,7 @@ export const routes: Routes = [
   },
   {
     path: 'ride-history',
-    component: RideHistoryComponent
+    component: RideHistoryComponent,
   },
   {
     path: 'requests',
@@ -44,22 +44,25 @@ export const routes: Routes = [
   },
   {
     path: 'incoming-ride',
-    component: IncomingRideComponent
+    component: IncomingRideComponent,
   },
   {
     path: 'tracking-route',
-    component: TrackingRouteComponent
-  },
-    {
-    path: 'complaint',
-    component: ComplaintDialogComponent
+    component: TrackingRouteComponent,
   },
   {
-    path:'rating',
-    component: RateDriverVehicleComponent
+    path: 'complaint',
+    component: ComplaintDialogComponent,
+  },
+  {
+    path: 'rating',
+    component: RateDriverVehicleComponent,
+  },
+  {
+    path: 'app-order-ride',
+    component: OrderRideComponent,
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
-
 ];
