@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import * as L from 'leaflet';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +31,9 @@ interface Location {
 })
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() locations: Location[] = [];
+  @Output() locationAdded = new EventEmitter<string>();
+  @Output() locationRemoved = new EventEmitter<number>();
+  @Output() allLocationsCleared = new EventEmitter<void>();
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
@@ -36,7 +47,10 @@ export class MapComponent implements AfterViewInit, OnChanges {
   private points: {
     marker: L.Marker;
     latLng: L.LatLng;
+    address?: string;
   }[] = [];
+
+  private isUpdatingFromParent = false;
 
   constructor(private http: HttpClient) {}
 
@@ -85,7 +99,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['locations'] && this.map) {
+    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
       this.updateLocationsFromInput();
     }
   }
@@ -108,11 +122,14 @@ export class MapComponent implements AfterViewInit, OnChanges {
       return;
     }
 
+    this.isUpdatingFromParent = true;
     this.clearAll();
 
     for (const location of this.locations) {
       await this.addLocationFromAddress(location);
     }
+
+    this.isUpdatingFromParent = false;
   }
 
   private async addLocationFromAddress(location: Location): Promise<void> {
@@ -130,39 +147,78 @@ export class MapComponent implements AfterViewInit, OnChanges {
           icon = this.DestinationIcon;
         }
 
-        this.addPointWithIcon(lat, lon, icon, location.address);
+        this.addPointWithIcon(lat, lon, icon, location.address, true);
       }
     } catch (error) {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
 
-  private addPointWithIcon(lat: number, lng: number, icon: L.Icon, title?: string): void {
+  private addPointWithIcon(
+    lat: number,
+    lng: number,
+    icon: L.Icon,
+    title?: string,
+    fromParent = false
+  ): void {
     const latLng = L.latLng(lat, lng);
     const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
     pin.on('click', () => {
-      if (title) {
-        pin.bindPopup(title).openPopup();
+      const index = this.points.findIndex((p) => p.marker === pin);
+      if (index !== -1) {
+        this.removePointByIndex(index);
       }
     });
 
-    this.points.push({ marker: pin, latLng });
+    if (title) {
+      pin.bindPopup(title);
+    }
+
+    this.points.push({ marker: pin, latLng, address: title });
     this.updateRoute();
   }
 
-  private addPoint(lat: number, lng: number): void {
-    this.addPointWithIcon(lat, lng, this.PinIcon);
+  private async addPoint(lat: number, lng: number): Promise<void> {
+    try {
+      const result = await this.reverseSearch(lat, lng).toPromise();
+
+      let address = '';
+      if (result && result.address) {
+        const parts = [];
+        if (result.address.road) parts.push(result.address.road);
+        if (result.address.house_number) parts.push(result.address.house_number);
+        address = parts.join(' ') || result.display_name;
+      }
+
+      this.addPointWithIcon(lat, lng, this.PinIcon, address);
+
+      if (address) {
+        this.locationAdded.emit(address);
+      }
+    } catch (error) {
+      console.error('Error reverse geocoding:', error);
+      this.addPointWithIcon(lat, lng, this.PinIcon);
+    }
+  }
+
+  private removePointByIndex(index: number): void {
+    if (index < 0 || index >= this.points.length) return;
+
+    const point = this.points[index];
+    this.map.removeLayer(point.marker);
+    this.points.splice(index, 1);
+
+    this.updateRoute();
+
+    this.locationRemoved.emit(index);
   }
 
   public removeLastPoint(): void {
     if (this.points.length === 0) return;
 
-    const last = this.points.pop();
-    if (!last) return;
-
-    this.map.removeLayer(last.marker);
-    this.updateRoute();
+    const lastIndex = this.points.length - 1;
+    this.removePointByIndex(lastIndex);
   }
 
   private updateRoute(): void {

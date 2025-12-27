@@ -129,4 +129,70 @@ export class OrderRideComponent implements OnInit {
   getLocations() {
     return this.currentLocations;
   }
+
+  onLocationAdded(address: string) {
+    if (!this.fromLocation || this.fromLocation.trim() === '') {
+      this.fromLocation = address;
+    } else if (!this.toLocation || this.toLocation.trim() === '') {
+      this.toLocation = address;
+    } else {
+      this.stops.push(this.toLocation);
+      this.toLocation = address;
+    }
+
+    this.updateLocationText();
+  }
+
+  onLocationRemoved(index: number) {
+    const totalLocations = 1 + this.stops.length + 1;
+
+    if (index === 0) {
+      if (this.stops.length > 0) {
+        this.fromLocation = this.stops[0];
+        this.stops.splice(0, 1);
+      } else if (this.toLocation && this.toLocation.trim() !== '') {
+        this.fromLocation = this.toLocation;
+        this.toLocation = '';
+      } else {
+        this.fromLocation = '';
+      }
+    } else if (index === totalLocations - 1) {
+      if (this.stops.length > 0) {
+        this.toLocation = this.stops[this.stops.length - 1];
+        this.stops.splice(this.stops.length - 1, 1);
+      } else {
+        this.toLocation = '';
+      }
+    } else if (index > 0 && index < totalLocations - 1) {
+      const stopIndex = index - 1;
+      this.stops.splice(stopIndex, 1);
+    }
+
+    this.updateLocationText();
+  }
+
+  private updateLocationText() {
+    let locationParts = [];
+
+    if (this.fromLocation && this.fromLocation.trim() !== '') {
+      locationParts.push(this.fromLocation);
+    }
+
+    const validStops = this.stops.filter((s) => s && s.trim() !== '');
+    if (validStops.length > 0) {
+      locationParts = [...locationParts, ...validStops];
+    }
+
+    if (this.toLocation && this.toLocation.trim() !== '') {
+      locationParts.push(this.toLocation);
+    }
+
+    if (locationParts.length > 0) {
+      this.locationText = locationParts.join(' → ');
+    } else {
+      this.locationText = 'Select locations on map';
+    }
+
+    this.updateMapLocations();
+  }
 }

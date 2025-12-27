@@ -110,7 +110,7 @@
 
       @for(email of passengerEmails; track $index; let i = $index) {
       <div class="input-group">
-        <label>Passenger {{ i + 1 }}:</label>
+        <label style="margin: 5px 0">Passenger {{ i + 1 }}:</label>
         <div style="display: flex; gap: 5px">
           <input
             type="email"
@@ -147,7 +147,12 @@
 
     <button class="order-btn">Order</button>
   </div>
-  <app-map [locations]="getLocations()"></app-map>
+  <app-map
+    [locations]="getLocations()"
+    (locationAdded)="onLocationAdded($event)"
+    (locationRemoved)="onLocationRemoved($event)"
+  >
+  </app-map>
 </div>
 
 <router-outlet></router-outlet>
