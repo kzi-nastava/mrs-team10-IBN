@@ -1,9 +1,11 @@
-package com.example.ubercorp.activities;
+package com.example.ubercorp.fragments;
 
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -13,15 +15,16 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.ubercorp.R;
-import java.util.stream.Collectors;
 
-public class OrderRideActivity extends AppCompatActivity {
+public class OrderRideFragment extends Fragment {
 
     // UI elements
     private CardView locationDisplay;
@@ -73,61 +76,64 @@ public class OrderRideActivity extends AppCompatActivity {
     private boolean isShareRideOpen = false;
     private List<String> passengerEmails = new ArrayList<>();
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_order_ride);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_order_ride, container, false);
 
-        initializeViews();
+        initializeViews(view);
         setupListeners();
         updateLocationDisplay();
         calculatePrice();
+
+        return view;
     }
 
-    private void initializeViews() {
+    private void initializeViews(View view) {
         // Location display
-        locationDisplay = findViewById(R.id.locationDisplay);
-        locationText = findViewById(R.id.locationText);
-        timeText = findViewById(R.id.timeText);
-        dropdownArrow = findViewById(R.id.dropdownArrow);
-        dropdownContent = findViewById(R.id.dropdownContent);
+        locationDisplay = view.findViewById(R.id.locationDisplay);
+        locationText = view.findViewById(R.id.locationText);
+        timeText = view.findViewById(R.id.timeText);
+        dropdownArrow = view.findViewById(R.id.dropdownArrow);
+        dropdownContent = view.findViewById(R.id.dropdownContent);
 
         // Location inputs
-        fromLocationInput = findViewById(R.id.fromLocationInput);
-        toLocationInput = findViewById(R.id.toLocationInput);
-        stopsContainer = findViewById(R.id.stopsContainer);
-        addStopBtn = findViewById(R.id.addStopBtn);
+        fromLocationInput = view.findViewById(R.id.fromLocationInput);
+        toLocationInput = view.findViewById(R.id.toLocationInput);
+        stopsContainer = view.findViewById(R.id.stopsContainer);
+        addStopBtn = view.findViewById(R.id.addStopBtn);
 
         // Time selection
-        radioNow = findViewById(R.id.radioNow);
-        radioSchedule = findViewById(R.id.radioSchedule);
-        dateTimePicker = findViewById(R.id.dateTimePicker);
-        dateInput = findViewById(R.id.dateInput);
-        timeInput = findViewById(R.id.timeInput);
+        radioNow = view.findViewById(R.id.radioNow);
+        radioSchedule = view.findViewById(R.id.radioSchedule);
+        dateTimePicker = view.findViewById(R.id.dateTimePicker);
+        dateInput = view.findViewById(R.id.dateInput);
+        timeInput = view.findViewById(R.id.timeInput);
 
-        confirmBtn = findViewById(R.id.confirmBtn);
+        confirmBtn = view.findViewById(R.id.confirmBtn);
 
         // Car options
-        standardCar = findViewById(R.id.standardCar);
-        luxuryCar = findViewById(R.id.luxuryCar);
-        vanCar = findViewById(R.id.vanCar);
+        standardCar = view.findViewById(R.id.standardCar);
+        luxuryCar = view.findViewById(R.id.luxuryCar);
+        vanCar = view.findViewById(R.id.vanCar);
 
         // Share ride
-        shareRideCard = findViewById(R.id.shareRideCard);
-        shareRideText = findViewById(R.id.shareRideText);
-        shareRideArrow = findViewById(R.id.shareRideArrow);
-        shareRideContent = findViewById(R.id.shareRideContent);
-        passengersContainer = findViewById(R.id.passengersContainer);
-        addPassengerBtn = findViewById(R.id.addPassengerBtn);
-        confirmShareBtn = findViewById(R.id.confirmShareBtn);
+        shareRideCard = view.findViewById(R.id.shareRideCard);
+        shareRideText = view.findViewById(R.id.shareRideText);
+        shareRideArrow = view.findViewById(R.id.shareRideArrow);
+        shareRideContent = view.findViewById(R.id.shareRideContent);
+        passengersContainer = view.findViewById(R.id.passengersContainer);
+        addPassengerBtn = view.findViewById(R.id.addPassengerBtn);
+        confirmShareBtn = view.findViewById(R.id.confirmShareBtn);
 
         // Checkboxes
-        babyCheckbox = findViewById(R.id.babyCheckbox);
-        petCheckbox = findViewById(R.id.petCheckbox);
+        babyCheckbox = view.findViewById(R.id.babyCheckbox);
+        petCheckbox = view.findViewById(R.id.petCheckbox);
 
         // Price and order
-        totalPriceText = findViewById(R.id.totalPriceText);
-        orderBtn = findViewById(R.id.orderBtn);
+        totalPriceText = view.findViewById(R.id.totalPriceText);
+        orderBtn = view.findViewById(R.id.orderBtn);
 
         // Set initial values
         fromLocationInput.setText(fromLocation);
@@ -173,6 +179,10 @@ public class OrderRideActivity extends AppCompatActivity {
 
         // Order button
         orderBtn.setOnClickListener(v -> placeOrder());
+
+        // Checkboxes for price calculation
+        babyCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> calculatePrice());
+        petCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> calculatePrice());
     }
 
     private void toggleDropdown() {
@@ -261,8 +271,8 @@ public class OrderRideActivity extends AppCompatActivity {
         selectedCar = carType;
 
         // Reset all backgrounds
-        int defaultColor = ContextCompat.getColor(this, R.color.car_default);
-        int selectedColor = ContextCompat.getColor(this, R.color.car_selected);
+        int defaultColor = ContextCompat.getColor(requireContext(), R.color.car_default);
+        int selectedColor = ContextCompat.getColor(requireContext(), R.color.car_selected);
 
         standardCar.setCardBackgroundColor(defaultColor);
         luxuryCar.setCardBackgroundColor(defaultColor);
@@ -346,7 +356,6 @@ public class OrderRideActivity extends AppCompatActivity {
     }
 
     private void calculatePrice() {
-
     }
 
     private void placeOrder() {
@@ -364,6 +373,6 @@ public class OrderRideActivity extends AppCompatActivity {
             message += "\nPet-friendly";
         }
 
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
     }
 }

@@ -14,9 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.UberCorp">
-        <activity
-            android:name=".activities.OrderRideActivity"
-            android:exported="false" />
+
         <activity
             android:name=".activities.ForgotPasswordActivity"
             android:exported="false" />
