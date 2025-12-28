@@ -26,6 +26,10 @@ button {
   background-color: #a85f5f;
 }
 
+.form-button-two {
+  background-color: #ad2d2d;
+}
+
 input[type='text'],
 input[type='file'],
 input[type='password'] {
