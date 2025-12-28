@@ -1,12 +1,11 @@
 package com.example.UberComp.controller;
 
-import com.example.UberComp.dto.GetVehiclePositionDTO;
+import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.driver.CreateDriverDTO;
 import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.DriverStatusDTO;
 import com.example.UberComp.dto.driver.UpdatedStatusDriverDTO;
 import com.example.UberComp.service.DriverService;
-import jdk.jfr.Registered;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,8 +21,8 @@ public class DriverController {
     private DriverService driverService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GetVehiclePositionDTO>> getVehiclePosition() {
-        List<GetVehiclePositionDTO> vehiclePositions = driverService.getVehiclePosition();
+    public ResponseEntity<List<GetVehiclePositionDTO>> getVehiclePositions() {
+        List<GetVehiclePositionDTO> vehiclePositions = driverService.getVehiclePositions();
         return ResponseEntity.ok(vehiclePositions);
     }
 

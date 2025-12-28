@@ -20,6 +20,6 @@ public class RideService {
     public GetRideDetailsDTO getRide(Long rideId){
         return new GetRideDetailsDTO();
     }
-    public UpdatedStatusRideDTO endOfRide(UpdatestatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
+    public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
     public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
 }
