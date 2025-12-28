@@ -51,14 +51,12 @@ public class RideController {
     public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable("id") Long id)
     {
         GetRideDetailsDTO ride = rideService.getRide(id);
-
         return new ResponseEntity<GetRideDetailsDTO>(ride, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetTrackingRideDTO> getTrackingRide(@PathVariable("id") Long id){
         GetTrackingRideDTO trackingRide = rideService.getTrackingRide(id);
-
         return new ResponseEntity<>(trackingRide, HttpStatus.OK);
     }
 
@@ -74,11 +72,9 @@ public class RideController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UpdatedStatusRideDTO> updateRideStatus(@RequestBody UpdatestatusRideDTO ride, @PathVariable Long id)
+    public ResponseEntity<UpdatedStatusRideDTO> updateRideStatus(@RequestBody UpdateStatusRideDTO rideStatus, @PathVariable Long id)
             throws Exception {
-        UpdatedStatusRideDTO updatedRide = new UpdatedStatusRideDTO();
-        updatedRide.setId(id);
-        updatedRide.setRideStatus(ride.getRideStatus());
+        UpdatedStatusRideDTO updatedRide = rideService.updateRideStatus(rideStatus);
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 
