@@ -1,6 +1,9 @@
 package com.example.UberComp.controller;
 
 
+import com.example.UberComp.dto.user.CreatedUserDTO;
+import com.example.UberComp.dto.user.GetProfileDTO;
+import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.account.*;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
@@ -43,10 +46,12 @@ class AccountController {
     }
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAccountDTO> createAccount(@RequestBody CreateAccountDTO account) throws Exception{
+    public ResponseEntity<GetProfileDTO> createAccount(@RequestBody CreateAccountDTO account, CreateUserDTO userDTO) throws Exception{
         Account registered = accountService.register(account);
-        GetAccountDTO registeredDTO = new GetAccountDTO(registered);
-        return new ResponseEntity<GetAccountDTO>(registeredDTO, HttpStatus.CREATED);
+        AccountDTO registeredDTO = new AccountDTO();
+        CreatedUserDTO createdUserDTO = new CreatedUserDTO();
+        GetProfileDTO profile = new GetProfileDTO(createdUserDTO, registeredDTO);
+        return new ResponseEntity<GetProfileDTO>(profile, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -70,4 +75,43 @@ class AccountController {
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) {
+        CreatedUserDTO createUserDTO = new CreatedUserDTO(1L, "Bojana", "Paunović", "adresa", "061234567", "image.png");
+
+        GetProfileDTO profile = new GetProfileDTO(
+                createUserDTO,
+                null
+        );
+
+        return ResponseEntity.ok(profile);
+    }
+
+    @PostMapping("/approve-change/{id}")
+    public ResponseEntity<String> approveChange(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reject-change/{id}")
+    public ResponseEntity<String> rejectChange(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/profile")
+    public ResponseEntity<GetProfileDTO> updateProfile(@PathVariable Long id, @RequestBody CreateUserDTO updatedUser) {
+        CreatedUserDTO createUserDTO = new CreatedUserDTO(
+                1L,
+                updatedUser.getName(),
+                updatedUser.getLastName(),
+                updatedUser.getHomeAddress(),
+                updatedUser.getPhone(),
+                updatedUser.getImage()
+        );
+
+        GetProfileDTO updatedProfile = new GetProfileDTO(createUserDTO, null);
+
+        return ResponseEntity.ok(updatedProfile);
+    }
+
 }

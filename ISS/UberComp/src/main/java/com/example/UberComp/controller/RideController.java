@@ -80,14 +80,19 @@ public class RideController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new GetRideDTO());
+        GetRideDTO rideDTO = new GetRideDTO();
+        rideDTO.setStartLocation(dto.getStartAddress());
+        rideDTO.setEndLocation(dto.getDestinationAddress());
+        return ResponseEntity.status(HttpStatus.CREATED).body(rideDTO);
     }
 
     @PostMapping("/favorites/{id}/order")
     public ResponseEntity<GetRideDTO> orderFromFavorite(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new GetRideDTO());
+        GetRideDTO dto = new GetRideDTO();
+        dto.setStartLocation("Dummy start address for favorite " + id);
+        dto.setEndLocation("Dummy destination address");
+        dto.setPrice(500.0);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @PutMapping("/{id}/start")

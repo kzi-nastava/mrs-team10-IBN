@@ -3,6 +3,7 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.report.CreateReportDTO;
 import com.example.UberComp.dto.report.CreatedReportDTO;
 import com.example.UberComp.service.ReportService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("api/reports")
 public class ReportController {
 

@@ -1,4 +1,17 @@
 package com.example.UberComp.dto.user;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreatedUserDTO {
+    private Long Id;
+    private String name;
+    private String lastName;
+    private String homeAddress;
+    private String phone;
+    private String image;
 }
