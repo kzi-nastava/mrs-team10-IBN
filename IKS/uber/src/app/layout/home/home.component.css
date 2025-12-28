@@ -1,3 +1,7 @@
 div, app-map{
     display: inline-block;
 }
+
+p{
+    margin-left: 30px;
+}

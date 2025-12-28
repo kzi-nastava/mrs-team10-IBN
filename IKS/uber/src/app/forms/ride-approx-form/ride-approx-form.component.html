@@ -1,4 +1,6 @@
 <div id="placeholder">
+    <h2>Want to go somewhere in Novi Sad?</h2>
+    <p>We can take you there... just choose your route</p>
     <form [formGroup]="endpoints">
         <input type="text" formControlName="startLoc" placeholder="Start Location"/>
         <br/>
@@ -8,7 +10,7 @@
         <button (click)="removeStation()" class="form-button-two">Remove Station</button>
         <div id="stationsBox" formArrayName="stations">
             @for (station of stations.controls; track station; let i = $index){
-                <input type="text" [formControlName]="i" placeholder="Station #{{ i + 1}}"/>
+                <input type="text" [formControlName]="i" placeholder="Station #{{ i + 1}}" class="animated"/>
                 <br/>
             }
         </div>

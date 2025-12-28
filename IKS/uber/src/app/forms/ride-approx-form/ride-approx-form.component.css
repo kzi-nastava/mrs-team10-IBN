@@ -1,5 +1,5 @@
 #stationsBox{
-    height:200px;
+    height:150px;
     width:auto;
     overflow-y: scroll;
     width:350px;
@@ -12,5 +12,23 @@ button{
 }
 
 #placeholder{
-    margin-left: 20px;
+    margin-left: 10px;
+}
+
+.animated{
+    animation: fade 0.5s
+}
+
+h2{
+    color: white;
+    margin: 0;
+}
+
+@keyframes fade{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 100;
+    }
 }
