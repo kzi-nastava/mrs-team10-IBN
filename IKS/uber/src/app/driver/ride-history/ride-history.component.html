@@ -1,12 +1,19 @@
 <app-nav-bar></app-nav-bar>
 
 <div class="date-container">
-<mat-form-field>
-  <mat-label>Choose a date</mat-label>
-  <input matInput [matDatepicker]="picker">
-  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-  <mat-datepicker #picker></mat-datepicker>
-</mat-form-field>
+  <mat-form-field>
+    <mat-label>Choose a date</mat-label>
+    <input matInput [matDatepicker]="picker">
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  @if(user().role == 'administrator'){
+    <select>
+      <option value="" disabled selected hidden>Sort By</option>
+      <option value="price">Price</option>
+      <option value="date">Date</option>
+    </select>
+  }
 </div>
 
 <div class="container">
@@ -25,12 +32,13 @@
             <input type="text" placeholder="{{ride.destination}}" readonly />
             </div>
         </div>
-
-        <div class="avatars">
-            <img src="corgo1.jpeg" />
-            <img src="corgo3.jpg" />
-            <img src="corgo2.jpeg" />
-        </div>
+        @if(user().role != 'passenger'){
+          <div class="avatars">
+              <img src="corgo1.jpeg" />
+              <img src="corgo3.jpg" />
+              <img src="corgo2.jpeg" />
+          </div>
+        }
         <div class="time">
             <div class="time-box">{{ ride.startTime | date:'HH:mm' }}</div>
             <div class="time-box">{{ ride.endTime | date:'HH:mm' }}</div>

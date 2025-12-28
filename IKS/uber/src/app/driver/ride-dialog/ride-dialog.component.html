@@ -20,19 +20,24 @@
 </div>
 
 <div class="users-wrapper">
-<div class="users">
-    <div class="user-card" *ngFor="let user of ride.users()">
-        <img  src="corgo1.jpeg" alt="{{user.name}}" class="avatar">
-        <h4>{{ user.name }}</h4>
-        <p>{{ user.email }}</p>
-        <p>{{ user.phoneNumber }}</p>
-    </div>
-</div>
+@if(user().role != 'passenger'){
+  <div class="users">
+      <div class="user-card" *ngFor="let user of ride.users()">
+          <img  src="corgo1.jpeg" alt="{{user.name}}" class="avatar">
+          <h4>{{ user.name }}</h4>
+          <p>{{ user.email }}</p>
+          <p>{{ user.phoneNumber }}</p>
+      </div>
+  </div>
+}
 
   <div class="dialog-footer">
     <button class="favorite-btn">❤️Favorites</button>
     <span class="price">{{ ride.price }} RSD</span>
     <button class="order-btn">Order</button>
+    @if(user().role == 'passenger'){
+      <button class="rate-btn">Rate Ride</button>
+    }
   </div>
 </div>
 </div>

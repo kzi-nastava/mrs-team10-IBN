@@ -1,6 +1,7 @@
 import { Component, Signal } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
+import { UserService } from '../../service/user.service';
 import { NavBarComponent } from '../../layout/nav-bar/nav-bar.component';
 import { RideDialogComponent } from '../ride-dialog/ride-dialog.component';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -9,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
+import { User } from '../../model/user.model';
 
 @Component({
   selector: 'app-ride-history',
@@ -27,15 +29,17 @@ import { DatePipe } from '@angular/common';
 })
 export class RideHistoryComponent {
   protected rides: Signal<Ride[]>;
+  protected user: Signal<User>;
 
-  constructor(private service: RideService, private dialog: MatDialog) {
-    this.rides = this.service.rides;
+  constructor(private rideService: RideService, private userService: UserService, private dialog: MatDialog) {
+    this.rides = this.rideService.rides;
+    this.user = this.userService.logged;
   }
 
   openRideDialog(ride: Ride) {
     this.dialog.open(RideDialogComponent, {
       width: '50vw',
-      height: '82vh',
+      height: 'auto',
       maxWidth: '80vw',
       data: ride
     });
