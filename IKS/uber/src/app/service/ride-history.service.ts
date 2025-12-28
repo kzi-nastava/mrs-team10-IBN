@@ -13,18 +13,21 @@ export class RideService {
         id: 1,
         name: "Ivana Ignjatic",
         email: "ignjaticivana@gmail.com",
+        role:'passenger',
         phoneNumber: "066 066 00 00"
       },
       {
         id: 2,
         name: "Niksa Cvorovic",
         email: "cvorovicniksa@gmail.com",
+        role: 'passenger',
         phoneNumber: "066 066 00 00"
       },
       {
         id: 3,
         name: "Bojana Paunovic",
         email: "paunovicbojana@gmail.com",
+        role: 'passenger',
         phoneNumber: "066 066 00 00"
       },
       

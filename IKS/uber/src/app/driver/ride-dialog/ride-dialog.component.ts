@@ -1,8 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, Signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Ride } from '../../model/ride-history.model';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { UserService } from '../../service/user.service';
+import { User } from '../../model/user.model';
 
 @Component({
   selector: 'app-ride-dialog',
@@ -16,8 +18,14 @@ import { MatCheckbox } from '@angular/material/checkbox';
   providers: [DatePipe]
 })
 export class RideDialogComponent {
+  protected user: Signal<User>
+
   constructor(
     public dialogRef: MatDialogRef<RideDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public ride: Ride
-  ) {}
+    private userService: UserService,
+    @Inject(MAT_DIALOG_DATA) public ride: Ride,
+  ) {
+    this.user = userService.logged
+  }
+
 }

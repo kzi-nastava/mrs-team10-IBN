@@ -3,14 +3,16 @@ div.date-container {
   justify-content: center;
   align-items: center;
   height: 5vh;
+  gap:5%;
 }
 
-mat-form-field {
+mat-form-field, mat-select {
   background-color: white;      
   padding: 0.5rem 1rem;         
   border-radius: 1rem;          
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   width: 15rem;
+  font-family: "Mandali" !important;
 }
 
 mat-form-field input {
