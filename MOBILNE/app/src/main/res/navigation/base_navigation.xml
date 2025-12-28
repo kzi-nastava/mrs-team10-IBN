@@ -44,4 +44,9 @@
         android:name="com.example.ubercorp.fragments.RatingDriverAndVehicle"
         tools:layout="@layout/fragment_rating_driver_and_vehicle"
         />
+    <fragment
+        android:id="@+id/orderRideFragment"
+        android:name="com.example.ubercorp.fragments.OrderRideFragment"
+        tools:layout="@layout/fragment_order_ride"
+        />
 </navigation>

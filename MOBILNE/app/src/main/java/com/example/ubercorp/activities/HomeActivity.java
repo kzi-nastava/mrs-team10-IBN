@@ -10,14 +10,17 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.widget.Button;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.ActivityHomeBinding;
+import com.example.ubercorp.fragments.OrderRideFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.HashSet;
@@ -34,6 +37,7 @@ public class HomeActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private Set<Integer> topLevelDestinations = new HashSet<>();
+    //private Button orderRideButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,7 @@ public class HomeActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
             Log.i("UberComp", "Destination Changed");
         });
+        //orderRideButton = findViewById(R.id.orderRideButton);
 
         mAppBarConfiguration = new AppBarConfiguration
                 .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification)
@@ -68,8 +73,10 @@ public class HomeActivity extends AppCompatActivity {
 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
+//        orderRideButton.setOnClickListener(v -> {
+//            navController.navigate(R.id.orderRideFragment);
+//        });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
