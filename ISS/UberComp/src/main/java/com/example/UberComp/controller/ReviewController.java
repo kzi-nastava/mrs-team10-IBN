@@ -3,12 +3,14 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.review.CreateReviewDTO;
 import com.example.UberComp.dto.review.CreatedReviewDTO;
 import com.example.UberComp.service.ReviewService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/reviews")
 public class ReviewController {
 

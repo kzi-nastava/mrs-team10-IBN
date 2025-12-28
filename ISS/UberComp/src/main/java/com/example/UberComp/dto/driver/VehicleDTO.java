@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VehicleDTO {
-    private VehicleType vehicleType;
+    private VehicleTypeDTO vehicleTypeDTO;
     private String model;
     private String plate;
     private Integer seatNumber;

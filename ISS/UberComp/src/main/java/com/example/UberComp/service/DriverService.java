@@ -17,11 +17,7 @@ public class DriverService {
     public DriverDTO register(CreateDriverDTO dto) {
         return new DriverDTO(
                 dto.getAccountDTO(),
-                dto.getName(),
-                dto.getLastName(),
-                dto.getHomeAddress(),
-                dto.getPhone(),
-                dto.getImage(),
+                dto.getCreateUserDTO(),
                 dto.getVehicleDTO(),
                 0
         );

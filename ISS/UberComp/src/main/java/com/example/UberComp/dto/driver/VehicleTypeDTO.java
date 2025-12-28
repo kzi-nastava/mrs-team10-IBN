@@ -2,12 +2,13 @@ package com.example.UberComp.dto.driver;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class GetVehiclePositionDTO {
+public class VehicleTypeDTO {
     private Long id;
-    private Double lat;
-    private Double lon;
-    private boolean isBusy;
+    private String name;
+    private Double price;
 }
