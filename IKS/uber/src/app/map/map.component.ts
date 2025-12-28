@@ -12,15 +12,11 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
 import { environment } from '../../environments/environment';
+import { Location } from '../model/location.model';
+import { output } from '@angular/core';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
-}
-
-interface Location {
-  address: string;
-  type: 'pickup' | 'stop' | 'destination';
-  index?: number;
 }
 
 @Component({
@@ -34,6 +30,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
+  estimatedTime = output<string>();
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
@@ -246,7 +243,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       };
 
       this.routeControl = L.Routing.control(options).addTo(this.map);
-      this.routeControl.on('routesfound', function (e) {
+      this.routeControl.on('routesfound',  (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
         console.log(
@@ -256,9 +253,11 @@ export class MapComponent implements AfterViewInit, OnChanges {
             Math.round((summary.totalTime % 3600) / 60) +
             ' minutes'
         );
+        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes')
       });
     }
   }
+
 
   private registerOnClick(): void {
     this.map.on('click', (e: any) => {

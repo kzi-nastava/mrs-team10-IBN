@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HomeComponent } from './home.component';
+import { RideApproxFormComponent } from './ride-approx-form.component';
 
-describe('HomeComponentComponent', () => {
-  let component: HomeComponent;
-  let fixture: ComponentFixture<HomeComponent>;
+describe('RideApproxFormComponent', () => {
+  let component: RideApproxFormComponent;
+  let fixture: ComponentFixture<RideApproxFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HomeComponent]
+      imports: [RideApproxFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(HomeComponent);
+    fixture = TestBed.createComponent(RideApproxFormComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

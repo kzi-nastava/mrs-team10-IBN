@@ -1,0 +1,16 @@
+#stationsBox{
+    height:200px;
+    width:auto;
+    overflow-y: scroll;
+    width:350px;
+    scrollbar-color: gray #312e2e;
+}
+
+button{
+    width:140px;
+    font-size: 16px;
+}
+
+#placeholder{
+    margin-left: 20px;
+}

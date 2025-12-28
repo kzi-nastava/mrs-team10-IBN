@@ -1,0 +1,17 @@
+<div id="placeholder">
+    <form [formGroup]="endpoints">
+        <input type="text" formControlName="startLoc" placeholder="Start Location"/>
+        <br/>
+        <input type="text" formControlName="destination" placeholder="Destination"/>
+        <br/>
+        <button (click)="addStation()" class="form-button-one">Add Station</button>
+        <button (click)="removeStation()" class="form-button-two">Remove Station</button>
+        <div id="stationsBox" formArrayName="stations">
+            @for (station of stations.controls; track station; let i = $index){
+                <input type="text" [formControlName]="i" placeholder="Station #{{ i + 1}}"/>
+                <br/>
+            }
+        </div>
+    </form>
+    <button (click)="getRoute()" class="form-button-one">Show Route</button>
+</div>
