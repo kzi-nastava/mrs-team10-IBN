@@ -75,6 +75,8 @@ public class RideController {
     public ResponseEntity<UpdatedStatusRideDTO> updateRideStatus(@RequestBody UpdateStatusRideDTO rideStatus, @PathVariable Long id)
             throws Exception {
         UpdatedStatusRideDTO updatedRide = rideService.updateRideStatus(rideStatus);
+        updatedRide.setId(id);
+        updatedRide.setRideStatus(rideStatus.getRideStatus());
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 
