@@ -1,0 +1,76 @@
+body {
+  background-color: #312e2e;
+}
+
+h1, p, label{
+    color: white;
+}
+
+p, label, h2, textarea{
+  font-family: "Mandali";
+}
+
+button {
+  margin: 10px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  height: 40px;
+  width: 100px;
+  font-family: "Mandali";
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.form-button-one {
+  background-color: #a85f5f;
+}
+
+.form-button-two {
+  background-color: #ad2d2d;
+}
+
+input[type='text'],
+input[type='file'],
+input[type='password'],
+select {
+  margin: 10px;
+  margin-left: 0;
+  width: 300px;
+  height: 30px;
+  padding-left: 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: white;
+  font-family: "Mandali";
+  font-size: 20px;
+}
+
+select{
+  height:50px;
+}
+
+a {
+  color: #ad2d2d;
+}
+
+input[type='text']:focus,
+input[type='password']:focus,
+select:focus {
+  outline: none;
+}
+
+input[type='file'] {
+  color: gray;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 3rem !important;
+  background-color: #d3d3d3 !important;
+}
+/* 
+.dialog-container {
+  background-color: transparent !important;
+} */
+
+

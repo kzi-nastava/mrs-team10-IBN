@@ -1,0 +1,7 @@
+<router-outlet></router-outlet>
+<app-nav-bar></app-nav-bar>
+<div>
+    <app-ride-approx-form (routeOutput)="routeOutputEvent($event)"></app-ride-approx-form>
+    <p>Estimated time: {{ estimatedTimeOutput }}</p>
+</div>
+<app-map [locations]="routeOutput" (estimatedTime)="timeEstimationEvent($event)"></app-map>

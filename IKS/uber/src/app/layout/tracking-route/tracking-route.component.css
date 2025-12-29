@@ -1,0 +1,38 @@
+div{
+    width:70%;
+    margin: auto;
+    align-items: center;
+    text-align: center;
+}
+
+#container{
+    padding-top: 5%;
+}
+
+p{
+    color:white;
+    font-size: 20px;
+}
+
+img{
+    height:300px;
+    width: auto;
+}
+
+h1, p{
+    line-height: 20px;
+}
+
+h1{
+    margin: 20px;
+    font-family: "Squada One";
+    font-size: 60px;
+}
+
+button{
+    background-color: #A85F5F;
+}
+
+#panic{
+    background-color: #691D1D;
+}

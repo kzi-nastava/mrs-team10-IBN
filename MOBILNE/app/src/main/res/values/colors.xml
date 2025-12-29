@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#312E2E</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#D9D9D9</color>
+    <color name="form_text_gray">#7E7A7A</color>
+    <color name="btn_color_1">#A85F5F</color>
+    <color name="btn_color_2">#691D1D</color>
+    <color name="btn_color_3">#893E3E</color>
+    <color name="green">#729664</color>
+    <color name="car_default">#e0e0e0</color>
+    <color name="car_selected">#ffd700</color>
+</resources>

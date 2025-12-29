@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/base_navigation"
+    app:startDestination="@id/ride_history">
+
+    <fragment
+        android:id="@+id/ride_history"
+        android:name="com.example.ubercorp.fragments.RideHistoryFragment"
+        tools:layout="@layout/fragment_ride_history">
+        <action
+            android:id="@+id/action_history_to_details"
+            app:destination="@id/rideDetailsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/rideDetailsFragment"
+        android:name="com.example.ubercorp.fragments.RideDetailsFragment"
+        tools:layout="@layout/fragment_ride_details">
+        <action
+            android:id="@+id/action_details_to_history"
+            app:destination="@id/ride_history"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.example.ubercorp.fragments.AccountFragment"
+        tools:layout="@layout/fragment_account">
+
+        <action
+            android:id="@+id/action_account_to_changeRequests"
+            app:destination="@id/changeRequestsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/changeRequestsFragment"
+        android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
+        tools:layout="@layout/fragment_change_requests"/>
+
+    <fragment
+        android:id="@+id/rating"
+        android:name="com.example.ubercorp.fragments.RatingDriverAndVehicle"
+        tools:layout="@layout/fragment_rating_driver_and_vehicle"
+        />
+    <fragment
+        android:id="@+id/orderRideFragment"
+        android:name="com.example.ubercorp.fragments.OrderRideFragment"
+        tools:layout="@layout/fragment_order_ride"
+        />
+</navigation>

@@ -1,0 +1,23 @@
+<div id="container">
+    <img src="register.svg" alt="Register"/>
+    <form [formGroup]="registerForm">
+        <div id="grid">
+            <input type="text" formControlName="email" placeholder="E-mail">
+            <input type="password" formControlName="password" placeholder="Password">
+            <input type="password" formControlName="confirmPassword" placeholder="Confirm Password">
+            <div>
+                <div id="edit-icon" (click)="fileInput.click()">📷</div>
+                <p>{{ filename }}</p>
+            </div>
+            <input type="file" #fileInput class="invisible" (change)="onFileSelected($event)">
+            <input type="text" formControlName="name" placeholder="Name">
+            <input type="text" formControlName="lastName" placeholder="Last Name">
+            <input type="text" formControlName="address" placeholder="Address">
+            <input type="text" formControlName="phone" placeholder="Phone Number">
+            <div id="bottom">
+                <button class="form-button-one">Sign Up</button>
+                <p id="signin">Already have an account? <br/> <a [routerLink]="['/login']">Sign In!</a></p>
+            </div>
+        </div>
+    </form>
+</div>
