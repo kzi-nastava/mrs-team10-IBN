@@ -2,9 +2,22 @@
 <div id="container">
     <h1>Tracking Route</h1>
     <p>Estimated {{ timeType }} time: {{ time }}</p>
-    <img src="map-example.png" alt="Map Example"/>
+    <app-map></app-map>
     <div>
-        <button (click)="changeState()">{{ firstButtonText }}</button>
-        <button id="panic">PANIC</button>
+        @if(user().role=='driver'){
+            <button (click)="changeState()">{{ firstButtonText }}</button>
+            <button id="panic">PANIC</button>
+        }
     </div>
+        @if(user().role=='passenger'){
+        <div class="top-bar">
+        <button class="panic">PANIC</button>
+
+        <div class="right">
+            <label class="label">Something is wrong?</label>
+            <button class="report-button">Report here</button>
+        </div>
+        </div>
+        }
+
 </div>
