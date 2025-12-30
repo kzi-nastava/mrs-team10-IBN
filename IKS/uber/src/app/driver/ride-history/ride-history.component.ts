@@ -1,4 +1,4 @@
-import { Component, Signal } from '@angular/core';
+import { Component, Signal, inject } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
 import { UserService } from '../../service/user.service';
@@ -29,11 +29,18 @@ import { User } from '../../model/user.model';
 })
 export class RideHistoryComponent {
   protected rides: Signal<Ride[]>;
-  protected user: Signal<User>;
+  protected user: User | null;
+  private userService: UserService = inject(UserService)
 
-  constructor(private rideService: RideService, private userService: UserService, private dialog: MatDialog) {
+  constructor(private rideService: RideService, private dialog: MatDialog) {
     this.rides = this.rideService.rides;
-    this.user = this.userService.logged;
+    let logged = sessionStorage.getItem('loggedUser')
+    if (logged != null){
+      this.user = JSON.parse(logged) as User
+    } else {
+      this.user = null
+    }
+    console.log(this.user)
   }
 
   openRideDialog(ride: Ride) {

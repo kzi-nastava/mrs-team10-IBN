@@ -18,14 +18,19 @@ import { User } from '../../model/user.model';
   providers: [DatePipe]
 })
 export class RideDialogComponent {
-  protected user: Signal<User>
+  protected user: User | null
 
   constructor(
     public dialogRef: MatDialogRef<RideDialogComponent>,
-    private userService: UserService,
     @Inject(MAT_DIALOG_DATA) public ride: Ride,
   ) {
-    this.user = userService.logged
+    let logged = sessionStorage.getItem('loggedUser')
+    if (logged != null){
+      this.user = JSON.parse(logged) as User
+      console.log(this.user)
+    } else {
+      this.user = null
+    }
   }
 
 }

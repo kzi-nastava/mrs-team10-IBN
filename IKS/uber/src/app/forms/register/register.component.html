@@ -15,7 +15,7 @@
             <input type="text" formControlName="address" placeholder="Address">
             <input type="text" formControlName="phone" placeholder="Phone Number">
             <div id="bottom">
-                <button class="form-button-one">Sign Up</button>
+                <button class="form-button-one" (click)="register()">Sign Up</button>
                 <p id="signin">Already have an account? <br/> <a [routerLink]="['/login']">Sign In!</a></p>
             </div>
         </div>

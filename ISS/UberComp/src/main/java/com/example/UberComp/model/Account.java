@@ -31,6 +31,9 @@ public class Account {
     @Column
     private String blockingReason;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private User user;
+
     public Account(String email, String password, AccountType type){
         this.email = email;
         this.password = password;

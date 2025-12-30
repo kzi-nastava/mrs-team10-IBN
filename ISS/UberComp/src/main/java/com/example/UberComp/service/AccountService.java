@@ -27,6 +27,7 @@ public class AccountService {
             newUser.setPhone(account.getPhone());
             newUser.setImage(account.getImage());
             newUser.setAccount(newAccount);
+            newAccount.setUser(newUser);
             accountRepository.save(newAccount);
             return userRepository.save(newUser);
         } else {
@@ -36,7 +37,7 @@ public class AccountService {
 
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
-        if (account.getPassword().equals(accountDTO.getPassword())){
+        if (account != null && account.getPassword().equals(accountDTO.getPassword())){
             return account;
         } else {
             return null;

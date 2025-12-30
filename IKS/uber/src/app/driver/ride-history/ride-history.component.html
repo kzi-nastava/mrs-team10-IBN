@@ -7,7 +7,7 @@
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
   </mat-form-field>
-  @if(user().role == 'administrator'){
+  @if(user?.role == 'administrator'){
     <select>
       <option value="" disabled selected hidden>Sort By</option>
       <option value="price">Price</option>
@@ -32,7 +32,7 @@
             <input type="text" placeholder="{{ride.destination}}" readonly />
             </div>
         </div>
-        @if(user().role != 'passenger'){
+        @if(user?.role != 'passenger'){
           <div class="avatars">
               <img src="corgo1.jpeg" />
               <img src="corgo3.jpg" />

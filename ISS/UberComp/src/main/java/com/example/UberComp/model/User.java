@@ -31,7 +31,8 @@ public class User {
     private String image;
 
     @Column
-    private List<String> favoriteRoutes;
+    @OneToMany
+    private List<Route> favoriteRoutes;
 
     @OneToOne
     private Account account;
