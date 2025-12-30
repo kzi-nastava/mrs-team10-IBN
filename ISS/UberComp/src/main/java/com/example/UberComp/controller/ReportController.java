@@ -4,6 +4,7 @@ import com.example.UberComp.dto.report.CreateReportDTO;
 import com.example.UberComp.dto.report.CreatedReportDTO;
 import com.example.UberComp.service.ReportService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,6 @@ public class ReportController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreatedReportDTO> createReport(@RequestBody CreateReportDTO createReportDTO) {
         CreatedReportDTO createdReport = reportService.createReport(createReportDTO);
-        return ResponseEntity.ok(createdReport);
+        return new ResponseEntity<CreatedReportDTO>(createdReport,HttpStatus.CREATED);
     }
 }
