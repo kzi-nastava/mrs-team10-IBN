@@ -6,6 +6,7 @@ import { Signal } from '@angular/core';
 import { UserService } from '../../service/user.service';
 import { User } from '../../model/user.model';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
 
 @Component({
   selector: 'app-tracking-route',
@@ -32,5 +33,12 @@ export class TrackingRouteComponent {
     this.routeStarted = true;
     this.firstButtonText = "Finish";
     this.timeType = "arrival"
+  }
+
+  openComplaintDialog(){
+    this.dialog.open(ComplaintDialogComponent, {
+           width: '90%',
+           maxWidth: '420px',
+        });
   }
 }
