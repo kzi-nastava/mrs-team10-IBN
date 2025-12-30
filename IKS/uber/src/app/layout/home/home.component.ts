@@ -22,4 +22,6 @@ export class HomeComponent {
   timeEstimationEvent(eventData: string){
     this.estimatedTimeOutput = eventData;
   }
+
+  
 }

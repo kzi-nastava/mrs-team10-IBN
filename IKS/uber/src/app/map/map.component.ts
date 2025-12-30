@@ -14,6 +14,7 @@ import 'leaflet-routing-machine';
 import { environment } from '../../environments/environment';
 import { Location } from '../model/location.model';
 import { output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -21,11 +22,12 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 
 @Component({
   selector: 'app-map',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './map.component.html',
   styleUrl: './map.component.css',
 })
 export class MapComponent implements AfterViewInit, OnChanges {
+  @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
