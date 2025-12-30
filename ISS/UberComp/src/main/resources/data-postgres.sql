@@ -1,1 +1,0 @@
-INSERT INTO account (email, password, account_type, account_status) VALUES ('user@gmail.com', 'password', 'PASSENGER', 'UNVERIFIED');

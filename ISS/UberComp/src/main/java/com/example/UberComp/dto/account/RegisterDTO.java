@@ -4,8 +4,13 @@ import com.example.UberComp.enums.AccountType;
 import lombok.Data;
 
 @Data
-public class CreateAccountDTO {
+public class RegisterDTO {
     private String email;
     private String password;
     private AccountType type;
+    private String name;
+    private String lastName;
+    private String homeAddress;
+    private String phone;
+    private String image;
 }
