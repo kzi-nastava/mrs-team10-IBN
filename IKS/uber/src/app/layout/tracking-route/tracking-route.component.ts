@@ -16,29 +16,29 @@ import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/compl
 })
 export class TrackingRouteComponent {
   router: Router = inject(Router);
-  timeType: String = "departure";
-  time: String = "17:16";
+  timeType: String = 'departure';
+  time: String = '17:16';
   routeStarted: Boolean = false;
-  firstButtonText: String = "Start";
-  protected user: Signal<User>;
+  firstButtonText: String = 'Start';
+  protected user: User | null = null;
 
   constructor(private userService: UserService, private dialog: MatDialog) {
     this.user = this.userService.logged;
   }
 
-  changeState(){
-    if(this.routeStarted){
-      this.router.navigate(['/home'])
+  changeState() {
+    if (this.routeStarted) {
+      this.router.navigate(['/home']);
     }
     this.routeStarted = true;
-    this.firstButtonText = "Finish";
-    this.timeType = "arrival"
+    this.firstButtonText = 'Finish';
+    this.timeType = 'arrival';
   }
 
-  openComplaintDialog(){
+  openComplaintDialog() {
     this.dialog.open(ComplaintDialogComponent, {
-           width: '90%',
-           maxWidth: '420px',
-        });
+      width: '90%',
+      maxWidth: '420px',
+    });
   }
 }

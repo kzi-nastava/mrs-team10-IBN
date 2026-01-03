@@ -1,19 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { ChangeDetectorRef } from '@angular/core';
+import { DriverFormComponent, DriverFormData } from '../../forms/driver-form/driver-form.component';
+import {
+  VehicleFormComponent,
+  VehicleFormData,
+} from '../../forms/vehicle-form/vehicle-form.component';
 
 @Component({
   selector: 'app-account',
-  imports: [FormsModule, RouterLink, CommonModule, NavBarComponent, RouterOutlet],
+  imports: [
+    RouterLink,
+    CommonModule,
+    NavBarComponent,
+    RouterOutlet,
+    DriverFormComponent,
+    VehicleFormComponent,
+  ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
 })
 export class AccountComponent implements OnInit {
-  userRole: 'user' | 'driver' | 'admin' = 'driver';
-  originalData = {
+  userRole: 'user' | 'driver' | 'admin' = 'admin';
+
+  driverFormData: DriverFormData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
     address: 'Kopernikova 23, Novi Sad',
@@ -21,35 +32,36 @@ export class AccountComponent implements OnInit {
     email: 'paunovicboka@gmail.com',
   };
 
-  formData = {
+  originalDriverData: DriverFormData = {
     firstName: 'Bojana',
     lastName: 'Paunovic',
     address: 'Kopernikova 23, Novi Sad',
     phone: '0612018550',
     email: 'paunovicboka@gmail.com',
+  };
+
+  vehicleData: VehicleFormData = {
+    model: '',
+    type: 'standard',
+    licensePlate: '',
+    seats: 4,
+    babyTransport: false,
+    petTransport: false,
   };
 
   hoursWorkedToday = 7;
   maxHoursPerDay = 8;
+  showVehicleModal = false;
+  successMessage: string | null = null;
+  userProfileImage: string = 'accountpic.png';
 
   ngOnInit() {
     this.initParticles();
   }
 
-  hasChanges(): boolean {
-    return (
-      this.formData.firstName !== this.originalData.firstName ||
-      this.formData.lastName !== this.originalData.lastName ||
-      this.formData.address !== this.originalData.address ||
-      this.formData.phone !== this.originalData.phone
-    );
-  }
-
   getProgressPercentage(): number {
     return (this.hoursWorkedToday / this.maxHoursPerDay) * 100;
   }
-
-  successMessage: string | null = null;
 
   showSuccess(message: string) {
     this.successMessage = message;
@@ -58,20 +70,33 @@ export class AccountComponent implements OnInit {
     }, 3000);
   }
 
-  saveChanges() {
-    console.log('Saving:', this.formData);
-    this.originalData = { ...this.formData };
-    this.showSuccess('Changes saved successfully.');
+  onDriverFormSubmit(data: DriverFormData) {
+    if (this.userRole === 'driver') {
+      console.log('Sent to admin:', data);
+      this.showSuccess('Changes sent to admin successfully.');
+    } else {
+      console.log('Saving:', data);
+      this.originalDriverData = { ...data };
+      this.showSuccess('Changes saved successfully.');
+    }
   }
 
-  sendChanges() {
-    console.log('Sent to admin:', this.formData);
-    this.showSuccess('Changes sent to admin successfully.');
-  }
-
-  sendVehicleChanges() {
-    console.log('Sent to admin:', this.vehicleData);
+  onVehicleFormSubmit(data: VehicleFormData) {
+    console.log('Vehicle changes sent to admin:', data);
     this.showSuccess('Vehicle changes sent to admin successfully.');
+    this.closeVehicleModal();
+  }
+
+  onProfileImageChange(newImage: string) {
+    this.userProfileImage = newImage;
+  }
+
+  openVehicleModal() {
+    this.showVehicleModal = true;
+  }
+
+  closeVehicleModal() {
+    this.showVehicleModal = false;
   }
 
   get menuItems() {
@@ -106,29 +131,6 @@ export class AccountComponent implements OnInit {
       ],
     };
     return [...(roleMenus[this.userRole] || []), ...commonItems];
-  }
-
-  showVehicleModal = false;
-  vehicleData = {
-    model: '',
-    type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
-  };
-
-  openVehicleModal() {
-    this.showVehicleModal = true;
-  }
-
-  closeVehicleModal() {
-    this.showVehicleModal = false;
-  }
-
-  saveVehicleInfo() {
-    console.log('Vehicle data:', this.vehicleData);
-    this.closeVehicleModal();
   }
 
   initParticles() {
@@ -203,22 +205,5 @@ export class AccountComponent implements OnInit {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
-  }
-
-  userProfileImage: string = 'accountpic.png';
-
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.userProfileImage = e.target.result;
-        this.cdr.detectChanges();
-      };
-      reader.readAsDataURL(file);
-    }
   }
 }
