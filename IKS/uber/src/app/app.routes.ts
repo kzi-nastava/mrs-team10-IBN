@@ -12,6 +12,8 @@ import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password
 import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
 import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate-driver-vehicle.component';
 import { OrderRideComponent } from './layout/order-ride/order-ride.component';
+import { ManageUsersComponent } from './layout/manage-users/manage-users.component';
+import { RegisterDriverComponent } from './layout/register-driver/register-driver.component';
 
 export const routes: Routes = [
   {
@@ -59,8 +61,16 @@ export const routes: Routes = [
     component: RateDriverVehicleComponent,
   },
   {
-    path: 'app-order-ride',
+    path: 'order-ride',
     component: OrderRideComponent,
+  },
+  {
+    path: 'manage-users',
+    component: ManageUsersComponent,
+  },
+  {
+    path: 'register-driver',
+    component: RegisterDriverComponent,
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

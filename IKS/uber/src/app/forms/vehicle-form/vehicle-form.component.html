@@ -1,0 +1,92 @@
+@if (showAsModal) {
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="stopPropagation($event)">
+    <div class="modal-header">
+      <h2>🚗 My Vehicle Information</h2>
+      <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <input
+        type="text"
+        [(ngModel)]="vehicleData.model"
+        placeholder="Vehicle model (e.g. Toyota Corolla)"
+      />
+
+      <label class="input-label">Vehicle type</label>
+      <select [(ngModel)]="vehicleData.type" class="vehicle-select">
+        <option value="standard">Standard</option>
+        <option value="luxury">Luxury</option>
+        <option value="van">Van</option>
+      </select>
+
+      <input type="text" [(ngModel)]="vehicleData.licensePlate" placeholder="License plate" />
+
+      <label class="input-label">Number of seats</label>
+      <input
+        type="number"
+        [(ngModel)]="vehicleData.seats"
+        placeholder="Number of seats"
+        min="1"
+        max="9"
+      />
+
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="vehicleData.babyTransport" />
+          <span class="checkbox-text"> 👶 Baby transport </span>
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="vehicleData.petTransport" />
+          <span class="checkbox-text"> 🐾 Pet transport </span>
+        </label>
+      </div>
+
+      <button class="send-vehicle-changes" (click)="onSubmit()">
+        {{ buttonLabel }}
+      </button>
+    </div>
+  </div>
+</div>
+} @else {
+<div class="card vehicle-card">
+  <h3>🚗 Vehicle Information</h3>
+
+  <input
+    type="text"
+    [(ngModel)]="vehicleData.model"
+    placeholder="Vehicle model (e.g. Toyota Corolla)"
+  />
+
+  <label class="input-label">Vehicle type</label>
+  <select [(ngModel)]="vehicleData.type" class="vehicle-select">
+    <option value="standard">Standard</option>
+    <option value="luxury">Luxury</option>
+    <option value="van">Van</option>
+  </select>
+
+  <input type="text" [(ngModel)]="vehicleData.licensePlate" placeholder="License plate" />
+
+  <label class="input-label">Number of seats</label>
+  <input
+    type="number"
+    [(ngModel)]="vehicleData.seats"
+    placeholder="Number of seats"
+    min="1"
+    max="9"
+  />
+
+  <div class="checkbox-group">
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="vehicleData.babyTransport" />
+      <span class="checkbox-text"> 👶 Baby transport </span>
+    </label>
+
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="vehicleData.petTransport" />
+      <span class="checkbox-text"> 🐾 Pet transport </span>
+    </label>
+  </div>
+</div>
+}
