@@ -2,11 +2,12 @@ import { Component, inject } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
 import { MapComponent } from '../../map/map.component';
-import { Signal } from '@angular/core';
 import { UserService } from '../../service/user.service';
 import { User } from '../../model/user.model';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
+import { RouteService } from '../../service/route.service';
+import { Location } from '../../model/location.model';
 
 @Component({
   selector: 'app-tracking-route',
@@ -16,13 +17,16 @@ import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/compl
 })
 export class TrackingRouteComponent {
   router: Router = inject(Router);
+  routeService: RouteService = inject(RouteService)
+  userService: UserService = inject(UserService)
+  route: Location[] = this.routeService.route
   timeType: String = 'departure';
   time: String = '17:16';
   routeStarted: Boolean = false;
   firstButtonText: String = 'Start';
   protected user: User | null = null;
 
-  constructor(private userService: UserService, private dialog: MatDialog) {
+  constructor(private dialog: MatDialog) {
     this.user = this.userService.logged;
   }
 
