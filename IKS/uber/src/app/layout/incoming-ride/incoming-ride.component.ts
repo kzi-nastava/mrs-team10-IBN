@@ -1,15 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { NavBarComponent } from "../nav-bar/nav-bar.component";
 import { RouterLink } from '@angular/router';
+import { MapComponent } from "../../map/map.component";
+import { Location } from '../../model/location.model';
+import { RouteService } from '../../service/route.service';
 
 @Component({
   selector: 'app-incoming-ride',
-  imports: [MatIconModule, NavBarComponent, RouterLink],
+  imports: [MatIconModule, NavBarComponent, RouterLink, MapComponent],
   templateUrl: './incoming-ride.component.html',
   styleUrl: './incoming-ride.component.css',
 })
 export class IncomingRideComponent {
-  startloc: String = "Bulevar Oslobođenja 3";
-  finaldest: String = "Hadži Ruvimova 7";
+  RouteService: RouteService = inject(RouteService)
+
+  route: Location[] = this.RouteService.route;
 }
