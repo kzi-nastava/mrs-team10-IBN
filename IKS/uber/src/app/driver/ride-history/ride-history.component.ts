@@ -1,4 +1,4 @@
-import { Component, Signal, inject } from '@angular/core';
+import { Component, Signal, computed, inject } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
 import { UserService } from '../../service/user.service';
@@ -33,10 +33,11 @@ import { CommonModule } from '@angular/common';
 export class RideHistoryComponent {
   protected rides: Signal<Ride[]>;
   protected user: User | null;
-  private userService: UserService = inject(UserService)
+  protected fromDate: Date | null = null;
+  protected toDate: Date | null = null;
 
   constructor(private rideService: RideService, private dialog: MatDialog) {
-    this.rides = this.rideService.rides;
+    this.rides = computed(() => this.rideService.rides());
     let logged = sessionStorage.getItem('loggedUser')
     if (logged != null){
       this.user = JSON.parse(logged) as User
@@ -45,22 +46,60 @@ export class RideHistoryComponent {
     }
   }
 
-openRideDialog(ride: Ride) {
-  this.rideService.loadRideDetails(ride.id).subscribe({
-    next: (rideDetails: Ride) => {
-                      console.log(rideDetails)
-
-      this.dialog.open(RideDialogComponent, {
-        width: '50vw',
-        height: 'auto',
-        maxWidth: '80vw',
-        data: rideDetails 
+  onSelectChange(event: any){
+    this.rides = computed(() => {
+      const rides = this.rideService.rides();
+      const criteria = event.target.value
+      switch(criteria) {
+        case 'price-asc': return [...rides].sort((a, b) => a.price - b.price);
+        case 'price-desc': return [...rides].sort((a, b) => b.price - a.price);
+        case 'start-asc': return [...rides].sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+        case 'start-desc': return [...rides].sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
+        case 'end-asc': return [...rides].sort((a, b) => a.endTime.getTime() - b.endTime.getTime());
+        case 'end-desc': return [...rides].sort((a, b) => b.endTime.getTime() - a.endTime.getTime());
       }
-    );
-    },
-    error: (err : string) => console.error('Error loading ride details', err)
-  });
+      return rides;
+    });
+  }
 
-}
+  onFromDateChange(event: any){
+    this.fromDate = event.target.value
+    this.rides = computed(() => {
+      const rides = this.rideService.rides();
+      console.log(this.fromDate)
+      console.log(this.toDate)
+      if (this.toDate === null){
+        return [...rides].filter((ride) => ride.startTime.getTime() >= this.fromDate!.getTime())
+      }
+      return [...rides].filter((ride) => ride.startTime.getTime() >= this.fromDate!.getTime() && ride.startTime.getTime() <= this.toDate!.getTime())
+    });
+  }
 
+  onToDateChange(event: any){
+    this.toDate = event.target.value
+    this.rides = computed(() => {
+      const rides = this.rideService.rides();
+      console.log(this.fromDate)
+      console.log(this.toDate)
+      if (this.fromDate === null){
+        return [...rides].filter((ride) => ride.startTime.getTime() <= this.toDate!.getTime())
+      }
+      return [...rides].filter((ride) => ride.startTime.getTime() >= this.fromDate!.getTime() && ride.startTime.getTime() <= this.toDate!.getTime())
+    });
+  }
+
+  openRideDialog(ride: Ride) {
+    this.rideService.loadRideDetails(ride.id).subscribe({
+      next: (rideDetails: Ride) => {
+        console.log(rideDetails)
+        this.dialog.open(RideDialogComponent, {
+          width: '50vw',
+          height: 'auto',
+          maxWidth: '80vw',
+          data: rideDetails 
+        });
+      },
+      error: (err : string) => console.error('Error loading ride details', err)
+    });
+  }
 }
