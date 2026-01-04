@@ -1,7 +1,8 @@
 export interface User{
     id: number,
     name: string,
-    email: string,
+    lastName: string,
     role: 'passenger' | 'driver' | 'administrator'
-    phoneNumber: string
+    phone: string
+    image: string
 }

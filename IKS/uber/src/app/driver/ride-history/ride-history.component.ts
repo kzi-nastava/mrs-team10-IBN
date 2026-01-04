@@ -11,6 +11,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { User } from '../../model/user.model';
+import { Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-ride-history',
@@ -22,7 +24,8 @@ import { User } from '../../model/user.model';
     MatDatepickerModule,
     MatDialogModule,
     MatNativeDateModule,
-    DatePipe
+    DatePipe,
+    CommonModule
   ],
   templateUrl: 'ride-history.component.html',
   styleUrls: ['ride-history.component.css'],
@@ -40,16 +43,20 @@ export class RideHistoryComponent {
     } else {
       this.user = null
     }
-    console.log(this.user)
   }
 
-  openRideDialog(ride: Ride) {
-    this.dialog.open(RideDialogComponent, {
-      width: '50vw',
-      height: 'auto',
-      maxWidth: '80vw',
-      data: ride
-    });
-    console.log(ride);
-  }
+openRideDialog(ride: Ride) {
+  this.rideService.loadRideDetails(ride.id).subscribe({
+    next: (rideDetails: Ride) => {
+      this.dialog.open(RideDialogComponent, {
+        width: '50vw',
+        height: 'auto',
+        maxWidth: '80vw',
+        data: rideDetails 
+      });
+    },
+    error: (err : string) => console.error('Error loading ride details', err)
+  });
+}
+
 }
