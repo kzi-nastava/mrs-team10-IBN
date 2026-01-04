@@ -15,6 +15,7 @@ import { environment } from '../../environments/environment';
 import { Location } from '../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Station } from '../model/ride-history.model';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -29,6 +30,8 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
+  @Input() stations: Station[] = []; 
+  @Input() interactive: boolean = true; 
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
@@ -87,19 +90,32 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
 
     this.initMap();
-    this.registerOnClick();
+    if(this.interactive)
+      this.registerOnClick();
 
     if (this.locations && this.locations.length > 0) {
       this.updateLocationsFromInput();
     }
 
-    L.marker([45.2519, 19.8456], { icon: this.GreenCarIcon }).addTo(this.map);
-    L.marker([45.2222, 19.808], { icon: this.RedCarIcon }).addTo(this.map);
-  }
+    setTimeout(() => {
+    this.map.invalidateSize();
+    
+    if (this.stations && this.stations.length > 0) {
+      console.log('Loading stations in ngAfterViewInit:', this.stations);
+      this.loadFromStations();
+    } else if (this.locations && this.locations.length > 0) {
+      this.updateLocationsFromInput();
+    }
+  }, 100);
+}
+  
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
       this.updateLocationsFromInput();
+    }
+    if (changes['stations'] && this.map && this.stations.length > 0) {
+      this.loadFromStations(); 
     }
   }
 
@@ -107,8 +123,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.map = L.map('map', {
       center: [45.2396, 19.8227],
       zoom: 13,
+      dragging: this.interactive,        
+      touchZoom: this.interactive,     
+      scrollWheelZoom: this.interactive,
+      doubleClickZoom: this.interactive, 
+      boxZoom: this.interactive,        
+      keyboard: this.interactive,        
+      zoomControl: this.interactive      
     });
 
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -152,31 +176,56 @@ export class MapComponent implements AfterViewInit, OnChanges {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
+private addPointWithIcon(
+  lat: number,
+  lng: number,
+  icon: L.Icon,
+  title?: string,
+  fromParent = false,
+  shouldUpdateRoute = true 
+): void {
+  const latLng = L.latLng(lat, lng);
+  const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
-  private addPointWithIcon(
-    lat: number,
-    lng: number,
-    icon: L.Icon,
-    title?: string,
-    fromParent = false
-  ): void {
-    const latLng = L.latLng(lat, lng);
-    const pin = L.marker(latLng, { icon, title }).addTo(this.map);
-
-    pin.on('click', () => {
-      const index = this.points.findIndex((p) => p.marker === pin);
-      if (index !== -1) {
-        this.removePointByIndex(index);
-      }
-    });
-
-    if (title) {
-      pin.bindPopup(title);
+  pin.on('click', () => {
+    const index = this.points.findIndex((p) => p.marker === pin);
+    if (index !== -1) {
+      this.removePointByIndex(index);
     }
+  });
 
-    this.points.push({ marker: pin, latLng, address: title });
+  if (title) {
+    pin.bindPopup(title);
+  }
+
+  this.points.push({ marker: pin, latLng, address: title });
+  
+  if (shouldUpdateRoute) { 
     this.updateRoute();
   }
+}
+
+private loadFromStations(): void {
+  this.clearAll();
+  console.log(this.stations);
+  
+  this.stations.forEach((station, index) => {
+    const isLast = index === this.stations.length - 1;
+    let icon = this.PinIcon;
+    
+    if (index === 0) icon = this.PickupIcon;
+    else if (isLast) icon = this.DestinationIcon;
+    
+    this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
+
+    if (this.points.length > 0) {
+      const group = L.featureGroup(this.points.map(p => p.marker));
+      this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
+  }
+  });
+  
+  this.updateRoute();
+}
 
   private async addPoint(lat: number, lng: number): Promise<void> {
     try {

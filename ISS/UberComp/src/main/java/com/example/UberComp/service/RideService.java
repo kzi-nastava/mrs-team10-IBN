@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @AllArgsConstructor
@@ -26,8 +28,11 @@ public class RideService {
                 .map(GetRideDTO::new)
                 .toList();
     }
+    @Transactional(readOnly = true)
     public GetRideDetailsDTO getRide(Long rideId){
-        return new GetRideDetailsDTO(rideRepository.getRideWithRouteAndStations(rideId));
+        Ride ride = rideRepository.getRideWithRoute(rideId);
+        ride = rideRepository.getRideWithPassengers(rideId);
+        return new GetRideDetailsDTO(ride);
     }
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
     public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}

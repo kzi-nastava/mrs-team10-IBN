@@ -12,8 +12,9 @@
   align-items: flex-start;
 }
 
-.map-container img {
+.map-container {
   width: 18vw;
+  height: 200px;
   border-radius: 2rem;
 }
 

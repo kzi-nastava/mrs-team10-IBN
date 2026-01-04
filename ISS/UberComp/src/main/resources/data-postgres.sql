@@ -6,15 +6,16 @@ VALUES
 
 INSERT INTO app_user (id, name, last_name, home_address, phone, image, account_id)
 VALUES
-    (1, 'Marko', 'Marković', 'Sarajevo', '061111111', NULL, 1),
-    (2, 'Ivana', 'Ivić', 'Mostar', '062222222', NULL, 2),
-    (3, 'Ana', 'Anić', 'Tuzla', '063333333', NULL, 3);
+    (1, 'Marko', 'Marković', 'Novi Sad', '061111111', NULL, 1),
+    (2, 'Ivana', 'Ivić', 'Novi Sad', '062222222', NULL, 2),
+    (3, 'Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3);
 
 INSERT INTO coordinate (id, lat, lon, address)
 VALUES
-    (1, 43.8563, 18.4131, 'Baščaršija'),
-    (2, 43.8500, 18.4100, 'Marijin Dvor'),
-    (3, 43.3438, 17.8078, 'Mostar Centar');
+    (1, 45.2671, 19.8335, 'Bulevar oslobođenja 46'),
+    (2, 45.2551, 19.8451, 'Trg slobode 3'),
+    (3, 45.2396, 19.8227, 'Futoška 123'),
+    (4, 45.2396, 19.8227, 'Futoška 123');
 
 INSERT INTO route (id)
 VALUES
@@ -24,8 +25,9 @@ VALUES
 INSERT INTO route_stations (route_id, stations_id)
 VALUES
     (1, 1),
-    (1, 2),
-    (2, 3);
+    (1, 3),
+    (2, 2),
+    (2, 4);
 
 INSERT INTO ride (
     id, route_id, driver_id, babies, pets, price, start, estimated_time_arrival, status, cancellation_reason, panic
@@ -40,4 +42,5 @@ INSERT INTO ride (
 INSERT INTO ride_passengers (ride_id, passengers_id)
 VALUES
     (1, 2),
-    (1, 3);
+    (1, 3),
+    (2, 3);

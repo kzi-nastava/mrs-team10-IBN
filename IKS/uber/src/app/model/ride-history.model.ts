@@ -1,10 +1,22 @@
 import { User } from "./user.model";
-import {Signal} from '@angular/core';
+import { Location } from "./location.model";
+export interface Station {
+  id: number;
+  lat: number;
+  lon: number;
+  address: string;
+}
+
+export interface Route {
+  id: number;
+  stations: Station[];
+}
 
 export interface Ride {
   id: number;
   startLocation: string;
   endLocation: string;
+  route: Route;
   startTime: Date;
   endTime: Date;
   price: number;

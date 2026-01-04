@@ -2,7 +2,7 @@
 
   <div class="top">
     <div class="map-container">
-        <img src="map.png" alt="Ride route" />
+        <app-map class="compact" [stations]="ride.route.stations" [interactive]="false"></app-map>
     </div>
 
     <div class="time-status">
