@@ -137,6 +137,7 @@ public class AccountFragment extends Fragment {
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
 
         menuChangePassword.setOnClickListener(v -> showChangePassword());
+        menuManageUsers.setOnClickListener(v -> navigateToManageUsers());
     }
 
     private void setupMenuItems(View view) {
@@ -162,6 +163,11 @@ public class AccountFragment extends Fragment {
     private void navigateToChangeRequests() {
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_account_to_changeRequests);
+    }
+
+    private void navigateToManageUsers() {
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_account_to_manageUsers);
     }
     private void configureMenuForRole(String userRole) {
         hideAllMenuItems();

@@ -32,12 +32,30 @@
         <action
             android:id="@+id/action_account_to_changeRequests"
             app:destination="@id/changeRequestsFragment"/>
+        <action
+            android:id="@+id/action_account_to_manageUsers"
+            app:destination="@id/manageUsersFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/manageUsersFragment"
+        android:name="com.example.ubercorp.fragments.ManageUsersFragment"
+        tools:layout="@layout/fragment_manage_users">
+
+        <action
+            android:id="@+id/action_manageUsers_to_driverRegistration"
+            app:destination="@id/registerDriverFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/changeRequestsFragment"
         android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
         tools:layout="@layout/fragment_change_requests"/>
+
+    <fragment
+        android:id="@+id/registerDriverFragment"
+        android:name="com.example.ubercorp.fragments.RegisterDriverFragment"
+        tools:layout="@layout/fragment_register_driver"/>
 
     <fragment
         android:id="@+id/rating"
