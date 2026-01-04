@@ -21,9 +21,9 @@ public class RideController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetRideDTO>> getRides(
-            @RequestParam(required = false) Long driverId) {
+            @RequestParam(required = true) Long userId) {
 
-        Collection<GetRideDTO> rides = rideService.getRides(driverId);
+        Collection<GetRideDTO> rides = rideService.getRides(userId);
 
         return ResponseEntity.ok(rides);
     }

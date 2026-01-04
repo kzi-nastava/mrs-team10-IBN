@@ -3,8 +3,10 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Ride } from '../../model/ride-history.model';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { UserService } from '../../service/user.service';
 import { User } from '../../model/user.model';
+import { MapComponent } from '../../map/map.component';
+import { Station } from '../../model/ride-history.model';
+import { Location } from '../../model/location.model';
 
 @Component({
   selector: 'app-ride-dialog',
@@ -13,7 +15,8 @@ import { User } from '../../model/user.model';
   standalone: true,
   imports: [
     CommonModule,           
-    MatCheckbox
+    MatCheckbox,
+    MapComponent
   ],
   providers: [DatePipe]
 })
@@ -31,6 +34,8 @@ export class RideDialogComponent {
     } else {
       this.user = null
     }
+
   }
 
 }
+

@@ -2,7 +2,7 @@
 
   <div class="top">
     <div class="map-container">
-        <img src="map.png" alt="Ride route" />
+        <app-map class="compact" [stations]="ride.route.stations" [interactive]="false"></app-map>
     </div>
 
     <div class="time-status">
@@ -12,9 +12,9 @@
         </div>
 
         <div class="checkboxes">
-            <label><mat-checkbox>Canceled</mat-checkbox></label>
+            <label><mat-checkbox [checked] = "ride.canceled" [disabled] ="true">Canceled</mat-checkbox></label>
 
-            <label><mat-checkbox> Panic</mat-checkbox></label>
+            <label><mat-checkbox [checked] = "ride.panic" [disabled] = "true"> Panic</mat-checkbox></label>
         </div>
     </div>
 </div>
@@ -22,11 +22,10 @@
 <div class="users-wrapper">
 @if(user?.role != 'passenger'){
   <div class="users">
-      <div class="user-card" *ngFor="let user of ride.users()">
-          <img  src="corgo1.jpeg" alt="{{user.name}}" class="avatar">
-          <h4>{{ user.name }}</h4>
-          <p>{{ user.email }}</p>
-          <p>{{ user.phoneNumber }}</p>
+      <div class="user-card" *ngFor="let passenger of ride.passengers">
+          <img  [src]="passenger.image || 'pfp.png'" alt="{{passenger.name}}" class="avatar">
+          <h4>{{ passenger.name }}  {{passenger.lastName}}</h4>
+          <p>{{ passenger.phone }}</p>
       </div>
   </div>
 }
