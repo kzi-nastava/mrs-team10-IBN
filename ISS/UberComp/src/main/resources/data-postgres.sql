@@ -10,6 +10,8 @@ VALUES
     (2, 'Ivana', 'Ivić', 'Novi Sad', '062222222', NULL, 2),
     (3, 'Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3);
 
+UPDATE account SET user_id=id;
+
 INSERT INTO coordinate (id, lat, lon, address)
 VALUES
     (1, 45.2671, 19.8335, 'Bulevar oslobođenja 46'),
