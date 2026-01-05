@@ -7,7 +7,7 @@ import { User } from '../../model/user.model';
 import { MapComponent } from '../../map/map.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RateDriverVehicleComponent } from '../../passenger/rate-driver-vehicle/rate-driver-vehicle.component';
-
+import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';
 @Component({
   selector: 'app-ride-dialog',
   templateUrl: './ride-dialog.component.html',
@@ -40,13 +40,24 @@ export class RideDialogComponent {
   }
 
   openRateDialog() {
-    this.dialog.open(RateDriverVehicleComponent, {
-    width:'100vw',
-    maxWidth:'600px',
-    data: { rideId: this.ride.id }  
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000; 
+    const now = Date.now();
 
+    if (now - new Date(this.ride.startTime).getTime() > THREE_DAYS) {
+      this.dialog.open(SimpleMessageDialogComponent, {
+        width: '300px',
+        data: { message: "You can't rate this drive because more than 3 days have passed." }
+      });
+      return;
+    }
+
+    this.dialog.open(RateDriverVehicleComponent, {
+      width: '100vw',
+      maxWidth: '600px',
+      data: { rideId: this.ride.id }
     });
-  }    
+  }
+
 
 }
 

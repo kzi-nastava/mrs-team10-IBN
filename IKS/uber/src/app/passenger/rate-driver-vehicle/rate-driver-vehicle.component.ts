@@ -9,6 +9,8 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Ride } from '../../model/ride-history.model';
 import { MatDialogRef } from '@angular/material/dialog';
+import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-rate-driver-vehicle',
@@ -27,7 +29,9 @@ export class RateDriverVehicleComponent {
 
   constructor(private reviewService: ReviewService,
         private dialogRef: MatDialogRef<RateDriverVehicleComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: {rideId: number},){
+        @Inject(MAT_DIALOG_DATA) public data: {rideId: number},
+        private dialog: MatDialog
+){
   let logged = sessionStorage.getItem('loggedUser')
       if (logged != null){
         this.user = JSON.parse(logged) as User
@@ -62,8 +66,10 @@ export class RateDriverVehicleComponent {
   postReview(){
     this.reviewService.postReview(this.review).subscribe({
     next: (res) => {
-      console.log('Review posted successfully', res);
-      this.dialogRef.close(res);
+      this.dialog.open(SimpleMessageDialogComponent, {
+      width: '300px',
+      data: { message: "Your review is submitted." }
+    });
     },
     error: (err) => {
       console.error('Error posting review', err);

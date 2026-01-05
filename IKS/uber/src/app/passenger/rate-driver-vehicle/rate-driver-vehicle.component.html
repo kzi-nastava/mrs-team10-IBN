@@ -8,8 +8,8 @@
                 (click)="rateDriver(i + 1)"
                 (mouseenter)="hoverDriver(i + 1)"
                 (mouseleave)="hoverDriver(0)">
-            <mat-icon [ngStyle]="{'color': i < (driverHover || review?.driverRating || 0) ? 'gold' : 'black'}">
-                {{ i < (driverHover || review?.driverRating || 0) ? 'star' : 'star_border' }}
+            <mat-icon [ngStyle]="{'color': i < (driverHover || review.driverRating || 0) ? 'gold' : 'black'}">
+                {{ i < (driverHover || review.driverRating || 0) ? 'star' : 'star_border' }}
             </mat-icon>
             </span>
         </div>
@@ -22,8 +22,8 @@
                 (click)="rateVehicle(i + 1)"
                 (mouseenter)="hoverVehicle(i + 1)"
                 (mouseleave)="hoverVehicle(0)">
-            <mat-icon [ngStyle]="{'color': i < (vehicleHover || review?.vehicleRating || 0) ? 'gold' : 'black'}">
-                {{ i < (vehicleHover || review?.vehicleRating || 0) ? 'star' : 'star_border' }}
+            <mat-icon [ngStyle]="{'color': i < (vehicleHover || review.vehicleRating || 0) ? 'gold' : 'black'}">
+                {{ i < (vehicleHover || review.vehicleRating || 0) ? 'star' : 'star_border' }}
             </mat-icon>
             </span>
         </div>

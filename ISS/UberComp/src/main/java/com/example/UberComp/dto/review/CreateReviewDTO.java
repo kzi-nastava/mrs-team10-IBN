@@ -13,4 +13,5 @@ public class CreateReviewDTO {
     private Double vehicleRating;
     private Long userId;
     private Long rideId;
+
 }

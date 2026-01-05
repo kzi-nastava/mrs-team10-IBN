@@ -1,0 +1,15 @@
+.dialog-container {
+  padding: 1.5rem;
+  text-align: center;
+  font-family: 'Mandali', sans-serif;
+  background-color: #f0f0f0;
+  border-radius: 1rem;
+}
+
+p{
+    color:black
+}
+
+button {
+  margin-top: 1rem;
+}
