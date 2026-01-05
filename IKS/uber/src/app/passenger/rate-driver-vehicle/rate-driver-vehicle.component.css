@@ -1,10 +1,8 @@
 .dialog-container {
-    width: 35%;
-    border-radius: 1.5rem;
     padding: 1.5rem;
     background-color: #e0dcdc !important;
     font-family: 'Mandali';
-
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;

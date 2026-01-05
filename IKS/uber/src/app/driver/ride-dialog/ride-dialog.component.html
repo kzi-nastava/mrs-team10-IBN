@@ -35,7 +35,7 @@
     <span class="price">{{ ride.price }} RSD</span>
     <button class="order-btn">Order</button>
     @if(user?.role == 'passenger'){
-      <button class="rate-btn">Rate Ride</button>
+      <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
     }
   </div>
 </div>
