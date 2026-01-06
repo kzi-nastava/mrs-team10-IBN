@@ -8,9 +8,10 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 public class CreateReviewDTO {
-    private String content;
+    private String comment;
     private Double driverRating;
     private Double vehicleRating;
     private Long userId;
     private Long rideId;
+
 }

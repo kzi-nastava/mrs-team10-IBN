@@ -1,25 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { Review } from '../../model/review.model';
+import { ReviewService } from '../../service/review.service';
+import { User } from '../../model/user.model';
+import { FormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Ride } from '../../model/ride-history.model';
+import { MatDialogRef } from '@angular/material/dialog';
+import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-rate-driver-vehicle',
-  imports: [MatIconModule, CommonModule],
+  imports: [MatIconModule, CommonModule, RouterModule, FormsModule],
   templateUrl: './rate-driver-vehicle.component.html',
   styleUrls: ['./rate-driver-vehicle.component.css'],
 })
 
 export class RateDriverVehicleComponent {
+  protected review: Review = {
+        id: 0,
+        userId: 0,
+        rideId: 0,
+  };
+  protected user: User | null;
+
+  constructor(private reviewService: ReviewService,
+        private dialogRef: MatDialogRef<RateDriverVehicleComponent>,
+        @Inject(MAT_DIALOG_DATA) public data: {rideId: number},
+        private dialog: MatDialog
+){
+  let logged = sessionStorage.getItem('loggedUser')
+      if (logged != null){
+        this.user = JSON.parse(logged) as User
+        this.review.userId = this.user.id
+        this.review.rideId = data.rideId
+      } else {
+        this.user = null
+      }    
+
+  }
+
   stars = [1, 2, 3, 4, 5];
-
-  driverRating = 0;
   driverHover = 0;
-
-  vehicleRating = 0;
   vehicleHover = 0;
 
   rateDriver(value: number) {
-    this.driverRating = value;
+    this.review.driverRating = value;
   }
 
   hoverDriver(value: number) {
@@ -27,11 +56,25 @@ export class RateDriverVehicleComponent {
   }
 
   rateVehicle(value: number) {
-    this.vehicleRating = value;
+    this.review.vehicleRating = value;
   }
 
   hoverVehicle(value: number) {
     this.vehicleHover = value;
+  }
+
+  postReview(){
+    this.reviewService.postReview(this.review).subscribe({
+    next: (res) => {
+      this.dialog.open(SimpleMessageDialogComponent, {
+      width: '300px',
+      data: { message: "Your review is submitted." }
+    });
+    },
+    error: (err) => {
+      console.error('Error posting review', err);
+    }
+  });
   }
 }
 

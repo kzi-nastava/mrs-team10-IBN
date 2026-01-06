@@ -8,8 +8,8 @@
                 (click)="rateDriver(i + 1)"
                 (mouseenter)="hoverDriver(i + 1)"
                 (mouseleave)="hoverDriver(0)">
-            <mat-icon [ngStyle]="{'color': i < (driverHover || driverRating) ? 'gold' : 'black'}">
-                {{ i < (driverHover || driverRating) ? 'star' : 'star_border' }}
+            <mat-icon [ngStyle]="{'color': i < (driverHover || review.driverRating || 0) ? 'gold' : 'black'}">
+                {{ i < (driverHover || review.driverRating || 0) ? 'star' : 'star_border' }}
             </mat-icon>
             </span>
         </div>
@@ -22,8 +22,8 @@
                 (click)="rateVehicle(i + 1)"
                 (mouseenter)="hoverVehicle(i + 1)"
                 (mouseleave)="hoverVehicle(0)">
-            <mat-icon [ngStyle]="{'color': i < (vehicleHover || vehicleRating) ? 'gold' : 'black'}">
-                {{ i < (vehicleHover || vehicleRating) ? 'star' : 'star_border' }}
+            <mat-icon [ngStyle]="{'color': i < (vehicleHover || review.vehicleRating || 0) ? 'gold' : 'black'}">
+                {{ i < (vehicleHover || review.vehicleRating || 0) ? 'star' : 'star_border' }}
             </mat-icon>
             </span>
         </div>
@@ -31,7 +31,7 @@
 
 
 
-    <textarea class="textarea1" placeholder="Leave a comment..." rows="2"></textarea>
-    <button class="button1">Submit</button>
+    <textarea class="textarea1" placeholder="Leave a comment..." rows="2" [(ngModel)] = 'review.comment'></textarea>
+    <button class="button1" (click)="postReview()">Submit</button>
 
 </div>
