@@ -4,10 +4,18 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { MapComponent } from '../../map/map.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';
 
 @Component({
   selector: 'app-order-ride',
-  imports: [RouterModule, NavBarComponent, MapComponent, FormsModule, CommonModule],
+  imports: [
+    RouterModule,
+    NavBarComponent,
+    MapComponent,
+    FormsModule,
+    CommonModule,
+    FavoritesPopupComponent,
+  ],
   templateUrl: './order-ride.component.html',
   styleUrl: './order-ride.component.css',
 })
@@ -33,6 +41,24 @@ export class OrderRideComponent implements OnInit {
 
   ngOnInit() {
     this.updateMapLocations();
+  }
+
+  showFavoritesPopup = false;
+
+  openFavorites() {
+    this.showFavoritesPopup = true;
+  }
+
+  onRouteSelected(route: any) {
+    this.fromLocation = route.from;
+    this.toLocation = route.to;
+    this.stops = [...route.stops];
+    this.confirmSelection();
+    this.showFavoritesPopup = false;
+  }
+
+  closeFavorites() {
+    this.showFavoritesPopup = false;
   }
 
   toggleDropdown() {
