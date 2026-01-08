@@ -16,6 +16,8 @@ import { Location } from '../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Station } from '../model/ride-history.model';
+import { Ride } from '../model/ride-history.model';
+import { signal } from '@angular/core';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -39,6 +41,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
+  private activeRides: Ride[] = [];
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -79,13 +82,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
-      iconSize: [38, 38],
+      iconSize: [30, 30],
       iconAnchor: [22, 94],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
-      iconSize: [38, 38],
+      iconSize: [30, 30],
       iconAnchor: [22, 94],
     });
 
@@ -100,6 +103,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     setTimeout(() => {
     this.map.invalidateSize();
     
+    this.getVehiclePositions();
     if (this.stations && this.stations.length > 0) {
       console.log('Loading stations in ngAfterViewInit:', this.stations);
       this.loadFromStations();
@@ -338,4 +342,52 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
+    
+  getVehiclePositions(): void {
+    this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
+      .subscribe(rides => {
+
+        for (const ride of rides) {
+          console.log(ride)
+          const now = Date.now();
+          const start = new Date(ride.startTime).getTime();
+          const end = new Date(ride.endTime).getTime();
+
+          let progress = 0;
+          if (end > start) {
+            progress = (now - start) / (end - start);
+          }
+          progress = Math.max(0, Math.min(1, progress));
+          const waypoints = ride.route.stations
+            .filter(s => s.lat != null && s.lon != null)
+            .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
+
+            console.log(waypoints)
+          if (waypoints.length < 2) return;
+
+          const router = L.Routing.mapbox(environment.apiKey, {
+            profile: 'mapbox/driving'
+          });
+
+          (router as any).route(waypoints, (err: any, routes: any[]) => {
+            if (err || !routes || routes.length === 0) return;
+
+            const coords = routes[0].coordinates;
+            if (!coords || coords.length === 0) return;
+
+            const index = Math.min(
+              coords.length - 1,
+              Math.floor(progress * coords.length)
+            );
+
+            const pos = coords[index];
+            console.log(pos)
+            L.marker([pos.lat, pos.lng], {
+              icon: this.RedCarIcon
+            }).addTo(this.map);
+          });
+        }
+      });
+  }
+
 }
