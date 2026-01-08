@@ -115,7 +115,7 @@ export class AccountComponent implements OnInit {
 
     const roleMenus = {
       user: [
-        { icon: '⭐', label: 'Favorites', route: '/favorites' },
+        { icon: '❤️', label: 'Favorites', route: '/favorites' },
         { icon: '📊', label: 'My statistics', route: '/statistics/user' },
       ],
 

@@ -1,8 +1,10 @@
 <app-nav-bar></app-nav-bar>
 <div class="container">
   <div class="left-panel">
-    <h1>Choose a ride</h1>
-
+    <div class="header">
+      <h1>Choose a ride</h1>
+      <button (click)="openFavorites()">Favorites</button>
+    </div>
     @if (!isDropdownOpen) {
     <div class="location-input" (click)="toggleDropdown()">
       <div class="location-text">{{ locationText }}</div>
@@ -154,5 +156,9 @@
   >
   </app-map>
 </div>
+@if(showFavoritesPopup) {
+<app-favorites-popup (routeSelected)="onRouteSelected($event)" (closed)="closeFavorites()">
+</app-favorites-popup>
+}
 
 <router-outlet></router-outlet>
