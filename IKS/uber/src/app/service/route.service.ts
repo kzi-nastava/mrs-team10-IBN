@@ -11,7 +11,7 @@ export class RouteService {
       type:'pickup'
     },
     {
-      address:'Bulevar Patrijarha Pavla 50',
+      address:'Bulevar Patrijarha Pavla 60',
       type:'stop'
     },
     {

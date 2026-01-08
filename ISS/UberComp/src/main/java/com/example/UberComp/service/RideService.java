@@ -36,4 +36,8 @@ public class RideService {
     }
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
     public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
+
+    public void stopRide(StopRideDTO stopRideDTO){
+
+    }
 }

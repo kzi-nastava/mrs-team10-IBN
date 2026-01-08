@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { NavBarComponent } from "../nav-bar/nav-bar.component";
 import { RouterLink } from '@angular/router';
-import { MapComponent } from "../../map/map.component";
+import { MapComponent } from "../../maps/map/map.component";
 import { Location } from '../../model/location.model';
 import { RouteService } from '../../service/route.service';
 

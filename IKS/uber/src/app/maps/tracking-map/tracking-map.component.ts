@@ -6,37 +6,40 @@ import {
   SimpleChanges,
   Output,
   EventEmitter,
+  Signal,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
-import { environment } from '../../environments/environment';
-import { Location } from '../model/location.model';
+import { environment } from '../../../environments/environment';
+import { Location } from '../../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../model/ride-history.model';
+import { Station } from '../../model/ride-history.model';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
 }
 
 @Component({
-  selector: 'app-map',
-  imports: [CommonModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.css',
+  selector: 'app-tracking-map',
+  imports: [],
+  templateUrl: './tracking-map.component.html',
+  styleUrl: './tracking-map.component.css',
 })
-export class MapComponent implements AfterViewInit, OnChanges {
-  @Input() showRemoveButton!: boolean;
+export class TrackingMapComponent implements AfterViewInit{
   @Input() locations: Location[] = [];
-  @Input() stations: Station[] = []; 
   @Input() interactive: boolean = true; 
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
+  
   estimatedTime = output<string>();
 
+  private passedCount = 0
+  passingOutput = output<number>();
+  
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
 
@@ -45,12 +48,15 @@ export class MapComponent implements AfterViewInit, OnChanges {
   DestinationIcon!: L.Icon;
   GreenCarIcon!: L.Icon;
   RedCarIcon!: L.Icon;
-
+  CurrentLocationIcon!: L.Icon;
+  
   private points: {
     marker: L.Marker;
     latLng: L.LatLng;
     address?: string;
   }[] = [];
+  
+  private currentLoc!: L.Marker;
 
   private isUpdatingFromParent = false;
 
@@ -77,45 +83,18 @@ export class MapComponent implements AfterViewInit, OnChanges {
       iconAnchor: [20, 40],
     });
 
-    this.GreenCarIcon = L.icon({
-      iconUrl: 'green-car.png',
-      iconSize: [38, 38],
-      iconAnchor: [22, 94],
-    });
-
-    this.RedCarIcon = L.icon({
-      iconUrl: 'red-car.png',
-      iconSize: [38, 38],
-      iconAnchor: [22, 94],
-    });
+    this.CurrentLocationIcon = L.icon({
+      iconUrl: 'current-loc.svg',
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+    })
 
     this.initMap();
-    if(this.interactive)
-      this.registerOnClick();
 
     if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-
-    setTimeout(() => {
-    this.map.invalidateSize();
-    
-    if (this.stations && this.stations.length > 0) {
-      console.log('Loading stations in ngAfterViewInit:', this.stations);
-      this.loadFromStations();
-    } else if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-  }, 100);
-}
-  
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
-      this.updateLocationsFromInput();
-    }
-    if (changes['stations'] && this.map && this.stations.length > 0) {
-      this.loadFromStations(); 
+      this.updateLocationsFromInput().then(() => {
+        this.currentLoc = L.marker(this.points[0].latLng, {icon: this.CurrentLocationIcon}).addTo(this.map);
+      });
     }
   }
 
@@ -138,6 +117,17 @@ export class MapComponent implements AfterViewInit, OnChanges {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
+
+    this.map.on('click', (e) => {
+      this.currentLoc.setLatLng(e.latlng);
+      console.log(e.latlng.distanceTo(this.points[this.passedCount].latLng));
+      if (e.latlng.distanceTo(this.points[this.passedCount].latLng) < 50){
+        console.log("Station reached!")
+        ++this.passedCount;
+        this.passingOutput.emit(this.passedCount);
+        console.log(this.points)
+      }
+    })
   }
 
   private async updateLocationsFromInput(): Promise<void> {
@@ -153,6 +143,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       await this.addLocationFromAddress(location);
     }
 
+    this.updateRoute();
     this.isUpdatingFromParent = false;
   }
 
@@ -177,97 +168,23 @@ export class MapComponent implements AfterViewInit, OnChanges {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
-private addPointWithIcon(
-  lat: number,
-  lng: number,
-  icon: L.Icon,
-  title?: string,
-  fromParent = false,
-  shouldUpdateRoute = true 
-): void {
-  const latLng = L.latLng(lat, lng);
-  const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
-  pin.on('click', () => {
-    const index = this.points.findIndex((p) => p.marker === pin);
-    if (index !== -1) {
-      this.removePointByIndex(index);
+  private addPointWithIcon(
+    lat: number,
+    lng: number,
+    icon: L.Icon,
+    title?: string,
+    fromParent = false,
+    shouldUpdateRoute = true 
+  ): void {
+    const latLng = L.latLng(lat, lng);
+    const pin = L.marker(latLng, { icon, title }).addTo(this.map);
+
+    if (title) {
+      pin.bindPopup(title);
     }
-  });
 
-  if (title) {
-    pin.bindPopup(title);
-  }
-
-  this.points.push({ marker: pin, latLng, address: title });
-  
-  if (shouldUpdateRoute) { 
-    this.updateRoute();
-  }
-}
-
-private loadFromStations(): void {
-  this.clearAll();
-  console.log(this.stations);
-  
-  this.stations.forEach((station, index) => {
-    const isLast = index === this.stations.length - 1;
-    let icon = this.PinIcon;
-    
-    if (index === 0) icon = this.PickupIcon;
-    else if (isLast) icon = this.DestinationIcon;
-    
-    this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
-
-    if (this.points.length > 0) {
-      const group = L.featureGroup(this.points.map(p => p.marker));
-      this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
-  }
-  });
-  
-  this.updateRoute();
-}
-
-  private async addPoint(lat: number, lng: number): Promise<void> {
-    try {
-      const result = await this.reverseSearch(lat, lng).toPromise();
-
-      let address = '';
-      if (result && result.address) {
-        const parts = [];
-        if (result.address.road) parts.push(result.address.road);
-        if (result.address.house_number) parts.push(result.address.house_number);
-        address = parts.join(' ') || result.display_name;
-      }
-
-      this.addPointWithIcon(lat, lng, this.PinIcon, address);
-
-      if (address) {
-        this.locationAdded.emit(address);
-      }
-    } catch (error) {
-      console.error('Error reverse geocoding:', error);
-      this.addPointWithIcon(lat, lng, this.PinIcon);
-    }
-  }
-
-  private removePointByIndex(index: number): void {
-    if (index < 0 || index >= this.points.length) return;
-
-    const point = this.points[index];
-    this.map.removeLayer(point.marker);
-    this.points.splice(index, 1);
-
-    this.updateRoute();
-
-    this.locationRemoved.emit(index);
-  }
-
-  public removeLastPoint(): void {
-    if (this.points.length === 0) return;
-
-    const lastIndex = this.points.length - 1;
-    this.removePointByIndex(lastIndex);
+    this.points.push({ marker: pin, latLng, address: title });
   }
 
   private updateRoute(): void {
@@ -298,24 +215,11 @@ private loadFromStations(): void {
       this.routeControl.on('routesfound',  (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
-        console.log(
-          'Total distance is ' +
-            summary.totalDistance / 1000 +
-            ' km and total time is ' +
-            Math.round((summary.totalTime % 3600) / 60) +
-            ' minutes'
-        );
-        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes')
+        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + " minutes");
       });
     }
   }
 
-
-  private registerOnClick(): void {
-    this.map.on('click', (e: any) => {
-      this.addPoint(e.latlng.lat, e.latlng.lng);
-    });
-  }
 
   searchStreet(street: string): Observable<any> {
     return this.http.get(

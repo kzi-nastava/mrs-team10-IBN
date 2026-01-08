@@ -1,14 +1,14 @@
-INSERT INTO account (id, email, password, account_type, account_status, blocking_reason)
+INSERT INTO account (email, password, account_type, account_status, blocking_reason)
 VALUES
-    (1, 'driver@mail.com', 'pass123', 'DRIVER', 'VERIFIED', NULL),
-    (2, 'user1@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL),
-    (3, 'user2@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL);
+    ('driver@mail.com', 'pass123', 'DRIVER', 'VERIFIED', NULL),
+    ('user1@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL),
+    ('user2@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL);
 
-INSERT INTO app_user (id, name, last_name, home_address, phone, image, account_id)
+INSERT INTO app_user (name, last_name, home_address, phone, image, account_id)
 VALUES
-    (1, 'Marko', 'Marković', 'Novi Sad', '061111111', NULL, 1),
-    (2, 'Ivana', 'Ivić', 'Novi Sad', '062222222', NULL, 2),
-    (3, 'Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3);
+    ('Marko', 'Marković', 'Novi Sad', '061111111', NULL, 1),
+    ('Ivana', 'Ivić', 'Novi Sad', '062222222', NULL, 2),
+    ('Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3);
 
 UPDATE account SET user_id=id;
 
