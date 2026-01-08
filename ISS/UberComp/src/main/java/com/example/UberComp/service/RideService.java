@@ -1,5 +1,6 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.repository.RideRepository;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -34,6 +34,16 @@ public class RideService {
         ride = rideRepository.getRideWithPassengers(rideId);
         return new GetRideDetailsDTO(ride);
     }
+
+    @Transactional(readOnly = true)
+    public ArrayList<GetVehiclePositionDTO> getActiveRides() {
+        //get active drivers
+        Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(1L);
+        ArrayList<GetVehiclePositionDTO> activeRides = new ArrayList<>();
+        activeRides.add(new GetVehiclePositionDTO(ride));
+        return activeRides;
+    }
+
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
     public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
 }

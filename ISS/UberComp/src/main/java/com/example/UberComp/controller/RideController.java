@@ -1,5 +1,6 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.service.RideService;
@@ -22,9 +23,7 @@ public class RideController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetRideDTO>> getRides(
             @RequestParam(required = true) Long userId) {
-
         Collection<GetRideDTO> rides = rideService.getRides(userId);
-
         return ResponseEntity.ok(rides);
     }
 
@@ -52,6 +51,12 @@ public class RideController {
     {
         GetRideDetailsDTO ride = rideService.getRide(id);
         return new ResponseEntity<GetRideDetailsDTO>(ride, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/activeRides", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetVehiclePositionDTO>> activeRides(){
+        Collection<GetVehiclePositionDTO> activeRides = rideService.getActiveRides();
+        return ResponseEntity.ok(activeRides);
     }
 
     @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
