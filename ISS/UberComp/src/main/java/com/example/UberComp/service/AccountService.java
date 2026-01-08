@@ -1,8 +1,12 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.dto.account.AccountDTO;
+import com.example.UberComp.dto.account.GetAccountDTO;
 import com.example.UberComp.dto.account.LogAccountDTO;
 import com.example.UberComp.dto.account.RegisterDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
+import com.example.UberComp.dto.user.CreatedUserDTO;
+import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.User;
 import com.example.UberComp.repository.AccountRepository;
@@ -42,5 +46,20 @@ public class AccountService {
         } else {
             return null;
         }
+    }
+
+    public GetAccountDTO getbyId(Long id) {
+        Account account = accountRepository.findById(id).orElse(null);
+        if (account != null)
+            return new GetAccountDTO(account.getId(), account.getEmail(), account.getAccountType().toString());
+        return null;
+    }
+
+    public GetProfileDTO getProfile(Long id) {
+        Account account = accountRepository.findById(id).orElse(null);
+        AccountDTO getAccount = new AccountDTO(account.getEmail());
+        User user = account.getUser();
+        CreatedUserDTO getUser = new CreatedUserDTO(user);
+        return new GetProfileDTO(getUser, getAccount);
     }
 }

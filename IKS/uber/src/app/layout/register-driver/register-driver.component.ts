@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { DriverFormComponent, DriverFormData } from '../../forms/driver-form/driver-form.component';
+import { UserFormComponent, UserFormData } from '../../forms/user-form/user-form.component';
 import {
   VehicleFormComponent,
   VehicleFormData,
@@ -10,12 +10,12 @@ import {
 @Component({
   selector: 'app-register-driver',
   standalone: true,
-  imports: [CommonModule, NavBarComponent, DriverFormComponent, VehicleFormComponent],
+  imports: [CommonModule, NavBarComponent, UserFormComponent, VehicleFormComponent],
   templateUrl: './register-driver.component.html',
   styleUrls: ['./register-driver.component.css'],
 })
 export class RegisterDriverComponent implements OnInit {
-  newDriverData: DriverFormData = {
+  newDriverData: UserFormData = {
     firstName: '',
     lastName: '',
     address: '',
@@ -23,7 +23,7 @@ export class RegisterDriverComponent implements OnInit {
     email: '',
   };
 
-  emptyDriverData: DriverFormData = {
+  emptyDriverData: UserFormData = {
     firstName: '',
     lastName: '',
     address: '',

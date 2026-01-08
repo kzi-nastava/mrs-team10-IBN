@@ -13,6 +13,25 @@
     <img [src]="userProfileImage" alt="Profile Picture" />
     <div class="edit-icon" (click)="fileInput.click()">📷</div>
   </div>
+  } @if (isDriver) {
+  <div class="driver-status-container">
+    <div class="driver-status">
+      <div class="status-indicator" [style.background-color]="getStatusColor()">
+        @if (isDriverActive) {
+        <div class="pulse-ring"></div>
+        }
+      </div>
+      <span class="status-text">{{ getStatusText() }}</span>
+    </div>
+    <button
+      type="button"
+      class="toggle-status-btn"
+      [class.active]="isDriverActive"
+      (click)="goOnline()"
+    >
+      {{ isDriverActive ? 'Go Offline' : 'Go Online' }}
+    </button>
+  </div>
   }
 
   <input type="text" [(ngModel)]="formData.firstName" placeholder="First Name" />

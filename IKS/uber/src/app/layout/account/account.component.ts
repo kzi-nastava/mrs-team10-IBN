@@ -2,11 +2,34 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { DriverFormComponent, DriverFormData } from '../../forms/driver-form/driver-form.component';
+import { UserFormComponent, UserFormData } from '../../forms/user-form/user-form.component';
 import {
   VehicleFormComponent,
   VehicleFormData,
 } from '../../forms/vehicle-form/vehicle-form.component';
+import { User } from '../../model/user.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { ChangeDetectorRef } from '@angular/core';
+
+interface DriverDetails {
+  id: number;
+  userId: number;
+  vehicleId: number;
+  active: boolean;
+  hoursWorkedToday: number;
+  vehicle?: VehicleDetails;
+}
+
+interface VehicleDetails {
+  id: number;
+  model: string;
+  type: string;
+  licensePlate: string;
+  seats: number;
+  babyTransport: boolean;
+  petTransport: boolean;
+}
 
 @Component({
   selector: 'app-account',
@@ -15,29 +38,31 @@ import {
     CommonModule,
     NavBarComponent,
     RouterOutlet,
-    DriverFormComponent,
     VehicleFormComponent,
+    UserFormComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
+  standalone: true,
 })
 export class AccountComponent implements OnInit {
-  userRole: 'user' | 'driver' | 'admin' = 'admin';
+  protected user: User | null;
+  driverDetails: DriverDetails | null = null;
 
-  driverFormData: DriverFormData = {
-    firstName: 'Bojana',
-    lastName: 'Paunovic',
-    address: 'Kopernikova 23, Novi Sad',
-    phone: '0612018550',
-    email: 'paunovicboka@gmail.com',
+  userFormData: UserFormData = {
+    firstName: '',
+    lastName: '',
+    address: '',
+    phone: '',
+    email: '',
   };
 
-  originalDriverData: DriverFormData = {
-    firstName: 'Bojana',
-    lastName: 'Paunovic',
-    address: 'Kopernikova 23, Novi Sad',
-    phone: '0612018550',
-    email: 'paunovicboka@gmail.com',
+  originalUserData: UserFormData = {
+    firstName: '',
+    lastName: '',
+    address: '',
+    phone: '',
+    email: '',
   };
 
   vehicleData: VehicleFormData = {
@@ -49,18 +74,163 @@ export class AccountComponent implements OnInit {
     petTransport: false,
   };
 
-  hoursWorkedToday = 7;
+  hoursWorkedToday = 0;
   maxHoursPerDay = 8;
+  isDriverActive = false;
   showVehicleModal = false;
   successMessage: string | null = null;
+  errorMessage: string | null = null;
   userProfileImage: string = 'accountpic.png';
+  isLoading = false;
+
+  constructor(private http: HttpClient, private cd: ChangeDetectorRef) {
+    let logged = sessionStorage.getItem('loggedUser');
+    if (logged != null) {
+      this.user = JSON.parse(logged) as User;
+    } else {
+      this.user = null;
+    }
+  }
+
+  isDriver() {
+    if (this.user != null) return this.user.role === 'driver';
+    return false;
+  }
 
   ngOnInit() {
     this.initParticles();
+    this.loadUserData();
+
+    if (this.isDriver()) {
+      this.loadDriverDetails();
+    }
+  }
+
+  loadUserData() {
+    if (!this.user?.id) return;
+
+    this.isLoading = true;
+    this.http.get<any>(`${environment.apiHost}/account/${this.user.id}`).subscribe({
+      next: (response) => {
+        const userData = response.createdUserDTO;
+        const accountData = response.accountDTO;
+
+        if (!userData || !accountData) {
+          this.showError('User data is incomplete.');
+          this.isLoading = false;
+          return;
+        }
+
+        this.userFormData = {
+          firstName: userData.name || '',
+          lastName: userData.lastName || '',
+          address: userData.homeAddress || '',
+          phone: userData.phone || '',
+          email: accountData.email || '',
+        };
+
+        this.originalUserData = { ...this.userFormData };
+
+        if (userData.image) {
+          this.userProfileImage = userData.image;
+        }
+        this.cd.detectChanges();
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading user data:', error);
+        this.showError('Failed to load user data.');
+        this.isLoading = false;
+      },
+    });
+  }
+
+  loadDriverDetails() {
+    if (!this.user?.id) return;
+
+    this.isLoading = true;
+    this.http.get<DriverDetails>(`${environment.apiHost}/drivers/${this.user.id}`).subscribe({
+      next: (driverData) => {
+        this.driverDetails = driverData;
+        this.hoursWorkedToday = driverData.hoursWorkedToday || 0;
+        this.isDriverActive = driverData.active || false;
+
+        if (driverData.vehicle) {
+          this.vehicleData = {
+            model: driverData.vehicle.model || '',
+            type: 'standard',
+            licensePlate: driverData.vehicle.licensePlate || '',
+            seats: driverData.vehicle.seats || 4,
+            babyTransport: driverData.vehicle.babyTransport || false,
+            petTransport: driverData.vehicle.petTransport || false,
+          };
+        } else if (driverData.vehicleId) {
+          this.loadVehicleData(driverData.vehicleId);
+        }
+
+        this.cd.detectChanges();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading driver details:', error);
+        this.showError('Failed to load driver details.');
+        this.isLoading = false;
+      },
+    });
+  }
+
+  loadVehicleData(vehicleId: number) {
+    this.http.get<VehicleDetails>(`/api/vehicles/${vehicleId}`).subscribe({
+      next: (vehicle) => {
+        if (vehicle) {
+          this.vehicleData = {
+            model: vehicle.model || '',
+            type: 'luxury',
+            licensePlate: vehicle.licensePlate || '',
+            seats: vehicle.seats || 4,
+            babyTransport: vehicle.babyTransport || false,
+            petTransport: vehicle.petTransport || false,
+          };
+        }
+        this.cd.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading vehicle data:', error);
+      },
+    });
+  }
+
+  toggleDriverStatus() {
+    if (!this.user?.id || !this.driverDetails) return;
+
+    this.isLoading = true;
+    const newStatus = !this.isDriverActive;
+
+    this.http.put(`/api/drivers/${this.driverDetails.id}/status`, { active: newStatus }).subscribe({
+      next: () => {
+        this.isDriverActive = newStatus;
+        this.showSuccess(`Driver status changed to ${newStatus ? 'active' : 'inactive'}.`);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error updating driver status:', error);
+        this.showError('Failed to update driver status.');
+        this.isLoading = false;
+      },
+    });
   }
 
   getProgressPercentage(): number {
     return (this.hoursWorkedToday / this.maxHoursPerDay) * 100;
+  }
+
+  getStatusColor(): string {
+    return this.isDriverActive ? '#10b981' : '#ef4444';
+  }
+
+  getStatusText(): string {
+    return this.isDriverActive ? 'Active' : 'Inactive';
   }
 
   showSuccess(message: string) {
@@ -70,25 +240,100 @@ export class AccountComponent implements OnInit {
     }, 3000);
   }
 
-  onDriverFormSubmit(data: DriverFormData) {
-    if (this.userRole === 'driver') {
-      console.log('Sent to admin:', data);
-      this.showSuccess('Changes sent to admin successfully.');
+  showError(message: string) {
+    this.errorMessage = message;
+    setTimeout(() => {
+      this.errorMessage = null;
+    }, 3000);
+  }
+
+  onUserFormSubmit(data: UserFormData) {
+    if (!this.user?.id) return;
+
+    this.isLoading = true;
+
+    if (this.user?.role === 'driver') {
+      this.http.post(`/api/drivers/${this.driverDetails?.id}/change-request`, data).subscribe({
+        next: () => {
+          console.log('Sent to admin:', data);
+          this.showSuccess('Changes sent to admin successfully.');
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error sending change request:', error);
+          this.showError('Failed to send change request.');
+          this.isLoading = false;
+        },
+      });
     } else {
-      console.log('Saving:', data);
-      this.originalDriverData = { ...data };
-      this.showSuccess('Changes saved successfully.');
+      this.http.put(`/api/account/${this.user.id}`, data).subscribe({
+        next: (updatedUser) => {
+          console.log('Saving:', data);
+          this.originalUserData = { ...data };
+          this.userFormData = { ...data };
+
+          if (this.user) {
+            this.user = { ...this.user, ...updatedUser };
+          }
+
+          this.showSuccess('Changes saved successfully.');
+          this.cd.detectChanges();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error saving user data:', error);
+          this.showError('Failed to save changes.');
+          this.isLoading = false;
+        },
+      });
     }
   }
 
   onVehicleFormSubmit(data: VehicleFormData) {
-    console.log('Vehicle changes sent to admin:', data);
-    this.showSuccess('Vehicle changes sent to admin successfully.');
-    this.closeVehicleModal();
+    if (!this.user?.id || !this.driverDetails) return;
+
+    this.isLoading = true;
+
+    this.http.post(`/api/drivers/${this.driverDetails.id}/vehicle-change-request`, data).subscribe({
+      next: () => {
+        console.log('Vehicle changes sent to admin:', data);
+        this.showSuccess('Vehicle changes sent to admin successfully.');
+        this.closeVehicleModal();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error sending vehicle change request:', error);
+        this.showError('Failed to send vehicle change request.');
+        this.isLoading = false;
+      },
+    });
   }
 
   onProfileImageChange(newImage: string) {
-    this.userProfileImage = newImage;
+    if (!this.user?.id) return;
+
+    this.isLoading = true;
+
+    this.http
+      .put(`/api/users/${this.user.id}/profile-image`, { profileImage: newImage })
+      .subscribe({
+        next: () => {
+          this.userProfileImage = newImage;
+
+          if (this.user) {
+            this.user.image = newImage;
+          }
+          this.cd.detectChanges();
+
+          this.showSuccess('Profile image updated successfully.');
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error updating profile image:', error);
+          this.showError('Failed to update profile image.');
+          this.isLoading = false;
+        },
+      });
   }
 
   openVehicleModal() {
@@ -114,23 +359,25 @@ export class AccountComponent implements OnInit {
     ];
 
     const roleMenus = {
-      user: [
+      passenger: [
         { icon: '❤️', label: 'Favorites', route: '/favorites' },
         { icon: '📊', label: 'My statistics', route: '/statistics/user' },
       ],
 
       driver: [
         { icon: '🚗', label: 'My vehicle', route: '/my-vehicle' },
-        { icon: '📊', label: 'My statistics', route: '/statistics/driver' },
+        { icon: '📊', label: 'My statistics', route: '/statistics/User' },
       ],
 
-      admin: [
+      administrator: [
         { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
         { icon: '📥', label: 'Requests', route: '/requests' },
         { icon: '👥', label: 'Manage users', route: '/manage-users' },
       ],
     };
-    return [...(roleMenus[this.userRole] || []), ...commonItems];
+    if (this.user != null) {
+      return [...(roleMenus[this.user.role] || []), ...commonItems];
+    } else return null;
   }
 
   initParticles() {

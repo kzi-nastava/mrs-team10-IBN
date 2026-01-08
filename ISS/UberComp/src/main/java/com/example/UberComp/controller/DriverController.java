@@ -5,6 +5,7 @@ import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.service.DriverService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/drivers")
 public class DriverController {
+    @Autowired
     private DriverService driverService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -36,18 +38,15 @@ public class DriverController {
         return ResponseEntity.ok(updatedDriver);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<DriverDTO> getDriverProfile(@PathVariable Long id) {
-        AccountDTO accountDTO = new AccountDTO("driver@gmail.com");
-
-        CreateUserDTO createUserDTO = new CreateUserDTO("Bojana", "Paunović", "adresa", "061234567", "image.png");
-
-        VehicleDTO vehicleDTO = new VehicleDTO(new VehicleTypeDTO(), "Tesla Model 3", "NS123-XY", 4, true, true);
-
-        DriverDTO profile = new DriverDTO(accountDTO, createUserDTO, vehicleDTO, 8);
-
-        return ResponseEntity.ok(profile);
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<DriverDTO> getDriverProfile(@PathVariable Long userId) {
+        DriverDTO driverDTO = driverService.findById(userId);
+        if (driverDTO == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(driverDTO);
     }
+
 
     @PutMapping("/{id}/profile")
     public ResponseEntity<DriverDTO> updateDriverProfile(

@@ -44,10 +44,10 @@ class AccountController {
         if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         GetAccountDTO account = new GetAccountDTO();
         account.setId(loggedIn.getId());
-        account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
+        //account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
         account.setEmail(loggedIn.getEmail());
         account.setRole(loggedIn.getAccountType().toString());
-        account.setPhoneNumber(loggedIn.getUser().getPhone());
+        //account.setPhoneNumber(loggedIn.getUser().getPhone());
         return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
     }
 
@@ -83,14 +83,11 @@ class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) {
-        CreatedUserDTO createUserDTO = new CreatedUserDTO(1L, "Bojana", "Paunović", "adresa", "061234567", "image.png");
-
-        GetProfileDTO profile = new GetProfileDTO(
-                createUserDTO,
-                null
-        );
-
+    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) throws Exception {
+        GetProfileDTO profile = accountService.getProfile(id);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(profile);
     }
 
