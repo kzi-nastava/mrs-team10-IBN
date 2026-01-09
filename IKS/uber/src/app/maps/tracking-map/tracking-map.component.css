@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.map-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#map {
+  height: 60vh;
+  width: 55vw;
+  border-radius: 18px;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+:host(.compact) #map {
+  width: 100%;
+  height: 100%;
+}
+
+:host(.compact) .map-wrapper {
+  height: 100%;
+}

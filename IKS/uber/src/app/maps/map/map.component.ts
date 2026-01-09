@@ -11,11 +11,11 @@ import * as L from 'leaflet';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
-import { environment } from '../../environments/environment';
-import { Location } from '../model/location.model';
+import { environment } from '../../../environments/environment';
+import { Location } from '../../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../model/ride-history.model';
+import { Station } from '../../model/ride-history.model';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;

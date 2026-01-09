@@ -1,5 +1,5 @@
 export interface Location {
   address: string;
-  type: 'pickup' | 'stop' | 'destination';
+  type?: 'pickup' | 'stop' | 'destination';
   index?: number;
 }

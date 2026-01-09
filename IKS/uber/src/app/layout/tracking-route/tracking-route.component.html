@@ -1,8 +1,8 @@
 <app-nav-bar></app-nav-bar>
 <div id="container">
   <h1>Tracking Route</h1>
-  <p>Estimated {{ timeType }} time: {{ time }}</p>
-  <app-map [locations]="route"></app-map>
+  <p>{{ subtitleText }}</p>
+  <app-tracking-map [stations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)" (currentLocation)="getLocationEvent($event)"></app-tracking-map>
   <div>
     @if(user != null && user.role == 'driver'){
     <button (click)="changeState()">{{ firstButtonText }}</button>

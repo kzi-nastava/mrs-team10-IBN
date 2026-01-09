@@ -18,7 +18,6 @@ VALUES
     (3, 'Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3, 'User', NULL, NULL),
     (4, 'Bojana', 'Bojanic', 'Novi Sad', '063333333', NULL, 4, 'User', NULL, NULL);
 
-
 UPDATE account SET user_id=id;
 
 INSERT INTO vehicle

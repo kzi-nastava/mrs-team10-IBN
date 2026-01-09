@@ -1,0 +1,7 @@
+package com.example.UberComp.repository;
+
+import com.example.UberComp.model.Route;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RouteRepository extends JpaRepository<Route, Long> {
+}
