@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GetAccountDTO {
     private Long id;
-    private String name;
     private String email;
     private String role;
-    private String phoneNumber;
 }

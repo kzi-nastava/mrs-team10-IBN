@@ -21,6 +21,7 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/api/account")
+@CrossOrigin(origins = "http://localhost:4200")
 class AccountController {
     @Autowired
     private AccountService accountService;
@@ -44,10 +45,10 @@ class AccountController {
         if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         GetAccountDTO account = new GetAccountDTO();
         account.setId(loggedIn.getId());
-        account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
+        //account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
         account.setEmail(loggedIn.getEmail());
         account.setRole(loggedIn.getAccountType().toString());
-        account.setPhoneNumber(loggedIn.getUser().getPhone());
+        //account.setPhoneNumber(loggedIn.getUser().getPhone());
         return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
     }
 
@@ -83,14 +84,11 @@ class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) {
-        CreatedUserDTO createUserDTO = new CreatedUserDTO(1L, "Bojana", "Paunović", "adresa", "061234567", "image.png");
-
-        GetProfileDTO profile = new GetProfileDTO(
-                createUserDTO,
-                null
-        );
-
+    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) throws Exception {
+        GetProfileDTO profile = accountService.getProfile(id);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(profile);
     }
 
@@ -105,19 +103,14 @@ class AccountController {
     }
 
     @PutMapping("/{id}/profile")
-    public ResponseEntity<GetProfileDTO> updateProfile(@PathVariable Long id, @RequestBody CreateUserDTO updatedUser) {
-        CreatedUserDTO createUserDTO = new CreatedUserDTO(
-                1L,
-                updatedUser.getName(),
-                updatedUser.getLastName(),
-                updatedUser.getHomeAddress(),
-                updatedUser.getPhone(),
-                updatedUser.getImage()
-        );
-
-        GetProfileDTO updatedProfile = new GetProfileDTO(createUserDTO, null);
-
-        return ResponseEntity.ok(updatedProfile);
+    public ResponseEntity<GetProfileDTO> updateProfile(
+            @PathVariable Long id,
+            @RequestBody CreateUserDTO updatedUser) {
+        try {
+            GetProfileDTO updatedProfile = accountService.updateProfile(id, updatedUser);
+            return ResponseEntity.ok(updatedProfile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
-
 }

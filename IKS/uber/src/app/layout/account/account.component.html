@@ -8,10 +8,20 @@
   <div class="account-wrapper">
     <div class="card profile-card">
       <div class="profile-pic">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          style="display: none"
+        />
         <img [src]="userProfileImage" alt="Profile Picture" />
+        <div class="edit-icon" (click)="fileInput.click()">📷</div>
       </div>
 
-      <h2>{{ driverFormData.firstName }} {{ driverFormData.lastName }}</h2>
+      @if (userFormData) {
+      <h2>{{ userFormData.firstName }} {{ userFormData.lastName }}</h2>
+      }
 
       <ul class="menu">
         @for (item of menuItems; track item.label) {
@@ -26,7 +36,7 @@
       </ul>
     </div>
 
-    @if (userRole === 'driver') {
+    @if (isDriver()) {
     <div class="work-hours-section">
       <div class="semicircle-progress">
         <svg viewBox="0 0 200 120" class="progress-svg">
@@ -56,16 +66,16 @@
     </div>
     }
 
-    <app-driver-form
-      [formData]="driverFormData"
-      [originalData]="originalDriverData"
-      [buttonLabel]="userRole === 'driver' ? 'Send changes' : 'Save changes'"
+    <app-user-form
+      [formData]="userFormData"
+      [originalData]="originalUserFormData"
+      [buttonLabel]="user?.role === 'driver' ? 'Send changes' : 'Save changes'"
       [emailReadonly]="true"
-      [showProfilePicture]="false"
       [userProfileImage]="userProfileImage"
-      (formSubmit)="onDriverFormSubmit($event)"
-      (profileImageChange)="onProfileImageChange($event)"
-    ></app-driver-form>
+      [isDriver]="isDriver()"
+      [isDriverActive]="isDriverActive"
+      (formSubmit)="onUserFormSubmit($event)"
+    ></app-user-form>
   </div>
 
   @if (successMessage) {
@@ -75,6 +85,7 @@
   } @if (showVehicleModal) {
   <app-vehicle-form
     [vehicleData]="vehicleData"
+    [originalData]="originalVehicleData"
     [buttonLabel]="'Send Changes'"
     [showAsModal]="true"
     (formSubmit)="onVehicleFormSubmit($event)"
