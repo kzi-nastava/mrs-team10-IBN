@@ -21,6 +21,7 @@ export class RegisterDriverComponent implements OnInit {
     address: '',
     phone: '',
     email: '',
+    image: '',
   };
 
   emptyDriverData: UserFormData = {
@@ -29,6 +30,7 @@ export class RegisterDriverComponent implements OnInit {
     address: '',
     phone: '',
     email: '',
+    image: '',
   };
 
   newVehicleData: VehicleFormData = {
@@ -67,6 +69,7 @@ export class RegisterDriverComponent implements OnInit {
       address: '',
       phone: '',
       email: '',
+      image: '',
     };
 
     this.newVehicleData = {

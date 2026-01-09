@@ -12,6 +12,7 @@ import java.util.List;
 @Entity(name = "app_user")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")
+@DiscriminatorValue("User")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,7 @@ public class User {
     @Column(nullable = false)
     private String phone;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     @Column

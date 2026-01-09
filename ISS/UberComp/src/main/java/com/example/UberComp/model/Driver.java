@@ -16,8 +16,7 @@ public class Driver extends User {
 
     private Integer uptime;
 
-    @OneToOne
-    @JoinColumn(name = "vehicle_id")
+    @OneToOne(mappedBy = "driver")
     private Vehicle vehicle;
 }
 

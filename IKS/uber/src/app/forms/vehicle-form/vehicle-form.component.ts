@@ -27,6 +27,14 @@ export class VehicleFormComponent {
     babyTransport: false,
     petTransport: false,
   };
+  @Input() originalData: VehicleFormData = {
+    model: '',
+    type: 'standard',
+    licensePlate: '',
+    seats: 4,
+    babyTransport: false,
+    petTransport: false,
+  };
 
   @Input() buttonLabel: string = 'Send Changes';
   @Input() showAsModal: boolean = true;
@@ -44,5 +52,44 @@ export class VehicleFormComponent {
 
   stopPropagation(event: Event) {
     event.stopPropagation();
+  }
+
+  isUnchanged(): boolean {
+    return JSON.stringify(this.vehicleData) === JSON.stringify(this.originalData);
+  }
+
+  fieldTouched = false;
+
+  markFieldTouched() {
+    this.fieldTouched = true;
+  }
+
+  isModelInvalid(): boolean {
+    return this.fieldTouched && !this.vehicleData.model?.trim();
+  }
+
+  isPlateInvalid(): boolean {
+    return this.fieldTouched && !this.vehicleData.licensePlate?.trim();
+  }
+
+  isSeatsInvalid(): boolean {
+    return (
+      this.fieldTouched &&
+      (this.vehicleData.seats == null || this.vehicleData.seats < 1 || this.vehicleData.seats > 9)
+    );
+  }
+
+  isTypeInvalid(): boolean {
+    return this.fieldTouched && !this.vehicleData.type;
+  }
+
+  isFormValid(): boolean {
+    return (
+      !!this.vehicleData.model?.trim() &&
+      !!this.vehicleData.licensePlate?.trim() &&
+      this.vehicleData.seats >= 1 &&
+      this.vehicleData.seats <= 9 &&
+      !!this.vehicleData.type
+    );
   }
 }

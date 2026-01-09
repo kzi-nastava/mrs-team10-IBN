@@ -8,10 +8,20 @@
   <div class="account-wrapper">
     <div class="card profile-card">
       <div class="profile-pic">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          style="display: none"
+        />
         <img [src]="userProfileImage" alt="Profile Picture" />
+        <div class="edit-icon" (click)="fileInput.click()">📷</div>
       </div>
 
+      @if (userFormData) {
       <h2>{{ userFormData.firstName }} {{ userFormData.lastName }}</h2>
+      }
 
       <ul class="menu">
         @for (item of menuItems; track item.label) {
@@ -58,16 +68,13 @@
 
     <app-user-form
       [formData]="userFormData"
-      [originalData]="originalUserData"
+      [originalData]="originalUserFormData"
       [buttonLabel]="user?.role === 'driver' ? 'Send changes' : 'Save changes'"
       [emailReadonly]="true"
-      [showProfilePicture]="false"
       [userProfileImage]="userProfileImage"
       [isDriver]="isDriver()"
       [isDriverActive]="isDriverActive"
-      [onToggleStatus]="toggleDriverStatus.bind(this)"
       (formSubmit)="onUserFormSubmit($event)"
-      (profileImageChange)="onProfileImageChange($event)"
     ></app-user-form>
   </div>
 
@@ -78,6 +85,7 @@
   } @if (showVehicleModal) {
   <app-vehicle-form
     [vehicleData]="vehicleData"
+    [originalData]="originalVehicleData"
     [buttonLabel]="'Send Changes'"
     [showAsModal]="true"
     (formSubmit)="onVehicleFormSubmit($event)"

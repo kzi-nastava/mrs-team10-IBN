@@ -38,29 +38,36 @@ public class DriverController {
         return ResponseEntity.ok(updatedDriver);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<DriverDTO> getDriverProfile(@PathVariable Long userId) {
-        DriverDTO driverDTO = driverService.findById(userId);
+    @GetMapping("/{userId}")
+    public ResponseEntity<DriverDTO> getDriverByUserId(@PathVariable Long userId) {
+        DriverDTO driverDTO = driverService.findByUserId(userId);
         if (driverDTO == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(driverDTO);
     }
 
+    @PostMapping("/{id}/change-request")
+    public ResponseEntity<Void> submitDriverChangeRequest(
+            @PathVariable Long id,
+            @RequestBody UpdateDriverDTO changeRequest) {
+        try {
+            driverService.submitDriverChangeRequest(id, changeRequest);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @PutMapping("/{id}/profile")
     public ResponseEntity<DriverDTO> updateDriverProfile(
             @PathVariable Long id,
             @RequestBody UpdateDriverDTO updatedDriverDTO) {
-
-        DriverDTO updatedProfile = new DriverDTO(
-                new AccountDTO("driver@gmail.com"),
-                updatedDriverDTO.getCreateUserDTO(),
-                updatedDriverDTO.getVehicleDTO(),
-                8
-        );
-
-        return ResponseEntity.ok(updatedProfile);
+        try {
+            DriverDTO updatedProfile = driverService.updateDriverProfile(id, updatedDriverDTO);
+            return ResponseEntity.ok(updatedProfile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }

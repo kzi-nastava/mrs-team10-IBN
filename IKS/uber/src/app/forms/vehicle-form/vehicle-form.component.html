@@ -11,25 +11,54 @@
         type="text"
         [(ngModel)]="vehicleData.model"
         placeholder="Vehicle model (e.g. Toyota Corolla)"
+        (blur)="markFieldTouched()"
+        [class.invalid]="isModelInvalid()"
       />
+      @if (isModelInvalid()) {
+      <div class="error">Vehicle model is required</div>
+      }
 
       <label class="input-label">Vehicle type</label>
-      <select [(ngModel)]="vehicleData.type" class="vehicle-select">
+      <select
+        [(ngModel)]="vehicleData.type"
+        class="vehicle-select"
+        (blur)="markFieldTouched()"
+        [class.invalid]="isTypeInvalid()"
+      >
         <option value="standard">Standard</option>
         <option value="luxury">Luxury</option>
         <option value="van">Van</option>
       </select>
 
-      <input type="text" [(ngModel)]="vehicleData.licensePlate" placeholder="License plate" />
+      @if (isTypeInvalid()) {
+      <div class="error">Vehicle type is required</div>
+      }
+
+      <input
+        type="text"
+        [(ngModel)]="vehicleData.licensePlate"
+        placeholder="License plate"
+        (blur)="markFieldTouched()"
+        [class.invalid]="isPlateInvalid()"
+      />
+
+      @if (isPlateInvalid()) {
+      <div class="error">License plate is required</div>
+      }
 
       <label class="input-label">Number of seats</label>
       <input
         type="number"
         [(ngModel)]="vehicleData.seats"
-        placeholder="Number of seats"
         min="1"
         max="9"
+        (blur)="markFieldTouched()"
+        [class.invalid]="isSeatsInvalid()"
       />
+
+      @if (isSeatsInvalid()) {
+      <div class="error">Seats must be between 1 and 9</div>
+      }
 
       <div class="checkbox-group">
         <label class="checkbox-label">
@@ -43,7 +72,13 @@
         </label>
       </div>
 
-      <button class="send-vehicle-changes" (click)="onSubmit()">
+      <button
+        class="send-vehicle-changes"
+        (click)="onSubmit()"
+        type="submit"
+        [disabled]="isUnchanged()"
+        [class.disabled-btn]="isUnchanged()"
+      >
         {{ buttonLabel }}
       </button>
     </div>
@@ -57,25 +92,54 @@
     type="text"
     [(ngModel)]="vehicleData.model"
     placeholder="Vehicle model (e.g. Toyota Corolla)"
+    (blur)="markFieldTouched()"
+    [class.invalid]="isModelInvalid()"
   />
+  @if (isModelInvalid()) {
+  <div class="error">Vehicle model is required</div>
+  }
 
   <label class="input-label">Vehicle type</label>
-  <select [(ngModel)]="vehicleData.type" class="vehicle-select">
+  <select
+    [(ngModel)]="vehicleData.type"
+    class="vehicle-select"
+    (blur)="markFieldTouched()"
+    [class.invalid]="isTypeInvalid()"
+  >
     <option value="standard">Standard</option>
     <option value="luxury">Luxury</option>
     <option value="van">Van</option>
   </select>
 
-  <input type="text" [(ngModel)]="vehicleData.licensePlate" placeholder="License plate" />
+  @if (isTypeInvalid()) {
+  <div class="error">Vehicle type is required</div>
+  }
+
+  <input
+    type="text"
+    [(ngModel)]="vehicleData.licensePlate"
+    placeholder="License plate"
+    (blur)="markFieldTouched()"
+    [class.invalid]="isPlateInvalid()"
+  />
+
+  @if (isPlateInvalid()) {
+  <div class="error">License plate is required</div>
+  }
 
   <label class="input-label">Number of seats</label>
   <input
     type="number"
     [(ngModel)]="vehicleData.seats"
-    placeholder="Number of seats"
     min="1"
     max="9"
+    (blur)="markFieldTouched()"
+    [class.invalid]="isSeatsInvalid()"
   />
+
+  @if (isSeatsInvalid()) {
+  <div class="error">Seats must be between 1 and 9</div>
+  }
 
   <div class="checkbox-group">
     <label class="checkbox-label">

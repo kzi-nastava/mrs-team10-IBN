@@ -24,6 +24,6 @@ public class Vehicle {
     private Boolean petFriendly;
 
     @OneToOne
-    @JoinColumn(name = "driver_id")
+    @JoinColumn(name = "driver_id", referencedColumnName = "id")
     private Driver driver;
 }

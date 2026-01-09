@@ -214,6 +214,25 @@ h3 {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
+input.invalid {
+  border-color: #731111;
+  background-color: #fef2f2;
+}
+
+.error {
+  color: #731111;
+  font-size: 0.75rem;
+  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
+  font-weight: 700;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .info-card {

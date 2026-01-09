@@ -62,4 +62,33 @@ public class AccountService {
         CreatedUserDTO getUser = new CreatedUserDTO(user);
         return new GetProfileDTO(getUser, getAccount);
     }
+    public GetProfileDTO updateProfile(Long accountId, CreateUserDTO updatedUser) throws Exception {
+        Account account = accountRepository.findById(accountId).orElse(null);
+
+        if (account == null) {
+            throw new Exception("Account not found");
+        }
+
+        User user = account.getUser();
+        if(user == null) {
+            user = new User();
+            account.setUser(user);
+        }
+
+        user.setName(updatedUser.getName());
+        user.setLastName(updatedUser.getLastName());
+        user.setHomeAddress(updatedUser.getHomeAddress());
+        user.setPhone(updatedUser.getPhone());
+        user.setImage(updatedUser.getImage());
+        
+        accountRepository.save(account);
+
+        CreatedUserDTO createdUserDTO = new CreatedUserDTO(user);
+        AccountDTO accountDTO = new AccountDTO(account.getEmail());
+
+        userRepository.save(user);
+
+        return new GetProfileDTO(createdUserDTO, accountDTO);
+    }
+
 }
