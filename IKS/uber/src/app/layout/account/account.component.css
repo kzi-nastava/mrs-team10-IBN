@@ -116,6 +116,26 @@ h1 {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
+.edit-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+  font-size: 1.3rem;
+  background-color: #ffffff;
+  border-radius: 50%;
+  padding: 0.3rem;
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-icon:hover {
+  transform: translate(25%, 25%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 .menu {
   list-style: none;
   margin-top: 1rem;

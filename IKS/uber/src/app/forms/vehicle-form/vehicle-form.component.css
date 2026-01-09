@@ -38,19 +38,46 @@
   transition: all 0.3s ease;
   display: block;
 }
+.vehicle-card {
+  position: relative;
+}
+
 .vehicle-card select {
   width: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 12px;
 }
 
-.vehicle-card input:focus,
-.vehicle-card select:focus {
-  outline: none;
-  background-color: #e9e9e9;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+input.invalid,
+select.invalid {
+  border-color: #731111;
+  background-color: #fef2f2;
+  text-align: left;
+  display: block;
 }
 
-.vehicle-select {
-  cursor: pointer;
+.error {
+  color: #731111;
+  font-size: 0.75rem;
+  margin-top: -0.25rem;
+  margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
+  font-weight: 700;
+
+  display: block;
+  text-align: left;
+  align-self: flex-start;
+}
+
+.vehicle-card select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding-right: 2rem;
+  background-color: #d9d9d9;
 }
 
 .input-label {
@@ -242,8 +269,24 @@
   display: block;
 }
 
+.modal-body {
+  position: relative;
+}
+
 .modal-body select {
   width: 99.7%;
+  padding-right: 2.5rem;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  background-color: rgba(217, 217, 217, 0.9);
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
 }
 
 .modal-body input:focus,
