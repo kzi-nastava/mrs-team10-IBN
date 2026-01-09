@@ -11,7 +11,7 @@
         type="text"
         [(ngModel)]="vehicleData.model"
         placeholder="Vehicle model (e.g. Toyota Corolla)"
-        (blur)="markFieldTouched()"
+        (blur)="markFieldTouched('model')"
         [class.invalid]="isModelInvalid()"
       />
       @if (isModelInvalid()) {
@@ -22,7 +22,7 @@
       <select
         [(ngModel)]="vehicleData.type"
         class="vehicle-select"
-        (blur)="markFieldTouched()"
+        (blur)="markFieldTouched('type')"
         [class.invalid]="isTypeInvalid()"
       >
         <option value="standard">Standard</option>
@@ -38,7 +38,7 @@
         type="text"
         [(ngModel)]="vehicleData.licensePlate"
         placeholder="License plate"
-        (blur)="markFieldTouched()"
+        (blur)="markFieldTouched('licensePlate')"
         [class.invalid]="isPlateInvalid()"
       />
 
@@ -52,7 +52,7 @@
         [(ngModel)]="vehicleData.seats"
         min="1"
         max="9"
-        (blur)="markFieldTouched()"
+        (blur)="markFieldTouched('seats')"
         [class.invalid]="isSeatsInvalid()"
       />
 
@@ -92,7 +92,7 @@
     type="text"
     [(ngModel)]="vehicleData.model"
     placeholder="Vehicle model (e.g. Toyota Corolla)"
-    (blur)="markFieldTouched()"
+    (blur)="markFieldTouched('model')"
     [class.invalid]="isModelInvalid()"
   />
   @if (isModelInvalid()) {
@@ -103,7 +103,7 @@
   <select
     [(ngModel)]="vehicleData.type"
     class="vehicle-select"
-    (blur)="markFieldTouched()"
+    (blur)="markFieldTouched('type')"
     [class.invalid]="isTypeInvalid()"
   >
     <option value="standard">Standard</option>
@@ -119,7 +119,7 @@
     type="text"
     [(ngModel)]="vehicleData.licensePlate"
     placeholder="License plate"
-    (blur)="markFieldTouched()"
+    (blur)="markFieldTouched('licensePlate')"
     [class.invalid]="isPlateInvalid()"
   />
 
@@ -133,7 +133,7 @@
     [(ngModel)]="vehicleData.seats"
     min="1"
     max="9"
-    (blur)="markFieldTouched()"
+    (blur)="markFieldTouched('seats')"
     [class.invalid]="isSeatsInvalid()"
   />
 

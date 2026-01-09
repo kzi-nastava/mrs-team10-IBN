@@ -29,7 +29,7 @@
       name="firstName"
       [(ngModel)]="formData.firstName"
       placeholder="First Name"
-      (blur)="markFieldTouched()"
+      (blur)="markFieldTouched('firstName')"
       [class.invalid]="isFirstNameInvalid()"
     />
     } @if (isFirstNameInvalid()) {
@@ -40,7 +40,7 @@
       name="lastName"
       [(ngModel)]="formData.lastName"
       placeholder="Last Name"
-      (blur)="markFieldTouched()"
+      (blur)="markFieldTouched('lastName')"
       [class.invalid]="isLastNameInvalid()"
     />
     } @if (isLastNameInvalid()) {
@@ -51,7 +51,7 @@
       name="address"
       [(ngModel)]="formData.address"
       placeholder="Address"
-      (blur)="markFieldTouched()"
+      (blur)="markFieldTouched('address')"
       [class.invalid]="isAddressInvalid()"
     />
     } @if (isAddressInvalid()){
@@ -62,7 +62,7 @@
       name="phone"
       [(ngModel)]="formData.phone"
       placeholder="Phone (9-15 digits)"
-      (blur)="markFieldTouched()"
+      (blur)="markFieldTouched('phone')"
       [class.invalid]="isPhoneInvalid()"
     />} @if (isPhoneInvalid()) {
     <div class="error">Phone must be 9-15 digits</div>
@@ -73,7 +73,7 @@
       [(ngModel)]="formData.email"
       placeholder="Email"
       [readonly]="emailReadonly"
-      (blur)="markFieldTouched()"
+      (blur)="markFieldTouched('email')"
       [class.invalid]="isEmailInvalid()"
     />} @if (isEmailInvalid()) {
     <div class="error">Valid email is required</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { UserFormComponent, UserFormData } from '../../forms/user-form/user-form.component';
@@ -15,6 +15,9 @@ import {
   styleUrls: ['./register-driver.component.css'],
 })
 export class RegisterDriverComponent implements OnInit {
+  @ViewChild(UserFormComponent) userForm!: UserFormComponent;
+  @ViewChild(VehicleFormComponent) vehicleForm!: VehicleFormComponent;
+
   newDriverData: UserFormData = {
     firstName: '',
     lastName: '',
@@ -42,12 +45,46 @@ export class RegisterDriverComponent implements OnInit {
     petTransport: false,
   };
 
+  emptyVehicleData: VehicleFormData = {
+    model: '',
+    type: 'standard',
+    licensePlate: '',
+    seats: 4,
+    babyTransport: false,
+    petTransport: false,
+  };
+
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
   ngOnInit() {}
 
   registerDriver() {
+    this.userForm.formTouched = true;
+    this.userForm.touchedFields = {
+      firstName: true,
+      lastName: true,
+      address: true,
+      phone: true,
+      email: true,
+    };
+
+    this.vehicleForm.formTouched = true;
+    this.vehicleForm.touchedFields = {
+      model: true,
+      type: true,
+      licensePlate: true,
+      seats: true,
+    };
+
+    const isUserFormValid = this.userForm.isFormValid();
+    const isVehicleFormValid = this.vehicleForm.isFormValid();
+
+    if (!isUserFormValid || !isVehicleFormValid) {
+      this.showError('Please fill in all required fields correctly.');
+      return;
+    }
+
     const registrationData = {
       driver: this.newDriverData,
       vehicle: this.newVehicleData,
@@ -80,6 +117,26 @@ export class RegisterDriverComponent implements OnInit {
       babyTransport: false,
       petTransport: false,
     };
+
+    if (this.userForm) {
+      this.userForm.formTouched = false;
+      this.userForm.touchedFields = {
+        firstName: false,
+        lastName: false,
+        address: false,
+        phone: false,
+        email: false,
+      };
+    }
+    if (this.vehicleForm) {
+      this.vehicleForm.formTouched = false;
+      this.vehicleForm.touchedFields = {
+        model: false,
+        type: false,
+        licensePlate: false,
+        seats: false,
+      };
+    }
   }
 
   showSuccess(message: string) {

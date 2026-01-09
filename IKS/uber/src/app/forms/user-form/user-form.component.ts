@@ -50,10 +50,24 @@ export class UserFormComponent implements OnChanges {
   @Output() profileImageChange = new EventEmitter<string>();
 
   formTouched = false;
+  touchedFields = {
+    firstName: false,
+    lastName: false,
+    address: false,
+    phone: false,
+    email: false,
+  };
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['formData'] && !changes['formData'].firstChange) {
       this.formTouched = false;
+      this.touchedFields = {
+        firstName: false,
+        lastName: false,
+        address: false,
+        phone: false,
+        email: false,
+      };
     }
   }
 
@@ -71,6 +85,13 @@ export class UserFormComponent implements OnChanges {
 
   onSubmit() {
     this.formTouched = true;
+    this.touchedFields = {
+      firstName: true,
+      lastName: true,
+      address: true,
+      phone: true,
+      email: true,
+    };
 
     if (!this.isFormValid()) {
       console.warn('Form is invalid:', this.getValidationErrors());
@@ -141,7 +162,8 @@ export class UserFormComponent implements OnChanges {
   isFirstNameInvalid(): boolean {
     if (this.formData)
       return (
-        this.formTouched && (!this.formData.firstName || this.formData.firstName.trim().length < 2)
+        this.touchedFields.firstName &&
+        (!this.formData.firstName || this.formData.firstName.trim().length < 2)
       );
     return false;
   }
@@ -149,7 +171,8 @@ export class UserFormComponent implements OnChanges {
   isLastNameInvalid(): boolean {
     if (this.formData)
       return (
-        this.formTouched && (!this.formData.lastName || this.formData.lastName.trim().length < 2)
+        this.touchedFields.lastName &&
+        (!this.formData.lastName || this.formData.lastName.trim().length < 2)
       );
     return false;
   }
@@ -157,7 +180,8 @@ export class UserFormComponent implements OnChanges {
   isAddressInvalid(): boolean {
     if (this.formData)
       return (
-        this.formTouched && (!this.formData.address || this.formData.address.trim().length === 0)
+        this.touchedFields.address &&
+        (!this.formData.address || this.formData.address.trim().length === 0)
       );
     return false;
   }
@@ -165,7 +189,10 @@ export class UserFormComponent implements OnChanges {
   isPhoneInvalid(): boolean {
     if (this.formData) {
       const phonePattern = /^\d{9,15}$/;
-      return this.formTouched && (!this.formData.phone || !phonePattern.test(this.formData.phone));
+      return (
+        this.touchedFields.phone &&
+        (!this.formData.phone || !phonePattern.test(this.formData.phone))
+      );
     }
     return false;
   }
@@ -173,7 +200,10 @@ export class UserFormComponent implements OnChanges {
   isEmailInvalid(): boolean {
     if (this.formData) {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return this.formTouched && (!this.formData.email || !emailPattern.test(this.formData.email));
+      return (
+        this.touchedFields.email &&
+        (!this.formData.email || !emailPattern.test(this.formData.email))
+      );
     }
     return false;
   }
@@ -191,7 +221,10 @@ export class UserFormComponent implements OnChanges {
     this.onToggleStatus?.();
   }
 
-  markFieldTouched() {
+  markFieldTouched(field?: 'firstName' | 'lastName' | 'address' | 'phone' | 'email') {
     this.formTouched = true;
+    if (field) {
+      this.touchedFields[field] = true;
+    }
   }
 }

@@ -147,7 +147,7 @@ h3 {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background-color: #10b981;
+  background-color: #4caf50;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -159,7 +159,7 @@ h3 {
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  border: 2px solid #10b981;
+  border: 2px solid #4caf50;
   animation: pulse 2s infinite;
 }
 
@@ -205,13 +205,13 @@ h3 {
 }
 
 .toggle-status-btn.active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
+  background: linear-gradient(135deg, #4caf50 0%, #3f9242 100%);
+  border-color: #4caf50;
   color: white;
 }
 
 .toggle-status-btn.active:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #2f6d31 0%, #265827 100%);
 }
 
 input.invalid {

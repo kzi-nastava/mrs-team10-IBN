@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -18,7 +18,7 @@ export interface VehicleFormData {
   templateUrl: './vehicle-form.component.html',
   styleUrls: ['./vehicle-form.component.css'],
 })
-export class VehicleFormComponent {
+export class VehicleFormComponent implements OnChanges {
   @Input() vehicleData: VehicleFormData = {
     model: '',
     type: 'standard',
@@ -42,7 +42,40 @@ export class VehicleFormComponent {
   @Output() formSubmit = new EventEmitter<VehicleFormData>();
   @Output() closeModal = new EventEmitter<void>();
 
+  formTouched = false;
+  touchedFields = {
+    model: false,
+    type: false,
+    licensePlate: false,
+    seats: false,
+  };
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['vehicleData'] && !changes['vehicleData'].firstChange) {
+      this.formTouched = false;
+      this.touchedFields = {
+        model: false,
+        type: false,
+        licensePlate: false,
+        seats: false,
+      };
+    }
+  }
+
   onSubmit() {
+    this.formTouched = true;
+    this.touchedFields = {
+      model: true,
+      type: true,
+      licensePlate: true,
+      seats: true,
+    };
+
+    if (!this.isFormValid()) {
+      console.warn('Vehicle form is invalid');
+      return;
+    }
+
     this.formSubmit.emit(this.vehicleData);
   }
 
@@ -58,29 +91,30 @@ export class VehicleFormComponent {
     return JSON.stringify(this.vehicleData) === JSON.stringify(this.originalData);
   }
 
-  fieldTouched = false;
-
-  markFieldTouched() {
-    this.fieldTouched = true;
+  markFieldTouched(field?: 'model' | 'type' | 'licensePlate' | 'seats') {
+    this.formTouched = true;
+    if (field) {
+      this.touchedFields[field] = true;
+    }
   }
 
   isModelInvalid(): boolean {
-    return this.fieldTouched && !this.vehicleData.model?.trim();
+    return this.touchedFields.model && !this.vehicleData.model?.trim();
   }
 
   isPlateInvalid(): boolean {
-    return this.fieldTouched && !this.vehicleData.licensePlate?.trim();
+    return this.touchedFields.licensePlate && !this.vehicleData.licensePlate?.trim();
   }
 
   isSeatsInvalid(): boolean {
     return (
-      this.fieldTouched &&
+      this.touchedFields.seats &&
       (this.vehicleData.seats == null || this.vehicleData.seats < 1 || this.vehicleData.seats > 9)
     );
   }
 
   isTypeInvalid(): boolean {
-    return this.fieldTouched && !this.vehicleData.type;
+    return this.touchedFields.type && !this.vehicleData.type;
   }
 
   isFormValid(): boolean {
