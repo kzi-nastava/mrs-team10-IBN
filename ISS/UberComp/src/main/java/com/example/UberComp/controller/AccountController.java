@@ -1,6 +1,7 @@
 package com.example.UberComp.controller;
 
 
+import com.example.UberComp.dto.driver.DriverChangeRequestDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/account")
@@ -92,14 +94,32 @@ class AccountController {
         return ResponseEntity.ok(profile);
     }
 
+    @GetMapping("/change-requests")
+    public ResponseEntity<List<DriverChangeRequestDTO>> getChangeRequests() {
+        List<DriverChangeRequestDTO> requests = accountService.getAllPendingRequests();
+        return ResponseEntity.ok(requests);
+    }
+
     @PostMapping("/approve-change/{id}")
     public ResponseEntity<String> approveChange(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        try {
+            accountService.approveDriverChange(id);
+            return ResponseEntity.ok("Profile change approved successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Profile change request not found");
+        }
     }
 
     @PostMapping("/reject-change/{id}")
-    public ResponseEntity<String> rejectChange(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> rejectDriverChange(@PathVariable Long id) {
+        try {
+            accountService.rejectDriverChange(id);
+            return ResponseEntity.ok("Profile change rejected successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Profile change request not found");
+        }
     }
 
     @PutMapping("/{id}/profile")

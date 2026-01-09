@@ -32,7 +32,7 @@
           <td>
             <div class="date-cell">
               <span class="clock-icon"></span>
-              {{ request.requestDate }}
+              {{ request.requestDate | date : 'dd.MM.yyyy. HH:mm' }}
             </div>
           </td>
           <td>
@@ -81,7 +81,7 @@
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeModal()">Close</button>
-        @if (selectedRequest.status === 'pending') {
+        @if (isPending()) {
         <button class="btn btn-danger" (click)="handleReject(selectedRequest.id)">Reject</button>
         <button class="btn btn-success" (click)="handleApprove(selectedRequest.id)">Accept</button>
         }

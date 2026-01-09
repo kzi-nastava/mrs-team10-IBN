@@ -5,10 +5,10 @@ import { CommonModule } from '@angular/common';
 export interface VehicleFormData {
   model: string;
   type: 'standard' | 'luxury' | 'van';
-  licensePlate: string;
-  seats: number;
-  babyTransport: boolean;
-  petTransport: boolean;
+  plate: string;
+  seatNumber: number;
+  babySeat: boolean;
+  petFriendly: boolean;
 }
 
 @Component({
@@ -22,18 +22,18 @@ export class VehicleFormComponent implements OnChanges {
   @Input() vehicleData: VehicleFormData = {
     model: '',
     type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
   };
   @Input() originalData: VehicleFormData = {
     model: '',
     type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
   };
 
   @Input() buttonLabel: string = 'Send Changes';
@@ -47,7 +47,7 @@ export class VehicleFormComponent implements OnChanges {
     model: false,
     type: false,
     licensePlate: false,
-    seats: false,
+    seatNumber: false,
   };
 
   ngOnChanges(changes: SimpleChanges) {
@@ -57,7 +57,7 @@ export class VehicleFormComponent implements OnChanges {
         model: false,
         type: false,
         licensePlate: false,
-        seats: false,
+        seatNumber: false,
       };
     }
   }
@@ -68,7 +68,7 @@ export class VehicleFormComponent implements OnChanges {
       model: true,
       type: true,
       licensePlate: true,
-      seats: true,
+      seatNumber: true,
     };
 
     if (!this.isFormValid()) {
@@ -91,7 +91,7 @@ export class VehicleFormComponent implements OnChanges {
     return JSON.stringify(this.vehicleData) === JSON.stringify(this.originalData);
   }
 
-  markFieldTouched(field?: 'model' | 'type' | 'licensePlate' | 'seats') {
+  markFieldTouched(field?: 'model' | 'type' | 'licensePlate' | 'seatNumber') {
     this.formTouched = true;
     if (field) {
       this.touchedFields[field] = true;
@@ -103,13 +103,15 @@ export class VehicleFormComponent implements OnChanges {
   }
 
   isPlateInvalid(): boolean {
-    return this.touchedFields.licensePlate && !this.vehicleData.licensePlate?.trim();
+    return this.touchedFields.licensePlate && !this.vehicleData.plate?.trim();
   }
 
-  isSeatsInvalid(): boolean {
+  isSeatNumberInvalid(): boolean {
     return (
-      this.touchedFields.seats &&
-      (this.vehicleData.seats == null || this.vehicleData.seats < 1 || this.vehicleData.seats > 9)
+      this.touchedFields.seatNumber &&
+      (this.vehicleData.seatNumber == null ||
+        this.vehicleData.seatNumber < 1 ||
+        this.vehicleData.seatNumber > 9)
     );
   }
 
@@ -120,9 +122,9 @@ export class VehicleFormComponent implements OnChanges {
   isFormValid(): boolean {
     return (
       !!this.vehicleData.model?.trim() &&
-      !!this.vehicleData.licensePlate?.trim() &&
-      this.vehicleData.seats >= 1 &&
-      this.vehicleData.seats <= 9 &&
+      !!this.vehicleData.plate?.trim() &&
+      this.vehicleData.seatNumber >= 1 &&
+      this.vehicleData.seatNumber <= 9 &&
       !!this.vehicleData.type
     );
   }

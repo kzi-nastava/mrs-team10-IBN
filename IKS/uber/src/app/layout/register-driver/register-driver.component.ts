@@ -39,19 +39,19 @@ export class RegisterDriverComponent implements OnInit {
   newVehicleData: VehicleFormData = {
     model: '',
     type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
   };
 
   emptyVehicleData: VehicleFormData = {
     model: '',
     type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
   };
 
   successMessage: string | null = null;
@@ -74,7 +74,7 @@ export class RegisterDriverComponent implements OnInit {
       model: true,
       type: true,
       licensePlate: true,
-      seats: true,
+      seatNumber: true,
     };
 
     const isUserFormValid = this.userForm.isFormValid();
@@ -84,13 +84,6 @@ export class RegisterDriverComponent implements OnInit {
       this.showError('Please fill in all required fields correctly.');
       return;
     }
-
-    const registrationData = {
-      driver: this.newDriverData,
-      vehicle: this.newVehicleData,
-    };
-
-    console.log('Registering driver with vehicle:', registrationData);
 
     this.showSuccess('Driver and vehicle registered successfully!');
 
@@ -112,10 +105,10 @@ export class RegisterDriverComponent implements OnInit {
     this.newVehicleData = {
       model: '',
       type: 'standard',
-      licensePlate: '',
-      seats: 4,
-      babyTransport: false,
-      petTransport: false,
+      plate: '',
+      seatNumber: 4,
+      babySeat: false,
+      petFriendly: false,
     };
 
     if (this.userForm) {
@@ -134,7 +127,7 @@ export class RegisterDriverComponent implements OnInit {
         model: false,
         type: false,
         licensePlate: false,
-        seats: false,
+        seatNumber: false,
       };
     }
   }

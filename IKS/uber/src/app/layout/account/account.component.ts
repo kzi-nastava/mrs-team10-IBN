@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
@@ -12,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ChangeDetectorRef } from '@angular/core';
 import { DriverDetails } from '../../model/driver.model';
+import { VehicleTypeService } from '../../service/vehicle-type.service';
 
 @Component({
   selector: 'app-account',
@@ -44,17 +45,16 @@ export class AccountComponent implements OnInit {
   userProfileImage: string = 'accountpic.png';
   isLoading = false;
 
-  constructor(private http: HttpClient, private cd: ChangeDetectorRef) {
+  constructor(
+    private http: HttpClient,
+    private cd: ChangeDetectorRef,
+    private vehicleTypeService: VehicleTypeService
+  ) {
     let logged = sessionStorage.getItem('loggedUser');
     if (logged != null) {
       this.user = JSON.parse(logged) as User;
     } else {
       this.user = null;
-    }
-    this.loadUserData();
-
-    if (this.isDriver()) {
-      this.loadDriverDetails();
     }
   }
 
@@ -65,6 +65,12 @@ export class AccountComponent implements OnInit {
 
   ngOnInit() {
     this.initParticles();
+
+    if (this.isDriver()) {
+      this.loadDriverDetails();
+    } else {
+      this.loadUserData();
+    }
   }
 
   loadUserData() {
@@ -126,11 +132,12 @@ export class AccountComponent implements OnInit {
                 | 'standard'
                 | 'luxury'
                 | 'van') || 'standard',
-            licensePlate: response.vehicleDTO.plate || '',
-            seats: response.vehicleDTO.seatNumber || 4,
-            babyTransport: response.vehicleDTO.babySeat || false,
-            petTransport: response.vehicleDTO.petFriendly || false,
+            plate: response.vehicleDTO.plate || '',
+            seatNumber: response.vehicleDTO.seatNumber || 4,
+            babySeat: response.vehicleDTO.babySeat || false,
+            petFriendly: response.vehicleDTO.petFriendly || false,
           };
+          this.originalVehicleData = { ...this.vehicleData };
         }
 
         if (response.createUserDTO) {
@@ -148,9 +155,10 @@ export class AccountComponent implements OnInit {
           } else {
             this.userProfileImage = 'accountpic.png';
           }
+
+          this.originalUserFormData = { ...this.userFormData };
         }
 
-        this.originalVehicleData = { ...this.vehicleData };
         this.cd.detectChanges();
         this.isLoading = false;
       },
@@ -210,7 +218,7 @@ export class AccountComponent implements OnInit {
           phone: data.phone,
           image: data.image || null,
         },
-        vehicleDTO: this.vehicleData || null,
+        vehicleDTO: null,
       };
 
       this.http
@@ -218,20 +226,21 @@ export class AccountComponent implements OnInit {
         .subscribe({
           next: () => {
             this.isLoading = false;
-            this.showSuccess('Changes sent to admin successfully.');
+            this.showSuccess('Profile changes sent to admin successfully.');
+            this.originalUserFormData = { ...data };
             this.cd.detectChanges();
           },
           error: (error) => {
             console.error('Error sending change request:', error);
             this.isLoading = false;
-            this.showError('Failed to send change request.');
+            this.showError('Failed to send profile change request.');
             this.cd.detectChanges();
           },
         });
       return;
     }
 
-    const payload = {
+    const passengerPayload = {
       id: this.user.id,
       name: data.firstName,
       lastName: data.lastName,
@@ -240,23 +249,26 @@ export class AccountComponent implements OnInit {
       image: data.image || null,
     };
 
-    this.http.put(`${environment.apiHost}/account/${this.user.id}/profile`, payload).subscribe({
-      next: (updatedUser: any) => {
-        this.userFormData = { ...data };
-        if (this.user) {
-          this.user = { ...this.user, ...updatedUser };
-        }
-        this.isLoading = false;
-        this.showSuccess('Changes saved successfully.');
-        this.cd.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error saving user data:', error);
-        this.isLoading = false;
-        this.showError('Failed to save changes.');
-        this.cd.detectChanges();
-      },
-    });
+    this.http
+      .put(`${environment.apiHost}/account/${this.user.id}/profile`, passengerPayload)
+      .subscribe({
+        next: (updatedUser: any) => {
+          this.userFormData = { ...data };
+          this.originalUserFormData = { ...data };
+          if (this.user) {
+            this.user = { ...this.user, ...updatedUser };
+          }
+          this.isLoading = false;
+          this.showSuccess('Profile changed successfully.');
+          this.cd.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error saving user data:', error);
+          this.isLoading = false;
+          this.showError('Failed to save user data.');
+          this.cd.detectChanges();
+        },
+      });
   }
 
   onVehicleFormSubmit(data: VehicleFormData) {
@@ -265,9 +277,18 @@ export class AccountComponent implements OnInit {
     const driverId = this.user.id;
     this.vehicleData = { ...data };
 
+    const vehicleTypeDTO = this.vehicleTypeService.mapTypeToDTO(data.type);
+
     const payload = {
       createUserDTO: null,
-      vehicleDTO: this.vehicleData,
+      vehicleDTO: {
+        model: data.model,
+        plate: data.plate,
+        seatNumber: data.seatNumber,
+        babySeat: data.babySeat,
+        petFriendly: data.petFriendly,
+        vehicleTypeDTO: vehicleTypeDTO,
+      },
     };
 
     this.isLoading = true;
@@ -275,11 +296,13 @@ export class AccountComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         this.showSuccess('Vehicle changes sent to admin successfully.');
+        this.originalVehicleData = { ...data };
         this.closeVehicleModal();
         this.cd.detectChanges();
       },
       error: (error) => {
         console.error('Error sending vehicle change request:', error);
+        console.error('Error details:', error.error);
         this.isLoading = false;
         this.showError('Failed to send vehicle change request.');
         this.cd.detectChanges();

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,15 +21,6 @@ import java.util.stream.Collectors;
 public class DriverService {
     @Autowired
     private DriverRepository driverRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private VehicleRepository vehicleRepository;
 
     @Autowired
     private DriverChangeRequestRepository changeRequestRepository;
@@ -93,43 +85,7 @@ public class DriverService {
         }
 
         request.setStatus("PENDING");
+        request.setRequestDate(LocalDateTime.now());
         changeRequestRepository.save(request);
-    }
-
-    @Transactional
-    public DriverDTO updateDriverProfile(Long driverId, UpdateDriverDTO updatedDriverDTO) {
-        Driver driver = driverRepository.findById(driverId).orElse(null);
-
-        if (updatedDriverDTO.getCreateUserDTO() != null) {
-            driver.setName(updatedDriverDTO.getCreateUserDTO().getName());
-            driver.setLastName(updatedDriverDTO.getCreateUserDTO().getLastName());
-            driver.setHomeAddress(updatedDriverDTO.getCreateUserDTO().getHomeAddress());
-            driver.setPhone(updatedDriverDTO.getCreateUserDTO().getPhone());
-            userRepository.save(driver);
-        }
-
-        if (updatedDriverDTO.getVehicleDTO() != null) {
-            Vehicle vehicle = driver.getVehicle();
-            vehicle.setModel(updatedDriverDTO.getVehicleDTO().getModel());
-            VehicleTypeDTO vehicleTypeDTO = updatedDriverDTO.getVehicleDTO().getVehicleTypeDTO();
-            VehicleType vehicleType = new VehicleType(
-                    vehicleTypeDTO.getId(),
-                    vehicleTypeDTO.getName(),
-                    vehicleTypeDTO.getPrice()
-            );
-            vehicle.setVehicleType(vehicleType);
-            vehicle.setPlate(updatedDriverDTO.getVehicleDTO().getPlate());
-            vehicle.setSeatNumber(updatedDriverDTO.getVehicleDTO().getSeatNumber());
-            vehicle.setBabySeat(updatedDriverDTO.getVehicleDTO().getBabySeat());
-            vehicle.setPetFriendly(updatedDriverDTO.getVehicleDTO().getPetFriendly());
-            vehicleRepository.save(vehicle);
-        }
-
-        return new DriverDTO(
-                new AccountDTO(driver.getAccount().getEmail()),
-                new CreatedUserDTO(driver),
-                new VehicleDTO(driver.getVehicle()),
-                driver.getUptime()
-        );
     }
 }

@@ -58,16 +58,4 @@ public class DriverController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    @PutMapping("/{id}/profile")
-    public ResponseEntity<DriverDTO> updateDriverProfile(
-            @PathVariable Long id,
-            @RequestBody UpdateDriverDTO updatedDriverDTO) {
-        try {
-            DriverDTO updatedProfile = driverService.updateDriverProfile(id, updatedDriverDTO);
-            return ResponseEntity.ok(updatedProfile);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 }
