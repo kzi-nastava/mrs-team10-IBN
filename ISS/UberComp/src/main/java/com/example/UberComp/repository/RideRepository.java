@@ -33,6 +33,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     LEFT JOIN FETCH r.passengers
 """)
     List<Ride> getRidesWithRouteAndStations();
+
 }
 
 

@@ -47,10 +47,10 @@ public class RideController {
     }
 
     @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StartRideDTO> getIncomingRide(){
-        StartRideDTO ride = rideService.getIncomingRide();
-        if(ride == null) return new ResponseEntity<StartRideDTO>(ride, HttpStatus.NO_CONTENT);
-        return new ResponseEntity<StartRideDTO>(ride, HttpStatus.OK);
+    public ResponseEntity<IncomingRideDTO> getIncomingRide(){
+        IncomingRideDTO ride = rideService.getIncomingRide();
+        if(ride == null) return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,14 +66,26 @@ public class RideController {
         return new ResponseEntity<>(trackingRide, HttpStatus.OK);
     }
 
+    @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable("id") Long id) {
+        StartedRideDTO started = rideService.startRide(id, start);
+        return new ResponseEntity<>(started, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/finish/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinishedRideDTO> finishRide(@RequestBody RideMomentDTO finish, @PathVariable("id") Long id) {
+         FinishedRideDTO finished = rideService.endRide(id, finish);
+         return new ResponseEntity<>(finished, HttpStatus.OK);
+    }
+
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteRide(@PathVariable("id") Long id) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping(value = "/stop/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StoppedRideDTO> stopRide(@RequestBody StopRideDTO ride, @PathVariable("id") Long id){
-        StoppedRideDTO finished = new StoppedRideDTO(id, ride.getPassed(), ride.getFinishTime(), 0.0);
+    public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride, @PathVariable("id") Long id){
+        FinishedRideDTO finished = rideService.stopRide(id, ride);
         return new ResponseEntity<>(finished, HttpStatus.OK);
     }
 

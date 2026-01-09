@@ -1,18 +1,23 @@
 package com.example.UberComp.service;
 
 import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Coordinate;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.Route;
+import com.example.UberComp.repository.CoordinateRepository;
 import com.example.UberComp.repository.RideRepository;
+import com.example.UberComp.repository.RouteRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -23,9 +28,13 @@ public class RideService {
 
     @Autowired
     private RideRepository rideRepository;
+    @Autowired
+    private CoordinateRepository coordinateRepository;
+    @Autowired
+    private RouteRepository routeRepository;
 
-    public StartRideDTO getIncomingRide(){
-        StartRideDTO newRide = new StartRideDTO();
+    public IncomingRideDTO getIncomingRide(){
+        IncomingRideDTO newRide = new IncomingRideDTO();
         newRide.setId(0L);
         Route route = new Route();
         route.setId(1L);
@@ -53,7 +62,38 @@ public class RideService {
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
     public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
 
-    public void stopRide(StopRideDTO stopRideDTO){
+    public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        ride.setStatus(RideStatus.Finished);
+        ride.setFinish(LocalDateTime.parse(finish.getIsotime()));
+        // ride.setPrice(); price calculation
+        rideRepository.save(ride);
+        return new FinishedRideDTO(ride);
+    }
 
+    public FinishedRideDTO stopRide(Long rideId, StopRideDTO stopRideDTO) {
+        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        Coordinate newCoordinate = new Coordinate();
+        newCoordinate.setLat(stopRideDTO.getLat());
+        newCoordinate.setLon(stopRideDTO.getLon());
+        newCoordinate.setAddress(stopRideDTO.getAddress());
+        Coordinate savedCoord = coordinateRepository.save(newCoordinate);
+        List<Coordinate> newStations = ride.getRoute().getStations().subList(0, stopRideDTO.getPassed());
+        newStations.add(savedCoord);
+        Route newRoute = new Route();
+        newRoute.setStations(newStations);
+        Route savedRoute = routeRepository.save(newRoute);
+        ride.setRoute(savedRoute);
+        ride.setFinish(LocalDateTime.parse(stopRideDTO.getFinishTime()));
+        rideRepository.save(ride);
+        return new FinishedRideDTO(ride);
+    }
+
+    public StartedRideDTO startRide(Long id, RideMomentDTO start) {
+        Ride started = rideRepository.findById(id).orElseThrow();
+        started.setStatus(RideStatus.Ongoing);
+        started.setStart(LocalDateTime.parse(start.getIsotime()));
+        rideRepository.save(started);
+        return new StartedRideDTO(started.getId(), started.getStart());
     }
 }

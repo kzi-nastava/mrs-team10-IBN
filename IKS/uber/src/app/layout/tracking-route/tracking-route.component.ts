@@ -21,6 +21,7 @@ export class TrackingRouteComponent {
   routeService: RouteService = inject(RouteService)
   userService: UserService = inject(UserService)
   private cdr = inject(ChangeDetectorRef);
+  rideId?: number;
   route: Station[] = []
   passed: number = 0;
   currentLocation?: TrackingData;
@@ -47,6 +48,7 @@ export class TrackingRouteComponent {
     this.routeService.getRide().subscribe({
       next: (response) => {
         this.route = [...response.route.stations];
+        this.rideId = response.id
         console.log(this.route)
         this.cdr.detectChanges();
       }
@@ -67,14 +69,18 @@ export class TrackingRouteComponent {
   }
 
   changeState() {
+    const now = new Date();
     if (this.passed == 1 && !this.routeStarted) {
       this.routeStarted = true;
       this.firstButtonText = 'Finish';
       this.subtitleText = "Estimated arrival time: " + this.estimatedTime;
+      this.routeService.startRide(this.rideId!, now.toISOString());
     } else if (this.passed == this.route.length) {
-
+      this.routeService.finishRide(this.rideId!, now.toISOString());
+      this.router.navigate(["/home"])
     } else if (this.passed > 0 && this.passed < this.route.length){
-
+      this.routeService.stopRide(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
+      this.router.navigate(["/home"])
     }
   }
 
