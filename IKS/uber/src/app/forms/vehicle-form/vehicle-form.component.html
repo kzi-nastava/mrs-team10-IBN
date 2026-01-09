@@ -36,7 +36,7 @@
 
       <input
         type="text"
-        [(ngModel)]="vehicleData.licensePlate"
+        [(ngModel)]="vehicleData.plate"
         placeholder="License plate"
         (blur)="markFieldTouched('licensePlate')"
         [class.invalid]="isPlateInvalid()"
@@ -49,25 +49,25 @@
       <label class="input-label">Number of seats</label>
       <input
         type="number"
-        [(ngModel)]="vehicleData.seats"
+        [(ngModel)]="vehicleData.seatNumber"
         min="1"
         max="9"
-        (blur)="markFieldTouched('seats')"
-        [class.invalid]="isSeatsInvalid()"
+        (blur)="markFieldTouched('seatNumber')"
+        [class.invalid]="isSeatNumberInvalid()"
       />
 
-      @if (isSeatsInvalid()) {
+      @if (isSeatNumberInvalid()) {
       <div class="error">Seats must be between 1 and 9</div>
       }
 
       <div class="checkbox-group">
         <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="vehicleData.babyTransport" />
+          <input type="checkbox" [(ngModel)]="vehicleData.babySeat" />
           <span class="checkbox-text"> 👶 Baby transport </span>
         </label>
 
         <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="vehicleData.petTransport" />
+          <input type="checkbox" [(ngModel)]="vehicleData.petFriendly" />
           <span class="checkbox-text"> 🐾 Pet transport </span>
         </label>
       </div>
@@ -117,7 +117,7 @@
 
   <input
     type="text"
-    [(ngModel)]="vehicleData.licensePlate"
+    [(ngModel)]="vehicleData.plate"
     placeholder="License plate"
     (blur)="markFieldTouched('licensePlate')"
     [class.invalid]="isPlateInvalid()"
@@ -130,25 +130,25 @@
   <label class="input-label">Number of seats</label>
   <input
     type="number"
-    [(ngModel)]="vehicleData.seats"
+    [(ngModel)]="vehicleData.seatNumber"
     min="1"
     max="9"
-    (blur)="markFieldTouched('seats')"
-    [class.invalid]="isSeatsInvalid()"
+    (blur)="markFieldTouched('seatNumber')"
+    [class.invalid]="isSeatNumberInvalid()"
   />
 
-  @if (isSeatsInvalid()) {
+  @if (isSeatNumberInvalid()) {
   <div class="error">Seats must be between 1 and 9</div>
   }
 
   <div class="checkbox-group">
     <label class="checkbox-label">
-      <input type="checkbox" [(ngModel)]="vehicleData.babyTransport" />
+      <input type="checkbox" [(ngModel)]="vehicleData.babySeat" />
       <span class="checkbox-text"> 👶 Baby transport </span>
     </label>
 
     <label class="checkbox-label">
-      <input type="checkbox" [(ngModel)]="vehicleData.petTransport" />
+      <input type="checkbox" [(ngModel)]="vehicleData.petFriendly" />
       <span class="checkbox-text"> 🐾 Pet transport </span>
     </label>
   </div>
