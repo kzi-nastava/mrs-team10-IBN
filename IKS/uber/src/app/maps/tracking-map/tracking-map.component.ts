@@ -9,7 +9,7 @@ import {
   Signal,
 } from '@angular/core';
 import * as L from 'leaflet';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
 import { environment } from '../../../environments/environment';
@@ -17,6 +17,7 @@ import { Location } from '../../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Station } from '../../model/ride-history.model';
+import { TrackingData } from '../../layout/tracking-route/tracking-route.component';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -28,14 +29,12 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   templateUrl: './tracking-map.component.html',
   styleUrl: './tracking-map.component.css',
 })
-export class TrackingMapComponent implements AfterViewInit{
-  @Input() locations: Location[] = [];
-  @Input() interactive: boolean = true; 
-  @Output() locationAdded = new EventEmitter<string>();
-  @Output() locationRemoved = new EventEmitter<number>();
-  @Output() allLocationsCleared = new EventEmitter<void>();
+export class TrackingMapComponent implements AfterViewInit, OnChanges{
+  @Input() stations: Station[] = [];
+  @Input() interactive: boolean = true;
   
   estimatedTime = output<string>();
+  currentLocation = output<TrackingData>();
 
   private passedCount = 0
   passingOutput = output<number>();
@@ -56,7 +55,7 @@ export class TrackingMapComponent implements AfterViewInit{
     address?: string;
   }[] = [];
   
-  private currentLoc!: L.Marker;
+  private currentLocationMarker!: L.Marker;
 
   private isUpdatingFromParent = false;
 
@@ -91,9 +90,13 @@ export class TrackingMapComponent implements AfterViewInit{
 
     this.initMap();
 
-    if (this.locations && this.locations.length > 0) {
+    
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.stations && this.stations.length > 0) {
       this.updateLocationsFromInput().then(() => {
-        this.currentLoc = L.marker(this.points[0].latLng, {icon: this.CurrentLocationIcon}).addTo(this.map);
+        this.currentLocationMarker = L.marker(this.points[0].latLng, {icon: this.CurrentLocationIcon}).addTo(this.map);
       });
     }
   }
@@ -119,19 +122,23 @@ export class TrackingMapComponent implements AfterViewInit{
     }).addTo(this.map);
 
     this.map.on('click', (e) => {
-      this.currentLoc.setLatLng(e.latlng);
-      console.log(e.latlng.distanceTo(this.points[this.passedCount].latLng));
+      this.currentLocationMarker.setLatLng(e.latlng);
       if (e.latlng.distanceTo(this.points[this.passedCount].latLng) < 50){
         console.log("Station reached!")
         ++this.passedCount;
         this.passingOutput.emit(this.passedCount);
         console.log(this.points)
       }
+      this.getTrackingData(e.latlng).subscribe({
+        next: (response) => {
+          this.currentLocation.emit(response)
+        }
+      })
     })
   }
 
   private async updateLocationsFromInput(): Promise<void> {
-    if (!this.locations || this.locations.length === 0) {
+    if (!this.stations || this.stations.length === 0) {
       this.clearAll();
       return;
     }
@@ -139,7 +146,7 @@ export class TrackingMapComponent implements AfterViewInit{
     this.isUpdatingFromParent = true;
     this.clearAll();
 
-    for (const location of this.locations) {
+    for (const location of this.stations) {
       await this.addLocationFromAddress(location);
     }
 
@@ -220,6 +227,17 @@ export class TrackingMapComponent implements AfterViewInit{
     }
   }
 
+  getTrackingData(position: L.LatLng): Observable<TrackingData> {
+    var latRound: number = Number(position.lat.toFixed(7))
+    var lonRound: number = Number(position.lng.toFixed(7))
+    return this.reverseSearch(latRound, lonRound).pipe(
+      map((response) => ({
+        lat: latRound,
+        lon: lonRound,
+        address: response.address.road + ' ' + response.address.house_number
+      }))
+    );
+  }
 
   searchStreet(street: string): Observable<any> {
     return this.http.get(

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
 import { TrackingMapComponent } from '../../maps/tracking-map/tracking-map.component';
@@ -8,6 +8,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
 import { RouteService } from '../../service/route.service';
 import { Location } from '../../model/location.model';
+import { Station } from '../../model/ride-history.model';
 
 @Component({
   selector: 'app-tracking-route',
@@ -19,8 +20,10 @@ export class TrackingRouteComponent {
   router: Router = inject(Router);
   routeService: RouteService = inject(RouteService)
   userService: UserService = inject(UserService)
-  route: Location[] = this.routeService.route
+  private cdr = inject(ChangeDetectorRef);
+  route: Station[] = []
   passed: number = 0;
+  currentLocation?: TrackingData;
   estimatedTime?: string;
   subtitleText: String = 'Waiting for departure...';
   routeStarted: Boolean = false;
@@ -41,6 +44,13 @@ export class TrackingRouteComponent {
         "image":"",
       }
     }
+    this.routeService.getRide().subscribe({
+      next: (response) => {
+        this.route = [...response.route.stations];
+        console.log(this.route)
+        this.cdr.detectChanges();
+      }
+    })
   }
 
   setTimeEvent(eventData: string){
@@ -49,16 +59,23 @@ export class TrackingRouteComponent {
 
   passStationEvent(eventData: number){
     this.passed = eventData;
-    console.log(this.passed)
+  }
+
+  getLocationEvent(eventData: TrackingData){
+    this.currentLocation = eventData;
+    console.log(this.currentLocation);
   }
 
   changeState() {
-    if (this.routeStarted) {
-      
+    if (this.passed == 1 && !this.routeStarted) {
+      this.routeStarted = true;
+      this.firstButtonText = 'Finish';
+      this.subtitleText = "Estimated arrival time: " + this.estimatedTime;
+    } else if (this.passed == this.route.length) {
+
+    } else if (this.passed > 0 && this.passed < this.route.length){
+
     }
-    this.routeStarted = true;
-    this.firstButtonText = 'Finish';
-    this.subtitleText = "Estimated arrival time: " + this.estimatedTime;
   }
 
   openComplaintDialog() {
@@ -67,4 +84,10 @@ export class TrackingRouteComponent {
       maxWidth: '420px',
     });
   }
+}
+
+export interface TrackingData{
+  lat:number,
+  lon:number,
+  address:string,
 }

@@ -46,6 +46,12 @@ public class RideController {
         return new ResponseEntity<Collection<GetRideDetailsDTO>>(allRides, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StartRideDTO> getIncomingRide(){
+        StartRideDTO ride = rideService.getIncomingRide();
+        if(ride == null) return new ResponseEntity<StartRideDTO>(ride, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<StartRideDTO>(ride, HttpStatus.OK);
+    }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable("id") Long id)

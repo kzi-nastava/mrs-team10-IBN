@@ -2,7 +2,7 @@
 <div id="container">
   <h1>Tracking Route</h1>
   <p>{{ subtitleText }}</p>
-  <app-tracking-map [locations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)"></app-tracking-map>
+  <app-tracking-map [stations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)" (currentLocation)="getLocationEvent($event)"></app-tracking-map>
   <div>
     @if(user != null && user.role == 'driver'){
     <button (click)="changeState()">{{ firstButtonText }}</button>

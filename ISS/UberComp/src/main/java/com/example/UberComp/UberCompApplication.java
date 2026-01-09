@@ -12,7 +12,6 @@ public class UberCompApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(UberCompApplication.class, args);
 	}
-
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
