@@ -16,6 +16,10 @@ import com.example.UberComp.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class AccountService {
+public class AccountService implements UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
@@ -36,10 +40,21 @@ public class AccountService {
     private ObjectMapper objectMapper;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null){
+            throw new UsernameNotFoundException(String.format("No user found with email '%s'.", email));
+        } else {
+            return account;
+        }
+    }
 
     public User register(RegisterDTO account) {
         if (accountRepository.findByEmail(account.getEmail()) == null) {
-            Account newAccount = new Account(account.getEmail(), account.getPassword(), account.getType());
+            Account newAccount = new Account(account.getEmail(), passwordEncoder.encode(account.getPassword()), account.getType());
             User newUser = new User();
             newUser.setName(account.getName());
             newUser.setLastName(account.getLastName());
@@ -53,6 +68,7 @@ public class AccountService {
         }
         return null;
     }
+
 
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());

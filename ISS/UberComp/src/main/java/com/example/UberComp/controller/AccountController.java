@@ -41,28 +41,6 @@ class AccountController {
     //    return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
     //}
 
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAccountDTO> getAccount(@RequestBody LogAccountDTO creds) throws Exception{
-        Account loggedIn = accountService.login(creds);
-        if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        GetAccountDTO account = new GetAccountDTO();
-        account.setId(loggedIn.getId());
-        //account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
-        account.setEmail(loggedIn.getEmail());
-        account.setRole(loggedIn.getAccountType().toString());
-        //account.setPhoneNumber(loggedIn.getUser().getPhone());
-        return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetProfileDTO> createAccount(@RequestBody RegisterDTO userData) throws Exception{
-        User registered = accountService.register(userData);
-        AccountDTO registeredDTO = new AccountDTO(userData.getEmail());
-        CreatedUserDTO createdUserDTO = new CreatedUserDTO(registered);
-        GetProfileDTO profile = new GetProfileDTO(createdUserDTO, registeredDTO);
-        return new ResponseEntity<GetProfileDTO>(profile, HttpStatus.CREATED);
-    }
-
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
         UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
