@@ -47,6 +47,9 @@ public class Ride {
     private LocalDateTime estimatedTimeArrival;
 
     @Column
+    private LocalDateTime finish;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private RideStatus status;
 

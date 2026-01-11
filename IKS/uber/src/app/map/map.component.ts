@@ -26,8 +26,8 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 @Component({
   selector: 'app-map',
   imports: [CommonModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.css',
+  templateUrl: '../maps/map/map.component.html',
+  styleUrl: '../maps/map/map.component.css',
 })
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
@@ -348,7 +348,6 @@ private loadFromStations(): void {
       .subscribe(rides => {
 
         for (const ride of rides) {
-          console.log(ride)
           const now = Date.now();
           const start = new Date(ride.startTime).getTime();
           const end = new Date(ride.endTime).getTime();
@@ -362,7 +361,6 @@ private loadFromStations(): void {
             .filter(s => s.lat != null && s.lon != null)
             .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
 
-            console.log(waypoints)
           if (waypoints.length < 2) return;
 
           const router = L.Routing.mapbox(environment.apiKey, {
@@ -381,7 +379,6 @@ private loadFromStations(): void {
             );
 
             const pos = coords[index];
-            console.log(pos)
             L.marker([pos.lat, pos.lng], {
               icon: this.RedCarIcon
             }).addTo(this.map);

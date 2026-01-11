@@ -49,7 +49,7 @@ export const routes: Routes = [
     component: IncomingRideComponent,
   },
   {
-    path: 'tracking-route',
+    path: 'tracking-route/:rideId',
     component: TrackingRouteComponent,
   },
   {

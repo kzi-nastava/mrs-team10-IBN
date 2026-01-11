@@ -1,0 +1,2 @@
+Start-Process -FilePath powershell.exe -ArgumentList '-NoExit', '-Command', "& {cd ISS\UberComp; ./mvnw.cmd clean install; java -jar target/UberComp-0.0.1-SNAPSHOT.jar;}"
+Start-Process -FilePath powershell.exe -ArgumentList '-NoExit', '-Command', "& {cd IKS\uber; ng serve;}"

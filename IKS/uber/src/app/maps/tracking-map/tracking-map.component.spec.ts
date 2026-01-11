@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DriverFormComponent } from './driver-form.component';
+import { TrackingMapComponent } from './tracking-map.component';
 
-describe('DriverFormComponent', () => {
-  let component: DriverFormComponent;
-  let fixture: ComponentFixture<DriverFormComponent>;
+describe('TrackingMapComponent', () => {
+  let component: TrackingMapComponent;
+  let fixture: ComponentFixture<TrackingMapComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DriverFormComponent]
+      imports: [TrackingMapComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DriverFormComponent);
+    fixture = TestBed.createComponent(TrackingMapComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

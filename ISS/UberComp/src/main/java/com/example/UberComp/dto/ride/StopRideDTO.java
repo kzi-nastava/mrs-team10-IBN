@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 
 @Data
 public class StopRideDTO {
-    private Route passed;
-    private Coordinate finish;
-    private LocalDateTime finishTime;
+    private int passed;
+    private double lat;
+    private double lon;
+    private String address;
+    private String finishTime;
 }

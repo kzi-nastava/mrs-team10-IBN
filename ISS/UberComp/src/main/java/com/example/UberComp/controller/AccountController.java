@@ -1,6 +1,7 @@
 package com.example.UberComp.controller;
 
 
+import com.example.UberComp.dto.driver.DriverChangeRequestDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/account")
+@CrossOrigin(origins = "http://localhost:4200")
 class AccountController {
     @Autowired
     private AccountService accountService;
@@ -44,10 +47,10 @@ class AccountController {
         if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         GetAccountDTO account = new GetAccountDTO();
         account.setId(loggedIn.getId());
-        account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
+        //account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
         account.setEmail(loggedIn.getEmail());
         account.setRole(loggedIn.getAccountType().toString());
-        account.setPhoneNumber(loggedIn.getUser().getPhone());
+        //account.setPhoneNumber(loggedIn.getUser().getPhone());
         return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
     }
 
@@ -83,41 +86,51 @@ class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) {
-        CreatedUserDTO createUserDTO = new CreatedUserDTO(1L, "Bojana", "Paunović", "adresa", "061234567", "image.png");
-
-        GetProfileDTO profile = new GetProfileDTO(
-                createUserDTO,
-                null
-        );
-
+    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) throws Exception {
+        GetProfileDTO profile = accountService.getProfile(id);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/change-requests")
+    public ResponseEntity<List<DriverChangeRequestDTO>> getChangeRequests() {
+        List<DriverChangeRequestDTO> requests = accountService.getAllPendingRequests();
+        return ResponseEntity.ok(requests);
     }
 
     @PostMapping("/approve-change/{id}")
     public ResponseEntity<String> approveChange(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        try {
+            accountService.approveDriverChange(id);
+            return ResponseEntity.ok("Profile change approved successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Profile change request not found");
+        }
     }
 
     @PostMapping("/reject-change/{id}")
-    public ResponseEntity<String> rejectChange(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> rejectDriverChange(@PathVariable Long id) {
+        try {
+            accountService.rejectDriverChange(id);
+            return ResponseEntity.ok("Profile change rejected successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Profile change request not found");
+        }
     }
 
     @PutMapping("/{id}/profile")
-    public ResponseEntity<GetProfileDTO> updateProfile(@PathVariable Long id, @RequestBody CreateUserDTO updatedUser) {
-        CreatedUserDTO createUserDTO = new CreatedUserDTO(
-                1L,
-                updatedUser.getName(),
-                updatedUser.getLastName(),
-                updatedUser.getHomeAddress(),
-                updatedUser.getPhone(),
-                updatedUser.getImage()
-        );
-
-        GetProfileDTO updatedProfile = new GetProfileDTO(createUserDTO, null);
-
-        return ResponseEntity.ok(updatedProfile);
+    public ResponseEntity<GetProfileDTO> updateProfile(
+            @PathVariable Long id,
+            @RequestBody CreateUserDTO updatedUser) {
+        try {
+            GetProfileDTO updatedProfile = accountService.updateProfile(id, updatedUser);
+            return ResponseEntity.ok(updatedProfile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
-
 }

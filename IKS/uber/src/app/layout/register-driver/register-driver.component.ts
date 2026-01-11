@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { DriverFormComponent, DriverFormData } from '../../forms/driver-form/driver-form.component';
+import { UserFormComponent, UserFormData } from '../../forms/user-form/user-form.component';
 import {
   VehicleFormComponent,
   VehicleFormData,
@@ -10,34 +10,48 @@ import {
 @Component({
   selector: 'app-register-driver',
   standalone: true,
-  imports: [CommonModule, NavBarComponent, DriverFormComponent, VehicleFormComponent],
+  imports: [CommonModule, NavBarComponent, UserFormComponent, VehicleFormComponent],
   templateUrl: './register-driver.component.html',
   styleUrls: ['./register-driver.component.css'],
 })
 export class RegisterDriverComponent implements OnInit {
-  newDriverData: DriverFormData = {
+  @ViewChild(UserFormComponent) userForm!: UserFormComponent;
+  @ViewChild(VehicleFormComponent) vehicleForm!: VehicleFormComponent;
+
+  newDriverData: UserFormData = {
     firstName: '',
     lastName: '',
     address: '',
     phone: '',
     email: '',
+    image: '',
   };
 
-  emptyDriverData: DriverFormData = {
+  emptyDriverData: UserFormData = {
     firstName: '',
     lastName: '',
     address: '',
     phone: '',
     email: '',
+    image: '',
   };
 
   newVehicleData: VehicleFormData = {
     model: '',
     type: 'standard',
-    licensePlate: '',
-    seats: 4,
-    babyTransport: false,
-    petTransport: false,
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
+  };
+
+  emptyVehicleData: VehicleFormData = {
+    model: '',
+    type: 'standard',
+    plate: '',
+    seatNumber: 4,
+    babySeat: false,
+    petFriendly: false,
   };
 
   successMessage: string | null = null;
@@ -46,12 +60,30 @@ export class RegisterDriverComponent implements OnInit {
   ngOnInit() {}
 
   registerDriver() {
-    const registrationData = {
-      driver: this.newDriverData,
-      vehicle: this.newVehicleData,
+    this.userForm.formTouched = true;
+    this.userForm.touchedFields = {
+      firstName: true,
+      lastName: true,
+      address: true,
+      phone: true,
+      email: true,
     };
 
-    console.log('Registering driver with vehicle:', registrationData);
+    this.vehicleForm.formTouched = true;
+    this.vehicleForm.touchedFields = {
+      model: true,
+      type: true,
+      licensePlate: true,
+      seatNumber: true,
+    };
+
+    const isUserFormValid = this.userForm.isFormValid();
+    const isVehicleFormValid = this.vehicleForm.isFormValid();
+
+    if (!isUserFormValid || !isVehicleFormValid) {
+      this.showError('Please fill in all required fields correctly.');
+      return;
+    }
 
     this.showSuccess('Driver and vehicle registered successfully!');
 
@@ -67,16 +99,37 @@ export class RegisterDriverComponent implements OnInit {
       address: '',
       phone: '',
       email: '',
+      image: '',
     };
 
     this.newVehicleData = {
       model: '',
       type: 'standard',
-      licensePlate: '',
-      seats: 4,
-      babyTransport: false,
-      petTransport: false,
+      plate: '',
+      seatNumber: 4,
+      babySeat: false,
+      petFriendly: false,
     };
+
+    if (this.userForm) {
+      this.userForm.formTouched = false;
+      this.userForm.touchedFields = {
+        firstName: false,
+        lastName: false,
+        address: false,
+        phone: false,
+        email: false,
+      };
+    }
+    if (this.vehicleForm) {
+      this.vehicleForm.formTouched = false;
+      this.vehicleForm.touchedFields = {
+        model: false,
+        type: false,
+        licensePlate: false,
+        seatNumber: false,
+      };
+    }
   }
 
   showSuccess(message: string) {
