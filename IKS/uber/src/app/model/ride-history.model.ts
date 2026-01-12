@@ -18,9 +18,11 @@ export interface Ride {
   endLocation: string;
   route: Route;
   startTime: Date;
-  endTime: Date;
+  endTime: Date,
+  estimatedTimeArrival: Date;
   price: number;
   passengers: User[];
   canceled: boolean;
   panic: boolean
+  isBusy: boolean
 }

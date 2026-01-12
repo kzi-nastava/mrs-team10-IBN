@@ -83,13 +83,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.initMap();
@@ -103,7 +103,6 @@ export class MapComponent implements AfterViewInit, OnChanges {
     setTimeout(() => {
     this.map.invalidateSize();
     
-    this.getVehiclePositions();
     if (this.stations && this.stations.length > 0) {
       console.log('Loading stations in ngAfterViewInit:', this.stations);
       this.loadFromStations();
@@ -134,7 +133,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       doubleClickZoom: this.interactive, 
       boxZoom: this.interactive,        
       keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      zoomControl: this.interactive  ,   
     });
 
     
@@ -343,48 +342,5 @@ private loadFromStations(): void {
     }
   }
     
-  getVehiclePositions(): void {
-    this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
-      .subscribe(rides => {
-
-        for (const ride of rides) {
-          const now = Date.now();
-          const start = new Date(ride.startTime).getTime();
-          const end = new Date(ride.endTime).getTime();
-
-          let progress = 0;
-          if (end > start) {
-            progress = (now - start) / (end - start);
-          }
-          progress = Math.max(0, Math.min(1, progress));
-          const waypoints = ride.route.stations
-            .filter(s => s.lat != null && s.lon != null)
-            .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
-
-          if (waypoints.length < 2) return;
-
-          const router = L.Routing.mapbox(environment.apiKey, {
-            profile: 'mapbox/driving'
-          });
-
-          (router as any).route(waypoints, (err: any, routes: any[]) => {
-            if (err || !routes || routes.length === 0) return;
-
-            const coords = routes[0].coordinates;
-            if (!coords || coords.length === 0) return;
-
-            const index = Math.min(
-              coords.length - 1,
-              Math.floor(progress * coords.length)
-            );
-
-            const pos = coords[index];
-            L.marker([pos.lat, pos.lng], {
-              icon: this.RedCarIcon
-            }).addTo(this.map);
-          });
-        }
-      });
-  }
 
 }

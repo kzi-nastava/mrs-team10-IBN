@@ -2,11 +2,14 @@ package com.example.UberComp.service;
 
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Coordinate;
+import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.Route;
 import com.example.UberComp.repository.CoordinateRepository;
+import com.example.UberComp.repository.DriverRepository;
 import com.example.UberComp.repository.RideRepository;
 import com.example.UberComp.repository.RouteRepository;
 import lombok.AllArgsConstructor;
@@ -33,6 +36,8 @@ public class RideService {
     private CoordinateRepository coordinateRepository;
     @Autowired
     private RouteRepository routeRepository;
+    @Autowired
+    private DriverRepository driverRepository;
 
     public IncomingRideDTO getIncomingRide(){
         IncomingRideDTO newRide = new IncomingRideDTO();
@@ -63,10 +68,17 @@ public class RideService {
 
     @Transactional(readOnly = true)
     public ArrayList<GetVehiclePositionDTO> getActiveRides() {
-        //get active drivers
-        Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(1L);
         ArrayList<GetVehiclePositionDTO> activeRides = new ArrayList<>();
-        activeRides.add(new GetVehiclePositionDTO(ride));
+        List<Driver> activeDrivers = driverRepository.findByStatus(DriverStatus.DRIVING);
+        for(Driver driver: activeDrivers) {
+            Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(driver.getId());
+            activeRides.add(new GetVehiclePositionDTO(ride, true));
+        }
+        activeDrivers = driverRepository.findByStatus(DriverStatus.ONLINE);
+        for(Driver driver: activeDrivers) {
+            Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(driver.getId());
+            activeRides.add(new GetVehiclePositionDTO(ride, false));
+        }
         return activeRides;
     }
 

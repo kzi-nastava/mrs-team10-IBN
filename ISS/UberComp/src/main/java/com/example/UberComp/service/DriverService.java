@@ -3,6 +3,7 @@ package com.example.UberComp.service;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreatedUserDTO;
+import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,5 +88,9 @@ public class DriverService {
         request.setStatus("PENDING");
         request.setRequestDate(LocalDateTime.now());
         changeRequestRepository.save(request);
+    }
+
+    List<Driver> findByStatus(DriverStatus status){
+        return driverRepository.findByStatus(status);
     }
 }
