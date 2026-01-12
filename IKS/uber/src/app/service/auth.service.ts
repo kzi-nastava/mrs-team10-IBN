@@ -13,7 +13,6 @@ export class AuthService {
   login(creds: LoginCreds) {
     return this.http.post<any>(`${environment.authHost}/login`, creds, {observe: 'response'}).pipe(
       map((res: HttpResponse<any>) => {
-        console.log(res)
         if (res.status == 200){
           localStorage.setItem("auth_token", res.body.accessToken)
           localStorage.setItem("expires_in", res.body.expiresIn)

@@ -24,7 +24,6 @@ export class LoginComponent {
         email: this.loginForm.value.email as string,
         password: this.loginForm.value.password as string
       }
-      console.log(creds)
       this.authService.login(creds).subscribe(
         (res) => {
           if (res) this.router.navigate(["/home"])
