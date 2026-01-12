@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 import { ChangeDetectorRef } from '@angular/core';
 import { DriverDetails } from '../../model/driver.model';
 import { VehicleTypeService } from '../../service/vehicle-type.service';
+import { VehiclePriceComponent } from '../../forms/vehicle-price/vehicle-price.component';
 
 @Component({
   selector: 'app-account',
@@ -23,6 +24,7 @@ import { VehicleTypeService } from '../../service/vehicle-type.service';
     RouterOutlet,
     VehicleFormComponent,
     UserFormComponent,
+    VehiclePriceComponent
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
@@ -367,6 +369,17 @@ export class AccountComponent implements OnInit {
     this.showVehicleModal = false;
   }
 
+  showVehiclePriceModal = false;
+
+  openVehiclePriceModal() {
+    this.showVehiclePriceModal = true;
+  }
+
+  closeVehiclePriceModal() {
+    this.showVehiclePriceModal = false;
+  }
+
+
   get menuItems() {
     const commonItems = [
       {
@@ -396,6 +409,7 @@ export class AccountComponent implements OnInit {
         { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
         { icon: '📥', label: 'Requests', route: '/requests' },
         { icon: '👥', label: 'Manage users', route: '/manage-users' },
+        { icon: '💵', label: 'Vehicle price', route: '/vehicle-price' },
       ],
     };
     if (this.user != null) {

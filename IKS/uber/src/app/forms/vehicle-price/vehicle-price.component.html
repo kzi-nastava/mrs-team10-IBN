@@ -1,0 +1,30 @@
+<div class="overlay" (click)="close()">
+  <div class="dialog" (click)="stopPropagation($event)">
+
+    <div class="content">
+
+      <div class="column">
+        <h2>Vehicle type</h2>
+        <div class="pill">Standard</div>
+        <div class="pill">Luxury</div>
+        <div class="pill">Van</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="column">
+        <h2>Price (RSD)</h2>
+        <input class="pill input"  [(ngModel)]="prices.standard">
+        <input class="pill input" [(ngModel)]="prices.luxury">
+        <input class="pill input" [(ngModel)]="prices.van">
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="cancel" (click)="close()">Cancel</button>
+      <button class="save" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>
