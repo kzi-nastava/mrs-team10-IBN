@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from "@angular/router";
-import { RegistrationData, UserService } from '../../service/user.service';
+import { RegistrationData, AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -10,7 +10,7 @@ import { RegistrationData, UserService } from '../../service/user.service';
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  userService: UserService = inject(UserService);
+  authService: AuthService = inject(AuthService);
   router: Router = inject(Router)
 
   registerForm = new FormGroup({
@@ -47,13 +47,11 @@ export class RegisterComponent {
       image: formValue.image || ''
     };
 
-    this.userService.registerUser(registrationData).subscribe({
-      next: () => {
-        this.router.navigate(['/home'])
-      },
-      error: (err) => {
-        console.log(err)
+    this.authService.register(registrationData).subscribe(
+      (res) => {
+        if (res) this.router.navigate(["/home"])
+        else alert("Account already exists!")
       }
-    });
+    )
   }
 }

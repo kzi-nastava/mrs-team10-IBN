@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
 import { TrackingMapComponent } from '../../maps/tracking-map/tracking-map.component';
-import { UserService } from '../../service/user.service';
+import { AuthService } from '../../service/auth.service';
 import { User } from '../../model/user.model';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
@@ -19,7 +19,7 @@ import { Station } from '../../model/ride-history.model';
 export class TrackingRouteComponent {
   router: Router = inject(Router);
   routeService: RouteService = inject(RouteService)
-  userService: UserService = inject(UserService)
+  userService: AuthService = inject(AuthService)
   private cdr = inject(ChangeDetectorRef);
   rideId?: number;
   route: Station[] = []
@@ -43,6 +43,8 @@ export class TrackingRouteComponent {
         "role":"driver",
         "phone":"000",
         "image":"",
+        "address":"slay",
+        "email":"user@gmail.com"
       }
     }
     this.routeService.getRide().subscribe({

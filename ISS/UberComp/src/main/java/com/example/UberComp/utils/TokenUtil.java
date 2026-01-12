@@ -14,7 +14,7 @@ import java.util.Date;
 
 @Component
 public class TokenUtil {
-    @Value("spring-security-example")
+    @Value("uber-comp")
     private String APP_NAME;
 
     @Value("lanadelrey")
@@ -110,6 +110,7 @@ public class TokenUtil {
 
     private Claims getAllClaimsFromToken(String token) {
         Claims claims;
+        System.out.println(SECRET);
         try {
             claims = Jwts.parser()
                     .setSigningKey(SECRET)

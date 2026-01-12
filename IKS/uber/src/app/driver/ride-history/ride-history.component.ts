@@ -1,7 +1,7 @@
 import { Component, Signal, computed, inject } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
-import { UserService } from '../../service/user.service';
+import { AuthService } from '../../service/auth.service';
 import { NavBarComponent } from '../../layout/nav-bar/nav-bar.component';
 import { RideDialogComponent } from '../ride-dialog/ride-dialog.component';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
