@@ -11,15 +11,13 @@ import * as L from 'leaflet';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
-import { environment } from '../../../environments/environment';
-import { Location } from '../../model/location.model';
+import { environment } from '../../environments/environment';
+import { Location } from '../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../../model/ride-history.model';
-import { Ride } from '../../model/ride-history.model';
+import { Station } from '../model/ride-history.model';
+import { Ride } from '../model/ride-history.model';
 import { signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -28,8 +26,8 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 @Component({
   selector: 'app-map',
   imports: [CommonModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.css',
+  templateUrl: '../maps/map/map.component.html',
+  styleUrl: '../maps/map/map.component.css',
 })
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
@@ -43,7 +41,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
-  private vehicleLayer!: L.LayerGroup;
+  private activeRides: Ride[] = [];
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -85,14 +83,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
-      className: 'car-icon'
+      iconAnchor: [15, 15],
     });
 
     this.initMap();
@@ -103,12 +100,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
       this.updateLocationsFromInput();
     }
 
-    this.vehicleLayer = L.layerGroup().addTo(this.map);
-
     setTimeout(() => {
     this.map.invalidateSize();
     
-    this.getVehiclePositions();
     if (this.stations && this.stations.length > 0) {
       console.log('Loading stations in ngAfterViewInit:', this.stations);
       this.loadFromStations();
@@ -139,7 +133,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       doubleClickZoom: this.interactive, 
       boxZoom: this.interactive,        
       keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      zoomControl: this.interactive  ,   
     });
 
     
@@ -347,61 +341,6 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
-      
-
-  async getVehiclePositions() {
-    while (true) {
-      try {
-        const rides = await firstValueFrom(
-          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
-        );
-
-        for (const ride of rides) {
-          const now = Date.now();
-          const start = new Date(ride.startTime).getTime();
-          const eta = new Date(ride.estimatedTimeArrival).getTime();
-
-          let progress = 0;
-          if (eta > start) progress = (now - start) / (eta - start);
-          progress = Math.max(0, Math.min(1, progress));
-
-          const waypoints = ride.route.stations
-            .filter(s => s.lat != null && s.lon != null)
-            .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
-
-          if (waypoints.length < 2) continue;
-
-          const router = L.Routing.mapbox(environment.apiKey, { profile: 'mapbox/driving' });
-
-          (router as any).route(waypoints, (err: any, routes: any[]) => {
-            if (err || !routes?.length) return;
-
-            const coords = routes[0].coordinates;
-            if (!coords?.length) return;
-
-            const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
-            const pos = coords[index];
-
-            L.marker(
-              [pos.lat, pos.lng],
-              { icon: ride.isBusy ? this.RedCarIcon : this.GreenCarIcon }
-            ).addTo(this.vehicleLayer);
-          });
-        }
-
-      } catch (err) {
-        console.error(err);
-      }
-
-      this.vehicleLayer.clearLayers();
-      await this.sleep(5000);
-    }
-  }
-
-  sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
+    
 
 }
-

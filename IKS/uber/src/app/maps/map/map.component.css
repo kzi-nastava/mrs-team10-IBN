@@ -35,3 +35,8 @@
   padding: 6px 12px;
   color: black;
 }
+
+.car-icon {
+  transition: none !important;
+}
+
