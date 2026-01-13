@@ -357,7 +357,6 @@ private loadFromStations(): void {
         );
 
         for (const ride of rides) {
-          console.log(ride)
           const now = Date.now();
           const start = new Date(ride.startTime).getTime();
           const eta = new Date(ride.estimatedTimeArrival).getTime();
