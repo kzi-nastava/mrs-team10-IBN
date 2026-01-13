@@ -17,11 +17,19 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.api.ApiClient;
+import com.example.ubercorp.api.UserApi;
+import com.example.ubercorp.dto.AccountDTO;
+import com.example.ubercorp.dto.CreatedUserDTO;
+import com.example.ubercorp.dto.GetProfileDTO;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class AccountFragment extends Fragment {
     // Header & Profile
@@ -60,12 +68,13 @@ public class AccountFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
-
         setupMenuItems(view);
         initializeViews(view);
         setupListeners();
-        configureMenuForRole("admin");
+        configureMenuForRole("user");
         startFlyingTaxiAnimation();
+
+        view.post(() -> loadUserProfile(2L));
 
         return view;
     }
@@ -351,5 +360,48 @@ public class AccountFragment extends Fragment {
             }
         });
         animator.start();
+    }
+
+    private void loadUserProfile(Long userId) {
+        UserApi api = ApiClient.getInstance().create(UserApi.class);
+        Call<GetProfileDTO> call = api.getUser(userId);
+
+        call.enqueue(new Callback<GetProfileDTO>() {
+            @Override
+            public void onResponse(Call<GetProfileDTO> call, retrofit2.Response<GetProfileDTO> response) {
+                 if (response.isSuccessful() && response.body() != null) {
+                    GetProfileDTO profile = response.body();
+                    CreatedUserDTO user = profile.getCreatedUserDTO();
+                    AccountDTO account = profile.getAccountDTO();
+
+                    if (user != null) {
+                        if (etFirstName != null) etFirstName.setText(user.getName());
+                        if (etLastName != null) etLastName.setText(user.getLastName());
+                        if (tvUserName != null) {
+                            tvUserName.setText(user.getName() + " " + user.getLastName());
+                        }
+                    }
+
+                    if (account != null && account.getEmail() != null) {
+                        if (etEmail != null) etEmail.setText(account.getEmail());
+                        if (tvUserEmail != null) tvUserEmail.setText(account.getEmail());
+                    }
+                } else {
+                    android.util.Log.e("AccountFragment", "Response not successful: " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            android.util.Log.e("AccountFragment", "Error: " + response.errorBody().string());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetProfileDTO> call, Throwable t) {
+                android.util.Log.e("AccountFragment", "API FAILED", t);
+            }
+        });
     }
 }

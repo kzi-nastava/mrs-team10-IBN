@@ -89,7 +89,7 @@
                     android:id="@+id/tvUserName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bojana Paunovic"
+                    android:text=""
                     android:textColor="#FFFFFF"
                     android:textSize="26sp"
                     android:textStyle="bold"
@@ -100,7 +100,7 @@
                     android:id="@+id/tvUserEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="paunovicboka@gmail.com"
+                    android:text=""
                     android:textColor="#E0E0E0"
                     android:textSize="14sp"
                     android:layout_marginTop="2dp"/>
