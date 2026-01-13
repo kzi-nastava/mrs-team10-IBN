@@ -1,7 +1,8 @@
 INSERT INTO vehicle_type (name, price)
 VALUES
-    ('STANDARD', 1.0),
-    ('VAN', 1.5);
+    ('STANDARD', 120.20),
+    ('VAN', 222.22),
+    ('LUXURY', 333.33);
 
 INSERT INTO account (email, password, account_type, account_status, blocking_reason)
 VALUES

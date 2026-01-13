@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MapComponent } from '../../maps/map/map.component';
+import { MapComponent } from '../../maps/map-home/map.component';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { RideApproxFormComponent } from "../../forms/ride-approx-form/ride-approx-form.component";
 import { Location } from '../../model/location.model';

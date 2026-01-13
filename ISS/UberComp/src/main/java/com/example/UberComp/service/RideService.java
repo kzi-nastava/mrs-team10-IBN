@@ -71,12 +71,12 @@ public class RideService {
         ArrayList<GetVehiclePositionDTO> activeRides = new ArrayList<>();
         List<Driver> activeDrivers = driverRepository.findByStatus(DriverStatus.DRIVING);
         for(Driver driver: activeDrivers) {
-            Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(driver.getId());
+            Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
             activeRides.add(new GetVehiclePositionDTO(ride, true));
         }
         activeDrivers = driverRepository.findByStatus(DriverStatus.ONLINE);
         for(Driver driver: activeDrivers) {
-            Ride ride = rideRepository.findFirstByDriver_IdOrderByStart(driver.getId());
+            Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
             activeRides.add(new GetVehiclePositionDTO(ride, false));
         }
         return activeRides;

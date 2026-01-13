@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface RideRepository extends JpaRepository<Ride, Long> {
 
-    Ride findFirstByDriver_IdOrderByStart(Long driverId);
+    Ride findFirstByDriver_IdOrderByStartDesc(Long driverId);
 
     @Query("""
     SELECT r FROM Ride r
