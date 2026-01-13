@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateDriverDTO {
     private AccountDTO accountDTO;
-    private CreatedUserDTO createUserDTO;
+    private CreateUserDTO createUserDTO;
     private VehicleDTO vehicleDTO;
 }
