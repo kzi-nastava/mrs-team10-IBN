@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { Ride } from '../../model/ride-history.model';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { User } from '../../model/user.model';
-import { MapComponent } from '../../maps/map-ride-history/map.component';
+import { MapComponent } from '../../maps/map-basic/map.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RateDriverVehicleComponent } from '../../passenger/rate-driver-vehicle/rate-driver-vehicle.component';
 import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';

@@ -2,7 +2,7 @@ import { AfterViewInit, Component, inject, ChangeDetectorRef } from '@angular/co
 import { MatIconModule } from '@angular/material/icon';
 import { NavBarComponent } from "../nav-bar/nav-bar.component";
 import { RouterLink } from '@angular/router';
-import { MapComponent } from "../../maps/map-home/map.component";
+import { MapComponent } from "../../maps/map-basic/map.component";
 import { Location } from '../../model/location.model';
 import { RouteService } from '../../service/route.service';
 import { Station } from '../../model/ride-history.model';
