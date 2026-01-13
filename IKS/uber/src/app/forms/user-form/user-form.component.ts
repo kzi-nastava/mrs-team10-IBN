@@ -28,6 +28,12 @@ export class UserFormComponent implements OnChanges {
     image: '',
   };
 
+  @Output() userDataChange = new EventEmitter<UserFormData>();
+
+  onUserDataChange() {
+    this.userDataChange.emit(this.formData);
+  }
+
   @Input() originalData: UserFormData = {
     firstName: '',
     lastName: '',
