@@ -42,6 +42,12 @@ export class VehicleFormComponent implements OnChanges {
   @Output() formSubmit = new EventEmitter<VehicleFormData>();
   @Output() closeModal = new EventEmitter<void>();
 
+  @Output() vehicleDataChange = new EventEmitter<VehicleFormData>();
+
+  onVehicleDataChange() {
+    this.vehicleDataChange.emit(this.vehicleData);
+  }
+
   formTouched = false;
   touchedFields = {
     model: false,

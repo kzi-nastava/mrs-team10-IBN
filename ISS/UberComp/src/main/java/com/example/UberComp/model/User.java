@@ -38,5 +38,6 @@ public class User {
     private List<Route> favoriteRoutes;
 
     @OneToOne
+    @JoinColumn(name = "account_id")
     private Account account;
 }
