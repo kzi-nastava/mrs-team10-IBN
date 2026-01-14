@@ -8,6 +8,8 @@ import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
+import com.example.UberComp.enums.AccountStatus;
+import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.AccountRepository;
 import com.example.UberComp.repository.DriverChangeRequestRepository;
@@ -54,17 +56,25 @@ public class AccountService implements UserDetailsService {
 
     public User register(RegisterDTO account) {
         if (accountRepository.findByEmail(account.getEmail()) == null) {
-            Account newAccount = new Account(account.getEmail(), passwordEncoder.encode(account.getPassword()), account.getType());
-            User newUser = new User();
+            Account newAccount = new Account(account.getEmail(), account.getPassword(), account.getType());
+            User newUser;
+            if (account.getType() == AccountType.DRIVER) {
+                newUser = new Driver();
+            } else {
+                newUser = new User();
+            }
             newUser.setName(account.getName());
             newUser.setLastName(account.getLastName());
             newUser.setHomeAddress(account.getHomeAddress());
             newUser.setPhone(account.getPhone());
             newUser.setImage(account.getImage());
+
             newUser.setAccount(newAccount);
             newAccount.setUser(newUser);
+
             accountRepository.save(newAccount);
-            return userRepository.save(newUser);
+
+            return newUser;
         }
         return null;
     }
@@ -72,7 +82,7 @@ public class AccountService implements UserDetailsService {
 
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
-        return (account != null && account.getPassword().equals(accountDTO.getPassword())) ? account : null;
+        return (account != null && account.getAccountStatus() == AccountStatus.VERIFIED && account.getPassword().equals(accountDTO.getPassword())) ? account : null;
     }
 
     public GetAccountDTO getById(Long id) {

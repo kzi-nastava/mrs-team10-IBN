@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { MapComponent } from '../../maps/map/map.component';
+import { MapComponent } from '../../maps/map-basic/map.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';

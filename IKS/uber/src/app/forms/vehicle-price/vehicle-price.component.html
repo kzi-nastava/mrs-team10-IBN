@@ -1,0 +1,30 @@
+<div class="overlay" (click)="close()">
+  <div class="dialog" (click)="stopPropagation($event)">
+
+    <div class="content">
+
+      <div class="column">
+        <h2>Vehicle type</h2>
+          @for (price of prices(); track price.id) {
+            <input class="pill" [(ngModel)]="price.name" disabled="true">
+          }
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="column">
+        <h2>Price (RSD)</h2>
+          @for (price of prices(); track price.id) {
+            <input type="number" step="0.01" class="pill input"  [(ngModel)]="price.price" >
+          }
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="cancel" (click)="close()">Cancel</button>
+      <button class="save" (click)="save()">Save</button>
+    </div>
+
+  </div>
+</div>

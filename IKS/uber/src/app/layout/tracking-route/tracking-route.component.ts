@@ -36,16 +36,14 @@ export class TrackingRouteComponent {
     if (logged != null) {
       this.user = JSON.parse(logged) as User;
     } else {
-      this.user = {
-        "id":1,
-        "name":"Petar",
-        "lastName":"Petrović",
-        "role":"driver",
-        "phone":"000",
-        "image":"",
-        "address":"slay",
-        "email":"user@gmail.com"
-      }
+      // this.user = {
+      //   "id":1,
+      //   "name":"Petar",
+      //   "lastName":"Petrović",
+      //   "role":"driver",
+      //   "phone":"000",
+      //   "image":"",
+      // }
     }
     this.routeService.getRide().subscribe({
       next: (response) => {

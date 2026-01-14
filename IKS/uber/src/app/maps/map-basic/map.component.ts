@@ -16,6 +16,8 @@ import { Location } from '../../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Station } from '../../model/ride-history.model';
+import { Ride } from '../../model/ride-history.model';
+import { signal } from '@angular/core';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -24,8 +26,8 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 @Component({
   selector: 'app-map',
   imports: [CommonModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.css',
+  templateUrl: '../map-home/map.component.html',
+  styleUrl: '../map-home/map.component.css',
 })
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
@@ -39,6 +41,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
+  private activeRides: Ride[] = [];
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -79,14 +82,14 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
-      iconSize: [38, 38],
-      iconAnchor: [22, 94],
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
-      iconSize: [38, 38],
-      iconAnchor: [22, 94],
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
     });
 
     this.initMap();
@@ -130,7 +133,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       doubleClickZoom: this.interactive, 
       boxZoom: this.interactive,        
       keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      zoomControl: this.interactive  ,   
     });
 
     
@@ -338,4 +341,6 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
+    
+
 }

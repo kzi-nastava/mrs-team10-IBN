@@ -14,6 +14,7 @@ import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate
 import { OrderRideComponent } from './layout/order-ride/order-ride.component';
 import { ManageUsersComponent } from './layout/manage-users/manage-users.component';
 import { RegisterDriverComponent } from './layout/register-driver/register-driver.component';
+import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 
 export const routes: Routes = [
   {
@@ -67,6 +68,10 @@ export const routes: Routes = [
   {
     path: 'manage-users',
     component: ManageUsersComponent,
+  },
+  {
+    path: 'vehicle-price',
+    component: VehiclePriceComponent
   },
   {
     path: 'register-driver',

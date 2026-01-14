@@ -26,12 +26,18 @@
       <ul class="menu">
         @for (item of menuItems; track item.label) {
         <li
-          (click)="item.label === 'My vehicle' ? openVehicleModal() : null"
-          [routerLink]="item.label !== 'My vehicle' ? item.route : null"
-        >
-          <span class="icon">{{ item.icon }}</span>
-          {{ item.label }}
-        </li>
+        (click)="
+          item.label === 'My vehicle' ? openVehicleModal() :
+          item.label === 'Vehicle price' ? openVehiclePriceModal() : null
+        "
+        [routerLink]="
+          item.label !== 'My vehicle' && item.label !== 'Vehicle price' ? item.route : null
+        "
+      >
+        <span class="icon">{{ item.icon }}</span>
+        {{ item.label }}
+      </li>
+
         }
       </ul>
     </div>
@@ -76,6 +82,13 @@
       [isDriverActive]="isDriverActive"
       (formSubmit)="onUserFormSubmit($event)"
     ></app-user-form>
+
+    
+  <app-vehicle-price
+    *ngIf="showVehiclePriceModal"
+    (closeModal)="closeVehiclePriceModal()"
+    >
+  </app-vehicle-price>
   </div>
 
   @if (successMessage) {
@@ -93,5 +106,7 @@
   ></app-vehicle-form>
   }
 </div>
+
+
 
 <router-outlet></router-outlet>

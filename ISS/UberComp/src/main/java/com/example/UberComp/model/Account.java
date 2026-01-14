@@ -41,7 +41,7 @@ public class Account implements UserDetails {
     @Column
     private String blockingReason;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private User user;
 
     public Account(String email, String password, AccountType type){
