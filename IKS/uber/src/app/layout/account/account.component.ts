@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -13,6 +13,7 @@ import { VehicleTypeService } from '../../service/vehicle-type.service';
 import { User } from '../../model/user.model';
 import { DriverDetails } from '../../model/driver.model';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-account',
@@ -30,6 +31,8 @@ import { environment } from '../../../environments/environment';
   standalone: true,
 })
 export class AccountComponent implements OnInit {
+  private authService = inject(AuthService);
+
   user: User | null = null;
   driverDetails: DriverDetails | null = null;
   userFormData!: UserFormData;
@@ -59,7 +62,7 @@ export class AccountComponent implements OnInit {
   }
 
   private getAuthHeaders() {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('auth_token');
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${token}`,
@@ -68,7 +71,18 @@ export class AccountComponent implements OnInit {
   }
 
   isDriver() {
-    return this.user?.role === 'driver';
+    const role = this.authService.role();
+    return role === 'DRIVER';
+  }
+
+  isAdministrator() {
+    const role = this.authService.role();
+    return role === 'ADMINISTRATOR';
+  }
+
+  isPassenger() {
+    const role = this.authService.role();
+    return role === 'PASSENGER';
   }
 
   loadUserData() {
@@ -97,23 +111,16 @@ export class AccountComponent implements OnInit {
         this.userProfileImage = userData.image || 'accountpic.png';
         this.originalUserFormData = { ...this.userFormData };
 
-        let userRole = 'passenger';
+        const roleFromToken = this.authService.role();
+        console.log('Role from token:', roleFromToken);
 
-        if (accountData.accountType) {
-          userRole = accountData.accountType.toLowerCase();
-        } else if (userData.accountType) {
-          userRole = userData.accountType.toLowerCase();
+        if (roleFromToken) {
+          this.user = { role: roleFromToken.toLowerCase() } as User;
         } else {
-          console.warn(
-            'AccountType not found in response, attempting to load driver details to determine role'
-          );
-          this.attemptLoadDriverDetails();
-          userRole = 'passenger';
+          this.user = { role: 'passenger' } as User;
         }
 
-        this.user = { role: userRole } as User;
-
-        if (userRole === 'driver') {
+        if (this.isDriver()) {
           this.loadDriverDetails();
         }
 
@@ -133,11 +140,9 @@ export class AccountComponent implements OnInit {
       .get<DriverDetails>(`${environment.apiHost}/drivers/me`, this.getAuthHeaders())
       .subscribe({
         next: (response) => {
-          this.user = { role: 'driver' } as User;
           this.processDriverDetails(response);
         },
         error: () => {
-          this.user = { role: 'passenger' } as User;
           this.cd.detectChanges();
         },
       });
@@ -397,7 +402,9 @@ export class AccountComponent implements OnInit {
       },
     ];
 
-    const roleMenus = {
+    type RoleType = 'passenger' | 'driver' | 'administrator';
+
+    const roleMenus: Record<RoleType, Array<{ icon: string; label: string; route: string }>> = {
       passenger: [
         { icon: '❤️', label: 'Favorites', route: '/favorites' },
         { icon: '📊', label: 'My statistics', route: '/statistics/user' },
@@ -415,9 +422,16 @@ export class AccountComponent implements OnInit {
         { icon: '💵', label: 'Vehicle price', route: '/vehicle-price' },
       ],
     };
-    if (this.user != null) {
-      return [...(roleMenus[this.user.role] || []), ...commonItems];
-    } else return null;
+
+    const userRole = this.authService.role();
+
+    if (!userRole) {
+      return null;
+    }
+
+    const roleLowercase = userRole.toLowerCase() as RoleType;
+
+    return [...(roleMenus[roleLowercase] || []), ...commonItems];
   }
 
   initParticles() {

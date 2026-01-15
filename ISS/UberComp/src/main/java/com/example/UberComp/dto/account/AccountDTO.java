@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AccountDTO {
     private String email;
-    private AccountType accountType;
 }
