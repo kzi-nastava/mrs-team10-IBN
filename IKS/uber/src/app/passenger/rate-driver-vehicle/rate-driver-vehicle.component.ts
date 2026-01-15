@@ -30,9 +30,8 @@ export class RateDriverVehicleComponent {
         @Inject(MAT_DIALOG_DATA) public data: {rideId: number},
         private dialog: MatDialog
 ){
-
-  }
-
+  this.review.rideId = data.rideId;
+}
   stars = [1, 2, 3, 4, 5];
   driverHover = 0;
   vehicleHover = 0;

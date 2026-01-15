@@ -8,6 +8,7 @@ import { MapComponent } from '../../maps/map-basic/map.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { RateDriverVehicleComponent } from '../../passenger/rate-driver-vehicle/rate-driver-vehicle.component';
 import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';
+import { AuthService } from '../../service/auth.service';
 @Component({
   selector: 'app-ride-dialog',
   templateUrl: './ride-dialog.component.html',
@@ -22,21 +23,14 @@ import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog
   providers: [DatePipe]
 })
 export class RideDialogComponent {
-  protected user: User | null
-
+  protected role: string | null;
   constructor(
     public dialogRef: MatDialogRef<RideDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public ride: Ride,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {
-    let logged = sessionStorage.getItem('loggedUser')
-    if (logged != null){
-      this.user = JSON.parse(logged) as User
-      console.log(this.user)
-    } else {
-      this.user = null
-    }
-
+    this.role = authService.role();
   }
 
   openRateDialog() {

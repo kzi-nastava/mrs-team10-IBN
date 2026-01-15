@@ -20,7 +20,7 @@
 </div>
 
 <div class="users-wrapper">
-@if(user?.role != 'passenger'){
+@if(role != 'passenger'){
   <div class="users">
       <div class="user-card" *ngFor="let passenger of ride.passengers">
           <img  [src]="passenger.image || 'pfp.png'" alt="{{passenger.name}}" class="avatar">
@@ -34,7 +34,7 @@
     <button class="favorite-btn">❤️Favorites</button>
     <span class="price">{{ ride.price }} RSD</span>
     <button class="order-btn">Order</button>
-    @if(user?.role == 'passenger'){
+    @if(role == 'passenger'){
       <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
     }
   </div>
