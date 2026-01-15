@@ -1,10 +1,12 @@
 package com.example.ubercorp.fragments;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.util.TypedValueCompat;
 import androidx.fragment.app.Fragment;
 
@@ -30,6 +32,7 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.io.BufferedReader;
@@ -51,6 +54,7 @@ public class RouteFragment extends Fragment {
     private MapView mapView;
     private EditText startAddressInput, endAddressInput;
     private List<EditText> stationInputList = new ArrayList<EditText>();
+    private List<Marker> markers = new ArrayList<>();
     private Button drawRouteButton;
     private Button confirmButton;
     private Button addStopBtn;
@@ -181,8 +185,7 @@ public class RouteFragment extends Fragment {
                     stations.add(endPoint);
                     if (!stations.contains(null)) {
                         List<GeoPoint> routePoints = getRoute(stations);
-                        requireActivity().runOnUiThread(() -> drawRoute(routePoints));
-
+                        requireActivity().runOnUiThread(() -> drawRoute(routePoints, stations));
                     } else {
                         showToast("Unable to fetch route");
                     }
@@ -256,6 +259,21 @@ public class RouteFragment extends Fragment {
         return sb.toString();
     }
 
+    private void markStations(List<GeoPoint> stations) {
+        for (Marker marker : markers){
+            marker.remove(mapView);
+        }
+        for (GeoPoint station : stations){
+            Marker marker = new Marker(mapView);
+            marker.setPosition(station);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            marker.setIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_location));
+            marker.setVisible(true);
+            markers.add(marker);
+            mapView.getOverlays().add(marker);
+        }
+    }
+
     private List<GeoPoint> getRoute(List<GeoPoint> stations) throws IOException, JSONException {
         try {
             String urlString = buildQueryString(stations);
@@ -313,7 +331,7 @@ public class RouteFragment extends Fragment {
         return null;
     }
 
-    private void drawRoute(List<GeoPoint> routePoints) {
+    private void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {
         Polyline routeLine = new Polyline();
         routeLine.setPoints(routePoints);
         routeLine.setColor(0xFF0000FF);
@@ -321,9 +339,9 @@ public class RouteFragment extends Fragment {
 
         mapView.getOverlays().clear();
         mapView.getOverlays().add(routeLine);
+        markStations(stations);
         mapView.invalidate();
 
-        // Center the map on the first route point
         if (!routePoints.isEmpty()) {
             IMapController mapController = mapView.getController();
             mapController.setZoom(15.0);
