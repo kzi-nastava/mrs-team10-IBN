@@ -93,7 +93,7 @@ public class AccountService implements UserDetailsService {
 
     public GetProfileDTO getProfile(Long id) {
         return accountRepository.findById(id).map(account -> {
-            AccountDTO getAccount = new AccountDTO(account.getEmail(), account.getAccountType());
+            AccountDTO getAccount = new AccountDTO(account.getEmail());
             CreatedUserDTO getUser = new CreatedUserDTO(account.getUser());
             return new GetProfileDTO(getUser, getAccount);
         }).orElse(null);
@@ -112,7 +112,7 @@ public class AccountService implements UserDetailsService {
         user.setImage(updatedUser.getImage());
 
         userRepository.save(user);
-        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail(), account.getAccountType()));
+        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail()));
     }
 
     @Transactional
@@ -331,6 +331,6 @@ public class AccountService implements UserDetailsService {
         Account account = accountRepository.findByEmail(email);
         if (account == null) return null;
         User user = account.getUser();
-        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail(), account.getAccountType()));
+        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail()));
     }
 }

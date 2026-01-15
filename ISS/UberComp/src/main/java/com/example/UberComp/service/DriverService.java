@@ -92,7 +92,7 @@ public class DriverService {
         // TODO: activation token i verification mail
 
         return new DriverDTO(
-                new AccountDTO(driver.getAccount().getEmail(), driver.getAccount().getAccountType()),
+                new AccountDTO(driver.getAccount().getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
                 driver.getUptime()
@@ -107,7 +107,7 @@ public class DriverService {
         Vehicle vehicle = driver.getVehicle();
 
         return new DriverDTO(
-                new AccountDTO(account.getEmail(), account.getAccountType()),
+                new AccountDTO(account.getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
                 driver.getUptime()
@@ -121,7 +121,7 @@ public class DriverService {
         Vehicle vehicle = driver.getVehicle();
 
         return new DriverDTO(
-                new AccountDTO(account.getEmail(), account.getAccountType()),
+                new AccountDTO(account.getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
                 driver.getUptime()
