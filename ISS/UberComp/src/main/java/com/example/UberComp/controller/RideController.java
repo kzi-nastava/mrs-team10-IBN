@@ -3,12 +3,16 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
+import com.example.UberComp.model.Account;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,10 +24,20 @@ public class RideController {
 
     private RideService rideService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDTO>> getRides(
-            @RequestParam(required = true) Long userId) {
-        Collection<GetRideDTO> rides = rideService.getRides(userId);
+//    @PreAuthorize("hasRole('DRIVER')")
+    @GetMapping(value= "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> getRidesDriver(
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId());
+        return ResponseEntity.ok(rides);
+    }
+
+    @GetMapping(value= "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> getRidesPassenger(
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId());
         return ResponseEntity.ok(rides);
     }
 

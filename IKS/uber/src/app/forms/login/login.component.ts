@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from "@angular/router";
-import { LoginCreds, UserService } from '../../service/user.service';
+import { LoginCreds, AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +10,7 @@ import { LoginCreds, UserService } from '../../service/user.service';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  userService: UserService = inject(UserService)
+  authService: AuthService = inject(AuthService)
   router: Router = inject(Router)
 
   loginForm = new FormGroup({
@@ -24,14 +24,12 @@ export class LoginComponent {
         email: this.loginForm.value.email as string,
         password: this.loginForm.value.password as string
       }
-      this.userService.getUser(creds).subscribe({
-        next: (response) => {
-          sessionStorage.setItem('loggedUser', JSON.stringify(response))
-          this.router.navigate(['/home'])
-        },
-        error: (err) => console.log(err)
-      })
-      console.log(creds)
+      this.authService.login(creds).subscribe(
+        (res) => {
+          if (res) this.router.navigate(["/home"])
+          else alert("Incorrect Username or Password!")
+        }
+      )
     } else {
       alert("Invalid Login Form input!")
     }

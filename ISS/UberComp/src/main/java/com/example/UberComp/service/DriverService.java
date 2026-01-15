@@ -114,6 +114,20 @@ public class DriverService {
         );
     }
 
+    public DriverDTO findByAccountId(Long userId) {
+        Account account = accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Driver not found with user id: " + userId));
+        Driver driver = (Driver) account.getUser();
+
+        Vehicle vehicle = driver.getVehicle();
+
+        return new DriverDTO(
+                new AccountDTO(account.getEmail()),
+                new CreatedUserDTO(driver),
+                new VehicleDTO(vehicle),
+                driver.getUptime()
+        );
+    }
+
     @Transactional
     public void submitDriverChangeRequest(Long driverId, UpdateDriverDTO changeRequest) {
         Driver driver = driverRepository.findById(driverId)

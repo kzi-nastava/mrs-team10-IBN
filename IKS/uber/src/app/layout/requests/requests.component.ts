@@ -16,6 +16,8 @@ interface Request {
     oldData: { [key: string]: string };
     newData: { [key: string]: string };
   };
+  oldImage?: string;
+  newImage?: string;
 }
 
 @Component({
@@ -52,6 +54,13 @@ export class RequestsComponent implements OnInit {
     });
   }
 
+  hasImageChange(): boolean {
+    return !!(
+      this.selectedRequest?.newImage &&
+      this.selectedRequest.newImage !== this.selectedRequest.oldImage
+    );
+  }
+
   openRequestDetails(request: Request) {
     this.selectedRequest = request;
   }
@@ -62,12 +71,17 @@ export class RequestsComponent implements OnInit {
 
   handleApprove(id: number) {
     this.isLoading = true;
+    const requestId = id;
 
     this.http
-      .post(`${environment.apiHost}/account/approve-change/${id}`, {}, { responseType: 'text' })
+      .post(
+        `${environment.apiHost}/account/approve-change/${requestId}`,
+        {},
+        { responseType: 'text' }
+      )
       .subscribe({
         next: () => {
-          this.remove(id);
+          this.remove(requestId);
           this.closeModal();
           this.isLoading = false;
           this.cd.detectChanges();
@@ -81,12 +95,17 @@ export class RequestsComponent implements OnInit {
 
   handleReject(id: number) {
     this.isLoading = true;
+    const requestId = id;
 
     this.http
-      .post(`${environment.apiHost}/account/reject-change/${id}`, {}, { responseType: 'text' })
+      .post(
+        `${environment.apiHost}/account/reject-change/${requestId}`,
+        {},
+        { responseType: 'text' }
+      )
       .subscribe({
         next: () => {
-          this.remove(id);
+          this.remove(requestId);
           this.closeModal();
           this.isLoading = false;
           this.cd.detectChanges();

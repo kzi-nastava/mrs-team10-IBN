@@ -1,7 +1,7 @@
 import { Component, Signal, computed, inject } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
-import { UserService } from '../../service/user.service';
+import { AuthService } from '../../service/auth.service';
 import { NavBarComponent } from '../../layout/nav-bar/nav-bar.component';
 import { RideDialogComponent } from '../ride-dialog/ride-dialog.component';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -35,8 +35,9 @@ export class RideHistoryComponent {
   protected user: User | null;
   protected fromDate: Date | null = null;
   protected toDate: Date | null = null;
+  protected role: string | null;
 
-  constructor(private rideService: RideService, private dialog: MatDialog) {
+  constructor(private rideService: RideService, private dialog: MatDialog, private authService: AuthService) {
     this.rides = computed(() => this.rideService.rides());
     let logged = sessionStorage.getItem('loggedUser')
     if (logged != null){
@@ -44,6 +45,7 @@ export class RideHistoryComponent {
     } else {
       this.user = null
     }
+    this.role = authService.role();
   }
 
   onSelectChange(event: any){
@@ -91,7 +93,6 @@ export class RideHistoryComponent {
   openRideDialog(ride: Ride) {
     this.rideService.loadRideDetails(ride.id).subscribe({
       next: (rideDetails: Ride) => {
-        console.log(rideDetails)
         this.dialog.open(RideDialogComponent, {
           width: '50vw',
           height: 'auto',

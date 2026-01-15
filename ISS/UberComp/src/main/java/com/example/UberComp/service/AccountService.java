@@ -18,6 +18,10 @@ import com.example.UberComp.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class AccountService {
+public class AccountService implements UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
@@ -38,10 +42,21 @@ public class AccountService {
     private ObjectMapper objectMapper;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null){
+            throw new UsernameNotFoundException(String.format("No user found with email '%s'.", email));
+        } else {
+            return account;
+        }
+    }
 
     public User register(RegisterDTO account) {
         if (accountRepository.findByEmail(account.getEmail()) == null) {
-            Account newAccount = new Account(account.getEmail(), account.getPassword(), account.getType());
+            Account newAccount = new Account(account.getEmail(), passwordEncoder.encode(account.getPassword()), account.getType());
             User newUser;
             if (account.getType() == AccountType.DRIVER) {
                 newUser = new Driver();
@@ -63,6 +78,7 @@ public class AccountService {
         }
         return null;
     }
+
 
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
@@ -159,14 +175,9 @@ public class AccountService {
     private DriverChangeRequestDTO convertToDTO(DriverChangeRequest request) {
         Driver driver = request.getDriver();
 
-        System.out.println("=== CONVERTING REQUEST " + request.getId() + " ===");
-        System.out.println("Raw JSON from DB: " + request.getRequestedChanges());
-
         UpdateDriverDTO newData;
         try {
             newData = objectMapper.readValue(request.getRequestedChanges(), UpdateDriverDTO.class);
-            System.out.println("Parsed CreateUserDTO: " + newData.getCreateUserDTO());
-            System.out.println("Parsed VehicleDTO: " + newData.getVehicleDTO());
         } catch (Exception e) {
             System.err.println("JSON parsing error: " + e.getMessage());
             throw new RuntimeException("JSON error", e);
@@ -180,29 +191,22 @@ public class AccountService {
         boolean hasVehicleChanges = false;
         boolean hasProfileChanges = false;
 
+        String oldImage = null;
+        String newImage = null;
+
         if (newData.getVehicleDTO() != null) {
             Vehicle v = driver.getVehicle();
             VehicleDTO vDTO = newData.getVehicleDTO();
 
-            System.out.println("Processing vehicle changes...");
-            System.out.println("Current vehicle: " + (v != null ? v.toString() : "null"));
-            System.out.println("New vehicle DTO: model=" + vDTO.getModel() +
-                    ", plate=" + vDTO.getPlate() +
-                    ", seats=" + vDTO.getSeatNumber() +
-                    ", babySeat=" + vDTO.getBabySeat() +
-                    ", petFriendly=" + vDTO.getPetFriendly());
-
             if (addIfChanged(vOld, vNew, "Model",
                     (v != null ? v.getModel() : ""), vDTO.getModel())) {
                 hasVehicleChanges = true;
-                System.out.println("✓ Model changed");
             }
 
             String currentPlate = (v != null && v.getPlate() != null) ? v.getPlate() : "";
             String newPlate = vDTO.getPlate() != null ? vDTO.getPlate() : "";
             if (addIfChanged(vOld, vNew, "License Plate", currentPlate, newPlate)) {
                 hasVehicleChanges = true;
-                System.out.println("✓ License plate changed");
             }
 
             if (vDTO.getSeatNumber() != null) {
@@ -211,7 +215,6 @@ public class AccountService {
                     vOld.put("Seats", String.valueOf(currentSeats));
                     vNew.put("Seats", String.valueOf(vDTO.getSeatNumber()));
                     hasVehicleChanges = true;
-                    System.out.println("✓ Seat number changed: " + currentSeats + " -> " + vDTO.getSeatNumber());
                 }
             }
 
@@ -221,7 +224,6 @@ public class AccountService {
                     vOld.put("Baby Seat", currentBS ? "Yes" : "No");
                     vNew.put("Baby Seat", vDTO.getBabySeat() ? "Yes" : "No");
                     hasVehicleChanges = true;
-                    System.out.println("✓ Baby seat changed: " + currentBS + " -> " + vDTO.getBabySeat());
                 }
             }
 
@@ -231,8 +233,7 @@ public class AccountService {
                     vOld.put("Pet Friendly", currentPF ? "Yes" : "No");
                     vNew.put("Pet Friendly", vDTO.getPetFriendly() ? "Yes" : "No");
                     hasVehicleChanges = true;
-                    System.out.println("✓ Pet friendly changed: " + currentPF + " -> " + vDTO.getPetFriendly());
-                }
+                    }
             }
 
             if (vDTO.getVehicleTypeDTO() != null) {
@@ -241,7 +242,6 @@ public class AccountService {
                 String newType = vDTO.getVehicleTypeDTO().getName();
                 if (addIfChanged(vOld, vNew, "Vehicle Type", currentType, newType)) {
                     hasVehicleChanges = true;
-                    System.out.println("✓ Vehicle type changed: " + currentType + " -> " + newType);
                 }
             }
         }
@@ -249,43 +249,35 @@ public class AccountService {
         if (newData.getCreateUserDTO() != null) {
             CreatedUserDTO uDTO = newData.getCreateUserDTO();
 
-            System.out.println("Processing profile changes...");
-            System.out.println("Current driver: name=" + driver.getName() +
-                    ", lastName=" + driver.getLastName() +
-                    ", phone=" + driver.getPhone() +
-                    ", address=" + driver.getHomeAddress());
-            System.out.println("New user DTO: name=" + uDTO.getName() +
-                    ", lastName=" + uDTO.getLastName() +
-                    ", phone=" + uDTO.getPhone() +
-                    ", address=" + uDTO.getHomeAddress());
-
             if (addIfChanged(pOld, pNew, "Name", driver.getName(), uDTO.getName())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Name changed");
             }
 
             if (addIfChanged(pOld, pNew, "Last Name", driver.getLastName(), uDTO.getLastName())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Last name changed");
             }
 
             if (addIfChanged(pOld, pNew, "Phone", driver.getPhone(), uDTO.getPhone())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Phone changed");
             }
 
             if (addIfChanged(pOld, pNew, "Address", driver.getHomeAddress(), uDTO.getHomeAddress())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Address changed");
+            }
+
+            if (uDTO.getImage() != null && !uDTO.getImage().trim().isEmpty()) {
+                String currentImage = driver.getImage() != null ? driver.getImage() : "";
+                if (!currentImage.equals(uDTO.getImage())) {
+                    oldImage = currentImage;
+                    newImage = uDTO.getImage();
+                    hasProfileChanges = true;
+                }
             }
         }
 
         String type;
         Map<String, String> finalOld = new HashMap<>();
         Map<String, String> finalNew = new HashMap<>();
-
-        System.out.println("Has vehicle changes: " + hasVehicleChanges);
-        System.out.println("Has profile changes: " + hasProfileChanges);
 
         if (hasVehicleChanges && hasProfileChanges) {
             type = "both";
@@ -303,13 +295,7 @@ public class AccountService {
             finalNew = pNew;
         } else {
             type = "unknown";
-            System.out.println("⚠️ WARNING: No changes detected!");
         }
-
-        System.out.println("Final type: " + type);
-        System.out.println("Final old data: " + finalOld);
-        System.out.println("Final new data: " + finalNew);
-        System.out.println("=== END CONVERSION ===\n");
 
         return new DriverChangeRequestDTO(
                 request.getId(),
@@ -317,7 +303,9 @@ public class AccountService {
                 driver.getName() + " " + driver.getLastName(),
                 request.getRequestDate().toString(),
                 request.getStatus().toLowerCase(),
-                new DriverChangeRequestDTO.ChangesDTO(finalOld, finalNew)
+                new DriverChangeRequestDTO.ChangesDTO(finalOld, finalNew),
+                oldImage,
+                newImage
         );
     }
 
@@ -337,5 +325,12 @@ public class AccountService {
         oldMap.put(key, normalizedOld);
         newMap.put(key, normalizedNew);
         return true;
+    }
+
+    public GetProfileDTO getProfileByEmail(String email) throws Exception {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) return null;
+        User user = account.getUser();
+        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail()));
     }
 }

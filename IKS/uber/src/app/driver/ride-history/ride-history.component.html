@@ -13,7 +13,7 @@
     <mat-datepicker-toggle matIconSuffix [for]="topicker"></mat-datepicker-toggle>
     <mat-datepicker #topicker></mat-datepicker>
   </mat-form-field>
-  @if(user?.role == 'administrator'){
+  @if(role == 'administrator'){
     <select (change)="onSelectChange($event)">
       <option value="" disabled selected hidden>Sort By</option>
       <option value="price-asc">Price (ascending)</option>
@@ -42,7 +42,7 @@
             <input type="text" placeholder="{{ride.endLocation}}" readonly />
             </div>
         </div>
-       @if (user?.role !== 'passenger') {
+       @if (role !== 'passenger') {
         <div class="avatars">
             <img       *ngFor="let passenger of ride.passengers"
               [src]="passenger.image || 'pfp.png'"

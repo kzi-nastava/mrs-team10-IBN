@@ -22,27 +22,16 @@ import { MatDialog } from '@angular/material/dialog';
 export class RateDriverVehicleComponent {
   protected review: Review = {
         id: 0,
-        userId: 0,
         rideId: 0,
   };
-  protected user: User | null;
 
   constructor(private reviewService: ReviewService,
         private dialogRef: MatDialogRef<RateDriverVehicleComponent>,
         @Inject(MAT_DIALOG_DATA) public data: {rideId: number},
         private dialog: MatDialog
 ){
-  let logged = sessionStorage.getItem('loggedUser')
-      if (logged != null){
-        this.user = JSON.parse(logged) as User
-        this.review.userId = this.user.id
-        this.review.rideId = data.rideId
-      } else {
-        this.user = null
-      }    
-
-  }
-
+  this.review.rideId = data.rideId;
+}
   stars = [1, 2, 3, 4, 5];
   driverHover = 0;
   vehicleHover = 0;
