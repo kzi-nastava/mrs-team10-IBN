@@ -5,15 +5,16 @@
 }
 
 .map-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 #map {
-  height: 60vh;
-  width: 55vw;
+  height: 70vh;
+  width: 100%;
+  max-width: 800px;
   border-radius: 18px;
   overflow: hidden;
   z-index: 1;
@@ -39,4 +40,3 @@
 .car-icon {
   transition: none !important;
 }
-

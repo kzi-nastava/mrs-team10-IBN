@@ -112,7 +112,6 @@ export class AccountComponent implements OnInit {
         this.originalUserFormData = { ...this.userFormData };
 
         const roleFromToken = this.authService.role();
-        console.log('Role from token:', roleFromToken);
 
         if (roleFromToken) {
           this.user = { role: roleFromToken.toLowerCase() } as User;

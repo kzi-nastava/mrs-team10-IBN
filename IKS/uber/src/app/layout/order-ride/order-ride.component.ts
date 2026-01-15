@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { MapComponent } from '../../maps/map-basic/map.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';
+import { Location } from '../../model/location.model';
 
 @Component({
   selector: 'app-order-ride',
@@ -20,12 +21,15 @@ import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.comp
   styleUrl: './order-ride.component.css',
 })
 export class OrderRideComponent implements OnInit {
+  locations: Location[] = [];
+  estimatedTime: string = '';
+
   isDropdownOpen = false;
-  locationText = 'Kopernikova 23 → Železnička stanica';
+  locationText = '';
   timeText = 'Leave now';
 
-  fromLocation = 'Kopernikova 23';
-  toLocation = 'Železnička stanica';
+  fromLocation = '';
+  toLocation = '';
   stops: string[] = [];
 
   timeOption = 'now';
@@ -38,12 +42,34 @@ export class OrderRideComponent implements OnInit {
   passengerEmails: string[] = [];
 
   currentLocations: any[] = [];
+  showFavoritesPopup = false;
 
-  ngOnInit() {
-    this.updateMapLocations();
+  constructor(private router: Router) {
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state) {
+      this.locations = navigation.extras.state['locations'] || [];
+      this.estimatedTime = navigation.extras.state['estimatedTime'] || '';
+    }
   }
 
-  showFavoritesPopup = false;
+  ngOnInit() {
+    console.log('Received locations:', this.locations);
+    console.log('Estimated time:', this.estimatedTime);
+
+    if (this.locations && this.locations.length > 0) {
+      const pickup = this.locations.find((loc) => loc.type === 'pickup');
+      const destination = this.locations.find((loc) => loc.type === 'destination');
+      const stops = this.locations.filter((loc) => loc.type === 'stop');
+
+      if (pickup) this.fromLocation = pickup.address;
+      if (destination) this.toLocation = destination.address;
+      this.stops = stops.map((s) => s.address);
+
+      this.updateLocationText();
+    }
+
+    this.updateMapLocations();
+  }
 
   openFavorites() {
     this.showFavoritesPopup = true;
@@ -106,10 +132,6 @@ export class OrderRideComponent implements OnInit {
 
   confirmShareRide() {
     this.passengerEmails = this.passengerEmails.filter((email) => email.trim() !== '');
-
-    if (this.passengerEmails.length > 0) {
-    }
-
     this.isShareRideOpen = false;
   }
 
@@ -128,7 +150,6 @@ export class OrderRideComponent implements OnInit {
     }
 
     this.isDropdownOpen = false;
-
     this.updateMapLocations();
   }
 
