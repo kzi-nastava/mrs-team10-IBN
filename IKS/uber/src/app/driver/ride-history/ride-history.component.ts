@@ -35,8 +35,9 @@ export class RideHistoryComponent {
   protected user: User | null;
   protected fromDate: Date | null = null;
   protected toDate: Date | null = null;
+  protected role: string | null;
 
-  constructor(private rideService: RideService, private dialog: MatDialog) {
+  constructor(private rideService: RideService, private dialog: MatDialog, private authService: AuthService) {
     this.rides = computed(() => this.rideService.rides());
     let logged = sessionStorage.getItem('loggedUser')
     if (logged != null){
@@ -44,6 +45,7 @@ export class RideHistoryComponent {
     } else {
       this.user = null
     }
+    this.role = authService.role();
   }
 
   onSelectChange(event: any){

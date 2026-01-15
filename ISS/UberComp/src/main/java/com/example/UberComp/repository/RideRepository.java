@@ -37,7 +37,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     @Query("""
         SELECT DISTINCT r FROM Ride r
-        JOIN r.passengers p
+        JOIN FETCH r.passengers p
         JOIN FETCH r.route rt
         JOIN FETCH rt.stations
         WHERE p.id = :userId

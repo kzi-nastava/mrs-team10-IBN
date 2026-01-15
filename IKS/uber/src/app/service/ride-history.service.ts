@@ -13,6 +13,8 @@ import { AuthService } from './auth.service';
 })
 export class RideService {
   private authService = inject(AuthService);
+  private role = this.authService.role();
+
   constructor(private http: HttpClient) {
     this.loadRides();
   }
@@ -30,13 +32,12 @@ export class RideService {
   rides = this._rides.asReadonly();
 
   loadRides() {
-    let role = this.authService.role();
-    //if (role == 'DRIVER')
-    this.http
+    if (this.role == 'driver')
+      this.http
       .get<Ride[]>(`${environment.apiHost}/rides/driver`)
       .subscribe((rides) => this._rides.set(rides));
-    //else if (role == 'PASSENGER')
-    //  this.http.get<Ride[]>(`${environment.apiHost}/rides/passenger`).subscribe(rides => this._rides.set(rides));
+    else if (this.role == 'passenger')
+      this.http.get<Ride[]>(`${environment.apiHost}/rides/passenger`).subscribe(rides => this._rides.set(rides));
   }
 
   loadRideDetails(rideId: number): Observable<Ride> {
