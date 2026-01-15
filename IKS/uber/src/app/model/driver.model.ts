@@ -1,6 +1,7 @@
 export interface DriverDetails {
   accountDTO: {
     email: string;
+    type: string;
   };
   createUserDTO: {
     id: number;

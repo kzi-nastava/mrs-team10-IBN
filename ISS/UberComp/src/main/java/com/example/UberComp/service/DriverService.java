@@ -92,7 +92,7 @@ public class DriverService {
         // TODO: activation token i verification mail
 
         return new DriverDTO(
-                new AccountDTO(driver.getAccount().getEmail()),
+                new AccountDTO(driver.getAccount().getEmail(), driver.getAccount().getAccountType()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
                 driver.getUptime()
@@ -107,7 +107,21 @@ public class DriverService {
         Vehicle vehicle = driver.getVehicle();
 
         return new DriverDTO(
-                new AccountDTO(account.getEmail()),
+                new AccountDTO(account.getEmail(), account.getAccountType()),
+                new CreatedUserDTO(driver),
+                new VehicleDTO(vehicle),
+                driver.getUptime()
+        );
+    }
+
+    public DriverDTO findByAccountId(Long userId) {
+        Account account = accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Driver not found with user id: " + userId));
+        Driver driver = (Driver) account.getUser();
+
+        Vehicle vehicle = driver.getVehicle();
+
+        return new DriverDTO(
+                new AccountDTO(account.getEmail(), account.getAccountType()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
                 driver.getUptime()

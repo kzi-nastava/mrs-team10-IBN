@@ -16,6 +16,8 @@ public class DriverChangeRequestDTO {
     private String requestDate;
     private String status;
     private ChangesDTO changes;
+    private String oldImage;
+    private String newImage;
 
     @Data
     @AllArgsConstructor

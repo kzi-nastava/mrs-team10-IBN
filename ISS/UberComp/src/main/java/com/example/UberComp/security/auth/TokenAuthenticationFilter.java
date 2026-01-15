@@ -1,63 +1,54 @@
 package com.example.UberComp.security.auth;
 
 import com.example.UberComp.utils.TokenUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenUtil util;
-
+    private final TokenUtil tokenUtils;
     private final UserDetailsService userDetailsService;
 
-    protected final Log LOGGER = LogFactory.getLog(getClass());
-
-    @Autowired
-    public TokenAuthenticationFilter(TokenUtil tokenHelper, UserDetailsService userDetailsService) {
-        this.util = tokenHelper;
+    public TokenAuthenticationFilter(TokenUtil tokenUtils, UserDetailsService userDetailsService) {
+        this.tokenUtils = tokenUtils;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
 
-        String username;
-        String authToken = util.getToken(request);
+        String authToken = tokenUtils.getToken(request);
 
-        try {
-            if (authToken != null && !authToken.equals("")) {
-                username = util.getUsernameFromToken(authToken);
-                if (username != null) {
+        if (authToken != null && !authToken.isEmpty()) {
+            try {
+                String username = tokenUtils.getUsernameFromToken(authToken);
+
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    if (util.validateToken(authToken, userDetails)) {
-                        TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
-                        authentication.setToken(authToken);
+
+                    if (tokenUtils.validateToken(authToken, userDetails)) {
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
+            } catch (Exception e) {
+                logger.error("Cannot set user authentication: " + e.getMessage());
             }
-
-
-
         }
-        catch (ExpiredJwtException ex) {
-            LOGGER.debug("Token expired!");
-        }
+
         chain.doFilter(request, response);
     }
 }

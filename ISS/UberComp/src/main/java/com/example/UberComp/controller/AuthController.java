@@ -55,7 +55,7 @@ public class AuthController {
     public ResponseEntity<GetProfileDTO> createAccount(@RequestBody RegisterDTO userData) throws Exception{
         User registered = accountService.register(userData);
         if (registered == null) return new ResponseEntity<>(HttpStatus.CONFLICT);
-        AccountDTO registeredDTO = new AccountDTO(userData.getEmail());
+        AccountDTO registeredDTO = new AccountDTO(userData.getEmail(), userData.getType());
         CreatedUserDTO createdUserDTO = new CreatedUserDTO(registered);
         GetProfileDTO profile = new GetProfileDTO(createdUserDTO, registeredDTO);
         return new ResponseEntity<GetProfileDTO>(profile, HttpStatus.CREATED);

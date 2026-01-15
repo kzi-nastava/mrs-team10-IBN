@@ -1,5 +1,6 @@
 package com.example.UberComp.dto.account;
 
+import com.example.UberComp.enums.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,4 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AccountDTO {
     private String email;
+    private AccountType accountType;
 }

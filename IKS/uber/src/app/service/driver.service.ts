@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 export interface CreateDriverDTO {
   accountDTO: {
     email: string;
+    type: string;
   };
   createUserDTO: {
     name: string;
@@ -32,6 +33,7 @@ export interface CreateDriverDTO {
 export interface DriverDTO {
   accountDTO: {
     email: string;
+    type: string;
   };
   createUserDTO: {
     name: string;

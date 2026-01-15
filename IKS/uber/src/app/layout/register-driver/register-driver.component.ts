@@ -74,6 +74,7 @@ export class RegisterDriverComponent implements OnInit {
     const createDriverDTO: CreateDriverDTO = {
       accountDTO: {
         email: this.newDriverData.email,
+        type: 'DRIVER',
       },
       createUserDTO: {
         name: this.newDriverData.firstName,

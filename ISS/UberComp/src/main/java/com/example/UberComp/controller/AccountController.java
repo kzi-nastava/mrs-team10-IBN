@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -63,9 +64,12 @@ class AccountController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) throws Exception {
-        GetProfileDTO profile = accountService.getProfile(id);
+    @GetMapping("/me")
+    public ResponseEntity<GetProfileDTO> getProfile(Authentication auth) throws Exception {
+        String email = auth.getName();
+
+        GetProfileDTO profile = accountService.getProfileByEmail(email);
+
         if (profile == null) {
             return ResponseEntity.notFound().build();
         }
@@ -100,15 +104,19 @@ class AccountController {
         }
     }
 
-    @PutMapping("/{id}/profile")
+    @PutMapping("/me/profile")
     public ResponseEntity<GetProfileDTO> updateProfile(
-            @PathVariable Long id,
+            Authentication auth,
             @RequestBody CreateUserDTO updatedUser) {
         try {
-            GetProfileDTO updatedProfile = accountService.updateProfile(id, updatedUser);
+            Account account = (Account) auth.getPrincipal();
+            Long accountId = account.getId();
+
+            GetProfileDTO updatedProfile = accountService.updateProfile(accountId, updatedUser);
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

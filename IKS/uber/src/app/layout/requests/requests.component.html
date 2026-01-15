@@ -76,14 +76,47 @@
             </div>
           </div>
         </div>
+        } @if (hasImageChange()) {
+        <div class="change-item image-change-item">
+          <div class="change-label">Profile Image:</div>
+          <div class="image-comparison">
+            <div class="image-section">
+              <div class="change-subtitle">Old:</div>
+              <div class="image-wrapper old-image-wrapper">
+                <img
+                  [src]="selectedRequest.oldImage || 'accountpic.png'"
+                  alt="Current profile"
+                  class="profile-preview"
+                  onerror="this.src='accountpic.png'"
+                />
+              </div>
+            </div>
+
+            <div class="arrow image-arrow">→</div>
+
+            <div class="image-section">
+              <div class="change-subtitle">New:</div>
+              <div class="image-wrapper new-image-wrapper">
+                <img
+                  [src]="selectedRequest.newImage"
+                  alt="New profile"
+                  class="profile-preview"
+                  onerror="this.src='accountpic.png'"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
         }
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeModal()">Close</button>
         @if (isPending()) {
-        <button class="btn btn-danger" (click)="handleReject(selectedRequest.id)">Reject</button>
-        <button class="btn btn-success" (click)="handleApprove(selectedRequest.id)">Accept</button>
+        <button class="btn btn-danger" (click)="handleReject(selectedRequest?.id!)">Reject</button>
+        <button class="btn btn-success" (click)="handleApprove(selectedRequest?.id!)">
+          Accept
+        </button>
         }
       </div>
     </div>
