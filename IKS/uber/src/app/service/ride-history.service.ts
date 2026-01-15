@@ -1,11 +1,11 @@
-import {inject, Injectable, signal, Signal} from '@angular/core';
-import {Ride} from '../model/ride-history.model';
+import { inject, Injectable, signal, Signal } from '@angular/core';
+import { Ride } from '../model/ride-history.model';
 import { User } from '../model/user.model';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HttpHeaders } from '@angular/common/http';
-import { authGuard } from '../auth/auth-guard';
+import { AuthGuard } from '../auth/auth-guard';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -17,7 +17,6 @@ export class RideService {
     this.loadRides();
   }
 
-  
   // private getAuthHeaders() {
   //   const token = localStorage.getItem('authToken');
   //   return {
@@ -31,16 +30,16 @@ export class RideService {
   rides = this._rides.asReadonly();
 
   loadRides() {
-    let role =  this.authService.role();
+    let role = this.authService.role();
     //if (role == 'DRIVER')
-      this.http.get<Ride[]>(`${environment.apiHost}/rides/driver`).subscribe(rides => this._rides.set(rides));
+    this.http
+      .get<Ride[]>(`${environment.apiHost}/rides/driver`)
+      .subscribe((rides) => this._rides.set(rides));
     //else if (role == 'PASSENGER')
     //  this.http.get<Ride[]>(`${environment.apiHost}/rides/passenger`).subscribe(rides => this._rides.set(rides));
-}
-
-  loadRideDetails(rideId : number) : Observable<Ride>{ 
-    return this.http.get<Ride>(`${environment.apiHost}/rides/${rideId}`);
   }
 
-
+  loadRideDetails(rideId: number): Observable<Ride> {
+    return this.http.get<Ride>(`${environment.apiHost}/rides/${rideId}`);
+  }
 }

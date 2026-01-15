@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
@@ -9,7 +9,9 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  public readonly role = signal<string | null>(null)
+  private readonly jwtHelper = new JwtHelperService();
+
+  public readonly role = signal<string | null>(this.getRole());
 
   login(creds: LoginCreds) {
     return this.http
@@ -17,8 +19,13 @@ export class AuthService {
       .pipe(
         map((res: HttpResponse<any>) => {
           if (res.status == 200) {
+            const expirationTime = Math.floor(Date.now() / 1000) + Number(res.body.expiresIn);
+
             localStorage.setItem('auth_token', res.body.accessToken);
-            localStorage.setItem('expires_in', res.body.expiresIn);
+            localStorage.setItem('expires_in', expirationTime.toString());
+
+            this.updateRole();
+
             return true;
           } else {
             return false;
@@ -36,24 +43,39 @@ export class AuthService {
   logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('expires_in');
+    this.role.set(null);
   }
 
   isLoggedIn() {
     const expiration = localStorage.getItem('expires_in');
     if (expiration) {
-      return Math.floor(Date.now() / 1000) < Number(expiration);
+      const currentTime = Math.floor(Date.now() / 1000);
+      const isValid = currentTime < Number(expiration);
+      return isValid;
     } else {
       return false;
     }
   }
 
-  getRole(){
+  private getRole(): string | null {
     if (this.isLoggedIn()) {
-      const accessToken: any = localStorage.getItem('auth_token');
-      const helper = new JwtHelperService();
-      this.role.set(helper.decodeToken(accessToken).roles);
+      const accessToken = localStorage.getItem('auth_token');
+      if (accessToken) {
+        try {
+          const decodedToken = this.jwtHelper.decodeToken(accessToken);
+          return decodedToken.roles || null;
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          return null;
+        }
+      }
     }
-    this.role.set(null);
+    return null;
+  }
+
+  private updateRole() {
+    const newRole = this.getRole();
+    this.role.set(newRole);
   }
 }
 
