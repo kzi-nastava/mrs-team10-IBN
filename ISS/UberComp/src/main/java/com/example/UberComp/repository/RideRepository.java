@@ -3,6 +3,8 @@ package com.example.UberComp.repository;
 import com.example.UberComp.model.Ride;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 
 public interface RideRepository extends JpaRepository<Ride, Long> {
@@ -25,12 +27,22 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     Ride getRideWithPassengers(Long rideId);
 
     @Query("""
-    SELECT r FROM Ride r
+    SELECT DISTINCT r FROM Ride r
     JOIN FETCH r.route rt
     JOIN FETCH rt.stations
     LEFT JOIN FETCH r.passengers
+    WHERE r.driver.id = :driverId
 """)
-    List<Ride> getRidesWithRouteAndStations();
+    List<Ride> getRidesDriver(@Param("driverId") Long driverId);
+
+    @Query("""
+        SELECT DISTINCT r FROM Ride r
+        JOIN r.passengers p
+        JOIN FETCH r.route rt
+        JOIN FETCH rt.stations
+        WHERE p.id = :userId
+        """)
+    List<Ride> getRidesPassenger(@Param("userId") Long userId);
 
 }
 

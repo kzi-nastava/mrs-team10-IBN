@@ -360,7 +360,6 @@ private loadFromStations(): void {
           const now = Date.now();
           const start = new Date(ride.startTime).getTime();
           const eta = new Date(ride.estimatedTimeArrival).getTime();
-
           let progress = 0;
           if (eta > start) progress = (now - start) / (eta - start);
           progress = Math.max(0, Math.min(1, progress));

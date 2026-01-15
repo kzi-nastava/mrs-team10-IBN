@@ -53,8 +53,15 @@ public class RideService {
         return newRide;
     }
 
-    public Collection<GetRideDTO> getRides(Long driverId){
-        return rideRepository.getRidesWithRouteAndStations()
+    public Collection<GetRideDTO> getRidesDriver(Long driverId){
+        return rideRepository.getRidesDriver(driverId)
+                .stream()
+                .map(GetRideDTO::new)
+                .toList();
+    }
+
+    public Collection<GetRideDTO> getRidesPassenger(Long passengerId){
+        return rideRepository.getRidesPassenger(passengerId)
                 .stream()
                 .map(GetRideDTO::new)
                 .toList();

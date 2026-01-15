@@ -72,6 +72,7 @@ public class WebSecurityConfig {
             request
                     .requestMatchers("/auth/login", "/auth/register").permitAll()
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers("/api/rides/activeRides").permitAll()
                     .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                             "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
                     .requestMatchers("/api/**").authenticated()

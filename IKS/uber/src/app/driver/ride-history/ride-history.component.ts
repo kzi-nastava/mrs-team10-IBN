@@ -91,7 +91,6 @@ export class RideHistoryComponent {
   openRideDialog(ride: Ride) {
     this.rideService.loadRideDetails(ride.id).subscribe({
       next: (rideDetails: Ride) => {
-        console.log(rideDetails)
         this.dialog.open(RideDialogComponent, {
           width: '50vw',
           height: 'auto',
