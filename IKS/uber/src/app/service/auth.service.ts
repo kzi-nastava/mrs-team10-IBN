@@ -1,14 +1,15 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
-import { User } from '../model/user.model';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  public readonly role = signal<string | null>(null)
 
   login(creds: LoginCreds) {
     return this.http
@@ -44,6 +45,15 @@ export class AuthService {
     } else {
       return false;
     }
+  }
+
+  getRole(){
+    if (this.isLoggedIn()) {
+      const accessToken: any = localStorage.getItem('auth_token');
+      const helper = new JwtHelperService();
+      this.role.set(helper.decodeToken(accessToken).roles);
+    }
+    this.role.set(null);
   }
 }
 
