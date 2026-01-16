@@ -49,6 +49,7 @@ export class HomeComponent {
   }
 
   goToOrder() {
+    this.routeOutput = this.rideForm.getRoute();
     this.router.navigate(['/order-ride'], {
       state: {
         locations: this.routeOutput,

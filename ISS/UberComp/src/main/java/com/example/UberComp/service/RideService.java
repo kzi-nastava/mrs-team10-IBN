@@ -8,10 +8,7 @@ import com.example.UberComp.model.Coordinate;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.Route;
-import com.example.UberComp.repository.CoordinateRepository;
-import com.example.UberComp.repository.DriverRepository;
-import com.example.UberComp.repository.RideRepository;
-import com.example.UberComp.repository.RouteRepository;
+import com.example.UberComp.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,8 @@ public class RideService {
     private RouteRepository routeRepository;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private VehicleTypeRepository vehicleTypeRepository;
 
     public IncomingRideDTO getIncomingRide(){
         IncomingRideDTO newRide = new IncomingRideDTO();
@@ -125,5 +124,19 @@ public class RideService {
         started.setStart(LocalDateTime.parse(start.getIsotime()));
         rideRepository.save(started);
         return new StartedRideDTO(started.getId(), started.getStart());
+    }
+
+    public PriceDTO calculatePrice(CreateRideDTO dto) {
+        double basePrice = vehicleTypeRepository.findVehicleTypeByName(dto.getVehicleType()).getPrice();
+        double totalPrice = basePrice + dto.getDistance() * 120;
+        return new PriceDTO(totalPrice);
+    }
+
+    public GetRideDTO createRide(CreateRideDTO dto, Long userId) {
+        GetRideDTO rideDTO = new GetRideDTO();
+        rideDTO.setStartLocation(dto.getStartAddress());
+        rideDTO.setEndLocation(dto.getDestinationAddress());
+        rideDTO.setPrice(calculatePrice(dto).getPrice());
+        return rideDTO;
     }
 }

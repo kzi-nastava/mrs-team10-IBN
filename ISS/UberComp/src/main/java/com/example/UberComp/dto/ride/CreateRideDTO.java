@@ -12,6 +12,7 @@ import java.util.List;
 public class CreateRideDTO {
     private String startAddress;
     private String destinationAddress;
+    private Double distance;
     private List<String> stops;
     private List<String> passengerEmails;
     private String vehicleType;

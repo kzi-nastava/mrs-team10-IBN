@@ -117,11 +117,16 @@ public class RideController {
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto) {
-        GetRideDTO rideDTO = new GetRideDTO();
-        rideDTO.setStartLocation(dto.getStartAddress());
-        rideDTO.setEndLocation(dto.getDestinationAddress());
+    @PostMapping(value = "/calculate-price", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PriceDTO> calculatePrice(@RequestBody CreateRideDTO dto) {
+        PriceDTO priceDTO = rideService.calculatePrice(dto);
+        return ResponseEntity.ok(priceDTO);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        GetRideDTO rideDTO = rideService.createRide(dto, account.getUser().getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(rideDTO);
     }
 

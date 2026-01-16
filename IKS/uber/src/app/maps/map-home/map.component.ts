@@ -38,6 +38,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
+  @Output() routeCalculated = new EventEmitter<{ distance: number; duration: number }>();
   estimatedTime = output<string>();
 
   private map!: L.Map;
@@ -57,6 +58,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }[] = [];
 
   private isUpdatingFromParent = false;
+  private lastLocationsSignature = '';
+  private isMapReady = false;
 
   constructor(private http: HttpClient) {}
 
@@ -97,14 +100,11 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.initMap();
     if (this.interactive) this.registerOnClick();
 
-    if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-
     this.vehicleLayer = L.layerGroup().addTo(this.map);
 
     setTimeout(() => {
       this.map.invalidateSize();
+      this.isMapReady = true;
 
       this.getVehiclePositions();
       if (this.stations && this.stations.length > 0) {
@@ -117,10 +117,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
-      this.updateLocationsFromInput();
+    if (changes['locations'] && this.isMapReady) {
+      const newSignature = JSON.stringify(this.locations);
+
+      if (newSignature !== this.lastLocationsSignature && !this.isUpdatingFromParent) {
+        this.lastLocationsSignature = newSignature;
+        this.updateLocationsFromInput();
+      }
     }
-    if (changes['stations'] && this.map && this.stations.length > 0) {
+
+    if (changes['stations'] && this.isMapReady && this.stations.length > 0) {
       this.loadFromStations();
     }
   }
@@ -152,11 +158,14 @@ export class MapComponent implements AfterViewInit, OnChanges {
     }
 
     this.isUpdatingFromParent = true;
+
     this.clearAll();
 
     for (const location of this.locations) {
       await this.addLocationFromAddress(location);
     }
+
+    this.updateRoute();
 
     this.isUpdatingFromParent = false;
   }
@@ -176,12 +185,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
           icon = this.DestinationIcon;
         }
 
-        this.addPointWithIcon(lat, lon, icon, location.address, true);
+        this.addPointWithIcon(lat, lon, icon, location.address, true, false);
       }
     } catch (error) {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
+
   private addPointWithIcon(
     lat: number,
     lng: number,
@@ -326,16 +336,18 @@ export class MapComponent implements AfterViewInit, OnChanges {
       var summary = routes[0].summary;
 
       const totalMinutes = Math.round(summary.totalTime / 60);
+      const totalKm = summary.totalDistance / 1000;
 
       console.log(
-        'Total distance is ' +
-          summary.totalDistance / 1000 +
-          ' km and total time is ' +
-          totalMinutes +
-          ' minutes'
+        'Total distance is ' + totalKm + ' km and total time is ' + totalMinutes + ' minutes'
       );
 
       this.estimatedTime.emit(totalMinutes + ' minutes');
+
+      this.routeCalculated.emit({
+        distance: totalKm,
+        duration: totalMinutes,
+      });
 
       const bounds = L.latLngBounds(this.points.map((p) => p.latLng));
       this.map.fitBounds(bounds, {

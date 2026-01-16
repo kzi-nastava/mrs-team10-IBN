@@ -63,8 +63,8 @@
     <div class="car-options">
       <div
         class="car-option"
-        [class.selected]="selectedCar === 'standard'"
-        (click)="selectCar('standard')"
+        [class.selected]="selectedCar === 'STANDARD'"
+        (click)="selectCar('STANDARD')"
       >
         <img src="standard.png" alt="Standard" />
         <div class="car-name">Standard</div>
@@ -72,14 +72,14 @@
 
       <div
         class="car-option"
-        [class.selected]="selectedCar === 'luxury'"
-        (click)="selectCar('luxury')"
+        [class.selected]="selectedCar === 'LUXURY'"
+        (click)="selectCar('LUXURY')"
       >
         <img src="luxury.png" alt="Luxury" />
         <div class="car-name">Luxury</div>
       </div>
 
-      <div class="car-option" [class.selected]="selectedCar === 'van'" (click)="selectCar('van')">
+      <div class="car-option" [class.selected]="selectedCar === 'VAN'" (click)="selectCar('VAN')">
         <img src="van.png" alt="Van" />
         <div class="car-name">Van</div>
       </div>
@@ -145,20 +145,34 @@
       </div>
     </div>
 
-    <div class="total-price">Total Price:</div>
+    <div class="bottom">
+      <div class="total-price">Total Price: {{ totalPrice ?? ' -' }}</div>
 
-    <button class="order-btn">Order</button>
+      @if (totalPrice !== null) {
+      <button class="order-btn">Order</button>
+      }
+    </div>
   </div>
   <app-map
     [locations]="getLocations()"
     (locationAdded)="onLocationAdded($event)"
     (locationRemoved)="onLocationRemoved($event)"
+    (routeCalculated)="onRouteCalculated($event)"
+    [isUserLoggedIn]="true"
   >
   </app-map>
 </div>
 @if(showFavoritesPopup) {
 <app-favorites-popup (routeSelected)="onRouteSelected($event)" (closed)="closeFavorites()">
 </app-favorites-popup>
+} @if (successMessage) {
+<div class="message success-message">
+  {{ successMessage }}
+</div>
+} @if (errorMessage) {
+<div class="message error-message">
+  {{ errorMessage }}
+</div>
 }
 
 <router-outlet></router-outlet>

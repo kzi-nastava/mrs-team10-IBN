@@ -95,7 +95,7 @@ export class RideApproxFormComponent {
     this.getRoute();
   }
 
-  getRoute() {
+  public getRoute() {
     let route: Location[] = [];
     let order = 0;
 
@@ -132,5 +132,6 @@ export class RideApproxFormComponent {
 
     console.log(route);
     this.routeOutput.emit(route);
+    return route;
   }
 }
