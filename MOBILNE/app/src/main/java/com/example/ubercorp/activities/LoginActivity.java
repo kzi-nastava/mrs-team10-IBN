@@ -1,6 +1,8 @@
 package com.example.ubercorp.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Button;
@@ -14,8 +16,18 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.clients.AuthClient;
+import com.example.ubercorp.model.AuthToken;
+import com.example.ubercorp.model.Credentials;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private EditText emailField;
+    private EditText passwordField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,19 +40,14 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        EditText emailField = findViewById(R.id.emailField);
-        EditText passwordField = findViewById(R.id.passwordField);
+        emailField = findViewById(R.id.emailField);
+        passwordField = findViewById(R.id.passwordField);
 
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener((v) -> {
             String email = emailField.getText().toString();
             if (Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                String popupText = "Email: " + email + "\n" + "Password: " + passwordField.getText();
-                Toast toast = Toast.makeText(getApplicationContext(), popupText, Toast.LENGTH_SHORT);
-                toast.show();
-                startActivity(intent);
-                this.finish();
+                login();
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "Improper E-mail Format!", Toast.LENGTH_SHORT);
                 toast.show();
@@ -66,4 +73,33 @@ public class LoginActivity extends AppCompatActivity {
             this.finish();
         });
     }
+
+    public void login(){
+        Credentials creds = new Credentials(emailField.getText().toString().trim(), passwordField.getText().toString().trim());
+        Call<AuthToken> login = AuthClient.authService.login(creds);
+        login.enqueue(new Callback<AuthToken>(){
+            @Override
+            public void onResponse(Call<AuthToken> call, Response<AuthToken> response){
+                if (response.isSuccessful()){
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    SharedPreferences sharedPref = getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("auth_token", response.body().getAccessToken());
+                    editor.putLong("expires_in", response.body().getExpiresIn());
+                    editor.apply();
+                    startActivity(intent);
+                    LoginActivity.this.finish();
+                } else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Incorrect credentials!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+            @Override
+            public void onFailure(Call<AuthToken> call, Throwable t){
+                Toast toast = Toast.makeText(getApplicationContext(), "Login failed! Check your Internet connection and try again", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+    }
+
 }
