@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 @Component
-public class TokenUtil {
+public class TokenUtils {
     @Value("uber-comp")
     private String APP_NAME;
 

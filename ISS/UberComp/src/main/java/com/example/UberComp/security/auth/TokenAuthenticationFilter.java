@@ -1,6 +1,6 @@
 package com.example.UberComp.security.auth;
 
-import com.example.UberComp.utils.TokenUtil;
+import com.example.UberComp.utils.TokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +16,10 @@ import java.io.IOException;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenUtil tokenUtils;
+    private final TokenUtils tokenUtils;
     private final UserDetailsService userDetailsService;
 
-    public TokenAuthenticationFilter(TokenUtil tokenUtils, UserDetailsService userDetailsService) {
+    public TokenAuthenticationFilter(TokenUtils tokenUtils, UserDetailsService userDetailsService) {
         this.tokenUtils = tokenUtils;
         this.userDetailsService = userDetailsService;
     }

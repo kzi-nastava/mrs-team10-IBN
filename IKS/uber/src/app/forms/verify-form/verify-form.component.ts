@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-verify-account',
   imports: [ReactiveFormsModule],
-  templateUrl: './verify-account.component.html',
-  styleUrl: './verify-account.component.css',
+  templateUrl: './verify-form.component.html',
+  styleUrl: './verify-form.component.css',
 })
-export class VerifyAccountComponent {
+export class VerifyFormComponent {
   router: Router = inject(Router);
   verifyForm = new FormGroup({
     password: new FormControl("", Validators.minLength(6)),

@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { map, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
@@ -35,9 +35,13 @@ export class AuthService {
   }
 
   register(data: RegistrationData) {
+    return this.http.post<any>(`${environment.authHost}/register`, data, { observe: 'response' })
+  }
+
+  verify(id: string){
     return this.http
-      .post<any>(`${environment.authHost}/register`, data, { observe: 'response' })
-      .pipe(map((res: HttpResponse<any>) => res.status >= 200 && res.status < 300));
+      .get<any>(`${environment.authHost}/verify/${id}`, { observe: 'response' })
+      .pipe(map((res: HttpResponse<any>) => res.status >= 200 && res.status < 300))
   }
 
   logout() {
