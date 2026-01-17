@@ -44,6 +44,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
   private vehicleLayer!: L.LayerGroup;
+  private getVehiclesOnHome: boolean;
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -59,7 +60,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private isUpdatingFromParent = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.getVehiclesOnHome = true;
+  }
 
   ngAfterViewInit(): void {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -116,6 +119,10 @@ export class MapComponent implements AfterViewInit, OnChanges {
       this.updateLocationsFromInput();
     }
   }, 100);
+}
+
+ngOnDestroy(): void{
+  this.getVehiclesOnHome = false;
 }
   
 
@@ -350,7 +357,8 @@ private loadFromStations(): void {
       
 
   async getVehiclePositions() {
-    while (true) {
+    while (this.getVehiclesOnHome) {
+      console.log("nesto")
       try {
         const rides = await firstValueFrom(
           this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
@@ -393,7 +401,7 @@ private loadFromStations(): void {
       }
 
       this.vehicleLayer.clearLayers();
-      await this.sleep(7000);
+      await this.sleep(3000);
     }
   }
 
