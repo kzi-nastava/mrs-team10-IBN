@@ -6,7 +6,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';
 import { Location } from '../../model/location.model';
-import { RideService, CreateRideDTO, PriceDTO } from '../../service/ride-history.service';
+import {
+  RideService,
+  CreateRideDTO,
+  PriceDTO,
+  RideOrderResponseDTO,
+} from '../../service/ride-history.service';
 
 @Component({
   selector: 'app-order-ride',
@@ -61,7 +66,7 @@ export class OrderRideComponent implements OnInit {
   constructor(
     private router: Router,
     private rideService: RideService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
   ) {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state) {
@@ -115,6 +120,11 @@ export class OrderRideComponent implements OnInit {
 
     this.isCalculating = true;
 
+    let scheduledDateTime: string | null = null;
+    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
+    }
+
     const dto: CreateRideDTO = {
       startAddress: this.fromLocation,
       destinationAddress: this.toLocation,
@@ -124,6 +134,9 @@ export class OrderRideComponent implements OnInit {
       vehicleType: this.selectedCar,
       babySeat: this.isBabyTravel,
       petFriendly: this.isPetTravel,
+      scheduled: scheduledDateTime || '',
+      price: 0,
+      estimatedDuration: this.estimatedDuration || 30,
     };
 
     this.rideService.calculatePrice(dto).subscribe({
@@ -162,6 +175,12 @@ export class OrderRideComponent implements OnInit {
     }
 
     this.isOrdering = true;
+
+    let scheduledDateTime: string | null = null;
+    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
+    }
+
     const dto: CreateRideDTO = {
       startAddress: this.fromLocation,
       destinationAddress: this.toLocation,
@@ -171,26 +190,52 @@ export class OrderRideComponent implements OnInit {
       vehicleType: this.selectedCar,
       babySeat: this.isBabyTravel,
       petFriendly: this.isPetTravel,
+      scheduled: scheduledDateTime || '',
+      price: this.totalPrice,
+      estimatedDuration: this.estimatedDuration || 30,
     };
 
     this.rideService.orderRide(dto).subscribe({
-      next: (ride) => {
-        this.showSuccess(`Ride ordered successfully! Price: ${ride.price} RSD`);
-        this.router.navigate(['/ride-tracking', ride.id]);
+      next: (response: RideOrderResponseDTO) => {
         this.isOrdering = false;
+        if (response !== null) {
+          const pickupInfo =
+            response.estimatedPickupMinutes != -1
+              ? `Arrives in: ${response.estimatedPickupMinutes} min (${response.estimatedPickupTime})`
+              : `Scheduled for: ${response.estimatedPickupTime}`;
+
+          const successMsg = `
+🚗 Ride Ordered Successfully!
+
+💰 Price: ${response.price} RSD
+👤 Driver: ${response.driverName}
+📞 Phone: ${response.driverPhone}
+🚙 Vehicle: ${response.vehicleModel} (${response.vehiclePlate})
+⏱️ ${pickupInfo}
+`.trim();
+
+          this.showSuccess(successMsg);
+        } else {
+          let errorMsg = 'No available drivers. ';
+          this.showError(errorMsg);
+          return;
+        }
       },
       error: (error) => {
         console.error('Error ordering ride:', error);
+        this.isOrdering = false;
+
         let errorMsg = 'Failed to order ride. ';
 
-        if (error.error?.message) {
+        if (error.status === 204) {
+          errorMsg = 'No available drivers at the moment. Please try again later.';
+        } else if (error.error?.message) {
           errorMsg += error.error.message;
         } else {
           errorMsg += 'Please try again.';
         }
 
         this.showError(errorMsg);
-        this.isOrdering = false;
       },
     });
   }
@@ -262,13 +307,16 @@ export class OrderRideComponent implements OnInit {
   }
 
   confirmSelection() {
-    this.currentLocations = [];
-    let locationParts = [this.fromLocation];
-    if (this.stops.length > 0) {
-      locationParts = [...locationParts, ...this.stops.filter((s) => s.trim() !== '')];
-    }
-    locationParts.push(this.toLocation);
-    this.locationText = locationParts.join(' → ');
+    const newLocationParts = [];
+    if (this.fromLocation) newLocationParts.push(this.fromLocation);
+    const validStops = this.stops.filter((s) => s.trim() !== '');
+    if (validStops.length > 0) newLocationParts.push(...validStops);
+    if (this.toLocation) newLocationParts.push(this.toLocation);
+
+    const newLocationText = newLocationParts.join(' → ');
+    const locationsChanged = newLocationText !== this.locationText;
+
+    this.locationText = newLocationText;
 
     if (this.timeOption === 'now') {
       this.timeText = 'Leave now';
@@ -278,11 +326,12 @@ export class OrderRideComponent implements OnInit {
 
     this.isDropdownOpen = false;
 
-    this.totalPrice = null;
-    this.estimatedDistance = 0;
-
-    this.updateMapLocations();
-    this.calculatePrice();
+    if (locationsChanged) {
+      this.totalPrice = null;
+      this.estimatedDistance = 0;
+      this.updateMapLocations();
+      this.calculatePrice();
+    }
   }
 
   updateMapLocations() {
@@ -385,16 +434,20 @@ export class OrderRideComponent implements OnInit {
   showSuccess(message: string) {
     this.successMessage = message;
     this.errorMessage = null;
+    this.cd.detectChanges();
     setTimeout(() => {
       this.successMessage = null;
-    }, 5000);
+      this.cd.detectChanges();
+    }, 8000);
   }
 
   showError(message: string) {
     this.errorMessage = message;
     this.successMessage = null;
+    this.cd.detectChanges();
     setTimeout(() => {
       this.errorMessage = null;
+      this.cd.detectChanges();
     }, 5000);
   }
 }

@@ -198,7 +198,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     icon: L.Icon,
     title?: string,
     fromParent = false,
-    shouldUpdateRoute = true
+    shouldUpdateRoute = true,
   ): void {
     const latLng = L.latLng(lat, lng);
     const pin = L.marker(latLng, { icon, title }).addTo(this.map);
@@ -339,7 +339,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       const totalKm = summary.totalDistance / 1000;
 
       console.log(
-        'Total distance is ' + totalKm + ' km and total time is ' + totalMinutes + ' minutes'
+        'Total distance is ' + totalKm + ' km and total time is ' + totalMinutes + ' minutes',
       );
 
       this.estimatedTime.emit(totalMinutes + ' minutes');
@@ -385,7 +385,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     while (true) {
       try {
         const rides = await firstValueFrom(
-          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
+          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`),
         );
 
         for (const ride of rides) {

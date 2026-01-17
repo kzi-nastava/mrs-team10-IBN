@@ -8,6 +8,31 @@ import { HttpHeaders } from '@angular/common/http';
 import { AuthGuard } from '../auth/auth-guard';
 import { AuthService } from './auth.service';
 
+export interface RideOrderResponseDTO {
+  rideId: number;
+  price: number;
+  status: string;
+
+  driverName: string;
+  driverPhone: string;
+  driverRating: number;
+
+  vehicleModel: string;
+  vehiclePlate: string;
+  vehicleColor?: string;
+
+  vehicleLocation: VehicleLocationDTO;
+
+  estimatedPickupMinutes: number;
+  estimatedPickupTime: string;
+}
+
+export interface VehicleLocationDTO {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
 export interface CreateRideDTO {
   startAddress: string;
   destinationAddress: string;
@@ -17,6 +42,9 @@ export interface CreateRideDTO {
   vehicleType: string;
   babySeat: boolean;
   petFriendly: boolean;
+  scheduled: string;
+  price: number;
+  estimatedDuration: number;
 }
 
 export interface PriceDTO {
@@ -35,7 +63,7 @@ export interface GetRideDTO {
   providedIn: 'root',
 })
 export class RideService {
-  private apiUrl = 'http://localhost:8090/api/rides';
+  private apiUrl = 'http://localhost:8090/api';
   private authService = inject(AuthService);
   private role = this.authService.role();
 
@@ -71,10 +99,10 @@ export class RideService {
   }
 
   calculatePrice(dto: CreateRideDTO): Observable<PriceDTO> {
-    return this.http.post<PriceDTO>(`${this.apiUrl}/calculate-price`, dto);
+    return this.http.post<PriceDTO>(`${this.apiUrl}/rides/calculate-price`, dto);
   }
 
-  orderRide(dto: CreateRideDTO): Observable<GetRideDTO> {
-    return this.http.post<GetRideDTO>(this.apiUrl, dto);
+  orderRide(dto: CreateRideDTO): Observable<RideOrderResponseDTO> {
+    return this.http.post<RideOrderResponseDTO>(`${this.apiUrl}/rides`, dto);
   }
 }

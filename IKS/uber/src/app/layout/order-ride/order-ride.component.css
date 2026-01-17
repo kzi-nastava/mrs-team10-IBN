@@ -372,9 +372,44 @@ app-map {
   animation: slideInRight 0.3s ease;
 }
 
-.success-message {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  color: white;
+.message.success-message {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  max-width: 300px;
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  background-color: #fff9c4;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 99999999999;
+  white-space: pre-line;
+  animation: slideInFade 0.5s ease forwards;
+}
+
+@keyframes slideInFade {
+  0% {
+    opacity: 0;
+    transform: translateX(50px) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 }
 
 .error-message {

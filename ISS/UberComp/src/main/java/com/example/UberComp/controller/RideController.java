@@ -1,9 +1,14 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.driver.AvailableDriverDTO;
+import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Account;
+import com.example.UberComp.model.Driver;
+import com.example.UberComp.model.Ride;
+import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +27,7 @@ import java.util.Collection;
 @RequestMapping("/api/rides")
 public class RideController {
 
+    private final DriverService driverService;
     private RideService rideService;
 
 //    @PreAuthorize("hasRole('DRIVER')")
@@ -124,10 +130,25 @@ public class RideController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+    public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
-        GetRideDTO rideDTO = rideService.createRide(dto, account.getUser().getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(rideDTO);
+
+        AvailableDriverDTO availableDriver = driverService.getAvailableDriver(dto);
+
+        if (availableDriver == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+
+        Ride ride = rideService.createRide(
+                dto,
+                account.getUser().getId(),
+                availableDriver.getDriver().getCreateUserDTO().getId(),
+                availableDriver.getEstimatedPickupMinutes()
+        );
+
+        RideOrderResponseDTO response = rideService.buildRideOrderResponse(ride.getId(), availableDriver);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/favorites/{id}/order")

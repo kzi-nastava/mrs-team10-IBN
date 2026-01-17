@@ -6,58 +6,59 @@
       <button (click)="openFavorites()">Favorites</button>
     </div>
     @if (!isDropdownOpen) {
-    <div class="location-input" (click)="toggleDropdown()">
-      <div class="location-text">{{ locationText }}</div>
-      <div class="time-selector">⌛ {{ timeText }}</div>
-      <span class="dropdown-arrow" [class.rotated]="isDropdownOpen">▼</span>
-    </div>
-    } @if (isDropdownOpen) {
-    <div class="dropdown-content">
-      <div class="input-group">
-        <label>From:</label>
-        <input type="text" placeholder="Enter pickup location" [(ngModel)]="fromLocation" />
+      <div class="location-input" (click)="toggleDropdown()">
+        <div class="location-text">{{ locationText }}</div>
+        <div class="time-selector">⌛ {{ timeText }}</div>
+        <span class="dropdown-arrow" [class.rotated]="isDropdownOpen">▼</span>
       </div>
-
-      <div class="input-group">
-        <label>To:</label>
-        <input type="text" placeholder="Enter destination" [(ngModel)]="toLocation" />
-      </div>
-
-      <button class="add-stop-btn" (click)="addStop()">+ Add stop</button>
-
-      @for(stop of stops; track $index; let i = $index) {
-      <div class="input-group">
-        <label>Stop {{ i + 1 }}:</label>
-        <div style="display: flex; gap: 5px">
-          <input type="text" placeholder="Enter stop location" [(ngModel)]="stops[i]" />
-          <button class="remove-stop-btn" (click)="removeStop(i)">x</button>
+    }
+    @if (isDropdownOpen) {
+      <div class="dropdown-content">
+        <div class="input-group">
+          <label>From:</label>
+          <input type="text" placeholder="Enter pickup location" [(ngModel)]="fromLocation" />
         </div>
-      </div>
-      }
 
-      <div class="time-selection">
-        <label>When:</label>
-        <div class="time-options">
-          <label class="radio-option">
-            <input type="radio" name="time" value="now" [(ngModel)]="timeOption" />
-            <span>Leave now</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="time" value="schedule" [(ngModel)]="timeOption" />
-            <span>Schedule for later</span>
-          </label>
+        <div class="input-group">
+          <label>To:</label>
+          <input type="text" placeholder="Enter destination" [(ngModel)]="toLocation" />
         </div>
-      </div>
 
-      @if(timeOption === 'schedule') {
-      <div class="datetime-picker">
-        <input type="date" [(ngModel)]="rideDate" />
-        <input type="time" [(ngModel)]="rideTime" />
-      </div>
-      }
+        <button class="add-stop-btn" (click)="addStop()">+ Add stop</button>
 
-      <button class="confirm-btn" (click)="confirmSelection()">Confirm</button>
-    </div>
+        @for (stop of stops; track $index; let i = $index) {
+          <div class="input-group">
+            <label>Stop {{ i + 1 }}:</label>
+            <div style="display: flex; gap: 5px">
+              <input type="text" placeholder="Enter stop location" [(ngModel)]="stops[i]" />
+              <button class="remove-stop-btn" (click)="removeStop(i)">x</button>
+            </div>
+          </div>
+        }
+
+        <div class="time-selection">
+          <label>When:</label>
+          <div class="time-options">
+            <label class="radio-option">
+              <input type="radio" name="time" value="now" [(ngModel)]="timeOption" />
+              <span>Leave now</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="time" value="scheduled" [(ngModel)]="timeOption" />
+              <span>Schedule for later</span>
+            </label>
+          </div>
+        </div>
+
+        @if (timeOption === 'scheduled') {
+          <div class="datetime-picker">
+            <input type="date" [(ngModel)]="rideDate" />
+            <input type="time" [(ngModel)]="rideTime" />
+          </div>
+        }
+
+        <button class="confirm-btn" (click)="confirmSelection()">Confirm</button>
+      </div>
     }
 
     <div class="car-options">
@@ -86,70 +87,69 @@
     </div>
 
     @if (!isShareRideOpen) {
-    <div class="share-ride" (click)="toggleShareRide()">
-      <span class="share-icon">👥</span>
-      @if (passengerEmails.length > 0) {
-      <span
-        >Share a ride ({{ passengerEmails.length }} passenger{{
-          passengerEmails.length > 1 ? 's' : ''
-        }})</span
-      >
-      } @else {
-      <span>Share a ride</span>
-      }
-      <span
-        class="dropdown-arrow2"
-        [class.rotated]="isShareRideOpen"
-        style="margin-left: auto; font-size: 12px"
-        >▼</span
-      >
-    </div>
-    } @if (isShareRideOpen) {
-    <div class="dropdown-content">
-      <div class="input-group">
-        <label>Add passengers by email:</label>
+      <div class="share-ride" (click)="toggleShareRide()">
+        <span class="share-icon">👥</span>
+        @if (passengerEmails.length > 0) {
+          <span
+            >Share a ride ({{ passengerEmails.length }} passenger{{
+              passengerEmails.length > 1 ? 's' : ''
+            }})</span
+          >
+        } @else {
+          <span>Share a ride</span>
+        }
+        <span
+          class="dropdown-arrow2"
+          [class.rotated]="isShareRideOpen"
+          style="margin-left: auto; font-size: 12px"
+          >▼</span
+        >
       </div>
-
-      @for(email of passengerEmails; track $index; let i = $index) {
-      <div class="input-group">
-        <label style="margin: 5px 0">Passenger {{ i + 1 }}:</label>
-        <div style="display: flex; gap: 5px">
-          <input
-            type="email"
-            placeholder="Enter passenger email"
-            [(ngModel)]="passengerEmails[i]"
-            [id]="'passenger-' + i"
-            [name]="'passenger-' + i"
-          />
-          <button class="remove-stop-btn" (click)="removePassenger(i)">x</button>
+    }
+    @if (isShareRideOpen) {
+      <div class="dropdown-content">
+        <div class="input-group">
+          <label>Add passengers by email:</label>
         </div>
+
+        @for (email of passengerEmails; track $index; let i = $index) {
+          <div class="input-group">
+            <label style="margin: 5px 0">Passenger {{ i + 1 }}:</label>
+            <div style="display: flex; gap: 5px">
+              <input
+                type="email"
+                placeholder="Enter passenger email"
+                [(ngModel)]="passengerEmails[i]"
+                [id]="'passenger-' + i"
+                [name]="'passenger-' + i"
+              />
+              <button class="remove-stop-btn" (click)="removePassenger(i)">x</button>
+            </div>
+          </div>
+        }
+
+        <button class="add-stop-btn" (click)="addPassenger()" style="margin-top: 5px">
+          + Add passenger
+        </button>
+
+        <button class="confirm-btn" (click)="confirmShareRide()">Confirm</button>
       </div>
-      }
-
-      <button class="add-stop-btn" (click)="addPassenger()" style="margin-top: 5px">
-        + Add passenger
-      </button>
-
-      <button class="confirm-btn" (click)="confirmShareRide()">Confirm</button>
-    </div>
     }
 
-    <div class="checkbox-group">
-      <div class="checkbox-item">
-        <input type="checkbox" id="baby" />
-        <label for="baby">Are you travelling with a baby?</label>
-      </div>
-      <div class="checkbox-item">
-        <input type="checkbox" id="pet" />
-        <label for="pet">Are you travelling with a pet?</label>
-      </div>
+    <div class="checkbox-item">
+      <input type="checkbox" id="baby" [(ngModel)]="isBabyTravel" />
+      <label for="baby">Are you travelling with a baby?</label>
+    </div>
+    <div class="checkbox-item">
+      <input type="checkbox" id="pet" [(ngModel)]="isPetTravel" />
+      <label for="pet">Are you travelling with a pet?</label>
     </div>
 
     <div class="bottom">
       <div class="total-price">Total Price: {{ totalPrice ?? ' -' }}</div>
 
       @if (totalPrice !== null) {
-      <button class="order-btn">Order</button>
+        <button class="order-btn" (click)="orderRide()">Order</button>
       }
     </div>
   </div>
@@ -162,17 +162,19 @@
   >
   </app-map>
 </div>
-@if(showFavoritesPopup) {
-<app-favorites-popup (routeSelected)="onRouteSelected($event)" (closed)="closeFavorites()">
-</app-favorites-popup>
-} @if (successMessage) {
-<div class="message success-message">
-  {{ successMessage }}
-</div>
-} @if (errorMessage) {
-<div class="message error-message">
-  {{ errorMessage }}
-</div>
+@if (showFavoritesPopup) {
+  <app-favorites-popup (routeSelected)="onRouteSelected($event)" (closed)="closeFavorites()">
+  </app-favorites-popup>
+}
+@if (successMessage) {
+  <div class="message success-message">
+    {{ successMessage }}
+  </div>
+}
+@if (errorMessage) {
+  <div class="message error-message">
+    {{ errorMessage }}
+  </div>
 }
 
 <router-outlet></router-outlet>
