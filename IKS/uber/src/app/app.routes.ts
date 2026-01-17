@@ -16,6 +16,7 @@ import { ManageUsersComponent } from './layout/manage-users/manage-users.compone
 import { RegisterDriverComponent } from './layout/register-driver/register-driver.component';
 import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 import { AuthGuard } from './auth/auth-guard';
+import { TrackingMapComponent } from './maps/tracking-map/tracking-map.component';
 
 export const routes: Routes = [
   {
@@ -67,6 +68,12 @@ export const routes: Routes = [
     component: TrackingRouteComponent,
     canActivate: [AuthGuard],
     data: { role: ['passenger', 'driver'] },
+  },
+  {
+    path: 'tracking-route',
+    component: TrackingRouteComponent,
+    canActivate: [AuthGuard],
+    data: { role: ['passenger', 'driver']}
   },
   {
     path: 'complaint',
