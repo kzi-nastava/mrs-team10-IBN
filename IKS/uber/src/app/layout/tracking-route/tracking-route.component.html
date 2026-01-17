@@ -2,14 +2,18 @@
 <div id="container">
   <h1>Tracking Route</h1>
   <p>{{ subtitleText }}</p>
-  <app-tracking-map [stations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)" (currentLocation)="getLocationEvent($event)"></app-tracking-map>
-  <div>
-    @if(user != null && user.role == 'driver'){
+ <!-- <app-tracking-map [stations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)" (currentLocation)="getLocationEvent($event)"></app-tracking-map>-->
+  <app-tracking-map
+    [stations]="route"
+    (estimatedTime)="setTimeEvent($event)">
+  </app-tracking-map>
+ <div>
+    @if(role == 'driver'){
     <button (click)="changeState()">{{ firstButtonText }}</button>
     <button id="panic">PANIC</button>
     }
   </div>
-  @if(user != null && user.role == 'passenger'){
+  @if(role == 'passenger'){
   <div class="top-bar">
     <button class="panic">PANIC</button>
 

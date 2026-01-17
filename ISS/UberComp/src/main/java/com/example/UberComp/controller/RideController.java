@@ -85,11 +85,13 @@ public class RideController {
         return ResponseEntity.ok(activeRides);
     }
 
-    @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetTrackingRideDTO> getTrackingRide(@PathVariable("id") Long id){
-        GetTrackingRideDTO trackingRide = rideService.getTrackingRide(id);
-        return new ResponseEntity<>(trackingRide, HttpStatus.OK);
+    @GetMapping(value = "/trackingRidePassenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetVehiclePositionDTO> trackingRidePassenger(Authentication auth){
+        Account acc = (Account) auth.getPrincipal();
+        GetVehiclePositionDTO trackingRide = rideService.getTrackingRide(acc.getUser().getId());
+        return ResponseEntity.ok(trackingRide);
     }
+
 
     @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable("id") Long id) {

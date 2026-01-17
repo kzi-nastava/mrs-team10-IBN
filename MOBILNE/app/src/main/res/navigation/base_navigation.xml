@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/base_navigation"
-    app:startDestination="@id/ride_history">
+    app:startDestination="@id/routeFragment">
 
     <fragment
         android:id="@+id/ride_history"
@@ -67,4 +67,9 @@
         android:name="com.example.ubercorp.fragments.OrderRideFragment"
         tools:layout="@layout/fragment_order_ride"
         />
+
+    <fragment
+        android:id="@+id/routeFragment"
+        android:name="com.example.ubercorp.fragments.RouteFragment"
+        tools:layout="@layout/fragment_route"/>
 </navigation>

@@ -65,9 +65,11 @@ public class HomeActivity extends AppCompatActivity {
         //orderRideButton = findViewById(R.id.orderRideButton);
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment)
                 .setOpenableLayout(drawer)
                 .build();
+
+
 
         NavigationUI.setupWithNavController(navigationView, navController);
 

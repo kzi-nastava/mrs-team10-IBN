@@ -44,6 +44,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
   private vehicleLayer!: L.LayerGroup;
+  private getVehiclesOnHome: boolean;
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -61,7 +62,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
   private lastLocationsSignature = '';
   private isMapReady = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.getVehiclesOnHome = true;
+  }
 
   ngAfterViewInit(): void {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -103,18 +106,22 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.vehicleLayer = L.layerGroup().addTo(this.map);
 
     setTimeout(() => {
-      this.map.invalidateSize();
-      this.isMapReady = true;
+    this.map.invalidateSize();
+    
+    this.getVehiclePositions();
+    if (this.stations && this.stations.length > 0) {
+      console.log('Loading stations in ngAfterViewInit:', this.stations);
+      this.loadFromStations();
+    } else if (this.locations && this.locations.length > 0) {
+      this.updateLocationsFromInput();
+    }
+  }, 100);
+}
 
-      this.getVehiclePositions();
-      if (this.stations && this.stations.length > 0) {
-        console.log('Loading stations in ngAfterViewInit:', this.stations);
-        this.loadFromStations();
-      } else if (this.locations && this.locations.length > 0) {
-        this.updateLocationsFromInput();
-      }
-    }, 100);
-  }
+ngOnDestroy(): void{
+  this.getVehiclesOnHome = false;
+}
+  
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['locations'] && this.isMapReady) {
@@ -382,7 +389,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   async getVehiclePositions() {
-    while (true) {
+    while (this.getVehiclesOnHome) {
+      console.log("nesto")
       try {
         const rides = await firstValueFrom(
           this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`),
@@ -423,7 +431,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
       }
 
       this.vehicleLayer.clearLayers();
-      await this.sleep(7000);
+      await this.sleep(3000);
     }
   }
 

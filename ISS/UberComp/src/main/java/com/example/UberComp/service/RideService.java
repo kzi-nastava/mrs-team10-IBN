@@ -94,8 +94,18 @@ public class RideService {
         return activeRides;
     }
 
+    @Transactional(readOnly = true)
+    public GetVehiclePositionDTO getTrackingRide(Long id) {
+        Ride ride = rideRepository.findFirstByPassengersIdOrderByStartDesc(id);
+        if(ride != null) {
+            if (ride.getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
+                return new GetVehiclePositionDTO();
+            return new GetVehiclePositionDTO(ride, true);
+        }
+        return new GetVehiclePositionDTO();
+    }
+
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
-    public GetTrackingRideDTO getTrackingRide(Long rideId){ return new GetTrackingRideDTO();}
 
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
         Ride ride = rideRepository.findById(rideId).orElseThrow();
