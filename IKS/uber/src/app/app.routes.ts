@@ -17,11 +17,9 @@ import { RegisterDriverComponent } from './layout/register-driver/register-drive
 import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 import { AuthGuard } from './auth/auth-guard';
 import { TrackingMapComponent } from './maps/tracking-map/tracking-map.component';
-<<<<<<< HEAD
 import { ScheduledRidesComponent } from './driver/scheduled-rides/scheduled-rides.component';
-=======
 import { VerifyAccountComponent } from './layout/verify-account/verify-account.component';
->>>>>>> dev
+
 
 export const routes: Routes = [
   {
