@@ -1,9 +1,14 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.driver.AvailableDriverDTO;
+import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Account;
+import com.example.UberComp.model.Driver;
+import com.example.UberComp.model.Ride;
+import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +27,7 @@ import java.util.Collection;
 @RequestMapping("/api/rides")
 public class RideController {
 
+    private final DriverService driverService;
     private RideService rideService;
 
 //    @PreAuthorize("hasRole('DRIVER')")
@@ -79,11 +85,13 @@ public class RideController {
         return ResponseEntity.ok(activeRides);
     }
 
-    @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetTrackingRideDTO> getTrackingRide(@PathVariable("id") Long id){
-        GetTrackingRideDTO trackingRide = rideService.getTrackingRide(id);
-        return new ResponseEntity<>(trackingRide, HttpStatus.OK);
+    @GetMapping(value = "/trackingRidePassenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetVehiclePositionDTO> trackingRidePassenger(Authentication auth){
+        Account acc = (Account) auth.getPrincipal();
+        GetVehiclePositionDTO trackingRide = rideService.getTrackingRide(acc.getUser().getId());
+        return ResponseEntity.ok(trackingRide);
     }
+
 
     @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable("id") Long id) {
@@ -117,12 +125,32 @@ public class RideController {
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto) {
-        GetRideDTO rideDTO = new GetRideDTO();
-        rideDTO.setStartLocation(dto.getStartAddress());
-        rideDTO.setEndLocation(dto.getDestinationAddress());
-        return ResponseEntity.status(HttpStatus.CREATED).body(rideDTO);
+    @PostMapping(value = "/calculate-price", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PriceDTO> calculatePrice(@RequestBody CreateRideDTO dto) {
+        PriceDTO priceDTO = rideService.calculatePrice(dto);
+        return ResponseEntity.ok(priceDTO);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+
+        AvailableDriverDTO availableDriver = driverService.getAvailableDriver(dto);
+
+        if (availableDriver == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+
+        Ride ride = rideService.createRide(
+                dto,
+                account.getUser().getId(),
+                availableDriver.getDriver().getCreateUserDTO().getId(),
+                availableDriver.getEstimatedPickupMinutes()
+        );
+
+        RideOrderResponseDTO response = rideService.buildRideOrderResponse(ride.getId(), availableDriver);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/favorites/{id}/order")

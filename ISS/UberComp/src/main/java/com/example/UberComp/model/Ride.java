@@ -14,6 +14,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Ride {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +27,7 @@ public class Ride {
     private Set<User> passengers;
 
     @ManyToOne
-    private User driver;
+    private Driver driver;
 
     @Column(nullable = false)
     private Boolean babies;

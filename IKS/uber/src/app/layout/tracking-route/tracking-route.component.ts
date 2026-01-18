@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
-import { TrackingMapComponent } from '../../maps/tracking-map/tracking-map.component';
+import { TrackingMapComponent } from '../../maps/tracking-map-passenger/tracking-map.component';
 import { AuthService } from '../../service/auth.service';
 import { User } from '../../model/user.model';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -29,22 +29,10 @@ export class TrackingRouteComponent {
   subtitleText: String = 'Waiting for departure...';
   routeStarted: Boolean = false;
   firstButtonText: String = 'Start';
-  protected user: User | null = null;
+  protected role: string | null;
 
-  constructor(private dialog: MatDialog) {
-    let logged = sessionStorage.getItem('loggedUser');
-    if (logged != null) {
-      this.user = JSON.parse(logged) as User;
-    } else {
-      // this.user = {
-      //   "id":1,
-      //   "name":"Petar",
-      //   "lastName":"Petrović",
-      //   "role":"driver",
-      //   "phone":"000",
-      //   "image":"",
-      // }
-    }
+  constructor(private dialog: MatDialog, authService: AuthService) {
+    this.role = authService.role();
     this.routeService.getRide().subscribe({
       next: (response) => {
         this.route = [...response.route.stations];
@@ -57,6 +45,7 @@ export class TrackingRouteComponent {
 
   setTimeEvent(eventData: string){
     this.estimatedTime = eventData;
+    this.subtitleText = "Estimated time arrival in: " + this.estimatedTime;
   }
 
   passStationEvent(eventData: number){

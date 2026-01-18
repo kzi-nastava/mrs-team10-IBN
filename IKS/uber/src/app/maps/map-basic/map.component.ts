@@ -32,8 +32,8 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
-  @Input() stations: Station[] = []; 
-  @Input() interactive: boolean = true; 
+  @Input() stations: Station[] = [];
+  @Input() interactive: boolean = true;
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
@@ -93,32 +93,30 @@ export class MapComponent implements AfterViewInit, OnChanges {
     });
 
     this.initMap();
-    if(this.interactive)
-      this.registerOnClick();
+    if (this.interactive) this.registerOnClick();
 
     if (this.locations && this.locations.length > 0) {
       this.updateLocationsFromInput();
     }
 
     setTimeout(() => {
-    this.map.invalidateSize();
-    
-    if (this.stations && this.stations.length > 0) {
-      console.log('Loading stations in ngAfterViewInit:', this.stations);
-      this.loadFromStations();
-    } else if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-  }, 100);
-}
-  
+      this.map.invalidateSize();
+
+      if (this.stations && this.stations.length > 0) {
+        console.log('Loading stations in ngAfterViewInit:', this.stations);
+        this.loadFromStations();
+      } else if (this.locations && this.locations.length > 0) {
+        this.updateLocationsFromInput();
+      }
+    }, 100);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
       this.updateLocationsFromInput();
     }
     if (changes['stations'] && this.map && this.stations.length > 0) {
-      this.loadFromStations(); 
+      this.loadFromStations();
     }
   }
 
@@ -126,17 +124,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.map = L.map('map', {
       center: [45.242, 19.8227],
       zoom: 12.75,
-      zoomSnap:0.25,
-      dragging: this.interactive,        
-      touchZoom: this.interactive,     
+      zoomSnap: 0.25,
+      dragging: this.interactive,
+      touchZoom: this.interactive,
       scrollWheelZoom: this.interactive,
-      doubleClickZoom: this.interactive, 
-      boxZoom: this.interactive,        
-      keyboard: this.interactive,        
-      zoomControl: this.interactive  ,   
+      doubleClickZoom: this.interactive,
+      boxZoom: this.interactive,
+      keyboard: this.interactive,
+      zoomControl: this.interactive,
     });
 
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -180,56 +177,56 @@ export class MapComponent implements AfterViewInit, OnChanges {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
-private addPointWithIcon(
-  lat: number,
-  lng: number,
-  icon: L.Icon,
-  title?: string,
-  fromParent = false,
-  shouldUpdateRoute = true 
-): void {
-  const latLng = L.latLng(lat, lng);
-  const pin = L.marker(latLng, { icon, title }).addTo(this.map);
+  private addPointWithIcon(
+    lat: number,
+    lng: number,
+    icon: L.Icon,
+    title?: string,
+    fromParent = false,
+    shouldUpdateRoute = true
+  ): void {
+    const latLng = L.latLng(lat, lng);
+    const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
-  pin.on('click', () => {
-    const index = this.points.findIndex((p) => p.marker === pin);
-    if (index !== -1) {
-      this.removePointByIndex(index);
+    pin.on('click', () => {
+      const index = this.points.findIndex((p) => p.marker === pin);
+      if (index !== -1) {
+        this.removePointByIndex(index);
+      }
+    });
+
+    if (title) {
+      pin.bindPopup(title);
     }
-  });
 
-  if (title) {
-    pin.bindPopup(title);
+    this.points.push({ marker: pin, latLng, address: title });
+
+    if (shouldUpdateRoute) {
+      this.updateRoute();
+    }
   }
 
-  this.points.push({ marker: pin, latLng, address: title });
-  
-  if (shouldUpdateRoute) { 
+  private loadFromStations(): void {
+    this.clearAll();
+    console.log(this.stations);
+
+    this.stations.forEach((station, index) => {
+      const isLast = index === this.stations.length - 1;
+      let icon = this.PinIcon;
+
+      if (index === 0) icon = this.PickupIcon;
+      else if (isLast) icon = this.DestinationIcon;
+
+      this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
+
+      if (this.points.length > 0) {
+        const group = L.featureGroup(this.points.map((p) => p.marker));
+        this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
+      }
+    });
+
     this.updateRoute();
   }
-}
-
-private loadFromStations(): void {
-  this.clearAll();
-  console.log(this.stations);
-  
-  this.stations.forEach((station, index) => {
-    const isLast = index === this.stations.length - 1;
-    let icon = this.PinIcon;
-    
-    if (index === 0) icon = this.PickupIcon;
-    else if (isLast) icon = this.DestinationIcon;
-    
-    this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
-
-    if (this.points.length > 0) {
-      const group = L.featureGroup(this.points.map(p => p.marker));
-      this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
-  }
-  });
-  
-  this.updateRoute();
-}
 
   private async addPoint(lat: number, lng: number): Promise<void> {
     try {
@@ -298,7 +295,7 @@ private loadFromStations(): void {
       };
 
       this.routeControl = L.Routing.control(options).addTo(this.map);
-      this.routeControl.on('routesfound',  (e) => {
+      this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
         console.log(
@@ -308,11 +305,10 @@ private loadFromStations(): void {
             Math.round((summary.totalTime % 3600) / 60) +
             ' minutes'
         );
-        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes')
+        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
     }
   }
-
 
   private registerOnClick(): void {
     this.map.on('click', (e: any) => {
@@ -341,6 +337,4 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
-    
-
 }

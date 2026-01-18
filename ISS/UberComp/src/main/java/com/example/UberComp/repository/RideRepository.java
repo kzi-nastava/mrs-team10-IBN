@@ -1,15 +1,20 @@
 package com.example.UberComp.repository;
 
+import com.example.UberComp.enums.RideStatus;
+import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface RideRepository extends JpaRepository<Ride, Long> {
 
     Ride findFirstByDriver_IdOrderByStartDesc(Long driverId);
+    Ride findFirstByPassengersIdOrderByStartDesc(Long passengersId);
 
     @Query("""
     SELECT r FROM Ride r
@@ -44,6 +49,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
         """)
     List<Ride> getRidesPassenger(@Param("userId") Long userId);
 
+    Optional<Ride> findFirstByDriverAndStatusOrderByStartDesc(Driver driver, RideStatus status);
 }
 
 

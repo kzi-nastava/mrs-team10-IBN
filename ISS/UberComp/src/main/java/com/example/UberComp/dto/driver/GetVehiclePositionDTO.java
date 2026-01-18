@@ -26,4 +26,8 @@ public class GetVehiclePositionDTO {
         this.route = new RouteDTO(ride.getRoute());
         this.isBusy = isBusy;
     }
+
+    public GetVehiclePositionDTO() {
+
+    }
 }
