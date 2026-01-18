@@ -821,11 +821,9 @@ public class DriverService {
                 fullAddress += ", Novi Sad, Serbia";
             }
 
-            String encodedAddress = java.net.URLEncoder.encode(fullAddress, StandardCharsets.UTF_8);
-
             String url = String.format(
                     "https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s&country=RS&limit=1",
-                    encodedAddress,
+                    fullAddress,
                     mapboxApiKey
             );
 
@@ -836,7 +834,7 @@ public class DriverService {
                 List<Map<String, Object>> features = (List<Map<String, Object>>) response.get("features");
                 if (!features.isEmpty()) {
                     List<Double> coordinates = (List<Double>) features.get(0).get("center");
-                    return new Coordinate(coordinates.get(1), coordinates.get(0)); // lat, lon
+                    return new Coordinate(coordinates.get(1), coordinates.get(0));
                 }
             }
         } catch (Exception e) {
@@ -987,12 +985,13 @@ public class DriverService {
             Map<String, Long> results = new HashMap<>();
 
             if (response != null && response.containsKey("durations")) {
-                List<List<Double>> durations = (List<List<Double>>) response.get("durations");
+                List<List<Number>> durations = (List<List<Number>>) response.get("durations");
                 if (!durations.isEmpty()) {
-                    List<Double> sourceDurations = durations.get(0);
+                    List<Number> sourceDurations = durations.get(0);
                     for (int i = 0; i < destinations.size(); i++) {
-                        Double duration = sourceDurations.get(i + 1);
-                        if (duration != null) {
+                        Number durationNum = sourceDurations.get(i + 1);
+                        if (durationNum != null) {
+                            double duration = durationNum.doubleValue();
                             String key = formatCoordinateKey(source, destinations.get(i));
                             results.put(key, Math.round(duration / 60.0));
                         }

@@ -106,22 +106,21 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.vehicleLayer = L.layerGroup().addTo(this.map);
 
     setTimeout(() => {
-    this.map.invalidateSize();
-    
-    this.getVehiclePositions();
-    if (this.stations && this.stations.length > 0) {
-      console.log('Loading stations in ngAfterViewInit:', this.stations);
-      this.loadFromStations();
-    } else if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-  }, 100);
-}
+      this.map.invalidateSize();
 
-ngOnDestroy(): void{
-  this.getVehiclesOnHome = false;
-}
-  
+      this.getVehiclePositions();
+      if (this.stations && this.stations.length > 0) {
+        this.loadFromStations();
+      } else if (this.locations && this.locations.length > 0) {
+        this.updateLocationsFromInput();
+      }
+      this.isMapReady = true;
+    }, 100);
+  }
+
+  ngOnDestroy(): void {
+    this.getVehiclesOnHome = false;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['locations'] && this.isMapReady) {
@@ -230,7 +229,6 @@ ngOnDestroy(): void{
 
   private loadFromStations(): void {
     this.clearAll();
-    console.log(this.stations);
 
     this.stations.forEach((station, index) => {
       const isLast = index === this.stations.length - 1;
@@ -390,7 +388,6 @@ ngOnDestroy(): void{
 
   async getVehiclePositions() {
     while (this.getVehiclesOnHome) {
-      console.log("nesto")
       try {
         const rides = await firstValueFrom(
           this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`),
