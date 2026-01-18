@@ -1,6 +1,7 @@
 package com.example.UberComp.repository;
 
 import com.example.UberComp.model.Driver;
+import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.ScheduledRide;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,15 @@ public interface ScheduledRideRepository extends JpaRepository<ScheduledRide, Lo
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    @Query("""
+
+    SELECT DISTINCT r FROM ScheduledRide r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.driver.id = :driverId
+    """)
+    List<ScheduledRide> getScheduledRidesForDriver(@Param("driverId") Long driverId);
+
 }

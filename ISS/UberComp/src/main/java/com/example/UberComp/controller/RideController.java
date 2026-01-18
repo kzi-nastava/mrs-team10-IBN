@@ -92,6 +92,12 @@ public class RideController {
         return ResponseEntity.ok(trackingRide);
     }
 
+    @GetMapping(value="/scheduledRides", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> scheduledRides(Authentication auth){
+        Account acc = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> scheduledRides = rideService.getScheduledRidesForDriver(acc.getUser().getId());
+        return ResponseEntity.ok(scheduledRides);
+    }
 
     @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable("id") Long id) {
