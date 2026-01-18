@@ -188,13 +188,18 @@ public class RideService {
 
         Optional<ScheduledRide> sRide = scheduledRideRepository.findById(ride.getId());
         if (sRide.isPresent()) {
-            response.setEstimatedPickupMinutes(-1L);
-            response.setEstimatedPickupTime(sRide.get().getScheduled().format(DateTimeFormatter.ofPattern("HH:mm")));
+            if (sRide.get().getScheduled() != null) {
+                response.setEstimatedPickupMinutes(-1L);
+                response.setEstimatedPickupTime(sRide.get().getScheduled().format(DateTimeFormatter.ofPattern("HH:mm")));
+            }
         } else {
             LocalDateTime estimatedArrival = LocalDateTime.now()
                     .plusMinutes(availableDriver.getEstimatedPickupMinutes());
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             response.setEstimatedPickupTime(estimatedArrival.format(timeFormatter));
+            if (availableDriver.getEstimatedPickupMinutes() == 0)
+                availableDriver.setEstimatedPickupMinutes(1L);
+            response.setEstimatedPickupMinutes(availableDriver.getEstimatedPickupMinutes());
         }
 
         return response;
@@ -279,8 +284,9 @@ public class RideService {
             ride.setStart(now);
             ride.setStatus(RideStatus.Pending);
 
-            long totalMinutes = (estimatedPickupMinutes != null ? estimatedPickupMinutes : 0L)
-                    + dto.getEstimatedDuration();
+            if (estimatedPickupMinutes == 0)
+                estimatedPickupMinutes = 1L;
+            long totalMinutes = estimatedPickupMinutes + dto.getEstimatedDuration();
             ride.setEstimatedTimeArrival(now.plusMinutes(totalMinutes));
 
             ride.setFinish(null);

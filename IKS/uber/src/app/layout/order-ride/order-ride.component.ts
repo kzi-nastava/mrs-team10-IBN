@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { MapComponent } from '../../maps/map-home/map.component';
@@ -27,6 +27,8 @@ import {
   styleUrl: './order-ride.component.css',
 })
 export class OrderRideComponent implements OnInit {
+  @ViewChild(MapComponent) mapComponent!: MapComponent;
+
   locations: Location[] = [];
   estimatedTime: string = '';
 
@@ -102,7 +104,8 @@ export class OrderRideComponent implements OnInit {
     this.estimatedDistance = event.distance;
     this.estimatedDuration = event.duration;
 
-    if (this.estimatedDistance > 0 && !this.isCalculating) {
+    if (this.estimatedDistance > 0) {
+      this.isCalculating = false;
       this.calculatePrice();
     }
   }
@@ -181,11 +184,18 @@ export class OrderRideComponent implements OnInit {
       scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
     }
 
+    const normalizeAddress = (addr: string) => {
+      if (!addr.toLowerCase().includes('novi sad')) {
+        return `${addr}, Novi Sad`;
+      }
+      return addr;
+    };
+
     const dto: CreateRideDTO = {
-      startAddress: this.fromLocation,
-      destinationAddress: this.toLocation,
+      startAddress: normalizeAddress(this.fromLocation),
+      destinationAddress: normalizeAddress(this.toLocation),
       distance: this.estimatedDistance,
-      stops: this.stops.filter((s) => s.trim() !== ''),
+      stops: this.stops.filter((s) => s.trim() !== '').map((s) => normalizeAddress(s)),
       passengerEmails: this.passengerEmails.filter((e) => e.trim() !== ''),
       vehicleType: this.selectedCar,
       babySeat: this.isBabyTravel,
@@ -210,7 +220,7 @@ export class OrderRideComponent implements OnInit {
 💰 Price: ${response.price} RSD
 👤 Driver: ${response.driverName}
 📞 Phone: ${response.driverPhone}
-🚙 Vehicle: ${response.vehicleModel} (${response.vehiclePlate})
+🚙 Vehicle: ${response.vehicleModel}
 ⏱️ ${pickupInfo}
 `.trim();
 
@@ -266,12 +276,14 @@ export class OrderRideComponent implements OnInit {
 
   removeStop(index: number) {
     this.stops.splice(index, 1);
-    this.calculatePrice();
+    this.updateMapLocations();
   }
 
   selectCar(carType: string) {
     this.selectedCar = carType;
-    this.calculatePrice();
+    if (this.totalPrice !== null) {
+      this.calculatePrice();
+    }
   }
 
   toggleShareRide() {
@@ -329,34 +341,32 @@ export class OrderRideComponent implements OnInit {
     if (locationsChanged) {
       this.totalPrice = null;
       this.estimatedDistance = 0;
+      this.estimatedDuration = null;
+
       this.updateMapLocations();
-      this.calculatePrice();
+
+      this.cd.detectChanges();
     }
   }
 
   updateMapLocations() {
     const locations = [];
 
-    if (this.fromLocation) {
+    if (this.fromLocation && this.fromLocation.trim()) {
       locations.push({ address: this.fromLocation, type: 'pickup' });
     }
 
     this.stops.forEach((stop, index) => {
-      if (stop.trim() !== '') {
+      if (stop && stop.trim()) {
         locations.push({ address: stop, type: 'stop', index: index + 1 });
       }
     });
 
-    if (this.toLocation) {
+    if (this.toLocation && this.toLocation.trim()) {
       locations.push({ address: this.toLocation, type: 'destination' });
     }
 
-    const newLocationsString = JSON.stringify(locations);
-    const oldLocationsString = JSON.stringify(this.currentLocations);
-
-    if (newLocationsString !== oldLocationsString) {
-      this.currentLocations = [...locations];
-    }
+    this.currentLocations = locations.map((loc) => ({ ...loc }));
   }
 
   getLocations() {
@@ -373,7 +383,6 @@ export class OrderRideComponent implements OnInit {
       this.toLocation = address;
     }
 
-    this.calculatePrice();
     this.updateLocationText();
   }
 
@@ -402,7 +411,6 @@ export class OrderRideComponent implements OnInit {
       this.stops.splice(stopIndex, 1);
     }
 
-    this.calculatePrice();
     this.updateLocationText();
   }
 

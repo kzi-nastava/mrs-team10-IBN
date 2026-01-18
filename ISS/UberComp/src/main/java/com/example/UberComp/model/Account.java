@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -41,6 +42,9 @@ public class Account implements UserDetails {
     @Column
     private String blockingReason;
 
+    @Column(unique = true)
+    private String verification;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     private User user;
 
@@ -51,6 +55,7 @@ public class Account implements UserDetails {
         this.accountStatus = AccountStatus.UNVERIFIED;
         this.blockingReason = null;
         this.lastPasswordResetDate = new Timestamp(new Date().getTime());
+        this.verification = UUID.randomUUID().toString();
     }
 
     @Override

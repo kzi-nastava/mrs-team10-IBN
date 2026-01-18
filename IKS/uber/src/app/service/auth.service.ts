@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { map, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
@@ -35,9 +35,23 @@ export class AuthService {
   }
 
   register(data: RegistrationData) {
-    return this.http
-      .post<any>(`${environment.authHost}/register`, data, { observe: 'response' })
-      .pipe(map((res: HttpResponse<any>) => res.status >= 200 && res.status < 300));
+    return this.http.post<any>(`${environment.authHost}/register`, data, { observe: 'response' })
+  }
+
+  verify(id: string){
+    return this.http.get<any>(`${environment.authHost}/verify/${id}`, { observe: 'response' })
+  }
+
+  checkSetPasswordToken(id: string){
+    return this.http.get<any>(`${environment.authHost}/set-password/${id}`, { observe: 'response' })
+  }
+
+  setPassword(id: string, password: string){
+    return this.http.post<any>(`${environment.authHost}/set-password/${id}`, {"password":password}, { observe: 'response' })
+  }
+
+  requestPasswordReset(email: string){
+    return this.http.post<any>(`${environment.authHost}/forgot-password`, {"email":email}, {observe: 'response'})
   }
 
   logout() {

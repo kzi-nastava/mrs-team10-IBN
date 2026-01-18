@@ -3,7 +3,7 @@ package com.example.UberComp.config;
 import com.example.UberComp.security.auth.RestAuthenticationEntryPoint;
 import com.example.UberComp.security.auth.TokenAuthenticationFilter;
 import com.example.UberComp.service.AccountService;
-import com.example.UberComp.utils.TokenUtil;
+import com.example.UberComp.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ public class WebSecurityConfig {
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Autowired
-    private TokenUtil tokenUtils;
+    private TokenUtils tokenUtils;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -70,7 +70,7 @@ public class WebSecurityConfig {
 
         http.authorizeHttpRequests(request -> {
             request
-                    .requestMatchers("/auth/login", "/auth/register").permitAll()
+                    .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/error").permitAll()
                     .requestMatchers("/api/rides/activeRides").permitAll()
                     .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",

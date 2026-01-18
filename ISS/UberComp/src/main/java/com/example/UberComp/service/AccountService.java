@@ -1,9 +1,6 @@
 package com.example.UberComp.service;
 
-import com.example.UberComp.dto.account.AccountDTO;
-import com.example.UberComp.dto.account.GetAccountDTO;
-import com.example.UberComp.dto.account.LogAccountDTO;
-import com.example.UberComp.dto.account.RegisterDTO;
+import com.example.UberComp.dto.account.*;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
@@ -11,10 +8,8 @@ import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.*;
-import com.example.UberComp.repository.AccountRepository;
-import com.example.UberComp.repository.DriverChangeRequestRepository;
-import com.example.UberComp.repository.DriverRepository;
-import com.example.UberComp.repository.UserRepository;
+import com.example.UberComp.repository.*;
+import com.example.UberComp.utils.EmailUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -44,6 +35,10 @@ public class AccountService implements UserDetailsService {
     private DriverRepository driverRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailUtils emailUtils;
+    @Autowired
+    private SetPasswordTokenRepository sptRepository;
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email);
@@ -72,6 +67,8 @@ public class AccountService implements UserDetailsService {
             newUser.setAccount(newAccount);
             newAccount.setUser(newUser);
 
+            emailUtils.sendVerificationEmail(newAccount);
+
             accountRepository.save(newAccount);
 
             return newUser;
@@ -83,6 +80,55 @@ public class AccountService implements UserDetailsService {
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
         return (account != null && account.getAccountStatus() == AccountStatus.VERIFIED && account.getPassword().equals(accountDTO.getPassword())) ? account : null;
+    }
+
+    public Account verify(String verification){
+        Account account = accountRepository.findByVerification(verification);
+        if(account != null){
+            long now = new Date().getTime();
+            if(now - account.getLastPasswordResetDate().getTime() < 86400000) {
+                account.setAccountStatus(AccountStatus.VERIFIED);
+            } else {
+                account.setAccountStatus(AccountStatus.BLOCKED);
+                account.setBlockingReason("Expired Verification");
+            }
+            account.setVerification(null);
+            accountRepository.save(account);
+            return account;
+        }
+        return null;
+    }
+
+    public boolean generatePasswordResetToken(String email){
+        Account account = accountRepository.findByEmail(email);
+        if(account == null){
+            return false;
+        }
+        SetPasswordToken token = new SetPasswordToken(account);
+        sptRepository.save(token);
+        emailUtils.sendSetPasswordEmail(token);
+        return true;
+    }
+
+    public boolean checkSetPasswordToken(String tokenString){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        return token != null;
+    }
+
+    public boolean setPassword(String tokenString, SetPasswordDTO passwordDTO){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        if(token == null){
+            return false;
+        }
+        Account account = token.getAccount();
+        // for drivers who are setting their password for the first time
+        if(account.getAccountStatus() == AccountStatus.UNVERIFIED){
+            account.setAccountStatus(AccountStatus.VERIFIED);
+        }
+        account.setPassword(passwordEncoder.encode(passwordDTO.getPassword()));
+        accountRepository.save(account);
+        sptRepository.delete(token);
+        return true;
     }
 
     public GetAccountDTO getById(Long id) {

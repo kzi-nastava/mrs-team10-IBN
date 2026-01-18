@@ -1,0 +1,13 @@
+<div id="container">
+    <img src="set_password.svg" alt="Verify"/>
+    <form [formGroup]="verifyForm" [style.display]="validToken === true ? 'block' : 'none'">
+        <input type="password" formControlName="password" placeholder="Password">
+        <br/>
+        <input type="password" formControlName="confirm" placeholder="Confirm Password">
+        <hr/>
+        <p>Choose your new password and confirm it</p>
+        <p class="errormsg" [style.display]="showError ? 'block' : 'none'">{{ errormsg }}</p>
+        <button class="form-button-one" (click)="verify()">Verify Account</button>
+    </form>
+    <h1 [style.display]="validToken === false ? 'block' : 'none'">Invalid Link!</h1>
+</div>
