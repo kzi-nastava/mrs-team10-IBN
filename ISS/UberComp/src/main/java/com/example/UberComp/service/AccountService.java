@@ -19,6 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -67,15 +70,20 @@ public class AccountService implements UserDetailsService {
             newUser.setAccount(newAccount);
             newAccount.setUser(newUser);
 
-            emailUtils.sendVerificationEmail(newAccount);
-
             accountRepository.save(newAccount);
+
+            if (newUser instanceof Driver) {
+                SetPasswordToken token = new SetPasswordToken(newAccount);
+                sptRepository.save(token);
+                emailUtils.sendSetPasswordEmail(token);
+            } else {
+                emailUtils.sendVerificationEmail(newAccount);
+            }
 
             return newUser;
         }
         return null;
     }
-
 
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
@@ -120,12 +128,26 @@ public class AccountService implements UserDetailsService {
         if(token == null){
             return false;
         }
+
         Account account = token.getAccount();
+        if (token.getCreatedAt().toInstant()
+                .plus(24, ChronoUnit.HOURS)
+                .isBefore(Instant.now())) {
+
+            sptRepository.delete(token);
+            account.setAccountStatus(AccountStatus.BLOCKED);
+            account.setBlockingReason("Expired Verification");
+            account.setVerification(null);
+            accountRepository.save(account);
+            return false;
+        }
+
         // for drivers who are setting their password for the first time
         if(account.getAccountStatus() == AccountStatus.UNVERIFIED){
             account.setAccountStatus(AccountStatus.VERIFIED);
         }
         account.setPassword(passwordEncoder.encode(passwordDTO.getPassword()));
+        account.setVerification(null);
         accountRepository.save(account);
         sptRepository.delete(token);
         return true;
