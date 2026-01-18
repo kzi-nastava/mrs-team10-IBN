@@ -105,6 +105,19 @@ public class RideService {
         return new GetVehiclePositionDTO();
     }
 
+    public Collection<GetRideDTO> getScheduledRidesForDriver(Long id){
+        List<ScheduledRide> scheduledRides = scheduledRideRepository.getScheduledRidesForDriver(id);
+        ArrayList<ScheduledRide> futureScheduledRides = new ArrayList<>();
+        for (ScheduledRide ride: scheduledRides){
+            if (ride.getStart().isAfter(LocalDateTime.now()))
+                futureScheduledRides.add(ride);
+        }
+        return futureScheduledRides
+                .stream()
+                .map(GetRideDTO::new)
+                .toList();
+    }
+
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
 
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){

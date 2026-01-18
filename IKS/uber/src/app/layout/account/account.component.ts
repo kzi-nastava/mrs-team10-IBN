@@ -412,6 +412,7 @@ export class AccountComponent implements OnInit {
       driver: [
         { icon: '🚗', label: 'My vehicle', route: '/my-vehicle' },
         { icon: '📊', label: 'My statistics', route: '/statistics/User' },
+        { icon: '📅', label: 'Scheduled rides', route: '/scheduled-rides'}
       ],
 
       administrator: [
