@@ -17,6 +17,7 @@ import { RegisterDriverComponent } from './layout/register-driver/register-drive
 import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 import { AuthGuard } from './auth/auth-guard';
 import { TrackingMapComponent } from './maps/tracking-map/tracking-map.component';
+import { ScheduledRidesComponent } from './driver/scheduled-rides/scheduled-rides.component';
 
 export const routes: Routes = [
   {
@@ -110,6 +111,12 @@ export const routes: Routes = [
     component: RegisterDriverComponent,
     canActivate: [AuthGuard],
     data: { role: ['administrator'] },
+  },
+  {
+    path: 'scheduled-rides',
+    component: ScheduledRidesComponent,
+    canActivate: [AuthGuard],
+    data: { role: ['driver']},
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

@@ -69,6 +69,7 @@ export class RideService {
 
   constructor(private http: HttpClient) {
     this.loadRides();
+    this.loadScheduledRides();
   }
 
   // private getAuthHeaders() {
@@ -83,6 +84,9 @@ export class RideService {
   private _rides = signal<Ride[]>([]);
   rides = this._rides.asReadonly();
 
+  private _scheduled_rides = signal<Ride[]>([]);
+  scheduled_rides = this._scheduled_rides.asReadonly();
+
   loadRides() {
     if (this.role == 'driver')
       this.http
@@ -92,6 +96,14 @@ export class RideService {
       this.http
         .get<Ride[]>(`${environment.apiHost}/rides/passenger`)
         .subscribe((rides) => this._rides.set(rides));
+  }
+
+  loadScheduledRides() {
+    this.http
+      .get<Ride[]>(`${environment.apiHost}/rides/scheduledRides`)
+      .subscribe((scheduled_rides) => {this._scheduled_rides.set(scheduled_rides);
+            console.log(this.scheduled_rides());}
+    );
   }
 
   loadRideDetails(rideId: number): Observable<Ride> {
