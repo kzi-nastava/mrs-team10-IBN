@@ -110,7 +110,6 @@ public class TokenUtils {
 
     private Claims getAllClaimsFromToken(String token) {
         Claims claims;
-        System.out.println(SECRET);
         try {
             claims = Jwts.parser()
                     .setSigningKey(SECRET)

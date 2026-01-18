@@ -2,6 +2,7 @@ package com.example.UberComp.controller;
 
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.account.RegisterDTO;
+import com.example.UberComp.dto.account.SetPasswordDTO;
 import com.example.UberComp.dto.auth.AuthTokenDTO;
 import com.example.UberComp.dto.account.LogAccountDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
@@ -69,5 +70,29 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> forgotPassword(@RequestBody AccountDTO account){
+        if(accountService.generatePasswordResetToken(account.getEmail())){
+            return ResponseEntity.ok(null);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(value = "/set-password/{token}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> checkSetPasswordToken(@PathVariable String token){
+        if(accountService.checkSetPasswordToken(token)){
+            return ResponseEntity.ok(null);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/set-password/{token}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> setPassword(@PathVariable String token, @RequestBody SetPasswordDTO password){
+        if(accountService.setPassword(token, password)){
+            return ResponseEntity.ok(null);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

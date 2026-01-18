@@ -1,9 +1,6 @@
 package com.example.UberComp.service;
 
-import com.example.UberComp.dto.account.AccountDTO;
-import com.example.UberComp.dto.account.GetAccountDTO;
-import com.example.UberComp.dto.account.LogAccountDTO;
-import com.example.UberComp.dto.account.RegisterDTO;
+import com.example.UberComp.dto.account.*;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
@@ -11,10 +8,7 @@ import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.*;
-import com.example.UberComp.repository.AccountRepository;
-import com.example.UberComp.repository.DriverChangeRequestRepository;
-import com.example.UberComp.repository.DriverRepository;
-import com.example.UberComp.repository.UserRepository;
+import com.example.UberComp.repository.*;
 import com.example.UberComp.utils.EmailUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -25,10 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -46,83 +37,8 @@ public class AccountService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailUtils emailUtils;
-
-    private void sendVerificationEmail(Account account){
-        String verificationLink = "http://localhost:4200/verify/" + account.getVerification();
-        String body = "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                "    <title>Verify Your Account</title>\n" +
-                "</head>\n" +
-                "<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;\">\n" +
-                "    <table role=\"presentation\" style=\"width: 100%; border-collapse: collapse;\">\n" +
-                "        <tr>\n" +
-                "            <td align=\"center\" style=\"padding: 40px 0;\">\n" +
-                "                <table role=\"presentation\" style=\"width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\">\n" +
-                "                    <!-- Header -->\n" +
-                "                    <tr>\n" +
-                "                        <td style=\"padding: 40px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center;\">\n" +
-                "                            <h1 style=\"margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;\">Account Verification</h1>\n" +
-                "                        </td>\n" +
-                "                    </tr>\n" +
-                "                    \n" +
-                "                    <!-- Content -->\n" +
-                "                    <tr>\n" +
-                "                        <td style=\"padding: 40px 30px;\">\n" +
-                "                            <p style=\"margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;\">\n" +
-                "                                Hello!\n" +
-                "                            </p>\n" +
-                "                            <p style=\"margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;\">\n" +
-                "                                Verify your account by clicking on the button below:\n" +
-                "                            </p>\n" +
-                "                            \n" +
-                "                            <!-- Button -->\n" +
-                "                            <table role=\"presentation\" style=\"margin: 0 auto;\">\n" +
-                "                                <tr>\n" +
-                "                                    <td style=\"border-radius: 6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\">\n" +
-                "                                        <a href=\""+ verificationLink + "\" style=\"display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 6px;\">\n" +
-                "                                            Verify Account\n" +
-                "                                        </a>\n" +
-                "                                    </td>\n" +
-                "                                </tr>\n" +
-                "                            </table>\n" +
-                "                            \n" +
-                "                            <p style=\"margin: 30px 0 0; color: #666666; font-size: 14px; line-height: 1.6;\">\n" +
-                "                                If the button doesn't work, you can copy and paste this link into your browser:\n" +
-                "                            </p>\n" +
-                "                            <p style=\"margin: 10px 0 0; color: #667eea; font-size: 14px; word-break: break-all;\">\n" +
-                "                                " + verificationLink + "\n" +
-                "                            </p>\n" +
-                "                            <p style=\"margin: 30px 0 0; color: #666666; font-size: 14px; line-height: 1.6;\">\n" +
-                "                                Verification link expires in 24 hours!\n" +
-                "                            </p>\n" +
-                "                        </td>\n" +
-                "                    </tr>\n" +
-                "                    \n" +
-                "                    <!-- Footer -->\n" +
-                "                    <tr>\n" +
-                "                        <td style=\"padding: 30px; background-color: #f8f8f8; text-align: center; border-top: 1px solid #eeeeee;\">\n" +
-                "                            <p style=\"margin: 0; color: #999999; font-size: 12px; line-height: 1.5;\">\n" +
-                "                                If you didn't create an account, you can safely ignore this email.\n" +
-                "                            </p>\n" +
-                "                        </td>\n" +
-                "                    </tr>\n" +
-                "                </table>\n" +
-                "            </td>\n" +
-                "        </tr>\n" +
-                "    </table>\n" +
-                "</body>\n" +
-                "</html>";
-        String subject = "UberComp Account Verification";
-        try {
-            emailUtils.sendMail(account.getEmail(), subject, body);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-
-    }
+    @Autowired
+    private SetPasswordTokenRepository sptRepository;
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email);
@@ -151,7 +67,7 @@ public class AccountService implements UserDetailsService {
             newUser.setAccount(newAccount);
             newAccount.setUser(newUser);
 
-            sendVerificationEmail(newAccount);
+            emailUtils.sendVerificationEmail(newAccount);
 
             accountRepository.save(newAccount);
 
@@ -181,6 +97,38 @@ public class AccountService implements UserDetailsService {
             return account;
         }
         return null;
+    }
+
+    public boolean generatePasswordResetToken(String email){
+        Account account = accountRepository.findByEmail(email);
+        if(account == null){
+            return false;
+        }
+        SetPasswordToken token = new SetPasswordToken(account);
+        sptRepository.save(token);
+        emailUtils.sendSetPasswordEmail(token);
+        return true;
+    }
+
+    public boolean checkSetPasswordToken(String tokenString){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        return token != null;
+    }
+
+    public boolean setPassword(String tokenString, SetPasswordDTO passwordDTO){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        if(token == null){
+            return false;
+        }
+        Account account = token.getAccount();
+        // for drivers who are setting their password for the first time
+        if(account.getAccountStatus() == AccountStatus.UNVERIFIED){
+            account.setAccountStatus(AccountStatus.VERIFIED);
+        }
+        account.setPassword(passwordEncoder.encode(passwordDTO.getPassword()));
+        accountRepository.save(account);
+        sptRepository.delete(token);
+        return true;
     }
 
     public GetAccountDTO getById(Long id) {

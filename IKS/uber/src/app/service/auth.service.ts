@@ -39,9 +39,19 @@ export class AuthService {
   }
 
   verify(id: string){
-    return this.http
-      .get<any>(`${environment.authHost}/verify/${id}`, { observe: 'response' })
-      .pipe(map((res: HttpResponse<any>) => res.status >= 200 && res.status < 300))
+    return this.http.get<any>(`${environment.authHost}/verify/${id}`, { observe: 'response' })
+  }
+
+  checkSetPasswordToken(id: string){
+    return this.http.get<any>(`${environment.authHost}/set-password/${id}`, { observe: 'response' })
+  }
+
+  setPassword(id: string, password: string){
+    return this.http.post<any>(`${environment.authHost}/set-password/${id}`, {"password":password}, { observe: 'response' })
+  }
+
+  requestPasswordReset(email: string){
+    return this.http.post<any>(`${environment.authHost}/forgot-password`, {"email":email}, {observe: 'response'})
   }
 
   logout() {

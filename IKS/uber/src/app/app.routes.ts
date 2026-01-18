@@ -30,14 +30,14 @@ export const routes: Routes = [
   {
     path: 'verify/:id',
     component: VerifyAccountComponent
-    // canActivate: [AuthGuard],
-    // data: { role: ['passenger'] },
   },
   {
     path: 'forgot-password',
     component: ForgotPasswordComponent
-    // canActivate: [AuthGuard],
-    // data: { role: ['administrator', 'passenger', 'driver'] },
+  },
+  {
+    path: 'set-password/:id',
+    component: VerifyFormComponent
   },
   {
     path: 'account',
