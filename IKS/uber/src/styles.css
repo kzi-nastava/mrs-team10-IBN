@@ -68,6 +68,14 @@ input[type='file'] {
   border-radius: 3rem !important;
   background-color: #d3d3d3 !important;
 }
+
+.errormsg {
+  font-size: 10px;
+  color: red;
+  font-family: "Mandali";
+  padding: 0;
+  margin: 0;
+}
 /* 
 .dialog-container {
   background-color: transparent !important;

@@ -7,7 +7,7 @@ import { AccountComponent } from './layout/account/account.component';
 import { RideHistoryComponent } from './driver/ride-history/ride-history.component';
 import { RequestsComponent } from './layout/requests/requests.component';
 import { TrackingRouteComponent } from './layout/tracking-route/tracking-route.component';
-import { VerifyAccountComponent } from './forms/verify-account/verify-account.component';
+import { VerifyFormComponent } from './forms/verify-form/verify-form.component';
 import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password.component';
 import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
 import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate-driver-vehicle.component';
@@ -17,6 +17,7 @@ import { RegisterDriverComponent } from './layout/register-driver/register-drive
 import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 import { AuthGuard } from './auth/auth-guard';
 import { TrackingMapComponent } from './maps/tracking-map/tracking-map.component';
+import { VerifyAccountComponent } from './layout/verify-account/verify-account.component';
 
 export const routes: Routes = [
   {
@@ -28,16 +29,16 @@ export const routes: Routes = [
     component: RegisterComponent,
   },
   {
-    path: 'verify',
-    component: VerifyAccountComponent,
-    canActivate: [AuthGuard],
-    data: { role: ['passenger'] },
+    path: 'verify/:id',
+    component: VerifyAccountComponent
   },
   {
     path: 'forgot-password',
-    component: ForgotPasswordComponent,
-    canActivate: [AuthGuard],
-    data: { role: ['administrator', 'passenger', 'driver'] },
+    component: ForgotPasswordComponent
+  },
+  {
+    path: 'set-password/:id',
+    component: VerifyFormComponent
   },
   {
     path: 'account',
