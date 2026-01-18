@@ -20,7 +20,6 @@ import { Ride } from '../../model/ride-history.model';
 import { signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
 }
@@ -34,11 +33,12 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
-  @Input() stations: Station[] = []; 
-  @Input() interactive: boolean = true; 
+  @Input() stations: Station[] = [];
+  @Input() interactive: boolean = true;
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
+  @Output() routeCalculated = new EventEmitter<{ distance: number; duration: number }>();
   estimatedTime = output<string>();
 
   private map!: L.Map;
@@ -59,6 +59,8 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }[] = [];
 
   private isUpdatingFromParent = false;
+  private lastLocationsSignature = '';
+  private isMapReady = false;
 
   constructor(private http: HttpClient) {
     this.getVehiclesOnHome = true;
@@ -95,16 +97,11 @@ export class MapComponent implements AfterViewInit, OnChanges {
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
       iconAnchor: [22, 94],
-      className: 'car-icon'
+      className: 'car-icon',
     });
 
     this.initMap();
-    if(this.interactive)
-      this.registerOnClick();
-
-    if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
+    if (this.interactive) this.registerOnClick();
 
     this.vehicleLayer = L.layerGroup().addTo(this.map);
 
@@ -127,11 +124,17 @@ ngOnDestroy(): void{
   
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
-      this.updateLocationsFromInput();
+    if (changes['locations'] && this.isMapReady) {
+      const newSignature = JSON.stringify(this.locations);
+
+      if (newSignature !== this.lastLocationsSignature && !this.isUpdatingFromParent) {
+        this.lastLocationsSignature = newSignature;
+        this.updateLocationsFromInput();
+      }
     }
-    if (changes['stations'] && this.map && this.stations.length > 0) {
-      this.loadFromStations(); 
+
+    if (changes['stations'] && this.isMapReady && this.stations.length > 0) {
+      this.loadFromStations();
     }
   }
 
@@ -139,17 +142,16 @@ ngOnDestroy(): void{
     this.map = L.map('map', {
       center: [45.242, 19.8227],
       zoom: 12.75,
-      zoomSnap:0.25,
-      dragging: this.interactive,        
-      touchZoom: this.interactive,     
+      zoomSnap: 0.25,
+      dragging: this.interactive,
+      touchZoom: this.interactive,
       scrollWheelZoom: this.interactive,
-      doubleClickZoom: this.interactive, 
-      boxZoom: this.interactive,        
-      keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      doubleClickZoom: this.interactive,
+      boxZoom: this.interactive,
+      keyboard: this.interactive,
+      zoomControl: this.interactive,
     });
 
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -163,11 +165,14 @@ ngOnDestroy(): void{
     }
 
     this.isUpdatingFromParent = true;
+
     this.clearAll();
 
     for (const location of this.locations) {
       await this.addLocationFromAddress(location);
     }
+
+    this.updateRoute();
 
     this.isUpdatingFromParent = false;
   }
@@ -187,83 +192,102 @@ ngOnDestroy(): void{
           icon = this.DestinationIcon;
         }
 
-        this.addPointWithIcon(lat, lon, icon, location.address, true);
+        this.addPointWithIcon(lat, lon, icon, location.address, true, false);
       }
     } catch (error) {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
-private addPointWithIcon(
-  lat: number,
-  lng: number,
-  icon: L.Icon,
-  title?: string,
-  fromParent = false,
-  shouldUpdateRoute = true 
-): void {
-  const latLng = L.latLng(lat, lng);
-  const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
-  pin.on('click', () => {
-    const index = this.points.findIndex((p) => p.marker === pin);
-    if (index !== -1) {
-      this.removePointByIndex(index);
+  private addPointWithIcon(
+    lat: number,
+    lng: number,
+    icon: L.Icon,
+    title?: string,
+    fromParent = false,
+    shouldUpdateRoute = true,
+  ): void {
+    const latLng = L.latLng(lat, lng);
+    const pin = L.marker(latLng, { icon, title }).addTo(this.map);
+
+    pin.on('click', () => {
+      const index = this.points.findIndex((p) => p.marker === pin);
+      if (index !== -1) {
+        this.removePointByIndex(index);
+      }
+    });
+
+    if (title) {
+      pin.bindPopup(title);
     }
-  });
 
-  if (title) {
-    pin.bindPopup(title);
+    this.points.push({ marker: pin, latLng, address: title });
+
+    if (shouldUpdateRoute) {
+      this.updateRoute();
+    }
   }
 
-  this.points.push({ marker: pin, latLng, address: title });
-  
-  if (shouldUpdateRoute) { 
+  private loadFromStations(): void {
+    this.clearAll();
+    console.log(this.stations);
+
+    this.stations.forEach((station, index) => {
+      const isLast = index === this.stations.length - 1;
+      let icon = this.PinIcon;
+
+      if (index === 0) icon = this.PickupIcon;
+      else if (isLast) icon = this.DestinationIcon;
+
+      this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
+
+      if (this.points.length > 0) {
+        const group = L.featureGroup(this.points.map((p) => p.marker));
+        this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
+      }
+    });
+
     this.updateRoute();
   }
-}
 
-private loadFromStations(): void {
-  this.clearAll();
-  console.log(this.stations);
-  
-  this.stations.forEach((station, index) => {
-    const isLast = index === this.stations.length - 1;
-    let icon = this.PinIcon;
-    
-    if (index === 0) icon = this.PickupIcon;
-    else if (isLast) icon = this.DestinationIcon;
-    
-    this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
+  @Input() isUserLoggedIn: boolean = false;
+  @Output() maxLocationsReached = new EventEmitter<void>();
 
-    if (this.points.length > 0) {
-      const group = L.featureGroup(this.points.map(p => p.marker));
-      this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
+  private canAddMorePoints(): boolean {
+    if (this.interactive) {
+      const currentPointsCount = this.points.length;
+      if (!this.isUserLoggedIn && currentPointsCount >= 2) {
+        return false;
+      }
+    }
+    return true;
   }
-  });
-  
-  this.updateRoute();
-}
 
   private async addPoint(lat: number, lng: number): Promise<void> {
-    try {
-      const result = await this.reverseSearch(lat, lng).toPromise();
+    if (this.canAddMorePoints()) {
+      try {
+        const result = await this.reverseSearch(lat, lng).toPromise();
 
-      let address = '';
-      if (result && result.address) {
-        const parts = [];
-        if (result.address.road) parts.push(result.address.road);
-        if (result.address.house_number) parts.push(result.address.house_number);
-        address = parts.join(' ') || result.display_name;
+        let address = '';
+        if (result && result.address) {
+          const parts = [];
+          if (result.address.road) parts.push(result.address.road);
+          if (result.address.house_number) parts.push(result.address.house_number);
+          address = parts.join(' ') || result.display_name;
+        }
+
+        this.addPointWithIcon(lat, lng, this.PinIcon, address);
+
+        if (address) {
+          this.locationAdded.emit(address);
+        }
+      } catch (error) {
+        console.error('Error reverse geocoding:', error);
+        this.addPointWithIcon(lat, lng, this.PinIcon);
       }
-
-      this.addPointWithIcon(lat, lng, this.PinIcon, address);
-
-      if (address) {
-        this.locationAdded.emit(address);
-      }
-    } catch (error) {
-      console.error('Error reverse geocoding:', error);
-      this.addPointWithIcon(lat, lng, this.PinIcon);
+    } else {
+      this.maxLocationsReached.emit();
+      return;
     }
   }
 
@@ -298,34 +322,47 @@ private loadFromStations(): void {
     const waypoints = this.points.map((p) => p.latLng);
 
     if (this.routeControl) {
-      this.routeControl.setWaypoints(waypoints);
-    } else {
-      const options: RoutingOptionsWithMarker = {
-        waypoints,
-        addWaypoints: false,
-        show: false,
-        createMarker: () => null,
-        router: L.routing.mapbox(environment.apiKey, {
-          profile: 'mapbox/driving',
-        }),
-      };
-
-      this.routeControl = L.Routing.control(options).addTo(this.map);
-      this.routeControl.on('routesfound',  (e) => {
-        var routes = e.routes;
-        var summary = routes[0].summary;
-        console.log(
-          'Total distance is ' +
-            summary.totalDistance / 1000 +
-            ' km and total time is ' +
-            Math.round((summary.totalTime % 3600) / 60) +
-            ' minutes'
-        );
-        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes')
-      });
+      this.map.removeControl(this.routeControl);
+      this.routeControl = undefined;
     }
-  }
 
+    const options: RoutingOptionsWithMarker = {
+      waypoints,
+      addWaypoints: false,
+      show: false,
+      createMarker: () => null,
+      router: L.routing.mapbox(environment.apiKey, {
+        profile: 'mapbox/driving',
+      }),
+    };
+
+    this.routeControl = L.Routing.control(options).addTo(this.map);
+
+    this.routeControl.on('routesfound', (e) => {
+      var routes = e.routes;
+      var summary = routes[0].summary;
+
+      const totalMinutes = Math.round(summary.totalTime / 60);
+      const totalKm = summary.totalDistance / 1000;
+
+      console.log(
+        'Total distance is ' + totalKm + ' km and total time is ' + totalMinutes + ' minutes',
+      );
+
+      this.estimatedTime.emit(totalMinutes + ' minutes');
+
+      this.routeCalculated.emit({
+        distance: totalKm,
+        duration: totalMinutes,
+      });
+
+      const bounds = L.latLngBounds(this.points.map((p) => p.latLng));
+      this.map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15,
+      });
+    });
+  }
 
   private registerOnClick(): void {
     this.map.on('click', (e: any) => {
@@ -334,15 +371,11 @@ private loadFromStations(): void {
   }
 
   searchStreet(street: string): Observable<any> {
-    return this.http.get(
-      'https://nominatim.openstreetmap.org/search?format=json&q=' + street + ', Novi Sad, Serbia'
-    );
+    return this.http.get('/nominatim/search?format=json&q=' + street + ', Novi Sad, Serbia');
   }
 
   reverseSearch(lat: number, lon: number): Observable<any> {
-    return this.http.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-    );
+    return this.http.get(`/nominatim/reverse?format=json&lat=${lat}&lon=${lon}`);
   }
 
   clearAll(): void {
@@ -354,14 +387,13 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
-      
 
   async getVehiclePositions() {
     while (this.getVehiclesOnHome) {
       console.log("nesto")
       try {
         const rides = await firstValueFrom(
-          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
+          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`),
         );
 
         for (const ride of rides) {
@@ -373,8 +405,8 @@ private loadFromStations(): void {
           progress = Math.max(0, Math.min(1, progress));
 
           const waypoints = ride.route.stations
-            .filter(s => s.lat != null && s.lon != null)
-            .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
+            .filter((s) => s.lat != null && s.lon != null)
+            .map((s) => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
 
           if (waypoints.length < 2) continue;
 
@@ -389,13 +421,11 @@ private loadFromStations(): void {
             const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
             const pos = coords[index];
 
-            L.marker(
-              [pos.lat, pos.lng],
-              { icon: ride.isBusy ? this.RedCarIcon : this.GreenCarIcon }
-            ).addTo(this.vehicleLayer);
+            L.marker([pos.lat, pos.lng], {
+              icon: ride.isBusy ? this.RedCarIcon : this.GreenCarIcon,
+            }).addTo(this.vehicleLayer);
           });
         }
-
       } catch (err) {
         console.error(err);
       }
@@ -406,9 +436,6 @@ private loadFromStations(): void {
   }
 
   sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
-
 }
-

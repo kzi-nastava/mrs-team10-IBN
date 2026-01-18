@@ -24,4 +24,10 @@ public class Coordinate {
 
     @Column
     private String address;
+
+    public Coordinate(Double lat, Double lon) {
+        this.id = null;
+        this.lat = lat;
+        this.lon = lon;
+    }
 }

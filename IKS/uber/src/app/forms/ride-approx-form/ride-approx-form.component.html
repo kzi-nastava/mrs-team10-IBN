@@ -1,19 +1,28 @@
 <div id="placeholder">
-    <h2>Want to go somewhere in Novi Sad?</h2>
-    <p>We can take you there... just choose your route</p>
-    <form [formGroup]="endpoints">
-        <input type="text" formControlName="startLoc" placeholder="Start Location"/>
-        <br/>
-        <input type="text" formControlName="destination" placeholder="Destination"/>
-        <br/>
-        <button (click)="addStation()" class="form-button-one">Add Station</button>
-        <button (click)="removeStation()" class="form-button-two">Remove Station</button>
-        <div id="stationsBox" formArrayName="stations">
-            @for (station of stations.controls; track station; let i = $index){
-                <input type="text" [formControlName]="i" placeholder="Station #{{ i + 1}}" class="animated"/>
-                <br/>
-            }
-        </div>
-    </form>
-    <button (click)="getRoute()" class="form-button-one">Show Route</button>
+  <h2>Want to go somewhere in Novi Sad?</h2>
+  <form [formGroup]="endpoints">
+    <input type="text" formControlName="startLoc" placeholder="Start Location" />
+    <br />
+    <input type="text" formControlName="destination" placeholder="Destination" />
+    <br />
+    @if (isLoggedIn()) {
+    <button (click)="addStation()" class="add-stop-btn" type="button">Add Station</button>
+    <div id="stationsBox" formArrayName="stations">
+      @for (station of stations.controls; track station; let i = $index){
+      <div class="station-row animated">
+        <input type="text" [formControlName]="i" placeholder="Station #{{ i + 1 }}" />
+        <button class="remove-stop-btn" (click)="removeStationAt(i)" type="button">x</button>
+      </div>
+      }
+    </div>
+    }
+  </form>
+  <div class="button-row">
+    <button (click)="getRoute()" class="form-button-one" type="button">Show Route</button>
+    <button (click)="clearAllLocations()" class="clear-btn" type="button">Clear all</button>
+  </div>
+
+  @if (errorMessage) {
+  <div class="error-message">{{ errorMessage }}</div>
+  }
 </div>
