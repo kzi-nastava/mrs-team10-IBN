@@ -31,6 +31,5 @@ export class ScheduledRidesComponent {
 
   constructor(private rideService: RideService) {
     this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
-    console.log(this.scheduled_rides());
   }
 }

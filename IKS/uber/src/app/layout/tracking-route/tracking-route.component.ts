@@ -3,12 +3,14 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
 import { TrackingMapComponent } from '../../maps/tracking-map-passenger/tracking-map.component';
 import { AuthService } from '../../service/auth.service';
-import { User } from '../../model/user.model';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
 import { RouteService } from '../../service/route.service';
-import { Location } from '../../model/location.model';
 import { Station } from '../../model/ride-history.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Ride } from '../../model/ride-history.model';
+import { Inject } from '@angular/core';
 
 @Component({
   selector: 'app-tracking-route',
@@ -31,16 +33,32 @@ export class TrackingRouteComponent {
   firstButtonText: String = 'Start';
   protected role: string | null;
 
-  constructor(private dialog: MatDialog, authService: AuthService) {
-    this.role = authService.role();
-    this.routeService.getRide().subscribe({
-      next: (response) => {
-        this.route = [...response.route.stations];
-        this.rideId = response.id
-        console.log(this.route)
-        this.cdr.detectChanges();
-      }
-    })
+  constructor(authService: AuthService, private http: HttpClient,
+          private dialog: MatDialog
+  ){
+      this.role = authService.role();
+      // this.routeService.getRide().subscribe({
+      //   next: (response) => {
+      //     this.route = [...response.route.stations];
+      //     this.rideId = response.id
+      //     this.cdr.detectChanges();
+      //   }
+      // })
+      this.setRideId();
+    }
+
+  setRideId() {
+    this.http
+      .get<Ride>(`${environment.apiHost}/rides/trackingRidePassenger`)
+      .subscribe({
+        next: (ride) => {
+          this.rideId = ride.id;
+          console.log(this.rideId);
+        },
+        error: (err) => {
+          console.error('Failed to fetch ride', err);
+        }
+      });
   }
 
   setTimeEvent(eventData: string){
@@ -74,9 +92,11 @@ export class TrackingRouteComponent {
   }
 
   openComplaintDialog() {
+    console.log(this.rideId)
     this.dialog.open(ComplaintDialogComponent, {
       width: '90%',
       maxWidth: '420px',
+      data: {rideId: this.rideId}
     });
   }
 }

@@ -128,7 +128,6 @@ export class TrackingMapComponent implements AfterViewInit {
       this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         const coords = routes[0].coordinates;
-        console.log(this.rideProgress)
         if (!coords?.length) return;
 
         const index = Math.min(coords.length - 1, Math.floor(this.rideProgress * coords.length));
