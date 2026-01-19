@@ -4,6 +4,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import {Router, RouterModule} from '@angular/router';
+import { AuthService } from '../../service/auth.service';
 
 
 /**
@@ -16,5 +17,8 @@ import {Router, RouterModule} from '@angular/router';
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, RouterModule],
 })
 export class NavBarComponent {
-
+  loggedIn: boolean;
+  constructor(authService: AuthService){
+    this.loggedIn = authService.isLoggedIn()
+  }
 }

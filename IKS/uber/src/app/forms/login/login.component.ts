@@ -12,9 +12,10 @@ import { LoginCreds, AuthService } from '../../service/auth.service';
 export class LoginComponent {
   authService: AuthService = inject(AuthService)
   router: Router = inject(Router)
+  errormsg: string | null = null;
 
   loginForm = new FormGroup({
-    email: new FormControl<string>('', Validators.required),
+    email: new FormControl<string>('', [Validators.required, Validators.email]),
     password: new FormControl<string>('', Validators.required),
   });
 
@@ -24,14 +25,16 @@ export class LoginComponent {
         email: this.loginForm.value.email as string,
         password: this.loginForm.value.password as string
       }
-      this.authService.login(creds).subscribe(
-        (res) => {
-          if (res) this.router.navigate(["/home"])
-          else alert("Incorrect Username or Password!")
-        }
-      )
-    } else {
-      alert("Invalid Login Form input!")
+      this.authService.login(creds).subscribe({
+        next: (res) => this.authService.save(res.body),
+        error: (err) => this.errormsg = "Incorrect Credentials!"
+      })
+    } else if (!this.loginForm.value.email) {
+      this.errormsg = "Email is required!";
+    } else if (this.loginForm.get('email')?.hasError('email')) {
+      this.errormsg = "Incorrect email format!";
+    } else if (!this.loginForm.value.password) {
+      this.errormsg = "Password is required!";
     }
   }
 }

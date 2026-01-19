@@ -12,7 +12,13 @@ img{
 }
 
 #loggedin-div{
-  text-align: left;
+  display: flex;
+  justify-content:left;
+  align-items: center;
+}
+
+#loggedin {
+  margin: 10px;
 }
 
 p {
