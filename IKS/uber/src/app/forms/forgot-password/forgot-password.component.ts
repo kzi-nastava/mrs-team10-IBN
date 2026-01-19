@@ -11,27 +11,28 @@ import { AuthService } from '../../service/auth.service';
 })
 export class ForgotPasswordComponent {
   forgotPasswordForm = new FormGroup({
-    email: new FormControl("", [Validators.required, Validators.email]),
-  })
+    email: new FormControl('', [Validators.required, Validators.email]),
+  });
   authService: AuthService = inject(AuthService);
   router: Router = inject(Router);
   errormsg: string | null = null;
-  cdr: ChangeDetectorRef = inject(ChangeDetectorRef)
+  cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  requestPasswordReset(){
-    if(this.forgotPasswordForm.valid){
-      this.authService.requestPasswordReset(this.forgotPasswordForm.value.email as string)
-      .subscribe({
-        next: (res) => {
-          this.router.navigate(["/home"])
-        },
-        error:(err) => {
-          this.errormsg = "Account with this email does not exist!"
-          this.cdr.detectChanges()
-        }
-      })
+  requestPasswordReset() {
+    if (this.forgotPasswordForm.valid) {
+      this.authService
+        .requestPasswordReset(this.forgotPasswordForm.value.email as string)
+        .subscribe({
+          next: (res) => {
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.errormsg = 'Account with this email does not exist!';
+            this.cdr.detectChanges();
+          },
+        });
     } else {
-      this.errormsg = "Incorrect Email Format!"
+      this.errormsg = 'Incorrect Email Format!';
     }
   }
 }

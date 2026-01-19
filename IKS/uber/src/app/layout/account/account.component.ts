@@ -14,6 +14,7 @@ import { User } from '../../model/user.model';
 import { DriverDetails } from '../../model/driver.model';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../service/auth.service';
+import { ChangePasswordComponent } from '../../forms/change-password/change-password.component';
 
 @Component({
   selector: 'app-account',
@@ -25,6 +26,7 @@ import { AuthService } from '../../service/auth.service';
     VehicleFormComponent,
     UserFormComponent,
     VehiclePriceComponent,
+    ChangePasswordComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
@@ -45,6 +47,7 @@ export class AccountComponent implements OnInit {
   isDriverActive = false;
   showVehicleModal = false;
   showVehiclePriceModal = false;
+  showChangePassword = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
   userProfileImage: string = 'accountpic.png';
@@ -53,7 +56,7 @@ export class AccountComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private cd: ChangeDetectorRef,
-    private vehicleTypeService: VehicleTypeService
+    private vehicleTypeService: VehicleTypeService,
   ) {}
 
   ngOnInit() {
@@ -331,7 +334,7 @@ export class AccountComponent implements OnInit {
       .put(
         `${environment.apiHost}/account/me/profile-image`,
         { profileImage: newImage },
-        this.getAuthHeaders()
+        this.getAuthHeaders(),
       )
       .subscribe({
         next: () => {
@@ -387,6 +390,19 @@ export class AccountComponent implements OnInit {
     this.showVehiclePriceModal = false;
   }
 
+  openChangePassword() {
+    this.showChangePassword = true;
+  }
+
+  closeChangePassword() {
+    this.showChangePassword = false;
+  }
+
+  onPasswordChanged(message: string) {
+    this.showSuccess(message);
+    this.closeChangePassword();
+  }
+
   get menuItems() {
     const commonItems = [
       {
@@ -412,7 +428,7 @@ export class AccountComponent implements OnInit {
       driver: [
         { icon: '🚗', label: 'My vehicle', route: '/my-vehicle' },
         { icon: '📊', label: 'My statistics', route: '/statistics/User' },
-        { icon: '📅', label: 'Scheduled rides', route: '/scheduled-rides'}
+        { icon: '📅', label: 'Scheduled rides', route: '/scheduled-rides' },
       ],
 
       administrator: [
