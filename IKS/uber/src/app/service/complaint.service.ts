@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Review } from '../model/review.model';
-
+import { Complaint } from '../model/complaint.model';
 @Injectable({
   providedIn: 'root'
 })
-export class ReviewService {
+export class ComplaintService {
   constructor(private http: HttpClient){
 
   }
 
-  postReview(review: Review){
-    return this.http.post(`${environment.apiHost}/reviews`, review)
+  postComplaint(complaint: Complaint){
+    console.log(complaint)
+    return this.http.post(`${environment.apiHost}/reports`, complaint)
   }
 }
