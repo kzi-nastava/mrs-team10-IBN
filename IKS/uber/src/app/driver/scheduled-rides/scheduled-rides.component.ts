@@ -22,7 +22,6 @@ import { RouterLink } from '@angular/router';
     MatNativeDateModule,
     DatePipe,
     CommonModule,
-    RouterLink
   ],
   templateUrl: './scheduled-rides.component.html',
   styleUrl: './scheduled-rides.component.css',
@@ -31,9 +30,7 @@ export class ScheduledRidesComponent {
   protected scheduled_rides: Signal<Ride[]>;
 
   constructor(private rideService: RideService) {
-   
     this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
-     console.log(this.scheduled_rides())
+    console.log(this.scheduled_rides());
   }
-
 }

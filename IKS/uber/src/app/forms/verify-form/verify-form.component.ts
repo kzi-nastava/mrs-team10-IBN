@@ -12,50 +12,50 @@ import { AuthService } from '../../service/auth.service';
 export class VerifyFormComponent {
   router: Router = inject(Router);
   verifyForm = new FormGroup({
-    password: new FormControl("", Validators.minLength(6)),
-    confirm: new FormControl("", Validators.minLength(6))
-  })
-  authService: AuthService = inject(AuthService)
-  route: ActivatedRoute = inject(ActivatedRoute)
-  cdr: ChangeDetectorRef = inject(ChangeDetectorRef)
+    password: new FormControl('', Validators.minLength(6)),
+    confirm: new FormControl('', Validators.minLength(6)),
+  });
+  authService: AuthService = inject(AuthService);
+  route: ActivatedRoute = inject(ActivatedRoute);
+  cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   validToken: Boolean | null = null;
-  showError: Boolean = false
-  errormsg = "";
+  showError: Boolean = false;
+  errormsg = '';
 
-  ngOnInit(){
-    this.authService.checkSetPasswordToken(this.route.snapshot.paramMap.get("id")!).subscribe({
+  ngOnInit() {
+    this.authService.checkSetPasswordToken(this.route.snapshot.paramMap.get('id')!).subscribe({
       next: (res) => {
-        this.validToken = true
+        this.validToken = true;
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.validToken = false;
         this.cdr.detectChanges();
-      }
-    })
+      },
+    });
   }
 
-  verify(){
-    if (!this.verifyForm.valid){
-      this.errormsg = "Password needs to be at least 6 characters long!"
-      this.showError = true
-    }
-    else if (this.verifyForm.value.password != this.verifyForm.value.confirm){
-      this.errormsg = "Field values not equal! Check your input"
-      this.showError = true
+  verify() {
+    if (!this.verifyForm.valid) {
+      this.errormsg = 'Password needs to be at least 6 characters long!';
+      this.showError = true;
+    } else if (this.verifyForm.value.password != this.verifyForm.value.confirm) {
+      this.errormsg = 'Field values not equal! Check your input';
+      this.showError = true;
     } else {
-      this.authService.setPassword(this.route.snapshot.paramMap.get("id")!, this.verifyForm.value.password!)
-      .subscribe({
-        next: (res) => {
-        this.router.navigate(["/home"]);
-      },
-      error: (err) => {
-        this.errormsg = "Something went wrong!"
-        this.showError = true
-        this.cdr.detectChanges();
-      }
-      })
-      
+      this.authService
+        .setPassword(this.route.snapshot.paramMap.get('id')!, this.verifyForm.value.password!)
+        .subscribe({
+          next: (res) => {
+            localStorage.clear();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.errormsg = 'Something went wrong!';
+            this.showError = true;
+            this.cdr.detectChanges();
+          },
+        });
     }
   }
 }

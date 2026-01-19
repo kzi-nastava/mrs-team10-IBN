@@ -124,48 +124,34 @@ public class EmailUtils {
                 "        <tr>\n" +
                 "            <td align=\"center\" style=\"padding: 40px 0;\">\n" +
                 "                <table role=\"presentation\" style=\"width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\">\n" +
-                "                    <!-- Header -->\n" +
                 "                    <tr>\n" +
                 "                        <td style=\"padding: 40px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center;\">\n" +
                 "                            <h1 style=\"margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;\">Set Password</h1>\n" +
                 "                        </td>\n" +
                 "                    </tr>\n" +
-                "                    \n" +
-                "                    <!-- Content -->\n" +
                 "                    <tr>\n" +
                 "                        <td style=\"padding: 40px 30px;\">\n" +
-                "                            <p style=\"margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;\">\n" +
-                "                                Hello!\n" +
-                "                            </p>\n" +
+                "                            <p style=\"margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;\">Hello!</p>\n" +
                 "                            <p style=\"margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;\">\n" +
                 "                                Set your new password by clicking on the button below and following the instructions:\n" +
                 "                            </p>\n" +
-                "                            \n" +
-                "                            <!-- Button -->\n" +
                 "                            <table role=\"presentation\" style=\"margin: 0 auto;\">\n" +
                 "                                <tr>\n" +
                 "                                    <td style=\"border-radius: 6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\">\n" +
-                "                                        <a href=\""+ SetPasswordToken + "\" style=\"display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 6px;\">\n" +
-                "                                            Reset Password\n" +
+                "                                        <a href=\"" + SetPasswordToken + "\" style=\"display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 6px;\">\n" +
+                "                                            Set Password\n" +
                 "                                        </a>\n" +
                 "                                    </td>\n" +
                 "                                </tr>\n" +
                 "                            </table>\n" +
-                "                            \n" +
+                "                            <p style=\"margin: 30px 0 0; color: #666666; font-size: 14px; line-height: 1.6;\">\n" +
+                "                                Set Password link expires in 24 hours!\n" +
+                "                            </p>\n" +
                 "                            <p style=\"margin: 30px 0 0; color: #666666; font-size: 14px; line-height: 1.6;\">\n" +
                 "                                If the button doesn't work, you can copy and paste this link into your browser:\n" +
                 "                            </p>\n" +
                 "                            <p style=\"margin: 10px 0 0; color: #667eea; font-size: 14px; word-break: break-all;\">\n" +
                 "                                " + SetPasswordToken + "\n" +
-                "                            </p>\n" +
-                "                        </td>\n" +
-                "                    </tr>\n" +
-                "                    \n" +
-                "                    <!-- Footer -->\n" +
-                "                    <tr>\n" +
-                "                        <td style=\"padding: 30px; background-color: #f8f8f8; text-align: center; border-top: 1px solid #eeeeee;\">\n" +
-                "                            <p style=\"margin: 0; color: #999999; font-size: 12px; line-height: 1.5;\">\n" +
-                "                                If you don't have an account, you can safely ignore this email.\n" +
                 "                            </p>\n" +
                 "                        </td>\n" +
                 "                    </tr>\n" +
@@ -175,6 +161,7 @@ public class EmailUtils {
                 "    </table>\n" +
                 "</body>\n" +
                 "</html>";
+
         String subject = "UberComp Account Set Password";
         try {
             sendMail(token.getAccount().getEmail(), subject, body);

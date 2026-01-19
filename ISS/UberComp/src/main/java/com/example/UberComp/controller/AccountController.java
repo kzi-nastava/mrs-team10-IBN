@@ -53,12 +53,6 @@ class AccountController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/setup-password")
-    public ResponseEntity<Void> setupPassword(@RequestBody SetupPasswordDTO dto) {
-        //accountService.setupPassword(dto);
-        return ResponseEntity.ok().build();
-    }
-
     @PutMapping("/change-password")
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
         return ResponseEntity.ok().build();
