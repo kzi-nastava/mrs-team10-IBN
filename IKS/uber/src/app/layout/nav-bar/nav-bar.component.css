@@ -68,6 +68,10 @@ mat-toolbar mat-icon {
   margin: 1rem 3rem 1rem 3rem;
 }
 
+button {
+  font-size: 14px;
+}
+
 
 mat-sidenav-container {
   position: absolute;

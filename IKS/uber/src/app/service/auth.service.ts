@@ -14,24 +14,7 @@ export class AuthService {
   public readonly role = signal<string | null>(this.getRole());
 
   login(creds: LoginCreds) {
-    return this.http
-      .post<any>(`${environment.authHost}/login`, creds, { observe: 'response' })
-      .pipe(
-        map((res: HttpResponse<any>) => {
-          if (res.status == 200) {
-            const expirationTime = Math.floor(Date.now() / 1000) + Number(res.body.expiresIn);
-
-            localStorage.setItem('auth_token', res.body.accessToken);
-            localStorage.setItem('expires_in', expirationTime.toString());
-
-            this.updateRole();
-
-            return true;
-          } else {
-            return false;
-          }
-        })
-      );
+    return this.http.post<any>(`${environment.authHost}/login`, creds, { observe: 'response' })
   }
 
   register(data: RegistrationData) {
@@ -71,6 +54,13 @@ export class AuthService {
     }
   }
 
+  save(token: AuthToken){
+    const expirationTime = Math.floor(Date.now() / 1000) + Number(token.expiresIn);
+    localStorage.setItem('auth_token', token.accessToken);
+    localStorage.setItem('expires_in', expirationTime.toString());
+    this.updateRole()
+  }
+
   private getRole(): string | null {
     if (this.isLoggedIn()) {
       const accessToken = localStorage.getItem('auth_token');
@@ -107,4 +97,9 @@ export interface RegistrationData {
   homeAddress: string;
   phone: string;
   image: string;
+}
+
+export interface AuthToken{
+  accessToken: string,
+  expiresIn: string
 }
