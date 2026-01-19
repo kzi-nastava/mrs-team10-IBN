@@ -225,14 +225,11 @@ public class AccountService implements UserDetailsService {
         List<DriverChangeRequest> requests = driverChangeRequestRepository.findByStatus("PENDING");
         List<DriverChangeRequestDTO> result = new ArrayList<>();
 
-        System.out.println("Found " + requests.size() + " pending requests");
-
         for (DriverChangeRequest request : requests) {
             try {
                 DriverChangeRequestDTO dto = convertToDTO(request);
                 result.add(dto);
             } catch (Exception e) {
-                System.err.println("Error converting request ID " + request.getId() + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -247,7 +244,6 @@ public class AccountService implements UserDetailsService {
         try {
             newData = objectMapper.readValue(request.getRequestedChanges(), UpdateDriverDTO.class);
         } catch (Exception e) {
-            System.err.println("JSON parsing error: " + e.getMessage());
             throw new RuntimeException("JSON error", e);
         }
 
@@ -400,5 +396,29 @@ public class AccountService implements UserDetailsService {
         if (account == null) return null;
         User user = account.getUser();
         return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail()));
+    }
+
+    @Transactional
+    public String changePassword(Long accountId, ChangePasswordDTO dto) {
+        Optional<Account> account = accountRepository.findById(accountId);
+        if (!account.isPresent()) return "Account not found";
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), account.get().getPassword())) {
+            return "Old password is incorrect";
+        }
+
+        if (dto.getOldPassword().equals(dto.getNewPassword())) {
+            return "New password must be different from old password";
+        }
+
+        if (dto.getNewPassword() == null || dto.getNewPassword().length() < 6) {
+            return "New password must be at least 6 characters long";
+        }
+
+        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
+        account.get().setPassword(encodedPassword);
+
+        accountRepository.save(account.get());
+        return "";
     }
 }

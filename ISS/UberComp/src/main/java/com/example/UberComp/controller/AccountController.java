@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/account")
@@ -53,8 +54,12 @@ class AccountController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
+    @PutMapping("/me/change-password")
+    public ResponseEntity<?> changePassword(Authentication auth, @RequestBody ChangePasswordDTO dto) {
+        Account account = (Account) auth.getPrincipal();
+        String message = accountService.changePassword(account.getId(), dto);
+        if (!message.isEmpty())
+            return ResponseEntity.ok().body(Map.of("message", message));
         return ResponseEntity.ok().build();
     }
 
