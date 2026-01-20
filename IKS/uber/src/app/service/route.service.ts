@@ -10,28 +10,41 @@ import { TrackingData } from '../layout/tracking-route/tracking-route.component'
 })
 export class RouteService {
   private readonly http = inject(HttpClient);
-  
+
   getRide(){
     return this.http.get<RidePayload>(`${environment.apiHost}/rides/incoming`);
   }
-  
+
   finishRide(id: number, time:string) {
     return this.http.post(`${environment.apiHost}/rides/finish/${id}`, {"isotime":time})
   }
-  
+
   startRide(id: number, time:string) {
     return this.http.post(`${environment.apiHost}/rides/start/${id}`, {"isotime":time})
   }
 
   stopRide(id: number, passed:number, time:string, location:TrackingData){
     const body = {
+      "id":id,
       "passed":passed,
       "lat": location.lat,
       "lon": location.lon,
       "address":location.address,
       "finishTime":time
     }
-    return this.http.post(`${environment.apiHost}/rides/stop/${id}`, body)
+    return this.http.post(`${environment.apiHost}/rides/stop`, body)
+  }
+
+  panic(id: number, passed:number, time:string, location:TrackingData){
+    const body = {
+      "id":id,
+      "passed":passed,
+      "lat": location.lat,
+      "lon": location.lon,
+      "address":location.address,
+      "finishTime":time
+    }
+    return this.http.post(`${environment.apiHost}/rides/panic`, body)
   }
 
   route: Location[] = [
