@@ -11,8 +11,8 @@ import retrofit2.http.POST;
 public interface AuthService {
     @Headers({
             "User-Agent: Mobile-Android",
-            "Content-Type:application/json"
+            "Content-Type: application/json"
     })
-    @POST("login")
+    @POST("auth/login")
     Call<AuthToken> login(@Body Credentials creds);
 }

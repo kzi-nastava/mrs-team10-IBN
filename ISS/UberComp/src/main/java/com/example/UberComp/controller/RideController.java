@@ -204,6 +204,7 @@ public class RideController {
         Account account = (Account) auth.getPrincipal();
         boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
         return ResponseEntity.ok(hasRide);
+    }
       
     @PostMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic) {

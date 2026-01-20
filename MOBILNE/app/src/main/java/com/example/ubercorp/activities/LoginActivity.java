@@ -16,7 +16,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ubercorp.R;
-import com.example.ubercorp.clients.AuthClient;
+import com.example.ubercorp.api.ApiClient;
+import com.example.ubercorp.clients.AuthService;
 import com.example.ubercorp.model.AuthToken;
 import com.example.ubercorp.model.Credentials;
 
@@ -76,7 +77,9 @@ public class LoginActivity extends AppCompatActivity {
 
     public void login(){
         Credentials creds = new Credentials(emailField.getText().toString().trim(), passwordField.getText().toString().trim());
-        Call<AuthToken> login = AuthClient.authService.login(creds);
+        AuthService authService = ApiClient.getInstance().createService(AuthService.class);
+        Call<AuthToken> login = authService.login(creds);
+
         login.enqueue(new Callback<AuthToken>(){
             @Override
             public void onResponse(Call<AuthToken> call, Response<AuthToken> response){

@@ -1,19 +1,18 @@
 package com.example.ubercorp.dto;
 
-public class CreatedUserDTO {
-    private Long id;
+public class CreateUserDTO {
     private String name;
     private String lastName;
     private String homeAddress;
     private String phone;
     private String image;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public CreateUserDTO(String firstName, String lastName, String address, String phone, String image) {
+        this.name = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.homeAddress = address;
+        this.image = image;
     }
 
     public String getName() { return name; }

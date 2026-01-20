@@ -53,12 +53,13 @@
                     app:strokeColor="#FFFFFF"
                     app:cardBackgroundColor="#FFFFFF">
 
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/ivProfilePic"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/ic_account"
-                        android:scaleType="centerCrop"/>
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="#FFFFFF"/>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
