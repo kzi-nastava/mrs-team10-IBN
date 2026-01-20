@@ -10,7 +10,6 @@ import { Station } from '../../model/ride-history.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Ride } from '../../model/ride-history.model';
-import { Inject } from '@angular/core';
 
 @Component({
   selector: 'app-tracking-route',
@@ -32,6 +31,7 @@ export class TrackingRouteComponent {
   routeStarted: Boolean = false;
   firstButtonText: String = 'Start';
   protected role: string | null;
+  panicWarningDisplay: boolean = false;
 
   constructor(authService: AuthService, private http: HttpClient,
           private dialog: MatDialog
@@ -98,6 +98,16 @@ export class TrackingRouteComponent {
       maxWidth: '420px',
       data: {rideId: this.rideId}
     });
+  }
+
+  showPanicWarning(){
+    this.panicWarningDisplay = true;
+  }
+
+  panic(){
+    const now = new Date();
+    this.subtitleText = "Panic signal has been broadcast. Help is on the way. Please remain calm."
+    this.routeService.panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
   }
 }
 

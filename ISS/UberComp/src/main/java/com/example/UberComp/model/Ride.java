@@ -36,9 +36,6 @@ public class Ride {
     private Boolean pets;
 
     @Column(nullable = false)
-    private Boolean panic;
-
-    @Column(nullable = false)
     private Double price;
 
     @Column(nullable = false)

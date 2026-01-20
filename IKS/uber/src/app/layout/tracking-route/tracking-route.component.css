@@ -6,7 +6,7 @@
 }
 
 
-p{
+.subtitle{
     color:white;
     font-size: 20px;
 }
@@ -37,7 +37,7 @@ button{
 }
 
 .right {
-  margin-left: auto; 
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -64,7 +64,7 @@ button{
   color: darkred;
   font-weight: bold;
   width: 10rem;
-  border: none;     
+  border: none;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -72,6 +72,4 @@ button{
 .report-button:hover {
     background-color: #9ea1ae;
 }
-
-
 

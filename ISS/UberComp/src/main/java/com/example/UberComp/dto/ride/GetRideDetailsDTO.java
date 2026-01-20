@@ -26,7 +26,6 @@ public class GetRideDetailsDTO {
     private Set<CreatedUserDTO> passengers;
     private Double price;
     private RideStatus status;
-    private Boolean panic;
     private Boolean canceled;
 
     public GetRideDetailsDTO(Ride ride){
@@ -40,7 +39,6 @@ public class GetRideDetailsDTO {
         }
         price = ride.getPrice();
         status = ride.getStatus();
-        panic = ride.getPanic();
         if (ride.getCancellationReason()!=null)
             canceled = true;
         else

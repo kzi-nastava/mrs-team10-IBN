@@ -42,6 +42,8 @@ public class RideService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private PanicSignalRepository panicSignalRepository;
+    @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
 
     public IncomingRideDTO getIncomingRide(){
@@ -131,8 +133,8 @@ public class RideService {
         return new FinishedRideDTO(ride);
     }
 
-    public FinishedRideDTO stopRide(Long rideId, StopRideDTO stopRideDTO) {
-        Ride ride = rideRepository.findById(rideId).orElseThrow();
+    public FinishedRideDTO stopRide(StopRideDTO stopRideDTO, boolean panic) {
+        Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow();
         Coordinate newCoordinate = new Coordinate();
         newCoordinate.setLat(stopRideDTO.getLat());
         newCoordinate.setLon(stopRideDTO.getLon());
@@ -145,7 +147,20 @@ public class RideService {
         Route savedRoute = routeRepository.save(newRoute);
         ride.setRoute(savedRoute);
         ride.setFinish(LocalDateTime.parse(stopRideDTO.getFinishTime()));
+        Driver driver = ride.getDriver();
+        if(panic) {
+            PanicSignal panicSignal = new PanicSignal();
+            panicSignal.setRide(ride);
+            panicSignalRepository.save(panicSignal);
+            ride.setStatus(RideStatus.Panic);
+            driver.setStatus(DriverStatus.PANIC);
+        }
+        else {
+            ride.setStatus(RideStatus.Finished);
+            driver.setStatus(DriverStatus.ONLINE);
+        }
         rideRepository.save(ride);
+        driverRepository.save(driver);
         return new FinishedRideDTO(ride);
     }
 
@@ -264,7 +279,6 @@ public class RideService {
             scheduledRide.setPassengers(passengers);
             scheduledRide.setBabies(dto.getBabySeat() != null ? dto.getBabySeat() : false);
             scheduledRide.setPets(dto.getPetFriendly() != null ? dto.getPetFriendly() : false);
-            scheduledRide.setPanic(false);
             scheduledRide.setPrice(dto.getPrice());
             scheduledRide.setStart(dto.getScheduled());
             scheduledRide.setStatus(RideStatus.Pending);
@@ -281,7 +295,6 @@ public class RideService {
             ride.setPassengers(passengers);
             ride.setBabies(dto.getBabySeat() != null ? dto.getBabySeat() : false);
             ride.setPets(dto.getPetFriendly() != null ? dto.getPetFriendly() : false);
-            ride.setPanic(false);
             ride.setPrice(dto.getPrice());
             ride.setStart(now);
             ride.setStatus(RideStatus.Pending);
