@@ -3,6 +3,7 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.driver.AvailableDriverDTO;
 import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
+import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Account;
@@ -22,6 +23,7 @@ import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -160,14 +162,36 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/favorites/{id}/order")
-    public ResponseEntity<GetRideDTO> orderFromFavorite(@PathVariable Long id) {
-        GetRideDTO dto = new GetRideDTO();
-        dto.setStartLocation("Dummy start address for favorite " + id);
-        dto.setEndLocation("Dummy destination address");
-        dto.setPrice(500.0);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    @GetMapping("/favorites")
+    public ResponseEntity<List<FavoriteRouteDTO>> getFavorites(Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        List<FavoriteRouteDTO> favs = rideService.getFavoriteRoutes(account);
+        return ResponseEntity.ok(favs);
     }
+
+    @PutMapping("/history/{id}/add-to-favorites")
+    public ResponseEntity<FavoriteRouteDTO> addToFavorites(
+            @PathVariable Long id,
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        FavoriteRouteDTO favoriteRoute = rideService.addRouteToFavorites(id, account);
+        return ResponseEntity.ok(favoriteRoute);
+    }
+
+    @DeleteMapping("/favorites/by-favorite-id/{favoriteId}")
+    public ResponseEntity<Void> removeByFavoriteId(@PathVariable Long favoriteId, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        rideService.removeRouteFromFavorites(favoriteId, account);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/history/by-route-id/{routeId}")
+    public ResponseEntity<Void> removeByRouteId(@PathVariable Long routeId, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        rideService.removeRouteFromFavoritesByRoute(routeId, account);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PutMapping("/{id}/start")
     public ResponseEntity<Void> startRide(@PathVariable Long id) {
