@@ -75,17 +75,17 @@ export class AccountComponent implements OnInit {
 
   isDriver() {
     const role = this.authService.role();
-    return role === 'DRIVER';
+    return role?.toUpperCase() === 'DRIVER';
   }
 
   isAdministrator() {
     const role = this.authService.role();
-    return role === 'ADMINISTRATOR';
+    return role?.toUpperCase() === 'ADMINISTRATOR';
   }
 
   isPassenger() {
     const role = this.authService.role();
-    return role === 'PASSENGER';
+    return role?.toUpperCase() === 'PASSENGER';
   }
 
   loadUserData() {

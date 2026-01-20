@@ -9,11 +9,11 @@ import java.util.List;
 @Getter
 @Setter
 public class RouteDTO {
-    public Long id;
-    List<CoordinateDTO> stations;
+    private Long Id;
+    private List<CoordinateDTO> stations;
 
     public RouteDTO(Route route) {
-        this.id = route.getId();
+        this.Id = route.getId();
         this.stations = route.getStations()
                 .stream()
                 .map(CoordinateDTO::new)

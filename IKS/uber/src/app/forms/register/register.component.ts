@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from "@angular/router";
+import { Router, RouterLink } from '@angular/router';
 import { RegistrationData, AuthService } from '../../service/auth.service';
 
 @Component({
@@ -11,23 +11,23 @@ import { RegistrationData, AuthService } from '../../service/auth.service';
 })
 export class RegisterComponent {
   authService: AuthService = inject(AuthService);
-  router: Router = inject(Router)
-  cdr: ChangeDetectorRef = inject(ChangeDetectorRef)
-  userProfileImage: string = "accountpic.png"
+  router: Router = inject(Router);
+  cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+  userProfileImage: string = 'accountpic.png';
   errormsg: string | null = null;
 
   registerForm = new FormGroup({
-    email: new FormControl("", [Validators.required, Validators.email]),
-    password: new FormControl("", [Validators.required, Validators.minLength(6)]),
-    confirmPassword: new FormControl("", Validators.required),
-    image: new FormControl(""),
-    name: new FormControl("", Validators.required),
-    lastName: new FormControl("", Validators.required),
-    address: new FormControl("", Validators.required),
-    phone: new FormControl("", Validators.required),
-  })
-  filename: String = "Profile Picture (Optional)";
-  
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    confirmPassword: new FormControl('', Validators.required),
+    image: new FormControl(''),
+    name: new FormControl('', Validators.required),
+    lastName: new FormControl('', Validators.required),
+    address: new FormControl('', Validators.required),
+    phone: new FormControl('', Validators.required),
+  });
+  filename: String = 'Profile Picture (Optional)';
+
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -42,35 +42,35 @@ export class RegisterComponent {
     }
   }
 
-  detectErrors(){
+  detectErrors() {
     this.errormsg = null;
     const formValue = this.registerForm.value;
     if (!formValue.email) {
-      this.errormsg = "Email is required!";
+      this.errormsg = 'Email is required!';
     } else if (this.registerForm.get('email')?.hasError('email')) {
-      this.errormsg = "Please enter a valid email address!";
+      this.errormsg = 'Please enter a valid email address!';
     } else if (!formValue.password) {
-      this.errormsg = "Password is required!";
+      this.errormsg = 'Password is required!';
     } else if (this.registerForm.get('password')?.hasError('minLength')) {
-      this.errormsg = "Password must be at least 6 characters long!";
+      this.errormsg = 'Password must be at least 6 characters long!';
     } else if (!formValue.confirmPassword) {
-      this.errormsg = "Please confirm your password!";
+      this.errormsg = 'Please confirm your password!';
     } else if (formValue.password !== formValue.confirmPassword) {
-      this.errormsg = "Passwords do not match!";
+      this.errormsg = 'Passwords do not match!';
     } else if (!formValue.name) {
-      this.errormsg = "Name is required!";
+      this.errormsg = 'Name is required!';
     } else if (!formValue.lastName) {
-      this.errormsg = "Last name is required!";
+      this.errormsg = 'Last name is required!';
     } else if (!formValue.address) {
-      this.errormsg = "Address is required!";
+      this.errormsg = 'Address is required!';
     } else if (!formValue.phone) {
-      this.errormsg = "Phone number is required!";
+      this.errormsg = 'Phone number is required!';
     }
   }
 
-  register(){
+  register() {
     if (this.registerForm.invalid) {
-      this.detectErrors()
+      this.detectErrors();
       return;
     }
 
@@ -84,17 +84,17 @@ export class RegisterComponent {
       lastName: formValue.lastName!,
       homeAddress: formValue.address!,
       phone: formValue.phone!,
-      image: this.userProfileImage || ''
+      image: this.userProfileImage || '',
     };
 
-    console.log(registrationData.image)
+    console.log(registrationData.image);
 
     this.authService.register(registrationData).subscribe({
-      next: (res) => this.router.navigate(["/home"]),
+      next: (res) => this.router.navigate(['/login']),
       error: (err) => {
-        this.errormsg = "Account with this email address already exists!"
+        this.errormsg = 'Account with this email address already exists!';
         this.cdr.detectChanges();
-      }
-    })
+      },
+    });
   }
 }

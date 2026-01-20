@@ -1,8 +1,10 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.AvailableDriverDTO;
 import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
+import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.enums.DriverStatus;
@@ -11,6 +13,7 @@ import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +44,8 @@ public class RideService {
     private VehicleTypeRepository vehicleTypeRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private FavoriteRouteRepository favoriteRouteRepository;
 
     public IncomingRideDTO getIncomingRide(){
         IncomingRideDTO newRide = new IncomingRideDTO();
@@ -299,5 +304,58 @@ public class RideService {
         }
 
         return ride;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FavoriteRouteDTO> getFavoriteRoutes(Account account) {
+        List<FavoriteRoute> favs = favoriteRouteRepository.findFavoriteRouteByAccount(account);
+
+        return favs.stream()
+                .map(fav -> {
+                    fav.getRoute().getStations().size();
+                    return new FavoriteRouteDTO(
+                            fav.getId(),
+                            null,
+                            new RouteDTO(fav.getRoute())
+                    );
+                })
+                .toList();
+    }
+
+    @Transactional
+    public FavoriteRouteDTO addRouteToFavorites(Long routeId, Account account) {
+        Optional<Route> route = routeRepository.findById(routeId);
+        if (!route.isPresent())
+            return null;
+
+        Optional<FavoriteRoute> existing = favoriteRouteRepository
+                .findByAccountAndRoute(account, route.get());
+
+        if (existing.isPresent()) {
+            FavoriteRoute fav = existing.get();
+            fav.getRoute().getStations().size();
+            return new FavoriteRouteDTO(fav.getId(), null, new RouteDTO(fav.getRoute()));
+        }
+
+        FavoriteRoute favoriteRoute = new FavoriteRoute();
+        favoriteRoute.setAccount(account);
+        favoriteRoute.setRoute(route.get());
+
+        FavoriteRoute saved = favoriteRouteRepository.save(favoriteRoute);
+        saved.getRoute().getStations().size();
+
+        return new FavoriteRouteDTO(saved.getId(), null, new RouteDTO(saved.getRoute()));
+    }
+
+    public void removeRouteFromFavorites(Long rideId, Account account) {
+        Optional<Ride> ride = rideRepository.findById(rideId);
+        Route route = routeRepository.findById(ride.get().getRoute().getId())
+                .orElseThrow(() -> new RuntimeException("Route not found"));
+
+        FavoriteRoute favoriteRoute = favoriteRouteRepository
+                .findByAccountAndRoute(account, route)
+                .orElseThrow(() -> new RuntimeException("Favorite route not found"));
+
+        favoriteRouteRepository.delete(favoriteRoute);
     }
 }
