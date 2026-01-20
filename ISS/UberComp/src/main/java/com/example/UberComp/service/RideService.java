@@ -368,4 +368,8 @@ public class RideService {
         }
         favoriteRouteRepository.delete(favoriteRoute);
     }
+
+    public boolean hasOngoingRide(Long userId) {
+        return rideRepository.existsByPassengerIdAndStatus(userId, RideStatus.Ongoing);
+    }
 }

@@ -197,4 +197,11 @@ public class RideController {
         rideService.startRide(id, start);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/ongoing")
+    public ResponseEntity<Boolean> getOngoing(Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
+        return ResponseEntity.ok(hasRide);
+    }
 }

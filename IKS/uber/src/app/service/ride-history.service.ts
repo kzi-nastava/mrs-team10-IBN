@@ -134,4 +134,8 @@ export class RideService {
   removeFromOtherFavorites(routeId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/rides/history/by-route-id/${routeId}`);
   }
+
+  hasOngoingRide(): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.apiHost}/rides/ongoing`);
+  }
 }
