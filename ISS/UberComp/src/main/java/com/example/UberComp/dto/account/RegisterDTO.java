@@ -2,9 +2,13 @@ package com.example.UberComp.dto.account;
 
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.enums.AccountType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RegisterDTO {
     private String email;
     private String password;

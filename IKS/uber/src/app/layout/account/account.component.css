@@ -44,14 +44,16 @@ app-nav-bar {
 
 h1 {
   position: relative;
-  margin: 0 auto 1rem;
+  margin: 0 auto 0.2rem;
   font-family: 'Squada One', Arial, sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 4rem;
   color: #ffffff;
   text-align: center;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .account-wrapper {
@@ -66,13 +68,17 @@ h1 {
 
 .card {
   border-radius: 15px;
-  padding: 0.5rem 2rem;
+  padding: 0.4rem 2rem;
   width: 100%;
   max-width: none;
   text-align: left;
   height: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   background-color: rgba(194, 190, 190, 0.522);
   backdrop-filter: blur(10px);
   z-index: 10000 !important;
@@ -124,11 +130,13 @@ h1 {
   font-size: 1.3rem;
   background-color: #ffffff;
   border-radius: 50%;
-  padding: 0.3rem;
+  padding: 0.5rem;
   padding-bottom: 0.5rem;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .edit-icon:hover {
@@ -142,7 +150,7 @@ h1 {
 }
 
 .menu li {
-  margin: 0.8rem 0;
+  margin: 0.5rem 0;
   font-weight: bold;
   color: white;
   display: flex;
@@ -178,7 +186,9 @@ h1 {
 }
 
 .progress-arc {
-  transition: stroke-dashoffset 1s ease, stroke 0.3s ease;
+  transition:
+    stroke-dashoffset 1s ease,
+    stroke 0.3s ease;
 }
 
 .progress-text {

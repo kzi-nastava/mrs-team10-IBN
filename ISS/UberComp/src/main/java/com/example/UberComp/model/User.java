@@ -33,10 +33,6 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String image;
 
-    @Column
-    @OneToMany
-    private List<Route> favoriteRoutes;
-
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;

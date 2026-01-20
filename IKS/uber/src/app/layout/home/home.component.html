@@ -1,12 +1,27 @@
 <app-nav-bar></app-nav-bar>
 <router-outlet></router-outlet>
-<div class = "left-panel">
-    <app-ride-approx-form (routeOutput)="routeOutputEvent($event)"></app-ride-approx-form>
-    <p>Estimated time: {{ estimatedTimeOutput }}</p>
-</div>
+<div class="container">
+  <div class="left-panel">
+    <app-ride-approx-form #rideForm (routeOutput)="routeOutputEvent($event)"></app-ride-approx-form>
+    <p class="estimated-time">Estimated time: {{ estimatedTimeOutput }}</p>
+    @if(isUserLoggedIn()) {
+    <button class="order-btn" (click)="goToOrder()">
+      <span class="order-icon">🚗</span>
+      Order Ride
+    </button>
+    }
+  </div>
 
-<div class="page">
-    <app-map [showRemoveButton]="true" [locations]="routeOutput" (estimatedTime)="timeEstimationEvent($event)"
+  <div class="page">
+    <app-map
+      [showRemoveButton]="false"
+      [locations]="routeOutput"
+      [isUserLoggedIn]="isUserLoggedIn()"
+      (estimatedTime)="timeEstimationEvent($event)"
+      (locationAdded)="onLocationAdded($event)"
+      (locationRemoved)="onLocationRemoved($event)"
+      (allLocationsCleared)="onAllLocationsCleared()"
+      (maxLocationsReached)="onMaxLocationsReached()"
     ></app-map>
-
+  </div>
 </div>

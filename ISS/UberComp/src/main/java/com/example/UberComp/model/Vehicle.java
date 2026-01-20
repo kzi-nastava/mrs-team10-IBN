@@ -1,14 +1,13 @@
 package com.example.UberComp.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @ToString(exclude = {"driver"})
+@EqualsAndHashCode(exclude = {"driver"})
 public class Vehicle {
 
     @Id
@@ -28,4 +27,7 @@ public class Vehicle {
     @OneToOne
     @JoinColumn(name = "driver_id", referencedColumnName = "id")
     private Driver driver;
+
+    @ManyToOne
+    private Coordinate location;
 }

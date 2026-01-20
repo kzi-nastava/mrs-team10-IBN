@@ -4,6 +4,7 @@ import com.example.UberComp.dto.account.RegisterDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
+import com.example.UberComp.model.Account;
 import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
 import com.example.UberComp.service.DriverService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,23 +57,36 @@ public class DriverController {
         return ResponseEntity.ok(updatedDriver);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<DriverDTO> getDriverByUserId(@PathVariable Long userId) {
-        DriverDTO driverDTO = driverService.findByUserId(userId);
-        if (driverDTO == null) {
-            return ResponseEntity.notFound().build();
+    @GetMapping("/me")
+    public ResponseEntity<DriverDTO> getDriverProfile(Authentication auth) {
+        try {
+            Account account = (Account) auth.getPrincipal();
+            DriverDTO driverDTO = driverService.findByAccountId(account.getId());
+            if (driverDTO == null) {
+                driverDTO = driverService.findByUserId(account.getUser().getId());
+            }
+            if (driverDTO == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
+            return ResponseEntity.ok(driverDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(driverDTO);
     }
 
-    @PostMapping("/{id}/change-request")
+    @PostMapping("/me/change-request")
     public ResponseEntity<Void> submitDriverChangeRequest(
-            @PathVariable Long id,
+            Authentication auth,
             @RequestBody UpdateDriverDTO changeRequest) {
         try {
-            driverService.submitDriverChangeRequest(id, changeRequest);
+            Account account = (Account) auth.getPrincipal();
+            Long userId = account.getUser().getId();
+
+            driverService.submitDriverChangeRequest(userId, changeRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

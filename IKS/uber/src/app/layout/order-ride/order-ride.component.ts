@@ -1,10 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { MapComponent } from '../../maps/map/map.component';
+import { MapComponent } from '../../maps/map-home/map.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';
+import { Location } from '../../model/location.model';
+import {
+  RideService,
+  CreateRideDTO,
+  PriceDTO,
+  RideOrderResponseDTO,
+} from '../../service/ride-history.service';
 
 @Component({
   selector: 'app-order-ride',
@@ -20,30 +27,228 @@ import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.comp
   styleUrl: './order-ride.component.css',
 })
 export class OrderRideComponent implements OnInit {
+  @ViewChild(MapComponent) mapComponent!: MapComponent;
+
+  locations: Location[] = [];
+  estimatedTime: string = '';
+
   isDropdownOpen = false;
-  locationText = 'Kopernikova 23 → Železnička stanica';
+  locationText = '';
   timeText = 'Leave now';
 
-  fromLocation = 'Kopernikova 23';
-  toLocation = 'Železnička stanica';
+  fromLocation = '';
+  toLocation = '';
   stops: string[] = [];
 
   timeOption = 'now';
   rideDate = '';
   rideTime = '';
 
-  selectedCar = 'standard';
+  selectedCar = 'STANDARD';
 
   isShareRideOpen = false;
   passengerEmails: string[] = [];
 
   currentLocations: any[] = [];
+  showFavoritesPopup = false;
 
-  ngOnInit() {
-    this.updateMapLocations();
+  totalPrice: number | null = null;
+  isBabyTravel = false;
+  isPetTravel = false;
+  isCalculating = false;
+  isOrdering = false;
+  estimatedDistance: number = 0;
+  estimatedDuration: number | null = null;
+
+  successMessage: string | null = null;
+  errorMessage: string | null = null;
+
+  private lastRouteSignature = '';
+
+  constructor(
+    private router: Router,
+    private rideService: RideService,
+    private cd: ChangeDetectorRef,
+  ) {
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state) {
+      this.locations = navigation.extras.state['locations'] || [];
+      this.estimatedTime = navigation.extras.state['estimatedTime'] || '';
+      this.estimatedDistance = navigation.extras.state['estimatedDistance'] || 0.0;
+    }
   }
 
-  showFavoritesPopup = false;
+  ngOnInit() {
+    if (this.locations && this.locations.length > 0) {
+      const pickup = this.locations.find((loc) => loc.type === 'pickup');
+      const destination = this.locations.find((loc) => loc.type === 'destination');
+      const stops = this.locations.filter((loc) => loc.type === 'stop');
+
+      if (pickup) this.fromLocation = pickup.address;
+      if (destination) this.toLocation = destination.address;
+      this.stops = stops.map((s) => s.address);
+
+      this.updateLocationText();
+    }
+
+    this.updateMapLocations();
+
+    const now = new Date();
+    this.rideDate = now.toISOString().split('T')[0];
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    this.rideTime = `${hours}:${minutes}`;
+  }
+
+  onRouteCalculated(event: { distance: number; duration: number }) {
+    this.estimatedDistance = event.distance;
+    this.estimatedDuration = event.duration;
+
+    if (this.estimatedDistance > 0) {
+      this.isCalculating = false;
+      this.calculatePrice();
+    }
+  }
+
+  calculatePrice() {
+    if (!this.fromLocation || !this.toLocation) {
+      this.showError('Please select pickup and destination locations');
+      return;
+    }
+
+    if (this.estimatedDistance === 0) {
+      this.showError('Please wait for route calculation to complete');
+      return;
+    }
+
+    this.isCalculating = true;
+
+    let scheduledDateTime: string | null = null;
+    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
+    }
+
+    const dto: CreateRideDTO = {
+      startAddress: this.fromLocation,
+      destinationAddress: this.toLocation,
+      distance: this.estimatedDistance,
+      stops: this.stops.filter((s) => s.trim() !== ''),
+      passengerEmails: this.passengerEmails.filter((e) => e.trim() !== ''),
+      vehicleType: this.selectedCar,
+      babySeat: this.isBabyTravel,
+      petFriendly: this.isPetTravel,
+      scheduled: scheduledDateTime || '',
+      price: 0,
+      estimatedDuration: this.estimatedDuration || 30,
+    };
+
+    this.rideService.calculatePrice(dto).subscribe({
+      next: (result: PriceDTO) => {
+        this.totalPrice = Math.round(result.price);
+        this.isCalculating = false;
+        this.cd.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error calculating price:', error);
+        let errorMsg = 'Failed to calculate price. ';
+
+        if (error.error?.message) {
+          errorMsg += error.error.message;
+        } else if (error.message) {
+          errorMsg += error.message;
+        } else {
+          errorMsg += 'Please check your input and try again.';
+        }
+
+        this.showError(errorMsg);
+        this.isCalculating = false;
+      },
+    });
+  }
+
+  orderRide() {
+    if (!this.totalPrice) {
+      this.showError('Please calculate price first');
+      return;
+    }
+
+    if (this.estimatedDistance === 0) {
+      this.showError('Invalid route distance');
+      return;
+    }
+
+    this.isOrdering = true;
+
+    let scheduledDateTime: string | null = null;
+    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
+    }
+
+    const normalizeAddress = (addr: string) => {
+      if (!addr.toLowerCase().includes('novi sad')) {
+        return `${addr}, Novi Sad`;
+      }
+      return addr;
+    };
+
+    const dto: CreateRideDTO = {
+      startAddress: normalizeAddress(this.fromLocation),
+      destinationAddress: normalizeAddress(this.toLocation),
+      distance: this.estimatedDistance,
+      stops: this.stops.filter((s) => s.trim() !== '').map((s) => normalizeAddress(s)),
+      passengerEmails: this.passengerEmails.filter((e) => e.trim() !== ''),
+      vehicleType: this.selectedCar,
+      babySeat: this.isBabyTravel,
+      petFriendly: this.isPetTravel,
+      scheduled: scheduledDateTime || '',
+      price: this.totalPrice,
+      estimatedDuration: this.estimatedDuration || 30,
+    };
+
+    this.rideService.orderRide(dto).subscribe({
+      next: (response: RideOrderResponseDTO) => {
+        this.isOrdering = false;
+        if (response !== null) {
+          const pickupInfo =
+            response.estimatedPickupMinutes != -1
+              ? `Arrives in: ${response.estimatedPickupMinutes} min (${response.estimatedPickupTime})`
+              : `Scheduled for: ${response.estimatedPickupTime}`;
+
+          const successMsg = `
+🚗 Ride Ordered Successfully!
+
+💰 Price: ${response.price} RSD
+👤 Driver: ${response.driverName}
+📞 Phone: ${response.driverPhone}
+🚙 Vehicle: ${response.vehicleModel}
+⏱️ ${pickupInfo}
+`.trim();
+
+          this.showSuccess(successMsg);
+        } else {
+          let errorMsg = 'No available drivers. ';
+          this.showError(errorMsg);
+          return;
+        }
+      },
+      error: (error) => {
+        console.error('Error ordering ride:', error);
+        this.isOrdering = false;
+
+        let errorMsg = 'Failed to order ride. ';
+
+        if (error.status === 204) {
+          errorMsg = 'No available drivers at the moment. Please try again later.';
+        } else if (error.error?.message) {
+          errorMsg += error.error.message;
+        } else {
+          errorMsg += 'Please try again.';
+        }
+
+        this.showError(errorMsg);
+      },
+    });
+  }
 
   openFavorites() {
     this.showFavoritesPopup = true;
@@ -71,10 +276,14 @@ export class OrderRideComponent implements OnInit {
 
   removeStop(index: number) {
     this.stops.splice(index, 1);
+    this.updateMapLocations();
   }
 
   selectCar(carType: string) {
     this.selectedCar = carType;
+    if (this.totalPrice !== null) {
+      this.calculatePrice();
+    }
   }
 
   toggleShareRide() {
@@ -106,20 +315,20 @@ export class OrderRideComponent implements OnInit {
 
   confirmShareRide() {
     this.passengerEmails = this.passengerEmails.filter((email) => email.trim() !== '');
-
-    if (this.passengerEmails.length > 0) {
-    }
-
     this.isShareRideOpen = false;
   }
 
   confirmSelection() {
-    let locationParts = [this.fromLocation];
-    if (this.stops.length > 0) {
-      locationParts = [...locationParts, ...this.stops.filter((s) => s.trim() !== '')];
-    }
-    locationParts.push(this.toLocation);
-    this.locationText = locationParts.join(' → ');
+    const newLocationParts = [];
+    if (this.fromLocation) newLocationParts.push(this.fromLocation);
+    const validStops = this.stops.filter((s) => s.trim() !== '');
+    if (validStops.length > 0) newLocationParts.push(...validStops);
+    if (this.toLocation) newLocationParts.push(this.toLocation);
+
+    const newLocationText = newLocationParts.join(' → ');
+    const locationsChanged = newLocationText !== this.locationText;
+
+    this.locationText = newLocationText;
 
     if (this.timeOption === 'now') {
       this.timeText = 'Leave now';
@@ -129,27 +338,35 @@ export class OrderRideComponent implements OnInit {
 
     this.isDropdownOpen = false;
 
-    this.updateMapLocations();
+    if (locationsChanged) {
+      this.totalPrice = null;
+      this.estimatedDistance = 0;
+      this.estimatedDuration = null;
+
+      this.updateMapLocations();
+
+      this.cd.detectChanges();
+    }
   }
 
   updateMapLocations() {
     const locations = [];
 
-    if (this.fromLocation) {
+    if (this.fromLocation && this.fromLocation.trim()) {
       locations.push({ address: this.fromLocation, type: 'pickup' });
     }
 
     this.stops.forEach((stop, index) => {
-      if (stop.trim() !== '') {
+      if (stop && stop.trim()) {
         locations.push({ address: stop, type: 'stop', index: index + 1 });
       }
     });
 
-    if (this.toLocation) {
+    if (this.toLocation && this.toLocation.trim()) {
       locations.push({ address: this.toLocation, type: 'destination' });
     }
 
-    this.currentLocations = [...locations];
+    this.currentLocations = locations.map((loc) => ({ ...loc }));
   }
 
   getLocations() {
@@ -220,5 +437,25 @@ export class OrderRideComponent implements OnInit {
     }
 
     this.updateMapLocations();
+  }
+
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.errorMessage = null;
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.successMessage = null;
+      this.cd.detectChanges();
+    }, 8000);
+  }
+
+  showError(message: string) {
+    this.errorMessage = message;
+    this.successMessage = null;
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.errorMessage = null;
+      this.cd.detectChanges();
+    }, 5000);
   }
 }

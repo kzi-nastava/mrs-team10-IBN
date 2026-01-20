@@ -20,50 +20,67 @@
       </div>
 
       @if (userFormData) {
-      <h2>{{ userFormData.firstName }} {{ userFormData.lastName }}</h2>
+        <h2>{{ userFormData.firstName }} {{ userFormData.lastName }}</h2>
       }
 
       <ul class="menu">
         @for (item of menuItems; track item.label) {
-        <li
-          (click)="item.label === 'My vehicle' ? openVehicleModal() : null"
-          [routerLink]="item.label !== 'My vehicle' ? item.route : null"
-        >
-          <span class="icon">{{ item.icon }}</span>
-          {{ item.label }}
-        </li>
+          <li
+            (click)="
+              item.label === 'My vehicle'
+                ? openVehicleModal()
+                : item.label === 'Vehicle price'
+                  ? openVehiclePriceModal()
+                  : item.label === 'Change password'
+                    ? openChangePassword()
+                    : item.label === 'Favorites'
+                      ? openFavorites()
+                      : null
+            "
+            [routerLink]="
+              item.label !== 'My vehicle' &&
+              item.label !== 'Vehicle price' &&
+              item.label !== 'Change password' &&
+              item.label !== 'Favorites'
+                ? item.route
+                : null
+            "
+          >
+            <span class="icon">{{ item.icon }}</span>
+            {{ item.label }}
+          </li>
         }
       </ul>
     </div>
 
     @if (isDriver()) {
-    <div class="work-hours-section">
-      <div class="semicircle-progress">
-        <svg viewBox="0 0 200 120" class="progress-svg">
-          <path
-            d="M 20 100 A 80 80 0 0 1 180 100"
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.1)"
-            stroke-width="20"
-            stroke-linecap="round"
-          />
-          <path
-            d="M 20 100 A 80 80 0 0 1 180 100"
-            fill="none"
-            [attr.stroke]="getProgressPercentage() > 80 ? '#4caf50' : '#ff9800'"
-            stroke-width="20"
-            stroke-linecap="round"
-            class="progress-arc"
-            [style.stroke-dasharray]="251.2"
-            [style.stroke-dashoffset]="251.2 - (251.2 * getProgressPercentage()) / 100"
-          />
-        </svg>
-        <div class="progress-text">
-          <div class="hours-big">{{ hoursWorkedToday }}</div>
-          <div class="hours-small">out of {{ maxHoursPerDay }}h</div>
+      <div class="work-hours-section">
+        <div class="semicircle-progress">
+          <svg viewBox="0 0 200 120" class="progress-svg">
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.1)"
+              stroke-width="20"
+              stroke-linecap="round"
+            />
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              [attr.stroke]="getProgressPercentage() > 80 ? '#4caf50' : '#ff9800'"
+              stroke-width="20"
+              stroke-linecap="round"
+              class="progress-arc"
+              [style.stroke-dasharray]="251.2"
+              [style.stroke-dashoffset]="251.2 - (251.2 * getProgressPercentage()) / 100"
+            />
+          </svg>
+          <div class="progress-text">
+            <div class="hours-big">{{ hoursWorkedToday }}</div>
+            <div class="hours-small">out of {{ maxHoursPerDay }}h</div>
+          </div>
         </div>
       </div>
-    </div>
     }
 
     <app-user-form
@@ -76,21 +93,34 @@
       [isDriverActive]="isDriverActive"
       (formSubmit)="onUserFormSubmit($event)"
     ></app-user-form>
+
+    <app-vehicle-price *ngIf="showVehiclePriceModal" (closeModal)="closeVehiclePriceModal()">
+    </app-vehicle-price>
   </div>
 
   @if (successMessage) {
-  <div class="success">
-    {{ successMessage }}
-  </div>
-  } @if (showVehicleModal) {
-  <app-vehicle-form
-    [vehicleData]="vehicleData"
-    [originalData]="originalVehicleData"
-    [buttonLabel]="'Send Changes'"
-    [showAsModal]="true"
-    (formSubmit)="onVehicleFormSubmit($event)"
-    (closeModal)="closeVehicleModal()"
-  ></app-vehicle-form>
+    <div class="success">
+      {{ successMessage }}
+    </div>
+  }
+  @if (showVehicleModal) {
+    <app-vehicle-form
+      [vehicleData]="vehicleData"
+      [originalData]="originalVehicleData"
+      [buttonLabel]="'Send Changes'"
+      [showAsModal]="true"
+      (formSubmit)="onVehicleFormSubmit($event)"
+      (closeModal)="closeVehicleModal()"
+    ></app-vehicle-form>
+  }
+  @if (showChangePassword) {
+    <app-change-password
+      (closeModal)="closeChangePassword()"
+      (passwordChanged)="onPasswordChanged($event)"
+    ></app-change-password>
+  }
+  @if (showFavorites) {
+    <app-favorites-popup (closed)="closeFavorites()" [editMode]="true"></app-favorites-popup>
   }
 </div>
 

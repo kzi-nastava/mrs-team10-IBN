@@ -1,29 +1,52 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.driver.AvailableDriverDTO;
+import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
+import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
+import com.example.UberComp.model.Account;
+import com.example.UberComp.model.Driver;
+import com.example.UberComp.model.PanicSignal;
+import com.example.UberComp.model.Ride;
+import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/rides")
 public class RideController {
 
+    private final DriverService driverService;
     private RideService rideService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDTO>> getRides(
-            @RequestParam(required = true) Long userId) {
-        Collection<GetRideDTO> rides = rideService.getRides(userId);
+//    @PreAuthorize("hasRole('DRIVER')")
+    @GetMapping(value= "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> getRidesDriver(
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId());
+        return ResponseEntity.ok(rides);
+    }
+
+    @GetMapping(value= "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> getRidesPassenger(
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId());
         return ResponseEntity.ok(rides);
     }
 
@@ -65,10 +88,18 @@ public class RideController {
         return ResponseEntity.ok(activeRides);
     }
 
-    @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetTrackingRideDTO> getTrackingRide(@PathVariable("id") Long id){
-        GetTrackingRideDTO trackingRide = rideService.getTrackingRide(id);
-        return new ResponseEntity<>(trackingRide, HttpStatus.OK);
+    @GetMapping(value = "/trackingRidePassenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GetVehiclePositionDTO> trackingRidePassenger(Authentication auth){
+        Account acc = (Account) auth.getPrincipal();
+        GetVehiclePositionDTO trackingRide = rideService.getTrackingRide(acc.getUser().getId());
+        return ResponseEntity.ok(trackingRide);
+    }
+
+    @GetMapping(value="/scheduledRides", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<GetRideDTO>> scheduledRides(Authentication auth){
+        Account acc = (Account) auth.getPrincipal();
+        Collection<GetRideDTO> scheduledRides = rideService.getScheduledRidesForDriver(acc.getUser().getId());
+        return ResponseEntity.ok(scheduledRides);
     }
 
     @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,9 +119,9 @@ public class RideController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping(value = "/stop/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride, @PathVariable("id") Long id){
-        FinishedRideDTO finished = rideService.stopRide(id, ride);
+    @PutMapping(value = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride){
+        FinishedRideDTO finished = rideService.stopRide(ride, false);
         return new ResponseEntity<>(finished, HttpStatus.OK);
     }
 
@@ -103,25 +134,80 @@ public class RideController {
         return new ResponseEntity<UpdatedStatusRideDTO>(updatedRide, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRideDTO> orderRide(@RequestBody CreateRideDTO dto) {
-        GetRideDTO rideDTO = new GetRideDTO();
-        rideDTO.setStartLocation(dto.getStartAddress());
-        rideDTO.setEndLocation(dto.getDestinationAddress());
-        return ResponseEntity.status(HttpStatus.CREATED).body(rideDTO);
+    @PostMapping(value = "/calculate-price", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PriceDTO> calculatePrice(@RequestBody CreateRideDTO dto) {
+        PriceDTO priceDTO = rideService.calculatePrice(dto);
+        return ResponseEntity.ok(priceDTO);
     }
 
-    @PostMapping("/favorites/{id}/order")
-    public ResponseEntity<GetRideDTO> orderFromFavorite(@PathVariable Long id) {
-        GetRideDTO dto = new GetRideDTO();
-        dto.setStartLocation("Dummy start address for favorite " + id);
-        dto.setEndLocation("Dummy destination address");
-        dto.setPrice(500.0);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+
+        AvailableDriverDTO availableDriver = driverService.getAvailableDriver(dto);
+
+        if (availableDriver == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+
+        Ride ride = rideService.createRide(
+                dto,
+                account.getUser().getId(),
+                availableDriver.getDriver().getCreateUserDTO().getId(),
+                availableDriver.getEstimatedPickupMinutes()
+        );
+
+        RideOrderResponseDTO response = rideService.buildRideOrderResponse(ride.getId(), availableDriver);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<FavoriteRouteDTO>> getFavorites(Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        List<FavoriteRouteDTO> favs = rideService.getFavoriteRoutes(account);
+        return ResponseEntity.ok(favs);
+    }
+
+    @PutMapping("/history/{id}/add-to-favorites")
+    public ResponseEntity<FavoriteRouteDTO> addToFavorites(
+            @PathVariable Long id,
+            Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        FavoriteRouteDTO favoriteRoute = rideService.addRouteToFavorites(id, account);
+        return ResponseEntity.ok(favoriteRoute);
+    }
+
+    @DeleteMapping("/favorites/by-favorite-id/{favoriteId}")
+    public ResponseEntity<Void> removeByFavoriteId(@PathVariable Long favoriteId, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        rideService.removeRouteFromFavorites(favoriteId, account);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/history/by-route-id/{routeId}")
+    public ResponseEntity<Void> removeByRouteId(@PathVariable Long routeId, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        rideService.removeRouteFromFavoritesByRoute(routeId, account);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PutMapping("/{id}/start")
-    public ResponseEntity<Void> startRide(@PathVariable Long id) {
+    public ResponseEntity<Void> startRide(@PathVariable Long id, @RequestBody RideMomentDTO start) {
+        rideService.startRide(id, start);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/ongoing")
+    public ResponseEntity<Boolean> getOngoing(Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
+        return ResponseEntity.ok(hasRide);
+      
+    @PostMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic) {
+        FinishedRideDTO panicked = rideService.stopRide(panic, true);
+        return new ResponseEntity<>(panicked, HttpStatus.OK);
     }
 }

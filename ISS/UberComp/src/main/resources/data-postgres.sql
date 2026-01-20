@@ -1,21 +1,8 @@
 INSERT INTO vehicle_type (name, price)
 VALUES
-    ('STANDARD', 1.0),
-    ('VAN', 1.5);
-
-INSERT INTO account (email, password, account_type, account_status, blocking_reason)
-VALUES
-    ('driver@mail.com', 'pass123', 'DRIVER', 'VERIFIED', NULL),
-    ('user1@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL),
-    ('user2@mail.com', 'pass123', 'PASSENGER', 'VERIFIED', NULL),
-    ('admin@mail.com', 'pass123', 'ADMINISTRATOR', 'VERIFIED', NULL);
-
-INSERT INTO app_user (name, last_name, home_address, phone, image, account_id, dtype, uptime, status)
-VALUES
-    ('Marko', 'Marković', 'Novi Sad', '061111111', NULL, 1, 'Driver', 6, 'ONLINE'),
-    ('Ivana', 'Ivić', 'Novi Sad', '062222222', NULL, 2, 'User', NULL, NULL),
-    ('Ana', 'Anić', 'Novi Sad', '063333333', NULL, 3, 'User', NULL, NULL),
-    ('Bojana', 'Bojanic', 'Novi Sad', '063333333', NULL, 4, 'User', NULL, NULL);
+    ('STANDARD', 120.20),
+    ('VAN', 222.22),
+    ('LUXURY', 333.33);
 
 INSERT INTO vehicle (model, plate, seat_number, baby_seat, pet_friendly, vehicle_type_id, driver_id)
 VALUES
@@ -40,11 +27,12 @@ VALUES
 
 INSERT INTO ride (route_id, driver_id, babies, pets, price, start, estimated_time_arrival, status, cancellation_reason, panic)
 VALUES
-    (1, 1, TRUE, FALSE, 15.50, '2026-01-04 10:00:00', '2026-01-04 10:25:00', 'Finished', NULL, FALSE),
-    (2, 1, FALSE, TRUE, 22.00, '2026-01-04 11:00:00', '2026-01-04 11:45:00', 'Finished', 'Passenger cancelled', FALSE);
+    (1, 4, TRUE, FALSE, 15.50, '2026-01-04 10:00:00', '2026-01-04 10:25:00', 'Finished', NULL, FALSE),
+    (2, 4, FALSE, TRUE, 22.00, '2026-01-04 11:00:00', '2026-01-04 11:45:00', 'Finished', 'Passenger cancelled', FALSE);
 
 INSERT INTO ride_passengers (ride_id, passengers_id)
 VALUES
-    (1, 2),
     (1, 3),
+    (1, 2),
     (2, 3);
+

@@ -1,8 +1,10 @@
 <div class="top">
-  <button mat-icon-button (click)="drawer.toggle()">
+  <button mat-icon-button (click)="drawer.toggle()" [style.display]="loggedIn ? 'inline' : 'none'">
       <mat-icon style="color: antiquewhite; ">menu</mat-icon>
   </button>
   <img class="nav-logo" src="logo.svg" [routerLink] ="[ '/home']"/>
+  <button class="form-button-one" [style.display]="!loggedIn ? 'inline' : 'none'" [routerLink] ="[ '/login']">Login</button>
+  <button class="form-button-two" [style.display]="!loggedIn ? 'inline' : 'none'" [routerLink] ="[ '/register']">Register</button>
   <span class="example-spacer"></span>
 
   <div class="notification">

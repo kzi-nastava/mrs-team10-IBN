@@ -14,3 +14,13 @@ img{
 button{
     width: 50%;
 }
+
+h1 {
+  font-family: 'Squada One';
+  font-size: 48px;
+  margin-bottom: 0;
+}
+
+p{
+  font-size: 10px;
+}

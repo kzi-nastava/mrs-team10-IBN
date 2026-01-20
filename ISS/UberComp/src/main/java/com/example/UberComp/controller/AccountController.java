@@ -15,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/account")
@@ -41,28 +43,6 @@ class AccountController {
     //    return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
     //}
 
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetAccountDTO> getAccount(@RequestBody LogAccountDTO creds) throws Exception{
-        Account loggedIn = accountService.login(creds);
-        if(loggedIn == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        GetAccountDTO account = new GetAccountDTO();
-        account.setId(loggedIn.getId());
-        //account.setName(loggedIn.getUser().getName() + " " + loggedIn.getUser().getLastName());
-        account.setEmail(loggedIn.getEmail());
-        account.setRole(loggedIn.getAccountType().toString());
-        //account.setPhoneNumber(loggedIn.getUser().getPhone());
-        return new ResponseEntity<GetAccountDTO>(account, HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetProfileDTO> createAccount(@RequestBody RegisterDTO userData) throws Exception{
-        User registered = accountService.register(userData);
-        AccountDTO registeredDTO = new AccountDTO(userData.getEmail());
-        CreatedUserDTO createdUserDTO = new CreatedUserDTO(registered);
-        GetProfileDTO profile = new GetProfileDTO(createdUserDTO, registeredDTO);
-        return new ResponseEntity<GetProfileDTO>(profile, HttpStatus.CREATED);
-    }
-
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
         UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
@@ -74,20 +54,21 @@ class AccountController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/setup-password")
-    public ResponseEntity<Void> setupPassword(@RequestBody SetupPasswordDTO dto) {
-        //accountService.setupPassword(dto);
+    @PutMapping("/me/change-password")
+    public ResponseEntity<?> changePassword(Authentication auth, @RequestBody ChangePasswordDTO dto) {
+        Account account = (Account) auth.getPrincipal();
+        String message = accountService.changePassword(account.getId(), dto);
+        if (!message.isEmpty())
+            return ResponseEntity.ok().body(Map.of("message", message));
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordDTO dto) {
-        return ResponseEntity.ok().build();
-    }
+    @GetMapping("/me")
+    public ResponseEntity<GetProfileDTO> getProfile(Authentication auth) throws Exception {
+        String email = auth.getName();
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GetProfileDTO> getProfile(@PathVariable Long id) throws Exception {
-        GetProfileDTO profile = accountService.getProfile(id);
+        GetProfileDTO profile = accountService.getProfileByEmail(email);
+
         if (profile == null) {
             return ResponseEntity.notFound().build();
         }
@@ -122,15 +103,19 @@ class AccountController {
         }
     }
 
-    @PutMapping("/{id}/profile")
+    @PutMapping("/me/profile")
     public ResponseEntity<GetProfileDTO> updateProfile(
-            @PathVariable Long id,
+            Authentication auth,
             @RequestBody CreateUserDTO updatedUser) {
         try {
-            GetProfileDTO updatedProfile = accountService.updateProfile(id, updatedUser);
+            Account account = (Account) auth.getPrincipal();
+            Long accountId = account.getId();
+
+            GetProfileDTO updatedProfile = accountService.updateProfile(accountId, updatedUser);
             return ResponseEntity.ok(updatedProfile);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -18,8 +18,6 @@ import { CommonModule } from '@angular/common';
 import { Station } from '../../model/ride-history.model';
 import { Ride } from '../../model/ride-history.model';
 import { signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   createMarker?: () => L.Marker | null;
@@ -28,14 +26,14 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 @Component({
   selector: 'app-map',
   imports: [CommonModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.css',
+  templateUrl: '../map-home/map.component.html',
+  styleUrl: '../map-home/map.component.css',
 })
 export class MapComponent implements AfterViewInit, OnChanges {
   @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
-  @Input() stations: Station[] = []; 
-  @Input() interactive: boolean = true; 
+  @Input() stations: Station[] = [];
+  @Input() interactive: boolean = true;
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
@@ -43,7 +41,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
-  private vehicleLayer!: L.LayerGroup;
+  private activeRides: Ride[] = [];
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
@@ -85,46 +83,40 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
-      className: 'car-icon'
+      iconAnchor: [15, 15],
     });
 
     this.initMap();
-    if(this.interactive)
-      this.registerOnClick();
+    if (this.interactive) this.registerOnClick();
 
     if (this.locations && this.locations.length > 0) {
       this.updateLocationsFromInput();
     }
 
-    this.vehicleLayer = L.layerGroup().addTo(this.map);
-
     setTimeout(() => {
-    this.map.invalidateSize();
-    
-    this.getVehiclePositions();
-    if (this.stations && this.stations.length > 0) {
-      console.log('Loading stations in ngAfterViewInit:', this.stations);
-      this.loadFromStations();
-    } else if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-  }, 100);
-}
-  
+      this.map.invalidateSize();
+
+      if (this.stations && this.stations.length > 0) {
+        console.log('Loading stations in ngAfterViewInit:', this.stations);
+        this.loadFromStations();
+      } else if (this.locations && this.locations.length > 0) {
+        this.updateLocationsFromInput();
+      }
+    }, 100);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
       this.updateLocationsFromInput();
     }
     if (changes['stations'] && this.map && this.stations.length > 0) {
-      this.loadFromStations(); 
+      this.loadFromStations();
     }
   }
 
@@ -132,17 +124,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.map = L.map('map', {
       center: [45.242, 19.8227],
       zoom: 12.75,
-      zoomSnap:0.25,
-      dragging: this.interactive,        
-      touchZoom: this.interactive,     
+      zoomSnap: 0.25,
+      dragging: this.interactive,
+      touchZoom: this.interactive,
       scrollWheelZoom: this.interactive,
-      doubleClickZoom: this.interactive, 
-      boxZoom: this.interactive,        
-      keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      doubleClickZoom: this.interactive,
+      boxZoom: this.interactive,
+      keyboard: this.interactive,
+      zoomControl: this.interactive,
     });
 
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -186,56 +177,56 @@ export class MapComponent implements AfterViewInit, OnChanges {
       console.error(`Error geocoding ${location.address}:`, error);
     }
   }
-private addPointWithIcon(
-  lat: number,
-  lng: number,
-  icon: L.Icon,
-  title?: string,
-  fromParent = false,
-  shouldUpdateRoute = true 
-): void {
-  const latLng = L.latLng(lat, lng);
-  const pin = L.marker(latLng, { icon, title }).addTo(this.map);
+  private addPointWithIcon(
+    lat: number,
+    lng: number,
+    icon: L.Icon,
+    title?: string,
+    fromParent = false,
+    shouldUpdateRoute = true,
+  ): void {
+    const latLng = L.latLng(lat, lng);
+    const pin = L.marker(latLng, { icon, title }).addTo(this.map);
 
-  pin.on('click', () => {
-    const index = this.points.findIndex((p) => p.marker === pin);
-    if (index !== -1) {
-      this.removePointByIndex(index);
+    pin.on('click', () => {
+      const index = this.points.findIndex((p) => p.marker === pin);
+      if (index !== -1) {
+        this.removePointByIndex(index);
+      }
+    });
+
+    if (title) {
+      pin.bindPopup(title);
     }
-  });
 
-  if (title) {
-    pin.bindPopup(title);
+    this.points.push({ marker: pin, latLng, address: title });
+
+    if (shouldUpdateRoute) {
+      this.updateRoute();
+    }
   }
 
-  this.points.push({ marker: pin, latLng, address: title });
-  
-  if (shouldUpdateRoute) { 
+  private loadFromStations(): void {
+    this.clearAll();
+    console.log(this.stations);
+
+    this.stations.forEach((station, index) => {
+      const isLast = index === this.stations.length - 1;
+      let icon = this.PinIcon;
+
+      if (index === 0) icon = this.PickupIcon;
+      else if (isLast) icon = this.DestinationIcon;
+
+      this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
+
+      if (this.points.length > 0) {
+        const group = L.featureGroup(this.points.map((p) => p.marker));
+        this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
+      }
+    });
+
     this.updateRoute();
   }
-}
-
-private loadFromStations(): void {
-  this.clearAll();
-  console.log(this.stations);
-  
-  this.stations.forEach((station, index) => {
-    const isLast = index === this.stations.length - 1;
-    let icon = this.PinIcon;
-    
-    if (index === 0) icon = this.PickupIcon;
-    else if (isLast) icon = this.DestinationIcon;
-    
-    this.addPointWithIcon(station.lat, station.lon, icon, station.address, false, false);
-
-    if (this.points.length > 0) {
-      const group = L.featureGroup(this.points.map(p => p.marker));
-      this.map.fitBounds(group.getBounds(), { padding: [50, 50] });
-  }
-  });
-  
-  this.updateRoute();
-}
 
   private async addPoint(lat: number, lng: number): Promise<void> {
     try {
@@ -304,7 +295,7 @@ private loadFromStations(): void {
       };
 
       this.routeControl = L.Routing.control(options).addTo(this.map);
-      this.routeControl.on('routesfound',  (e) => {
+      this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
         console.log(
@@ -312,13 +303,12 @@ private loadFromStations(): void {
             summary.totalDistance / 1000 +
             ' km and total time is ' +
             Math.round((summary.totalTime % 3600) / 60) +
-            ' minutes'
+            ' minutes',
         );
-        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes')
+        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
     }
   }
-
 
   private registerOnClick(): void {
     this.map.on('click', (e: any) => {
@@ -327,15 +317,11 @@ private loadFromStations(): void {
   }
 
   searchStreet(street: string): Observable<any> {
-    return this.http.get(
-      'https://nominatim.openstreetmap.org/search?format=json&q=' + street + ', Novi Sad, Serbia'
-    );
+    return this.http.get('/nominatim/search?format=json&q=' + street + ', Novi Sad, Serbia');
   }
 
   reverseSearch(lat: number, lon: number): Observable<any> {
-    return this.http.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-    );
+    return this.http.get(`/nominatim/reverse?format=json&lat=${lat}&lon=${lon}`);
   }
 
   clearAll(): void {
@@ -347,61 +333,4 @@ private loadFromStations(): void {
       this.routeControl = undefined;
     }
   }
-      
-
-  async getVehiclePositions() {
-    while (true) {
-      try {
-        const rides = await firstValueFrom(
-          this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`)
-        );
-
-        for (const ride of rides) {
-          const now = Date.now();
-          const start = new Date(ride.startTime).getTime();
-          const eta = new Date(ride.estimatedTimeArrival).getTime();
-
-          let progress = 0;
-          if (eta > start) progress = (now - start) / (eta - start);
-          progress = Math.max(0, Math.min(1, progress));
-
-          const waypoints = ride.route.stations
-            .filter(s => s.lat != null && s.lon != null)
-            .map(s => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
-
-          if (waypoints.length < 2) continue;
-
-          const router = L.Routing.mapbox(environment.apiKey, { profile: 'mapbox/driving' });
-
-          (router as any).route(waypoints, (err: any, routes: any[]) => {
-            if (err || !routes?.length) return;
-
-            const coords = routes[0].coordinates;
-            if (!coords?.length) return;
-
-            const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
-            const pos = coords[index];
-
-            L.marker(
-              [pos.lat, pos.lng],
-              { icon: ride.isBusy ? this.RedCarIcon : this.GreenCarIcon }
-            ).addTo(this.vehicleLayer);
-          });
-        }
-
-      } catch (err) {
-        console.error(err);
-      }
-
-      this.vehicleLayer.clearLayers();
-      await this.sleep(5000);
-    }
-  }
-
-  sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-
 }
-

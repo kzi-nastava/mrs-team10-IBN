@@ -12,7 +12,6 @@ export class ReviewService {
   }
 
   postReview(review: Review){
-    console.log(review)
     return this.http.post(`${environment.apiHost}/reviews`, review)
   }
 }

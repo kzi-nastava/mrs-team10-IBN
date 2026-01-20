@@ -1,13 +1,12 @@
 package com.example.UberComp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.UberComp.dto.vehicle.UpdateVehicleTypeDTO;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class VehicleType {
@@ -15,7 +14,16 @@ public class VehicleType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
     private String name;
+
+    @Column
     private Double price;
+
+    public VehicleType(UpdateVehicleTypeDTO update){
+        this.id = update.getId();
+        this.price = update.getPrice();
+        this.name = update.getName();
+    }
 }
 

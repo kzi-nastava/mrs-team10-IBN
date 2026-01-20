@@ -1,9 +1,6 @@
 package com.example.UberComp.service;
 
-import com.example.UberComp.dto.account.AccountDTO;
-import com.example.UberComp.dto.account.GetAccountDTO;
-import com.example.UberComp.dto.account.LogAccountDTO;
-import com.example.UberComp.dto.account.RegisterDTO;
+import com.example.UberComp.dto.account.*;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
@@ -11,23 +8,24 @@ import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.*;
-import com.example.UberComp.repository.AccountRepository;
-import com.example.UberComp.repository.DriverChangeRequestRepository;
-import com.example.UberComp.repository.DriverRepository;
-import com.example.UberComp.repository.UserRepository;
+import com.example.UberComp.repository.*;
+import com.example.UberComp.utils.EmailUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Service
-public class AccountService {
+public class AccountService implements UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
@@ -38,10 +36,25 @@ public class AccountService {
     private ObjectMapper objectMapper;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailUtils emailUtils;
+    @Autowired
+    private SetPasswordTokenRepository sptRepository;
+
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null){
+            throw new UsernameNotFoundException(String.format("No user found with email '%s'.", email));
+        } else {
+            return account;
+        }
+    }
 
     public User register(RegisterDTO account) {
         if (accountRepository.findByEmail(account.getEmail()) == null) {
-            Account newAccount = new Account(account.getEmail(), account.getPassword(), account.getType());
+            Account newAccount = new Account(account.getEmail(), passwordEncoder.encode(account.getPassword()), account.getType());
             User newUser;
             if (account.getType() == AccountType.DRIVER) {
                 newUser = new Driver();
@@ -59,6 +72,14 @@ public class AccountService {
 
             accountRepository.save(newAccount);
 
+            if (newUser instanceof Driver) {
+                SetPasswordToken token = new SetPasswordToken(newAccount);
+                sptRepository.save(token);
+                emailUtils.sendSetPasswordEmail(token);
+            } else {
+                emailUtils.sendVerificationEmail(newAccount);
+            }
+
             return newUser;
         }
         return null;
@@ -67,6 +88,69 @@ public class AccountService {
     public Account login(LogAccountDTO accountDTO) {
         Account account = accountRepository.findByEmail(accountDTO.getEmail());
         return (account != null && account.getAccountStatus() == AccountStatus.VERIFIED && account.getPassword().equals(accountDTO.getPassword())) ? account : null;
+    }
+
+    public Account verify(String verification){
+        Account account = accountRepository.findByVerification(verification);
+        if(account != null){
+            long now = new Date().getTime();
+            if(now - account.getLastPasswordResetDate().getTime() < 86400000) {
+                account.setAccountStatus(AccountStatus.VERIFIED);
+            } else {
+                account.setAccountStatus(AccountStatus.BLOCKED);
+                account.setBlockingReason("Expired Verification");
+            }
+            account.setVerification(null);
+            accountRepository.save(account);
+            return account;
+        }
+        return null;
+    }
+
+    public boolean generatePasswordResetToken(String email){
+        Account account = accountRepository.findByEmail(email);
+        if(account == null){
+            return false;
+        }
+        SetPasswordToken token = new SetPasswordToken(account);
+        sptRepository.save(token);
+        emailUtils.sendSetPasswordEmail(token);
+        return true;
+    }
+
+    public boolean checkSetPasswordToken(String tokenString){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        return token != null;
+    }
+
+    public boolean setPassword(String tokenString, SetPasswordDTO passwordDTO){
+        SetPasswordToken token = sptRepository.getByToken(tokenString);
+        if(token == null){
+            return false;
+        }
+
+        Account account = token.getAccount();
+        if (token.getCreatedAt().toInstant()
+                .plus(24, ChronoUnit.HOURS)
+                .isBefore(Instant.now())) {
+
+            sptRepository.delete(token);
+            account.setAccountStatus(AccountStatus.BLOCKED);
+            account.setBlockingReason("Expired Verification");
+            account.setVerification(null);
+            accountRepository.save(account);
+            return false;
+        }
+
+        // for drivers who are setting their password for the first time
+        if(account.getAccountStatus() == AccountStatus.UNVERIFIED){
+            account.setAccountStatus(AccountStatus.VERIFIED);
+        }
+        account.setPassword(passwordEncoder.encode(passwordDTO.getPassword()));
+        account.setVerification(null);
+        accountRepository.save(account);
+        sptRepository.delete(token);
+        return true;
     }
 
     public GetAccountDTO getById(Long id) {
@@ -141,14 +225,11 @@ public class AccountService {
         List<DriverChangeRequest> requests = driverChangeRequestRepository.findByStatus("PENDING");
         List<DriverChangeRequestDTO> result = new ArrayList<>();
 
-        System.out.println("Found " + requests.size() + " pending requests");
-
         for (DriverChangeRequest request : requests) {
             try {
                 DriverChangeRequestDTO dto = convertToDTO(request);
                 result.add(dto);
             } catch (Exception e) {
-                System.err.println("Error converting request ID " + request.getId() + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -159,16 +240,10 @@ public class AccountService {
     private DriverChangeRequestDTO convertToDTO(DriverChangeRequest request) {
         Driver driver = request.getDriver();
 
-        System.out.println("=== CONVERTING REQUEST " + request.getId() + " ===");
-        System.out.println("Raw JSON from DB: " + request.getRequestedChanges());
-
         UpdateDriverDTO newData;
         try {
             newData = objectMapper.readValue(request.getRequestedChanges(), UpdateDriverDTO.class);
-            System.out.println("Parsed CreateUserDTO: " + newData.getCreateUserDTO());
-            System.out.println("Parsed VehicleDTO: " + newData.getVehicleDTO());
         } catch (Exception e) {
-            System.err.println("JSON parsing error: " + e.getMessage());
             throw new RuntimeException("JSON error", e);
         }
 
@@ -180,29 +255,22 @@ public class AccountService {
         boolean hasVehicleChanges = false;
         boolean hasProfileChanges = false;
 
+        String oldImage = null;
+        String newImage = null;
+
         if (newData.getVehicleDTO() != null) {
             Vehicle v = driver.getVehicle();
             VehicleDTO vDTO = newData.getVehicleDTO();
 
-            System.out.println("Processing vehicle changes...");
-            System.out.println("Current vehicle: " + (v != null ? v.toString() : "null"));
-            System.out.println("New vehicle DTO: model=" + vDTO.getModel() +
-                    ", plate=" + vDTO.getPlate() +
-                    ", seats=" + vDTO.getSeatNumber() +
-                    ", babySeat=" + vDTO.getBabySeat() +
-                    ", petFriendly=" + vDTO.getPetFriendly());
-
             if (addIfChanged(vOld, vNew, "Model",
                     (v != null ? v.getModel() : ""), vDTO.getModel())) {
                 hasVehicleChanges = true;
-                System.out.println("✓ Model changed");
             }
 
             String currentPlate = (v != null && v.getPlate() != null) ? v.getPlate() : "";
             String newPlate = vDTO.getPlate() != null ? vDTO.getPlate() : "";
             if (addIfChanged(vOld, vNew, "License Plate", currentPlate, newPlate)) {
                 hasVehicleChanges = true;
-                System.out.println("✓ License plate changed");
             }
 
             if (vDTO.getSeatNumber() != null) {
@@ -211,7 +279,6 @@ public class AccountService {
                     vOld.put("Seats", String.valueOf(currentSeats));
                     vNew.put("Seats", String.valueOf(vDTO.getSeatNumber()));
                     hasVehicleChanges = true;
-                    System.out.println("✓ Seat number changed: " + currentSeats + " -> " + vDTO.getSeatNumber());
                 }
             }
 
@@ -221,7 +288,6 @@ public class AccountService {
                     vOld.put("Baby Seat", currentBS ? "Yes" : "No");
                     vNew.put("Baby Seat", vDTO.getBabySeat() ? "Yes" : "No");
                     hasVehicleChanges = true;
-                    System.out.println("✓ Baby seat changed: " + currentBS + " -> " + vDTO.getBabySeat());
                 }
             }
 
@@ -231,8 +297,7 @@ public class AccountService {
                     vOld.put("Pet Friendly", currentPF ? "Yes" : "No");
                     vNew.put("Pet Friendly", vDTO.getPetFriendly() ? "Yes" : "No");
                     hasVehicleChanges = true;
-                    System.out.println("✓ Pet friendly changed: " + currentPF + " -> " + vDTO.getPetFriendly());
-                }
+                    }
             }
 
             if (vDTO.getVehicleTypeDTO() != null) {
@@ -241,7 +306,6 @@ public class AccountService {
                 String newType = vDTO.getVehicleTypeDTO().getName();
                 if (addIfChanged(vOld, vNew, "Vehicle Type", currentType, newType)) {
                     hasVehicleChanges = true;
-                    System.out.println("✓ Vehicle type changed: " + currentType + " -> " + newType);
                 }
             }
         }
@@ -249,43 +313,35 @@ public class AccountService {
         if (newData.getCreateUserDTO() != null) {
             CreatedUserDTO uDTO = newData.getCreateUserDTO();
 
-            System.out.println("Processing profile changes...");
-            System.out.println("Current driver: name=" + driver.getName() +
-                    ", lastName=" + driver.getLastName() +
-                    ", phone=" + driver.getPhone() +
-                    ", address=" + driver.getHomeAddress());
-            System.out.println("New user DTO: name=" + uDTO.getName() +
-                    ", lastName=" + uDTO.getLastName() +
-                    ", phone=" + uDTO.getPhone() +
-                    ", address=" + uDTO.getHomeAddress());
-
             if (addIfChanged(pOld, pNew, "Name", driver.getName(), uDTO.getName())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Name changed");
             }
 
             if (addIfChanged(pOld, pNew, "Last Name", driver.getLastName(), uDTO.getLastName())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Last name changed");
             }
 
             if (addIfChanged(pOld, pNew, "Phone", driver.getPhone(), uDTO.getPhone())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Phone changed");
             }
 
             if (addIfChanged(pOld, pNew, "Address", driver.getHomeAddress(), uDTO.getHomeAddress())) {
                 hasProfileChanges = true;
-                System.out.println("✓ Address changed");
+            }
+
+            if (uDTO.getImage() != null && !uDTO.getImage().trim().isEmpty()) {
+                String currentImage = driver.getImage() != null ? driver.getImage() : "";
+                if (!currentImage.equals(uDTO.getImage())) {
+                    oldImage = currentImage;
+                    newImage = uDTO.getImage();
+                    hasProfileChanges = true;
+                }
             }
         }
 
         String type;
         Map<String, String> finalOld = new HashMap<>();
         Map<String, String> finalNew = new HashMap<>();
-
-        System.out.println("Has vehicle changes: " + hasVehicleChanges);
-        System.out.println("Has profile changes: " + hasProfileChanges);
 
         if (hasVehicleChanges && hasProfileChanges) {
             type = "both";
@@ -303,13 +359,7 @@ public class AccountService {
             finalNew = pNew;
         } else {
             type = "unknown";
-            System.out.println("⚠️ WARNING: No changes detected!");
         }
-
-        System.out.println("Final type: " + type);
-        System.out.println("Final old data: " + finalOld);
-        System.out.println("Final new data: " + finalNew);
-        System.out.println("=== END CONVERSION ===\n");
 
         return new DriverChangeRequestDTO(
                 request.getId(),
@@ -317,7 +367,9 @@ public class AccountService {
                 driver.getName() + " " + driver.getLastName(),
                 request.getRequestDate().toString(),
                 request.getStatus().toLowerCase(),
-                new DriverChangeRequestDTO.ChangesDTO(finalOld, finalNew)
+                new DriverChangeRequestDTO.ChangesDTO(finalOld, finalNew),
+                oldImage,
+                newImage
         );
     }
 
@@ -337,5 +389,36 @@ public class AccountService {
         oldMap.put(key, normalizedOld);
         newMap.put(key, normalizedNew);
         return true;
+    }
+
+    public GetProfileDTO getProfileByEmail(String email) throws Exception {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) return null;
+        User user = account.getUser();
+        return new GetProfileDTO(new CreatedUserDTO(user), new AccountDTO(account.getEmail()));
+    }
+
+    @Transactional
+    public String changePassword(Long accountId, ChangePasswordDTO dto) {
+        Optional<Account> account = accountRepository.findById(accountId);
+        if (!account.isPresent()) return "Account not found";
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), account.get().getPassword())) {
+            return "Old password is incorrect";
+        }
+
+        if (dto.getOldPassword().equals(dto.getNewPassword())) {
+            return "New password must be different from old password";
+        }
+
+        if (dto.getNewPassword() == null || dto.getNewPassword().length() < 6) {
+            return "New password must be at least 6 characters long";
+        }
+
+        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
+        account.get().setPassword(encodedPassword);
+
+        accountRepository.save(account.get());
+        return "";
     }
 }

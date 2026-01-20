@@ -1,24 +1,27 @@
 <app-nav-bar></app-nav-bar>
 <div id="container">
-    <h1>Incoming Ride</h1>
-    <div id="places">
-        <mat-icon>place</mat-icon><p>Start Location: {{ route.at(0)?.address }}</p>
-        <br/>
-        @for (station of route.slice(1, -1); track station){
-            <mat-icon>place</mat-icon><p>Station: {{ station.address }}</p>
-            <br/>
-        }
-        <mat-icon>place</mat-icon><p>Final Destination: {{ route.at(-1)?.address }}</p>
-        <br/>
-    </div>
-    <dialog #declineDialog>
-        <h2>Reason for decline</h2>
-        <textarea placeholder="Enter your reason for declining this ride..."></textarea>
-        <button [routerLink]="['/home']">Send</button>
-    </dialog>
-    <app-map [locations]="route"></app-map>
-    <div>
-        <button id="accept" [routerLink]="['/tracking-route']">Accept</button>
-        <button (click)="declineDialog.show()">Decline</button>
-    </div>
+  <h1>Incoming Ride</h1>
+  <div id="places">
+    <mat-icon>place</mat-icon>
+    <p>Start Location: {{ route.at(0)?.address }}</p>
+    <br />
+    @for (station of route.slice(1, -1); track station) {
+      <mat-icon>place</mat-icon>
+      <p>Station: {{ station.address }}</p>
+      <br />
+    }
+    <mat-icon>place</mat-icon>
+    <p>Final Destination: {{ route.at(-1)?.address }}</p>
+    <br />
+  </div>
+  <dialog #declineDialog>
+    <h2>Reason for decline</h2>
+    <textarea placeholder="Enter your reason for declining this ride..."></textarea>
+    <button>Send</button>
+  </dialog>
+  <app-map [locations]="route"></app-map>
+  <div>
+    <button id="accept" (click)="startRide()">Start</button>
+    <button (click)="declineDialog.show()">Decline</button>
+  </div>
 </div>

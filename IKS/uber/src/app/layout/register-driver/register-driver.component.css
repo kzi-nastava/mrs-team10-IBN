@@ -31,19 +31,21 @@ app-nav-bar {
   width: 90%;
   max-width: 1400px;
   margin: 1vh auto 4vh auto;
-  padding: 2rem 0;
+  padding: 1rem 0;
 }
 
 h1 {
   position: relative;
-  margin: 0 auto 1rem;
+  margin: 1rem auto 0;
   font-family: 'Squada One', Arial, sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 3.5rem;
   color: #ffffff;
   text-align: center;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
 
@@ -198,33 +200,36 @@ h1 {
   }
 }
 
+@media (max-width: 1350px) {
+  .registration-wrapper {
+    gap: 1.5rem;
+    margin: 0 1rem 0;
+  }
+
+  .form-section {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 900px) {
   .registration-wrapper {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 0 2rem 1rem;
   }
 
-  h1 {
-    font-size: 2.5rem;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
+  .form-section {
+    padding: 1.5rem;
   }
 }
 
 @media (max-width: 600px) {
-  .action-section {
-    flex-direction: column;
-    width: 100%;
+  .registration-wrapper {
+    margin: 0 1rem 1rem;
+    gap: 1rem;
   }
 
-  .register-btn,
-  .reset-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  h1 {
-    font-size: 2rem;
+  .form-section {
+    padding: 1rem;
   }
 }

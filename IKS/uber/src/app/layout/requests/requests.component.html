@@ -1,93 +1,136 @@
 <app-nav-bar></app-nav-bar>
 <div class="requests-container">
   <div class="header-card">
-    <h1>Change Requests</h1>
+    @if (requests.length !== 0) {
+      <h1>Change Requests</h1>
+    }
   </div>
-
-  <div class="table-card">
-    <table class="requests-table">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Driver</th>
-          <th>Date</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (request of requests; track request.id) {
-        <tr class="table-row">
-          <td>
-            <div class="type-cell">
-              <span
-                class="icon"
-                [class.profile-icon]="request.type === 'profile'"
-                [class.vehicle-icon]="request.type === 'vehicle'"
-              >
-                {{ request.type === 'profile' ? '👤' : '🚗' }}
-              </span>
-            </div>
-          </td>
-          <td>{{ request.driverName }}</td>
-          <td>
-            <div class="date-cell">
-              <span class="clock-icon"></span>
-              {{ request.requestDate | date : 'dd.MM.yyyy. HH:mm' }}
-            </div>
-          </td>
-          <td>
-            <button class="view-btn" (click)="openRequestDetails(request)">Review</button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  @if (requests.length === 0) {
+    <div class="empty-state">
+      <p>No requests at the moment.</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="requests-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Driver</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (request of requests; track request.id) {
+            <tr class="table-row">
+              <td>
+                <div class="type-cell">
+                  <span
+                    class="icon"
+                    [class.profile-icon]="request.type === 'profile'"
+                    [class.vehicle-icon]="request.type === 'vehicle'"
+                  >
+                    {{ request.type === 'profile' ? '👤' : '🚗' }}
+                  </span>
+                </div>
+              </td>
+              <td>{{ request.driverName }}</td>
+              <td>
+                <div class="date-cell">
+                  <span class="clock-icon"></span>
+                  {{ request.requestDate | date: 'dd.MM.yyyy. HH:mm' }}
+                </div>
+              </td>
+              <td>
+                <button class="view-btn" (click)="openRequestDetails(request)">Review</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   @if (selectedRequest) {
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <h2>Request details</h2>
-          <p class="modal-subtitle">
-            {{ selectedRequest.driverName }}
-          </p>
-        </div>
-      </div>
-
-      <div class="modal-body">
-        @for (key of getChangeKeys(); track key) {
-        <div class="change-item">
-          <div class="change-label">{{ key }}:</div>
-          <div class="change-comparison">
-            <div class="change-old">
-              <div class="change-subtitle">Old:</div>
-              <div class="change-value old-value">
-                {{ selectedRequest.changes.oldData[key] }}
-              </div>
-            </div>
-            <div class="arrow">→</div>
-            <div class="change-new">
-              <div class="change-subtitle">New:</div>
-              <div class="change-value new-value">
-                {{ selectedRequest.changes.newData[key] }}
-              </div>
-            </div>
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h2>Request details</h2>
+            <p class="modal-subtitle">
+              {{ selectedRequest.driverName }}
+            </p>
           </div>
         </div>
-        }
-      </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeModal()">Close</button>
-        @if (isPending()) {
-        <button class="btn btn-danger" (click)="handleReject(selectedRequest.id)">Reject</button>
-        <button class="btn btn-success" (click)="handleApprove(selectedRequest.id)">Accept</button>
-        }
+        <div class="modal-body">
+          @for (key of getChangeKeys(); track key) {
+            <div class="change-item">
+              <div class="change-label">{{ key }}:</div>
+              <div class="change-comparison">
+                <div class="change-old">
+                  <div class="change-subtitle">Old:</div>
+                  <div class="change-value old-value">
+                    {{ selectedRequest.changes.oldData[key] }}
+                  </div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="change-new">
+                  <div class="change-subtitle">New:</div>
+                  <div class="change-value new-value">
+                    {{ selectedRequest.changes.newData[key] }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+          @if (hasImageChange()) {
+            <div class="change-item image-change-item">
+              <div class="change-label">Profile Image:</div>
+              <div class="image-comparison">
+                <div class="image-section">
+                  <div class="change-subtitle">Old:</div>
+                  <div class="image-wrapper old-image-wrapper">
+                    <img
+                      [src]="selectedRequest.oldImage || 'accountpic.png'"
+                      alt="Current profile"
+                      class="profile-preview"
+                      onerror="this.src = 'accountpic.png'"
+                    />
+                  </div>
+                </div>
+
+                <div class="arrow image-arrow">→</div>
+
+                <div class="image-section">
+                  <div class="change-subtitle">New:</div>
+                  <div class="image-wrapper new-image-wrapper">
+                    <img
+                      [src]="selectedRequest.newImage"
+                      alt="New profile"
+                      class="profile-preview"
+                      onerror="this.src = 'accountpic.png'"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+          @if (isPending()) {
+            <button class="btn btn-danger" (click)="handleReject(selectedRequest.id)">
+              Reject
+            </button>
+            <button class="btn btn-success" (click)="handleApprove(selectedRequest.id)">
+              Accept
+            </button>
+          }
+        </div>
       </div>
     </div>
-  </div>
   }
 </div>
 <router-outlet></router-outlet>

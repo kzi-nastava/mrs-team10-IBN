@@ -1,42 +1,52 @@
 <div class="dialog-container">
-
   <div class="top">
     <div class="map-container">
-        <app-map class="compact" [stations]="ride.route.stations" [interactive]="false"></app-map>
+      <app-map class="compact" [stations]="ride.route.stations" [interactive]="false"></app-map>
     </div>
 
     <div class="time-status">
-        <div class="times">
-        <span>{{ ride.startTime | date:'HH:mm' }}</span>
-        <span>{{ ride.endTime | date:'HH:mm' }}</span>
-        </div>
-
-        <div class="checkboxes">
-            <label><mat-checkbox [checked] = "ride.canceled" [disabled] ="true">Canceled</mat-checkbox></label>
-
-            <label><mat-checkbox [checked] = "ride.panic" [disabled] = "true"> Panic</mat-checkbox></label>
-        </div>
-    </div>
-</div>
-
-<div class="users-wrapper">
-@if(user?.role != 'passenger'){
-  <div class="users">
-      <div class="user-card" *ngFor="let passenger of ride.passengers">
-          <img  [src]="passenger.image || 'pfp.png'" alt="{{passenger.name}}" class="avatar">
-          <h4>{{ passenger.name }}  {{passenger.lastName}}</h4>
-          <p>{{ passenger.phone }}</p>
+      <div class="times">
+        <span>{{ ride.startTime | date: 'HH:mm' }}</span>
+        <span>{{ ride.endTime | date: 'HH:mm' }}</span>
       </div>
-  </div>
-}
 
-  <div class="dialog-footer">
-    <button class="favorite-btn">❤️Favorites</button>
-    <span class="price">{{ ride.price }} RSD</span>
-    <button class="order-btn">Order</button>
-    @if(user?.role == 'passenger'){
-      <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
-    }
+      <div class="checkboxes">
+        <label
+          ><mat-checkbox [checked]="ride.canceled" [disabled]="true">Canceled</mat-checkbox></label
+        >
+        <label><mat-checkbox [checked]="ride.panic" [disabled]="true">Panic</mat-checkbox></label>
+      </div>
+    </div>
   </div>
-</div>
+
+  <div class="users-wrapper">
+    @if (role != 'passenger') {
+      <div class="users">
+        <div class="user-card" *ngFor="let passenger of ride.passengers">
+          <img [src]="passenger.image || 'pfp.png'" alt="{{ passenger.name }}" class="avatar" />
+          <h4>{{ passenger.name }} {{ passenger.lastName }}</h4>
+          <p>{{ passenger.phone }}</p>
+        </div>
+      </div>
+    }
+
+    <div class="dialog-footer">
+      <button
+        class="favorite-btn"
+        [class.is-favorite]="isFavorite$ | async"
+        (click)="toggleFavorite()"
+      >
+        <span class="heart-icon">{{ (isFavorite$ | async) ? '❤️' : '' }}</span>
+        {{ (isFavorite$ | async) ? 'In Favorites' : 'Add to Favorites' }}
+      </button>
+
+      <span class="price">{{ ride.price }} RSD</span>
+
+      <button class="order-btn">Order</button>
+
+      @if (role == 'passenger') {
+        <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
+      }
+    </div>
+  </div>
 </div>

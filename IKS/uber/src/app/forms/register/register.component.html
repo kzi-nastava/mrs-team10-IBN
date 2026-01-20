@@ -5,7 +5,8 @@
             <input type="text" formControlName="email" placeholder="E-mail">
             <input type="password" formControlName="password" placeholder="Password">
             <input type="password" formControlName="confirmPassword" placeholder="Confirm Password">
-            <div>
+            <div id="pfpdiv">
+                <img [src]="userProfileImage" alt="Profile Picture" id="pfp"/>
                 <div id="edit-icon" (click)="fileInput.click()">📷</div>
                 <p>{{ filename }}</p>
             </div>
@@ -14,9 +15,12 @@
             <input type="text" formControlName="lastName" placeholder="Last Name">
             <input type="text" formControlName="address" placeholder="Address">
             <input type="text" formControlName="phone" placeholder="Phone Number">
-            <div id="bottom">
-                <button class="form-button-one" (click)="register()">Sign Up</button>
-                <p id="signin">Already have an account? <br/> <a [routerLink]="['/login']">Sign In!</a></p>
+            <div>
+                <p class="errormsg" [style.display]="errormsg != null ? 'block' : 'none'">{{ errormsg }}</p>
+                <div id="bottom">
+                    <button class="form-button-one" (click)="register()">Sign Up</button>
+                    <p id="signin">Already have an account? <br/> <a [routerLink]="['/login']">Sign In!</a></p>
+                </div>
             </div>
         </div>
     </form>

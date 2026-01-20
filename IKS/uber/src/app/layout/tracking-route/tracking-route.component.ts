@@ -1,14 +1,15 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
-import { TrackingMapComponent } from '../../maps/tracking-map/tracking-map.component';
-import { UserService } from '../../service/user.service';
-import { User } from '../../model/user.model';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { TrackingMapComponent } from '../../maps/tracking-map-passenger/tracking-map.component';
+import { AuthService } from '../../service/auth.service';
+import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/complaint-dialog.component';
 import { RouteService } from '../../service/route.service';
-import { Location } from '../../model/location.model';
 import { Station } from '../../model/ride-history.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Ride } from '../../model/ride-history.model';
 
 @Component({
   selector: 'app-tracking-route',
@@ -19,7 +20,7 @@ import { Station } from '../../model/ride-history.model';
 export class TrackingRouteComponent {
   router: Router = inject(Router);
   routeService: RouteService = inject(RouteService)
-  userService: UserService = inject(UserService)
+  userService: AuthService = inject(AuthService)
   private cdr = inject(ChangeDetectorRef);
   rideId?: number;
   route: Station[] = []
@@ -29,27 +30,40 @@ export class TrackingRouteComponent {
   subtitleText: String = 'Waiting for departure...';
   routeStarted: Boolean = false;
   firstButtonText: String = 'Start';
-  protected user: User | null = null;
+  protected role: string | null;
+  panicWarningDisplay: boolean = false;
 
-  constructor(private dialog: MatDialog) {
-    let logged = sessionStorage.getItem('loggedUser');
-    if (logged != null) {
-      this.user = JSON.parse(logged) as User;
-    } else {
-
+  constructor(authService: AuthService, private http: HttpClient,
+          private dialog: MatDialog
+  ){
+      this.role = authService.role();
+      // this.routeService.getRide().subscribe({
+      //   next: (response) => {
+      //     this.route = [...response.route.stations];
+      //     this.rideId = response.id
+      //     this.cdr.detectChanges();
+      //   }
+      // })
+      this.setRideId();
     }
-    this.routeService.getRide().subscribe({
-      next: (response) => {
-        this.route = [...response.route.stations];
-        this.rideId = response.id
-        console.log(this.route)
-        this.cdr.detectChanges();
-      }
-    })
+
+  setRideId() {
+    this.http
+      .get<Ride>(`${environment.apiHost}/rides/trackingRidePassenger`)
+      .subscribe({
+        next: (ride) => {
+          this.rideId = ride.id;
+          console.log(this.rideId);
+        },
+        error: (err) => {
+          console.error('Failed to fetch ride', err);
+        }
+      });
   }
 
   setTimeEvent(eventData: string){
     this.estimatedTime = eventData;
+    this.subtitleText = "Estimated time arrival in: " + this.estimatedTime;
   }
 
   passStationEvent(eventData: number){
@@ -78,10 +92,22 @@ export class TrackingRouteComponent {
   }
 
   openComplaintDialog() {
+    console.log(this.rideId)
     this.dialog.open(ComplaintDialogComponent, {
       width: '90%',
       maxWidth: '420px',
+      data: {rideId: this.rideId}
     });
+  }
+
+  showPanicWarning(){
+    this.panicWarningDisplay = true;
+  }
+
+  panic(){
+    const now = new Date();
+    this.subtitleText = "Panic signal has been broadcast. Help is on the way. Please remain calm."
+    this.routeService.panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
   }
 }
 
