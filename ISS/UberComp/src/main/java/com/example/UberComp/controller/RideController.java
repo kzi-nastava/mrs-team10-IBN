@@ -194,13 +194,19 @@ public class RideController {
 
 
     @PutMapping("/{id}/start")
-    public ResponseEntity<Void> startRide(@PathVariable Long id) {
+    public ResponseEntity<Void> startRide(@PathVariable Long id, @RequestBody RideMomentDTO start) {
+        rideService.startRide(id, start);
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/ongoing")
+    public ResponseEntity<Boolean> getOngoing(Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
+        return ResponseEntity.ok(hasRide);
+      
     @PostMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic){
-        System.out.println("nigga we gon die");
+    public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic) {
         FinishedRideDTO panicked = rideService.stopRide(panic, true);
         return new ResponseEntity<>(panicked, HttpStatus.OK);
     }

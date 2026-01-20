@@ -29,16 +29,16 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   templateUrl: './tracking-map.component.html',
   styleUrl: './tracking-map.component.css',
 })
-export class TrackingMapComponent implements AfterViewInit, OnChanges{
+export class TrackingMapComponent implements AfterViewInit, OnChanges {
   @Input() stations: Station[] = [];
   @Input() interactive: boolean = true;
-  
+
   estimatedTime = output<string>();
   currentLocation = output<TrackingData>();
 
-  private passedCount = 0
+  private passedCount = 0;
   passingOutput = output<number>();
-  
+
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
 
@@ -48,13 +48,13 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
   GreenCarIcon!: L.Icon;
   RedCarIcon!: L.Icon;
   CurrentLocationIcon!: L.Icon;
-  
+
   private points: {
     marker: L.Marker;
     latLng: L.LatLng;
     address?: string;
   }[] = [];
-  
+
   private currentLocationMarker!: L.Marker;
 
   private isUpdatingFromParent = false;
@@ -86,17 +86,17 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
       iconUrl: 'current-loc.svg',
       iconSize: [16, 16],
       iconAnchor: [8, 8],
-    })
+    });
 
     this.initMap();
-
-    
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.stations && this.stations.length > 0) {
       this.updateLocationsFromInput().then(() => {
-        this.currentLocationMarker = L.marker(this.points[0].latLng, {icon: this.CurrentLocationIcon}).addTo(this.map);
+        this.currentLocationMarker = L.marker(this.points[0].latLng, {
+          icon: this.CurrentLocationIcon,
+        }).addTo(this.map);
       });
     }
   }
@@ -105,17 +105,16 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
     this.map = L.map('map', {
       center: [45.242, 19.8227],
       zoom: 12.75,
-      zoomSnap:0.25,
-      dragging: this.interactive,        
-      touchZoom: this.interactive,     
+      zoomSnap: 0.25,
+      dragging: this.interactive,
+      touchZoom: this.interactive,
       scrollWheelZoom: this.interactive,
-      doubleClickZoom: this.interactive, 
-      boxZoom: this.interactive,        
-      keyboard: this.interactive,        
-      zoomControl: this.interactive      
+      doubleClickZoom: this.interactive,
+      boxZoom: this.interactive,
+      keyboard: this.interactive,
+      zoomControl: this.interactive,
     });
 
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -123,18 +122,18 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
 
     this.map.on('click', (e) => {
       this.currentLocationMarker.setLatLng(e.latlng);
-      if (e.latlng.distanceTo(this.points[this.passedCount].latLng) < 50){
-        console.log("Station reached!")
+      if (e.latlng.distanceTo(this.points[this.passedCount].latLng) < 50) {
+        console.log('Station reached!');
         ++this.passedCount;
         this.passingOutput.emit(this.passedCount);
-        console.log(this.points)
+        console.log(this.points);
       }
       this.getTrackingData(e.latlng).subscribe({
         next: (response) => {
-          this.currentLocation.emit(response)
-        }
-      })
-    })
+          this.currentLocation.emit(response);
+        },
+      });
+    });
   }
 
   private async updateLocationsFromInput(): Promise<void> {
@@ -182,7 +181,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
     icon: L.Icon,
     title?: string,
     fromParent = false,
-    shouldUpdateRoute = true 
+    shouldUpdateRoute = true,
   ): void {
     const latLng = L.latLng(lat, lng);
     const pin = L.marker(latLng, { icon, title }).addTo(this.map);
@@ -219,36 +218,32 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges{
       };
 
       this.routeControl = L.Routing.control(options).addTo(this.map);
-      this.routeControl.on('routesfound',  (e) => {
+      this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
-        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + " minutes");
+        this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
     }
   }
 
   getTrackingData(position: L.LatLng): Observable<TrackingData> {
-    var latRound: number = Number(position.lat.toFixed(7))
-    var lonRound: number = Number(position.lng.toFixed(7))
+    var latRound: number = Number(position.lat.toFixed(7));
+    var lonRound: number = Number(position.lng.toFixed(7));
     return this.reverseSearch(latRound, lonRound).pipe(
       map((response) => ({
         lat: latRound,
         lon: lonRound,
-        address: response.address.road + ' ' + response.address.house_number
-      }))
+        address: response.address.road + ' ' + response.address.house_number,
+      })),
     );
   }
 
   searchStreet(street: string): Observable<any> {
-    return this.http.get(
-      'https://nominatim.openstreetmap.org/search?format=json&q=' + street + ', Novi Sad, Serbia'
-    );
+    return this.http.get('/nominatim/search?format=json&q=' + street + ', Novi Sad, Serbia');
   }
 
   reverseSearch(lat: number, lon: number): Observable<any> {
-    return this.http.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-    );
+    return this.http.get(`/nominatim/reverse?format=json&lat=${lat}&lon=${lon}`);
   }
 
   clearAll(): void {

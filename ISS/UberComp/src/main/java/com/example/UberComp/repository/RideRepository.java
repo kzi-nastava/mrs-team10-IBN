@@ -50,6 +50,14 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     List<Ride> getRidesPassenger(@Param("userId") Long userId);
 
     Optional<Ride> findFirstByDriverAndStatusOrderByStartDesc(Driver driver, RideStatus status);
+
+    @Query("""
+    SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
+    FROM Ride r
+    JOIN r.passengers p
+    WHERE p.id = :userId AND r.status = :status
+""")
+    boolean existsByPassengerIdAndStatus(@Param("userId") Long userId, @Param("status") RideStatus status);
 }
 
 

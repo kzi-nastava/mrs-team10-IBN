@@ -5,6 +5,8 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { RideApproxFormComponent } from '../../forms/ride-approx-form/ride-approx-form.component';
 import { Location } from '../../model/location.model';
 import { AuthService } from '../../service/auth.service';
+import { RideService } from '../../service/ride-history.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +18,7 @@ export class HomeComponent {
   @ViewChild('rideForm') rideForm!: RideApproxFormComponent;
   private authService = inject(AuthService);
   private router = inject(Router);
+  private rideService = inject(RideService);
 
   routeOutput: Location[] = [];
   estimatedTimeOutput: String = '';
@@ -48,13 +51,24 @@ export class HomeComponent {
     this.rideForm.showError('You need to be logged in to add more than 2 locations');
   }
 
-  goToOrder() {
-    this.routeOutput = this.rideForm.getRoute();
-    this.router.navigate(['/order-ride'], {
-      state: {
-        locations: this.routeOutput,
-        estimatedTime: this.estimatedTimeOutput,
-      },
-    });
+  async goToOrder() {
+    try {
+      const ongoing = await firstValueFrom(this.rideService.hasOngoingRide());
+
+      if (!ongoing) {
+        this.routeOutput = this.rideForm.getRoute();
+        this.router.navigate(['/order-ride'], {
+          state: {
+            locations: this.routeOutput,
+            estimatedTime: this.estimatedTimeOutput,
+          },
+        });
+      } else {
+        this.rideForm.showError('Please finish your ongoing ride before starting a new one.');
+      }
+    } catch (err) {
+      console.error('Failed to check ongoing ride', err);
+      this.rideForm.showError('Could not verify ongoing ride. Please try again.');
+    }
   }
 }
