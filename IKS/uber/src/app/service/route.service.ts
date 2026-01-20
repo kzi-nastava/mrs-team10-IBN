@@ -27,13 +27,26 @@ export class RouteService {
 
   stopRide(id: number, passed: number, time: string, location: TrackingData) {
     const body = {
-      passed: passed,
-      lat: location.lat,
-      lon: location.lon,
-      address: location.address,
-      finishTime: time,
-    };
-    return this.http.post(`${environment.apiHost}/rides/stop/${id}`, body);
+      "id":id,
+      "passed":passed,
+      "lat": location.lat,
+      "lon": location.lon,
+      "address":location.address,
+      "finishTime":time
+    }
+    return this.http.post(`${environment.apiHost}/rides/stop`, body)
+  }
+
+  panic(id: number, passed:number, time:string, location:TrackingData){
+    const body = {
+      "id":id,
+      "passed":passed,
+      "lat": location.lat,
+      "lon": location.lon,
+      "address":location.address,
+      "finishTime":time
+    }
+    return this.http.post(`${environment.apiHost}/rides/panic`, body)
   }
 
   route: Location[] = [

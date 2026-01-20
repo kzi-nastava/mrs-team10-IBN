@@ -8,6 +8,7 @@ import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.Driver;
+import com.example.UberComp.model.PanicSignal;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
@@ -118,9 +119,9 @@ public class RideController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping(value = "/stop/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride, @PathVariable("id") Long id){
-        FinishedRideDTO finished = rideService.stopRide(id, ride);
+    @PutMapping(value = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride){
+        FinishedRideDTO finished = rideService.stopRide(ride, false);
         return new ResponseEntity<>(finished, HttpStatus.OK);
     }
 
@@ -203,5 +204,10 @@ public class RideController {
         Account account = (Account) auth.getPrincipal();
         boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
         return ResponseEntity.ok(hasRide);
+      
+    @PostMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic) {
+        FinishedRideDTO panicked = rideService.stopRide(panic, true);
+        return new ResponseEntity<>(panicked, HttpStatus.OK);
     }
 }
