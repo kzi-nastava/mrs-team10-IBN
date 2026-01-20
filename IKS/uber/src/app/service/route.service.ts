@@ -10,49 +10,51 @@ import { TrackingData } from '../layout/tracking-route/tracking-route.component'
 })
 export class RouteService {
   private readonly http = inject(HttpClient);
-  
-  getRide(){
+
+  getRide() {
     return this.http.get<RidePayload>(`${environment.apiHost}/rides/incoming`);
   }
-  
-  finishRide(id: number, time:string) {
-    return this.http.post(`${environment.apiHost}/rides/finish/${id}`, {"isotime":time})
-  }
-  
-  startRide(id: number, time:string) {
-    return this.http.post(`${environment.apiHost}/rides/start/${id}`, {"isotime":time})
+
+  finishRide(id: number, time: string) {
+    return this.http.post(`${environment.apiHost}/rides/finish/${id}`, { isotime: time });
   }
 
-  stopRide(id: number, passed:number, time:string, location:TrackingData){
+  startRide(id: number, time: string) {
+    return this.http.put<void>(`${environment.apiHost}/rides/start/${id}`, {
+      isotime: time,
+    });
+  }
+
+  stopRide(id: number, passed: number, time: string, location: TrackingData) {
     const body = {
-      "passed":passed,
-      "lat": location.lat,
-      "lon": location.lon,
-      "address":location.address,
-      "finishTime":time
-    }
-    return this.http.post(`${environment.apiHost}/rides/stop/${id}`, body)
+      passed: passed,
+      lat: location.lat,
+      lon: location.lon,
+      address: location.address,
+      finishTime: time,
+    };
+    return this.http.post(`${environment.apiHost}/rides/stop/${id}`, body);
   }
 
   route: Location[] = [
     {
-      address:'Bulevar oslobođenja 7',
-      type:'pickup'
+      address: 'Bulevar oslobođenja 7',
+      type: 'pickup',
     },
     {
-      address:'Bulevar Patrijarha Pavla 60',
-      type:'stop'
+      address: 'Bulevar Patrijarha Pavla 60',
+      type: 'stop',
     },
     {
-      address:'Kornelija Stankovića 15',
-      type:'destination'
-    }
-  ]
+      address: 'Kornelija Stankovića 15',
+      type: 'destination',
+    },
+  ];
 }
 
-export interface RidePayload{
-  id: number,
-  route: Route,
-  startTime?: Date,
-  endTime?: Date
+export interface RidePayload {
+  id: number;
+  route: Route;
+  startTime?: Date;
+  endTime?: Date;
 }

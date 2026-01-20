@@ -183,7 +183,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     icon: L.Icon,
     title?: string,
     fromParent = false,
-    shouldUpdateRoute = true
+    shouldUpdateRoute = true,
   ): void {
     const latLng = L.latLng(lat, lng);
     const pin = L.marker(latLng, { icon, title }).addTo(this.map);
@@ -303,7 +303,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
             summary.totalDistance / 1000 +
             ' km and total time is ' +
             Math.round((summary.totalTime % 3600) / 60) +
-            ' minutes'
+            ' minutes',
         );
         this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
@@ -317,15 +317,11 @@ export class MapComponent implements AfterViewInit, OnChanges {
   }
 
   searchStreet(street: string): Observable<any> {
-    return this.http.get(
-      'https://nominatim.openstreetmap.org/search?format=json&q=' + street + ', Novi Sad, Serbia'
-    );
+    return this.http.get('/nominatim/search?format=json&q=' + street + ', Novi Sad, Serbia');
   }
 
   reverseSearch(lat: number, lon: number): Observable<any> {
-    return this.http.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-    );
+    return this.http.get(`/nominatim/reverse?format=json&lat=${lat}&lon=${lon}`);
   }
 
   clearAll(): void {

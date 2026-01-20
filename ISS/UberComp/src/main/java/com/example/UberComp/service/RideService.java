@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,7 +155,8 @@ public class RideService {
     public StartedRideDTO startRide(Long id, RideMomentDTO start) {
         Ride started = rideRepository.findById(id).orElseThrow();
         started.setStatus(RideStatus.Ongoing);
-        started.setStart(LocalDateTime.parse(start.getIsotime()));
+        Instant instant = Instant.parse(start.getIsotime());
+        started.setStart(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
         rideRepository.save(started);
         return new StartedRideDTO(started.getId(), started.getStart());
     }

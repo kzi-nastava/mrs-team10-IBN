@@ -193,7 +193,8 @@ public class RideController {
 
 
     @PutMapping("/{id}/start")
-    public ResponseEntity<Void> startRide(@PathVariable Long id) {
+    public ResponseEntity<Void> startRide(@PathVariable Long id, @RequestBody RideMomentDTO start) {
+        rideService.startRide(id, start);
         return ResponseEntity.noContent().build();
     }
 }
