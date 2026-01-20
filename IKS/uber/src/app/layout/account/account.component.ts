@@ -15,6 +15,7 @@ import { DriverDetails } from '../../model/driver.model';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../service/auth.service';
 import { ChangePasswordComponent } from '../../forms/change-password/change-password.component';
+import { FavoritesPopupComponent } from '../favorites-popup/favorites-popup.component';
 
 @Component({
   selector: 'app-account',
@@ -27,6 +28,7 @@ import { ChangePasswordComponent } from '../../forms/change-password/change-pass
     UserFormComponent,
     VehiclePriceComponent,
     ChangePasswordComponent,
+    FavoritesPopupComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.css'],
@@ -48,6 +50,7 @@ export class AccountComponent implements OnInit {
   showVehicleModal = false;
   showVehiclePriceModal = false;
   showChangePassword = false;
+  showFavorites = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
   userProfileImage: string = 'accountpic.png';
@@ -396,6 +399,14 @@ export class AccountComponent implements OnInit {
 
   closeChangePassword() {
     this.showChangePassword = false;
+  }
+
+  openFavorites() {
+    this.showFavorites = true;
+  }
+
+  closeFavorites() {
+    this.showFavorites = false;
   }
 
   onPasswordChanged(message: string) {

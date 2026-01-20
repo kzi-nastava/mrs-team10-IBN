@@ -1,10 +1,7 @@
 package com.example.UberComp.service;
 
 import com.example.UberComp.dto.account.AccountDTO;
-import com.example.UberComp.dto.driver.AvailableDriverDTO;
-import com.example.UberComp.dto.driver.DriverDTO;
-import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
-import com.example.UberComp.dto.driver.RouteDTO;
+import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.enums.DriverStatus;
@@ -316,7 +313,7 @@ public class RideService {
                     return new FavoriteRouteDTO(
                             fav.getId(),
                             null,
-                            new RouteDTO(fav.getRoute())
+                            new GetRouteDTO(fav.getRoute())
                     );
                 })
                 .toList();
@@ -334,7 +331,7 @@ public class RideService {
         if (existing.isPresent()) {
             FavoriteRoute fav = existing.get();
             fav.getRoute().getStations().size();
-            return new FavoriteRouteDTO(fav.getId(), null, new RouteDTO(fav.getRoute()));
+            return new FavoriteRouteDTO(fav.getId(), null, new GetRouteDTO(fav.getRoute()));
         }
 
         FavoriteRoute favoriteRoute = new FavoriteRoute();
@@ -344,18 +341,27 @@ public class RideService {
         FavoriteRoute saved = favoriteRouteRepository.save(favoriteRoute);
         saved.getRoute().getStations().size();
 
-        return new FavoriteRouteDTO(saved.getId(), null, new RouteDTO(saved.getRoute()));
+        return new FavoriteRouteDTO(saved.getId(), null, new GetRouteDTO(saved.getRoute()));
     }
 
-    public void removeRouteFromFavorites(Long rideId, Account account) {
-        Optional<Ride> ride = rideRepository.findById(rideId);
-        Route route = routeRepository.findById(ride.get().getRoute().getId())
-                .orElseThrow(() -> new RuntimeException("Route not found"));
-
-        FavoriteRoute favoriteRoute = favoriteRouteRepository
-                .findByAccountAndRoute(account, route)
+    public void removeRouteFromFavorites(Long favoriteRouteId, Account account) {
+        FavoriteRoute favoriteRoute = favoriteRouteRepository.findById(favoriteRouteId)
                 .orElseThrow(() -> new RuntimeException("Favorite route not found"));
 
+        if (!favoriteRoute.getAccount().getId().equals(account.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+        favoriteRouteRepository.delete(favoriteRoute);
+    }
+
+    public void removeRouteFromFavoritesByRoute(Long routeId, Account account) {
+        Route route = routeRepository.findById(routeId).orElseThrow(() -> new RuntimeException("Route not found"));
+        FavoriteRoute favoriteRoute = favoriteRouteRepository.findByRoute(route)
+                .orElseThrow(() -> new RuntimeException("Favorite route not found"));
+
+        if (!favoriteRoute.getAccount().getId().equals(account.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
         favoriteRouteRepository.delete(favoriteRoute);
     }
 }

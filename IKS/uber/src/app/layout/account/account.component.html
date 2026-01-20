@@ -33,12 +33,15 @@
                   ? openVehiclePriceModal()
                   : item.label === 'Change password'
                     ? openChangePassword()
-                    : null
+                    : item.label === 'Favorites'
+                      ? openFavorites()
+                      : null
             "
             [routerLink]="
               item.label !== 'My vehicle' &&
               item.label !== 'Vehicle price' &&
-              item.label !== 'Change password'
+              item.label !== 'Change password' &&
+              item.label !== 'Favorites'
                 ? item.route
                 : null
             "
@@ -115,6 +118,9 @@
       (closeModal)="closeChangePassword()"
       (passwordChanged)="onPasswordChanged($event)"
     ></app-change-password>
+  }
+  @if (showFavorites) {
+    <app-favorites-popup (closed)="closeFavorites()" [editMode]="true"></app-favorites-popup>
   }
 </div>
 

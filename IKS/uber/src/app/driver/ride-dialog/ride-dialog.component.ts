@@ -60,7 +60,7 @@ export class RideDialogComponent implements OnInit {
     const currentValue = this.isFavoriteSubject.value;
 
     if (currentValue) {
-      this.rideService.removeFromFavorites(this.ride.route.id).subscribe({
+      this.rideService.removeFromOtherFavorites(this.ride.route.id).subscribe({
         next: () => {
           this.isFavoriteSubject.next(false);
           this.showMessage('Removed from favorites');

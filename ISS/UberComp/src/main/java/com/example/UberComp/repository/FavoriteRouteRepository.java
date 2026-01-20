@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface FavoriteRouteRepository extends JpaRepository<FavoriteRoute, Long> {
     List<FavoriteRoute> findFavoriteRouteByAccount(Account account);
     Optional<FavoriteRoute> findByAccountAndRoute(Account account, Route route);
+    Optional<FavoriteRoute> findByRoute(Route route);
 }

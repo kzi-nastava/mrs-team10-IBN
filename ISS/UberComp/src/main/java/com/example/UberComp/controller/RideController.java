@@ -177,14 +177,20 @@ public class RideController {
         return ResponseEntity.ok(favoriteRoute);
     }
 
-    @DeleteMapping("/history/{id}/remove-from-favorites")
-    public ResponseEntity<Void> removeFromFavorites(
-            @PathVariable Long id,
-            Authentication auth) {
+    @DeleteMapping("/favorites/by-favorite-id/{favoriteId}")
+    public ResponseEntity<Void> removeByFavoriteId(@PathVariable Long favoriteId, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
-        rideService.removeRouteFromFavorites(id, account);
+        rideService.removeRouteFromFavorites(favoriteId, account);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/history/by-route-id/{routeId}")
+    public ResponseEntity<Void> removeByRouteId(@PathVariable Long routeId, Authentication auth) {
+        Account account = (Account) auth.getPrincipal();
+        rideService.removeRouteFromFavoritesByRoute(routeId, account);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PutMapping("/{id}/start")
     public ResponseEntity<Void> startRide(@PathVariable Long id) {

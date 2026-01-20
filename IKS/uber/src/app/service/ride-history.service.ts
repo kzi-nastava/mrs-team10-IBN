@@ -128,6 +128,10 @@ export class RideService {
   }
 
   removeFromFavorites(routeId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/rides/history/${routeId}/remove-from-favorites`);
+    return this.http.delete<void>(`${this.apiUrl}/rides/favorites/by-favorite-id/${routeId}`);
+  }
+
+  removeFromOtherFavorites(routeId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/rides/history/by-route-id/${routeId}`);
   }
 }
