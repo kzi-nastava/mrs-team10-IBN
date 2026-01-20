@@ -101,9 +101,10 @@ export class RideService {
   loadScheduledRides() {
     this.http
       .get<Ride[]>(`${environment.apiHost}/rides/scheduledRides`)
-      .subscribe((scheduled_rides) => {this._scheduled_rides.set(scheduled_rides);
-            console.log(this.scheduled_rides());}
-    );
+      .subscribe((scheduled_rides) => {
+        this._scheduled_rides.set(scheduled_rides);
+        console.log(this.scheduled_rides());
+      });
   }
 
   loadRideDetails(rideId: number): Observable<Ride> {
@@ -116,5 +117,21 @@ export class RideService {
 
   orderRide(dto: CreateRideDTO): Observable<RideOrderResponseDTO> {
     return this.http.post<RideOrderResponseDTO>(`${this.apiUrl}/rides`, dto);
+  }
+
+  getFavoriteRoutes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/rides/favorites`);
+  }
+
+  addToFavorites(routeId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/rides/history/${routeId}/add-to-favorites`, {});
+  }
+
+  removeFromFavorites(routeId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/rides/favorites/by-favorite-id/${routeId}`);
+  }
+
+  removeFromOtherFavorites(routeId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/rides/history/by-route-id/${routeId}`);
   }
 }

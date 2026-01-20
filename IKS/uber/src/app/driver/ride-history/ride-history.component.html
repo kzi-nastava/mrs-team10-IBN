@@ -3,17 +3,17 @@
 <div class="date-container">
   <mat-form-field>
     <mat-label>From: </mat-label>
-    <input matInput [matDatepicker]="frompicker" (dateChange)="onFromDateChange($event)">
+    <input matInput [matDatepicker]="frompicker" (dateChange)="onFromDateChange($event)" />
     <mat-datepicker-toggle matIconSuffix [for]="frompicker"></mat-datepicker-toggle>
     <mat-datepicker #frompicker></mat-datepicker>
   </mat-form-field>
   <mat-form-field>
     <mat-label>To: </mat-label>
-    <input matInput [matDatepicker]="topicker" (dateChange)="onToDateChange($event)">
+    <input matInput [matDatepicker]="topicker" (dateChange)="onToDateChange($event)" />
     <mat-datepicker-toggle matIconSuffix [for]="topicker"></mat-datepicker-toggle>
     <mat-datepicker #topicker></mat-datepicker>
   </mat-form-field>
-  @if(role == 'administrator'){
+  @if (role == 'administrator') {
     <select (change)="onSelectChange($event)">
       <option value="" disabled selected hidden>Sort By</option>
       <option value="price-asc">Price (ascending)</option>
@@ -29,35 +29,31 @@
 <div class="container">
   @for (ride of rides(); track ride.id) {
     <div class="ride-card" (click)="openRideDialog(ride)">
-        <button class="fav-btn">❤️</button>
+      <!-- <button class="fav-btn">❤️</button> -->
 
-        <div class="locations">
-            <div class="location">
-            <span class="pin red"></span>
-            <input type="text" placeholder={{ride.startLocation}} readonly />
-            </div>
-
-            <div class="location">
-            <span class="pin green"></span>
-            <input type="text" placeholder="{{ride.endLocation}}" readonly />
-            </div>
+      <div class="locations">
+        <div class="location">
+          <span class="pin red"></span>
+          <input type="text" placeholder="{{ ride.startLocation }}" readonly />
         </div>
-       @if (role !== 'passenger') {
+
+        <div class="location">
+          <span class="pin green"></span>
+          <input type="text" placeholder="{{ ride.endLocation }}" readonly />
+        </div>
+      </div>
+      @if (role !== 'passenger') {
         <div class="avatars">
-            <img       *ngFor="let passenger of ride.passengers"
-              [src]="passenger.image || 'pfp.png'"
-            />
+          <img *ngFor="let passenger of ride.passengers" [src]="passenger.image || 'pfp.png'" />
         </div>
-    
       }
 
-        <div class="time">
-            <div class="time-box">{{ ride.startTime | date:'dd/MM/yyyy' }}</div>
-            <div class="time-box">{{ ride.startTime | date:'HH:mm' }}</div>
-            <div class="time-box">{{ ride.endTime | date:'HH:mm' }}</div>
-        </div>
-        <div class="price">{{ride.price}} RSD</div>
-</div>
-
+      <div class="time">
+        <div class="time-box">{{ ride.startTime | date: 'dd/MM/yyyy' }}</div>
+        <div class="time-box">{{ ride.startTime | date: 'HH:mm' }}</div>
+        <div class="time-box">{{ ride.endTime | date: 'HH:mm' }}</div>
+      </div>
+      <div class="price">{{ ride.price }} RSD</div>
+    </div>
   }
 </div>
