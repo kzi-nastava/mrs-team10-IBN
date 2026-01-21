@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 import com.example.ubercorp.R;
 
@@ -14,30 +15,36 @@ import java.io.ByteArrayOutputStream;
 
 public class ImageHelper {
 
-    public static void setProfileImage(String base64Image, ImageView ivProfilePic) {
-        if (base64Image == null || base64Image.isEmpty()) {
-            ivProfilePic.setImageResource(R.drawable.ic_account);
-            return;
-        }
+    public static void setProfileImage(String imageString, ImageView imageView) {
+        if (imageString == null || imageView == null) return;
 
         try {
-            String cleanBase64 = base64Image;
-            if (base64Image.contains(",")) {
-                cleanBase64 = base64Image.split(",")[1];
-            }
+            if (imageString.startsWith("data:image") || isBase64(imageString)) {
+                String base64Data = imageString;
+                if (imageString.contains(",")) {
+                    base64Data = imageString.split(",")[1];
+                }
 
-            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-
-            if (bitmap != null) {
-                Bitmap circularBitmap = getCircularBitmap(bitmap);
-                ivProfilePic.setImageBitmap(circularBitmap);
+                byte[] decodedBytes = Base64.decode(base64Data, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                imageView.setImageBitmap(bitmap);
             } else {
-                ivProfilePic.setImageResource(R.drawable.ic_account);
+                int resId = imageView.getContext().getResources()
+                        .getIdentifier(imageString.replace(".png", ""), "drawable", imageView.getContext().getPackageName());
+                if (resId != 0) imageView.setImageResource(resId);
             }
         } catch (Exception e) {
-            android.util.Log.e("ImageHelper", "Error decoding profile image", e);
-            ivProfilePic.setImageResource(R.drawable.ic_account);
+            e.printStackTrace();
+            imageView.setImageResource(R.drawable.ic_account);
+        }
+    }
+
+    private static boolean isBase64(String string) {
+        try {
+            Base64.decode(string, Base64.DEFAULT);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 

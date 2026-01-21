@@ -15,7 +15,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="👤"
+        android:text=""
         android:textSize="15sp"
         android:gravity="center"/>
 
@@ -36,7 +36,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        android:text="🕐 2024-12-15"
+        android:text=""
+        android:gravity="center"
         android:textColor="#666666"
         android:textSize="14sp"
         android:layout_marginStart="8dp"/>

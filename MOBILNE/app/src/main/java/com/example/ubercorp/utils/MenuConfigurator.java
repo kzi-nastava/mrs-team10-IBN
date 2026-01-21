@@ -11,7 +11,7 @@ public class MenuConfigurator {
         hideAllMenuItems(menuViews);
 
         switch (role) {
-            case "admin":
+            case "administrator":
                 showAdminMenu(menuViews);
                 break;
             case "driver":

@@ -269,12 +269,12 @@ export class AccountComponent implements OnInit {
 
     request.subscribe({
       next: (res: any) => {
-        this.userFormData = { ...data };
-        this.originalUserFormData = { ...data };
-
         if (this.isDriver()) {
+          this.userFormData = { ...this.originalUserFormData };
           this.showSuccess('Change request sent to admin successfully.');
         } else {
+          this.userFormData = { ...data };
+          this.originalUserFormData = { ...data };
           this.showSuccess('Profile updated successfully.');
         }
 
@@ -316,8 +316,7 @@ export class AccountComponent implements OnInit {
       .post(`${environment.apiHost}/drivers/me/change-request`, payload, this.getAuthHeaders())
       .subscribe({
         next: () => {
-          this.vehicleData = { ...data };
-          this.originalVehicleData = { ...data };
+          this.loadDriverDetails();
           this.showVehicleModal = false;
           this.showSuccess('Vehicle change request sent to admin successfully.');
           this.cd.detectChanges();

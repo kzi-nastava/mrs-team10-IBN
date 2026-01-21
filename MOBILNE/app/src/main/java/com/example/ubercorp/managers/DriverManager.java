@@ -70,6 +70,7 @@ public class DriverManager {
             public void onResponse(Call<Void> call, retrofit2.Response<Void> response) {
                 if (response.isSuccessful()) {
                     listener.onVehicleUpdateSuccess();
+                    loadDriverData();
                 } else {
                     listener.onActionFailed("Failed to submit change request: " + response.code());
                 }

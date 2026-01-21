@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import com.example.ubercorp.api.ApiClient;
 import com.example.ubercorp.api.UserService;
 import com.example.ubercorp.dto.*;
+import com.example.ubercorp.utils.JwtUtils;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 
@@ -74,6 +76,9 @@ public class ProfileManager {
             public void onResponse(Call<GetProfileDTO> call, retrofit2.Response<GetProfileDTO> response) {
                 if (response.isSuccessful()) {
                     listener.onProfileUpdateSuccess();
+                    if (JwtUtils.getRoleFromToken(token).equals("driver")) {
+                        loadProfile();
+                    }
                 } else {
                     listener.onProfileUpdateFailed("Update failed");
                 }
