@@ -8,6 +8,7 @@ import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
+import com.example.UberComp.utils.EmailUtils;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -48,6 +49,8 @@ public class RideService {
     private PanicSignalRepository panicSignalRepository;
     @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
+    @Autowired
+    private EmailUtils emailUtils;
 
     public IncomingRideDTO getIncomingRide(){
         IncomingRideDTO newRide = new IncomingRideDTO();
