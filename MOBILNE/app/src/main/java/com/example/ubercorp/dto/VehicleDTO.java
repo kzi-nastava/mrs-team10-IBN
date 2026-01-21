@@ -8,6 +8,8 @@ public class VehicleDTO {
     private Boolean babySeat;
     private Boolean petFriendly;
 
+    public VehicleDTO() {}
+
     public VehicleDTO(VehicleTypeDTO vehicleTypeDTO, String model, String plate,
                       Integer seatNumber, Boolean babySeat, Boolean petFriendly) {
         this.vehicleTypeDTO = vehicleTypeDTO;
@@ -19,9 +21,22 @@ public class VehicleDTO {
     }
 
     public VehicleTypeDTO getVehicleTypeDTO() { return vehicleTypeDTO; }
+    public void setVehicleTypeDTO(VehicleTypeDTO vehicleTypeDTO) {
+        this.vehicleTypeDTO = vehicleTypeDTO;
+    }
+
     public String getModel() { return model; }
+    public void setModel(String model) { this.model = model; }
+
     public String getPlate() { return plate; }
+    public void setPlate(String plate) { this.plate = plate; }
+
     public Integer getSeatNumber() { return seatNumber; }
+    public void setSeatNumber(Integer seatNumber) { this.seatNumber = seatNumber; }
+
     public Boolean getBabySeat() { return babySeat; }
+    public void setBabySeat(Boolean babySeat) { this.babySeat = babySeat; }
+
     public Boolean getPetFriendly() { return petFriendly; }
+    public void setPetFriendly(Boolean petFriendly) { this.petFriendly = petFriendly; }
 }

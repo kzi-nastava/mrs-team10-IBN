@@ -8,24 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,31 +25,48 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+
 import com.example.ubercorp.R;
-import com.example.ubercorp.api.ApiClient;
-import com.example.ubercorp.api.DriverService;
-import com.example.ubercorp.api.UserService;
 import com.example.ubercorp.dto.AccountDTO;
 import com.example.ubercorp.dto.CreateUserDTO;
 import com.example.ubercorp.dto.CreatedUserDTO;
-import com.example.ubercorp.dto.GetProfileDTO;
+import com.example.ubercorp.dto.DriverDTO;
 import com.example.ubercorp.dto.UpdateDriverDTO;
+import com.example.ubercorp.dto.VehicleDTO;
+import com.example.ubercorp.dto.VehicleTypeDTO;
+import com.example.ubercorp.managers.AdminManager;
+import com.example.ubercorp.managers.DriverManager;
+import com.example.ubercorp.managers.PassengerManager;
+import com.example.ubercorp.managers.ProfileManager;
+import com.example.ubercorp.utils.ImageHelper;
+import com.example.ubercorp.utils.JwtUtils;
+import com.example.ubercorp.utils.MenuConfigurator;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.io.ByteArrayOutputStream;
+public class AccountFragment extends Fragment implements
+        ProfileManager.ProfileUpdateListener,
+        DriverManager.DriverActionsListener {
 
-import retrofit2.Call;
-import retrofit2.Callback;
-
-public class AccountFragment extends Fragment {
+    // Managers
+    private ProfileManager profileManager;
+    private DriverManager driverManager;
     private static final int MEDIA_IMAGES_PERMISSION = 100;
     private static final int SELECT_IMAGE = 200;
     private String ImagePermission;
     private String currentBase64Image = "";
+    private VehicleDTO currentVehicle;
+    private DriverDTO currentDriver;
+    private String userRole = "passenger";
+
     // Header & Profile
     private FrameLayout headerBackground, changePassword;
     private LinearLayout userInfoSection;
@@ -78,6 +82,7 @@ public class AccountFragment extends Fragment {
     private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
 
     // Vehicle Edit
+    private TextView tvVehicleModel, tvVehiclePlate;
     private RadioGroup rgVehicleType;
     private TextInputEditText etNumberOfSeats;
     private MaterialCheckBox cbBabyTransport, cbPetTransport;
@@ -93,10 +98,6 @@ public class AccountFragment extends Fragment {
             menuChangePassword, menuDeleteAccount, menuFavorites,
             menuUserStat, menuDriverStat, menuVehicle;
 
-    public static AccountFragment newInstance() {
-        return new AccountFragment();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
@@ -107,15 +108,153 @@ public class AccountFragment extends Fragment {
             ImagePermission = Manifest.permission.READ_EXTERNAL_STORAGE;
         }
 
-        setupMenuItems(view);
+        // Initialize managers
+        profileManager = new ProfileManager(getContext(), this);
+        driverManager = new DriverManager(getContext(), this);
+
+        loadUserRoleFromToken();
         initializeViews(view);
+        setupMenuItems(view);
         setupListeners();
-        configureMenuForRole("user");
+
+        MenuConfigurator.MenuViews menuViews = createMenuViews();
+        MenuConfigurator.configureForRole(userRole, menuViews);
+
         startFlyingTaxiAnimation();
 
-        view.post(this::loadUserProfile);
+        view.post(this::loadRoleBasedData);
 
         return view;
+    }
+
+    private void loadRoleBasedData() {
+        if ("driver".equals(userRole)) {
+            driverManager.loadDriverData();
+        } else {
+            profileManager.loadProfile();
+        }
+    }
+
+    private void loadUserRoleFromToken() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+
+        if (token != null) {
+            if (JwtUtils.isTokenExpired(token)) {
+                android.util.Log.w("AccountFragment", "Token has expired");
+                return;
+            }
+
+            String role = JwtUtils.getRoleFromToken(token);
+            if (role != null) {
+                userRole = role;
+                android.util.Log.d("AccountFragment", "User role from token: " + userRole);
+            }
+
+            String email = JwtUtils.getEmailFromToken(token);
+            if (email != null) {
+                android.util.Log.d("AccountFragment", "User email from token: " + email);
+            }
+        } else {
+            android.util.Log.e("AccountFragment", "No auth token found");
+        }
+    }
+
+    // ProfileManager callbacks
+    @Override
+    public void onProfileLoaded(CreateUserDTO user, AccountDTO account) {
+        displayUserInfo(user, account);
+    }
+
+    @Override
+    public void onProfileUpdateSuccess() {
+        Toast.makeText(getContext(), "Profile updated", Toast.LENGTH_SHORT).show();
+        hideEditProfile();
+    }
+
+    @Override
+    public void onProfileUpdateFailed(String error) {
+        Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
+    }
+
+    // DriverManager callbacks
+    @Override
+    public void onDriverDataLoaded(DriverDTO driver) {
+        currentDriver = driver;
+        displayUserInfo(driver.getCreateUser(), driver.getAccount());
+        if (driver.getVehicleDTO() != null) {
+            currentVehicle = driver.getVehicleDTO();
+            displayVehicleInfo(driver.getVehicleDTO());
+        }
+        if (driver.getUptime() != null) {
+            updateDriverHours(driver.getUptime() / 60.0f);
+        }
+    }
+
+    @Override
+    public void onVehicleUpdateSuccess() {
+        Toast.makeText(getContext(), "Change request submitted", Toast.LENGTH_LONG).show();
+        hideEditVehicle();
+    }
+
+    @Override
+    public void onActionFailed(String error) {
+        Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+    }
+
+    private void displayUserInfo(CreateUserDTO user, AccountDTO account) {
+        if (user != null) {
+            if (etFirstName != null) etFirstName.setText(user.getName());
+            if (etLastName != null) etLastName.setText(user.getLastName());
+            if (tvUserName != null) {
+                tvUserName.setText(user.getName() + " " + user.getLastName());
+            }
+            if (etPhone != null) etPhone.setText(user.getPhone());
+            if (etAddress != null) etAddress.setText(user.getHomeAddress());
+            if (user.getImage() != null && !user.getImage().isEmpty()) {
+                ImageHelper.setProfileImage(user.getImage(), ivProfilePic);
+            }
+        }
+
+        if (account != null && account.getEmail() != null) {
+            if (etEmail != null) etEmail.setText("🔒 " + account.getEmail());
+            if (tvUserEmail != null) tvUserEmail.setText(account.getEmail());
+        }
+    }
+
+    private void displayVehicleInfo(VehicleDTO vehicle) {
+        if (vehicle == null) return;
+
+        if (vehicle.getModel() != null && tvVehicleModel != null) {
+            tvVehicleModel.setText(vehicle.getModel());
+        }
+        if (vehicle.getPlate() != null && tvVehiclePlate != null) {
+            tvVehiclePlate.setText(vehicle.getPlate());
+        }
+
+        VehicleTypeDTO vehicleType = vehicle.getVehicleTypeDTO();
+        if (vehicleType != null && vehicleType.getName() != null) {
+            String typeName = vehicleType.getName();
+            if ("STANDARD".equalsIgnoreCase(typeName)) {
+                rgVehicleType.check(R.id.rbStandard);
+            } else if ("LUXURY".equalsIgnoreCase(typeName)) {
+                rgVehicleType.check(R.id.rbLuxury);
+            } else if ("VAN".equalsIgnoreCase(typeName)) {
+                rgVehicleType.check(R.id.rbVan);
+            }
+        }
+
+        if (vehicle.getSeatNumber() != null && etNumberOfSeats != null) {
+            etNumberOfSeats.setText(String.valueOf(vehicle.getSeatNumber()));
+        }
+
+        if (vehicle.getBabySeat() != null && cbBabyTransport != null) {
+            cbBabyTransport.setChecked(vehicle.getBabySeat());
+        }
+
+        if (vehicle.getPetFriendly() != null && cbPetTransport != null) {
+            cbPetTransport.setChecked(vehicle.getPetFriendly());
+        }
     }
 
     private void initializeViews(View view) {
@@ -149,6 +288,8 @@ public class AccountFragment extends Fragment {
         btnCancelPassword = view.findViewById(R.id.btnCancelPassword);
 
         // Vehicle Edit
+        tvVehicleModel = view.findViewById(R.id.etVehicleModel);
+        tvVehiclePlate = view.findViewById(R.id.etLicensePlate);
         rgVehicleType = view.findViewById(R.id.rgVehicleType);
         etNumberOfSeats = view.findViewById(R.id.etNumberOfSeats);
         cbBabyTransport = view.findViewById(R.id.cbBabyTransport);
@@ -198,9 +339,27 @@ public class AccountFragment extends Fragment {
 
         // Navigate to Change Requests
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
-
         menuChangePassword.setOnClickListener(v -> showChangePassword());
         menuManageUsers.setOnClickListener(v -> navigateToManageUsers());
+    }
+
+    private MenuConfigurator.MenuViews createMenuViews() {
+        MenuConfigurator.MenuViews menuViews = new MenuConfigurator.MenuViews();
+        menuViews.menuPlatformStats = menuPlatformStats;
+        menuViews.menuRequests = menuRequests;
+        menuViews.menuManageUsers = menuManageUsers;
+        menuViews.menuChangePassword = menuChangePassword;
+        menuViews.menuDeleteAccount = menuDeleteAccount;
+        menuViews.menuFavorites = menuFavorites;
+        menuViews.menuUserStat = menuUserStat;
+        menuViews.menuDriverStat = menuDriverStat;
+        menuViews.menuVehicle = menuVehicle;
+        menuViews.drivingHoursSection = drivingHoursSection;
+        menuViews.tvUserEmail = tvUserEmail;
+        menuViews.changePassword = changePassword;
+        menuViews.btnSaveChanges = btnSaveChanges;
+        menuViews.btnSendChanges = btnSendChanges;
+        return menuViews;
     }
 
     private void selectImage() {
@@ -208,34 +367,6 @@ public class AccountFragment extends Fragment {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Profile Picture"), SELECT_IMAGE);
-    }
-
-    private Bitmap resizeBitmap(Bitmap image, int maxWidth, int maxHeight) {
-        if (maxHeight > 0 && maxWidth > 0) {
-            int width = image.getWidth();
-            int height = image.getHeight();
-            float ratioBitmap = (float) width / (float) height;
-            float ratioMax = (float) maxWidth / (float) maxHeight;
-
-            int finalWidth = maxWidth;
-            int finalHeight = maxHeight;
-            if (ratioMax > ratioBitmap) {
-                finalWidth = (int) ((float)maxHeight * ratioBitmap);
-            } else {
-                finalHeight = (int) ((float)maxWidth / ratioBitmap);
-            }
-            return Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
-        }
-        return image;
-    }
-
-    private String bitmapToBase64(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        String base64 = Base64.encodeToString(byteArray, Base64.NO_WRAP);
-
-        return "data:image/jpeg;base64," + base64;
     }
 
     @Override
@@ -259,12 +390,10 @@ public class AccountFragment extends Fragment {
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+                bitmap = ImageHelper.resizeBitmap(bitmap, 800, 800);
+                currentBase64Image = ImageHelper.bitmapToBase64(bitmap);
 
-                bitmap = resizeBitmap(bitmap, 800, 800);
-
-                currentBase64Image = bitmapToBase64(bitmap);
-
-                Bitmap circularBitmap = getCircularBitmap(bitmap);
+                Bitmap circularBitmap = ImageHelper.getCircularBitmap(bitmap);
                 ivProfilePic.setImageBitmap(circularBitmap);
 
                 Toast.makeText(getContext(), "Image selected. Save changes to update.", Toast.LENGTH_SHORT).show();
@@ -296,6 +425,19 @@ public class AccountFragment extends Fragment {
         setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
                 "My Vehicle", "Manage your vehicle", true);
     }
+
+    private void setupMenuItem(View menuItem, String emoji, String title, String subtitle, boolean showDivider) {
+        TextView tvIcon = menuItem.findViewById(R.id.tvIcon);
+        TextView tvTitle = menuItem.findViewById(R.id.tvTitle);
+        TextView tvSubtitle = menuItem.findViewById(R.id.tvSubtitle);
+        View divider = menuItem.findViewById(R.id.divider);
+
+        tvIcon.setText(emoji);
+        tvTitle.setText(title);
+        tvSubtitle.setText(subtitle);
+        divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
+    }
+
     private void navigateToChangeRequests() {
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_account_to_changeRequests);
@@ -304,45 +446,6 @@ public class AccountFragment extends Fragment {
     private void navigateToManageUsers() {
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_account_to_manageUsers);
-    }
-    private void configureMenuForRole(String userRole) {
-        hideAllMenuItems();
-
-        switch (userRole) {
-            case "admin":
-                showViews(menuPlatformStats, menuRequests, menuManageUsers,
-                        menuChangePassword, menuDeleteAccount);
-                break;
-
-            case "driver":
-                showViews(menuVehicle, menuDriverStat, menuChangePassword, menuDeleteAccount);
-                tvUserEmail.setVisibility(View.GONE);
-                drivingHoursSection.setVisibility(View.VISIBLE);
-                updateDriverHours(5.5f);
-                btnSaveChanges.setVisibility(View.GONE);
-                btnSendChanges.setVisibility(View.VISIBLE);
-                break;
-
-            case "user":
-                showViews(menuFavorites, menuUserStat, menuChangePassword, menuDeleteAccount);
-                break;
-        }
-    }
-
-    private void hideAllMenuItems() {
-        hideViews(menuPlatformStats, menuRequests, menuManageUsers, menuChangePassword,
-                menuDeleteAccount, menuFavorites, menuUserStat, menuVehicle, menuDriverStat,
-                drivingHoursSection);
-        btnSendChanges.setVisibility(View.GONE);
-        changePassword.setVisibility(View.GONE);
-    }
-
-    private void showViews(View... views) {
-        for (View view : views) view.setVisibility(View.VISIBLE);
-    }
-
-    private void hideViews(View... views) {
-        for (View view : views) view.setVisibility(View.GONE);
     }
 
     // Edit Profile
@@ -375,12 +478,15 @@ public class AccountFragment extends Fragment {
     private void saveProfileChanges() {
         String firstName = etFirstName.getText().toString().trim();
         String lastName = etLastName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
         if (firstName.isEmpty() || lastName.isEmpty()) {
             Toast.makeText(getContext(), "Name and last name are required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (address.isEmpty() || phone.isEmpty()) {
+            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -394,42 +500,9 @@ public class AccountFragment extends Fragment {
                 imageToSend
         );
 
-        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("auth_token", null);
-
-        if (token == null) {
-            android.util.Log.e("AccountFragment", "No auth token found");
-            return;
-        }
-
-        UserService userApi = ApiClient.getInstance().createService(UserService.class);
-        Call<GetProfileDTO> call = userApi.updateProfile("Bearer " + token, updateDTO);
-
-        call.enqueue(new Callback<GetProfileDTO>() {
-            @Override
-            public void onResponse(Call<GetProfileDTO> call, retrofit2.Response<GetProfileDTO> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    GetProfileDTO profile = response.body();
-
-                    tvUserName.setText(firstName + " " + lastName);
-                    tvUserEmail.setText(email);
-                    currentBase64Image = "";
-
-                    Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-                    hideEditProfile();
-                } else {
-                    Toast.makeText(getContext(), "Failed to update profile", Toast.LENGTH_SHORT).show();
-                    android.util.Log.e("AccountFragment", "Update failed: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GetProfileDTO> call, Throwable t) {
-                Toast.makeText(getContext(), "Network error", Toast.LENGTH_SHORT).show();
-                android.util.Log.e("AccountFragment", "Update failed", t);
-            }
-        });
+        profileManager.updateProfile(updateDTO);
     }
+
     private void sendProfileChanges() {
         String firstName = etFirstName.getText().toString().trim();
         String lastName = etLastName.getText().toString().trim();
@@ -441,36 +514,24 @@ public class AccountFragment extends Fragment {
             return;
         }
 
-        CreateUserDTO userDTO = new CreateUserDTO(
+        if (address.isEmpty() || phone.isEmpty()) {
+            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String imageToSend = currentBase64Image.isEmpty() ? "" : currentBase64Image;
+
+        CreateUserDTO updateDTO = new CreateUserDTO(
                 firstName,
                 lastName,
                 address,
                 phone,
-                ""
+                imageToSend
         );
 
-        UpdateDriverDTO changeRequest = new UpdateDriverDTO(userDTO, null);
-
-        DriverService driverService = ApiClient.getInstance().createService(DriverService.class);
-        Call<Void> call = driverService.submitDriverChangeRequest(changeRequest);
-
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, retrofit2.Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Change request submitted for admin approval", Toast.LENGTH_LONG).show();
-                    hideEditProfile();
-                } else {
-                    Toast.makeText(getContext(), "Failed to submit change request", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(getContext(), "Network error", Toast.LENGTH_SHORT).show();
-                android.util.Log.e("AccountFragment", "Change request failed", t);
-            }
-        });
+        UpdateDriverDTO changeRequest = new UpdateDriverDTO(updateDTO, currentVehicle, null);
+        driverManager.submitChangeRequest(changeRequest);
+        hideEditProfile();
     }
 
     private void showEditVehicle() {
@@ -485,32 +546,59 @@ public class AccountFragment extends Fragment {
 
     private void saveVehicleChanges() {
         int selectedId = rgVehicleType.getCheckedRadioButtonId();
-        String vehicleType = selectedId == R.id.rbStandard ? "Standard" :
-                selectedId == R.id.rbLuxury ? "Luxury" : "Van";
+        String vehicleTypeName = selectedId == R.id.rbStandard ? "STANDARD" :
+                selectedId == R.id.rbLuxury ? "LUXURY" : "VAN";
 
-        String seats = etNumberOfSeats.getText().toString();
+        String seatsStr = etNumberOfSeats.getText().toString().trim();
+        if (seatsStr.isEmpty()) {
+            Toast.makeText(getContext(), "Number of seats is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int seatNumber;
+        try {
+            seatNumber = Integer.parseInt(seatsStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(), "Invalid number of seats", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         boolean babyTransport = cbBabyTransport.isChecked();
         boolean petTransport = cbPetTransport.isChecked();
 
-        hideEditVehicle();
+        Long typeId = vehicleTypeName.equals("STANDARD") ? 1L :
+                vehicleTypeName.equals("LUXURY") ? 2L : 3L;
+        VehicleTypeDTO vehicleType = new VehicleTypeDTO(typeId, vehicleTypeName, 0.0);
+
+        String model = tvVehicleModel.getText().toString().trim();
+        if (model.isEmpty()) {
+            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String plate = tvVehiclePlate.getText().toString().trim();
+        if (plate.isEmpty()) {
+            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        VehicleDTO updatedVehicle = new VehicleDTO(
+                vehicleType,
+                model,
+                plate,
+                seatNumber,
+                babyTransport,
+                petTransport
+        );
+
+        UpdateDriverDTO changeRequest = new UpdateDriverDTO(currentDriver.getCreateUser(), updatedVehicle, null);
+        driverManager.submitChangeRequest(changeRequest);
+        currentVehicle = updatedVehicle;
     }
 
     private void updateDriverHours(float hoursWorked) {
         driverProgress.setMax(8);
         driverProgress.setProgress((int) hoursWorked);
         tvDrivingHoursProgress.setText(String.format("%.1f / 8 hours", hoursWorked));
-    }
-
-    private void setupMenuItem(View menuItem, String emoji, String title, String subtitle, boolean showDivider) {
-        TextView tvIcon = menuItem.findViewById(R.id.tvIcon);
-        TextView tvTitle = menuItem.findViewById(R.id.tvTitle);
-        TextView tvSubtitle = menuItem.findViewById(R.id.tvSubtitle);
-        View divider = menuItem.findViewById(R.id.divider);
-
-        tvIcon.setText(emoji);
-        tvTitle.setText(title);
-        tvSubtitle.setText(subtitle);
-        divider.setVisibility(showDivider ? View.VISIBLE : View.GONE);
     }
 
     private void startFlyingTaxiAnimation() {
@@ -581,107 +669,15 @@ public class AccountFragment extends Fragment {
         animator.start();
     }
 
-    private void loadUserProfile() {
-        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
-        String token = sharedPref.getString("auth_token", null);
-
-        if (token == null) {
-            android.util.Log.e("AccountFragment", "No auth token found");
-            return;
-        }
-
-        UserService userApi = ApiClient.getInstance().createService(UserService.class);
-        Call<GetProfileDTO> call = userApi.getUser("Bearer " + token);
-
-        call.enqueue(new Callback<GetProfileDTO>() {
-            @Override
-            public void onResponse(Call<GetProfileDTO> call, retrofit2.Response<GetProfileDTO> response) {
-                 if (response.isSuccessful() && response.body() != null) {
-                    GetProfileDTO profile = response.body();
-                    CreatedUserDTO user = profile.getCreatedUserDTO();
-                    AccountDTO account = profile.getAccountDTO();
-
-                    if (user != null) {
-                        if (etFirstName != null) etFirstName.setText(user.getName());
-                        if (etLastName != null) etLastName.setText(user.getLastName());
-                        if (tvUserName != null) {
-                            tvUserName.setText(user.getName() + " " + user.getLastName());
-                        }
-                        if (etPhone != null) etPhone.setText(user.getPhone());
-                        if (etAddress != null) etAddress.setText(user.getHomeAddress());
-                        if (user.getImage() != null) {
-                            setProfileImage(user.getImage());
-                        }
-                    }
-
-                    if (account != null && account.getEmail() != null) {
-                        if (etEmail != null) etEmail.setText("🔒 " + account.getEmail());
-                        if (tvUserEmail != null) tvUserEmail.setText(account.getEmail());
-                    }
-                } else {
-                    android.util.Log.e("AccountFragment", "Response not successful: " + response.code());
-                    try {
-                        if (response.errorBody() != null) {
-                            android.util.Log.e("AccountFragment", "Error: " + response.errorBody().string());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GetProfileDTO> call, Throwable t) {
-                android.util.Log.e("AccountFragment", "API FAILED", t);
-            }
-        });
-    }
-
-    private void setProfileImage(String base64Image) {
-        if (base64Image == null || base64Image.isEmpty()) {
-            ivProfilePic.setImageResource(R.drawable.ic_account);
-            return;
-        }
-
-        try {
-            String cleanBase64 = base64Image;
-            if (base64Image.contains(",")) {
-                cleanBase64 = base64Image.split(",")[1];
-            }
-
-            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-
-            if (bitmap != null) {
-                Bitmap circularBitmap = getCircularBitmap(bitmap);
-                ivProfilePic.setImageBitmap(circularBitmap);
-            } else {
-                ivProfilePic.setImageResource(R.drawable.ic_account);
-            }
-        } catch (Exception e) {
-            android.util.Log.e("AccountFragment", "Error decoding profile image", e);
-            ivProfilePic.setImageResource(R.drawable.ic_account);
+    private void showViews(View... views) {
+        for (View view : views) {
+            if (view != null) view.setVisibility(View.VISIBLE);
         }
     }
 
-    private Bitmap getCircularBitmap(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        int diameter = Math.min(width, height);
-
-        Bitmap output = Bitmap.createBitmap(diameter, diameter, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-
-        canvas.drawCircle(diameter / 2f, diameter / 2f, diameter / 2f, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-
-        float left = (diameter - width) / 2f;
-        float top = (diameter - height) / 2f;
-        canvas.drawBitmap(bitmap, left, top, paint);
-
-        return output;
+    private void hideViews(View... views) {
+        for (View view : views) {
+            if (view != null) view.setVisibility(View.GONE);
+        }
     }
 }

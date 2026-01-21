@@ -6,13 +6,14 @@ import com.example.ubercorp.dto.UpdateDriverDTO;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface DriverService {
 
-    @GET("drivers/me")
-    Call<DriverDTO> getDriverProfile();
+    @GET("api/drivers/me")
+    Call<DriverDTO> getDriverProfile(@Header("Authorization") String authToken);
 
-    @POST("drivers/me/change-request")
-    Call<Void> submitDriverChangeRequest(@Body UpdateDriverDTO changeRequest);
+    @POST("api/drivers/me/change-request")
+    Call<Void> submitDriverChangeRequest(@Header("Authorization") String authToken, @Body UpdateDriverDTO changeRequest);
 }
