@@ -7,16 +7,17 @@ import {
   Output,
   EventEmitter,
   Signal,
+  input,
 } from '@angular/core';
 import * as L from 'leaflet';
-import { Observable, map } from 'rxjs';
+import { Observable, firstValueFrom, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import 'leaflet-routing-machine';
 import { environment } from '../../../environments/environment';
 import { Location } from '../../model/location.model';
 import { output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Station } from '../../model/ride-history.model';
+import { Ride, Station } from '../../model/ride-history.model';
 import { TrackingData } from '../../layout/tracking-route/tracking-route.component';
 
 interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
@@ -32,21 +33,27 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
 export class TrackingMapComponent implements AfterViewInit, OnChanges {
   @Input() stations: Station[] = [];
   @Input() interactive: boolean = true;
+  rideId = input<number>();
 
   estimatedTime = output<string>();
   currentLocation = output<TrackingData>();
-
-  private passedCount = 0;
+  stateChange = output<string>();
   passingOutput = output<number>();
+  distanceOutput = output<number>();
+
+  private passedCount = 1;
+  getTrackingVehicle: boolean = true
+  rideProgress: number = 0
+  coordinates: any;
+  distance: number = 0;
 
   private map!: L.Map;
   private routeControl?: L.Routing.Control;
+  private vehicleLayer!: L.LayerGroup;
 
   PinIcon!: L.Icon;
   PickupIcon!: L.Icon;
   DestinationIcon!: L.Icon;
-  GreenCarIcon!: L.Icon;
-  RedCarIcon!: L.Icon;
   CurrentLocationIcon!: L.Icon;
 
   private points: {
@@ -89,6 +96,8 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
     });
 
     this.initMap();
+    
+    this.vehicleLayer = L.layerGroup().addTo(this.map);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -119,21 +128,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
-
-    this.map.on('click', (e) => {
-      this.currentLocationMarker.setLatLng(e.latlng);
-      if (e.latlng.distanceTo(this.points[this.passedCount].latLng) < 50) {
-        console.log('Station reached!');
-        ++this.passedCount;
-        this.passingOutput.emit(this.passedCount);
-        console.log(this.points);
-      }
-      this.getTrackingData(e.latlng).subscribe({
-        next: (response) => {
-          this.currentLocation.emit(response);
-        },
-      });
-    });
   }
 
   private async updateLocationsFromInput(): Promise<void> {
@@ -149,7 +143,12 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
       await this.addLocationFromAddress(location);
     }
 
-    this.updateRoute();
+    this.drawInitialRoute().then(() => {
+      setTimeout(() => {
+        this.map.invalidateSize();
+        this.getVehiclePosition();
+      }, 100);
+    });
     this.isUpdatingFromParent = false;
   }
 
@@ -193,7 +192,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
     this.points.push({ marker: pin, latLng, address: title });
   }
 
-  private updateRoute(): void {
+  private async drawInitialRoute(): Promise<void> {
     if (this.points.length < 2) {
       if (this.routeControl) {
         this.map.removeControl(this.routeControl);
@@ -221,6 +220,8 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
       this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
+        this.coordinates = routes[0].coordinates;
+        this.distance = routes[0].summary.totalDistance / 1000;
         this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
     }
@@ -254,5 +255,62 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges {
       this.map.removeControl(this.routeControl);
       this.routeControl = undefined;
     }
+  }
+
+  async getVehiclePosition() {
+    while (this.getTrackingVehicle) {
+      try {
+        const ride = await firstValueFrom(
+          this.http.get<Ride>(`${environment.apiHost}/rides/${this.rideId()}`)
+        );
+        if (ride.status == 'Finished' || ride.status == 'Panic'){
+          this.stateChange.emit(ride.status)
+          break
+        }
+
+        const now = Date.now();
+        const start = new Date(ride.startTime).getTime();
+        const eta = new Date(ride.endTime).getTime();
+
+        this.calculateRemainingTime(eta, now);
+
+        this.rideProgress = 0;
+        if (eta > start) this.rideProgress = (now - start) / (eta - start);
+        this.rideProgress = Math.max(0, Math.min(1, this.rideProgress));
+
+        if (!this.coordinates.length) return;
+        
+        const index = Math.min(this.coordinates.length - 1, Math.floor(this.rideProgress * this.coordinates.length));
+        const pos = this.coordinates[index];
+
+        this.currentLocationMarker.setLatLng(pos)
+        if (pos.distanceTo(this.points[this.passedCount].latLng) < 50) {
+          ++this.passedCount;
+          this.passingOutput.emit(this.passedCount);
+        }
+        this.getTrackingData(pos).subscribe({
+          next: (response) => {
+            this.currentLocation.emit(response);
+            this.distanceOutput.emit(this.distance * (index / this.coordinates.length))
+          },
+        });
+        this.map.setView([pos.lat, pos.lng], 20);
+      }
+
+      catch (err) {
+        console.error(err);
+      }
+      this.vehicleLayer.clearLayers();
+      await this.sleep(3000);
+    }
+  }
+
+  calculateRemainingTime(eta: number, now: number) {
+    const diffMs = Math.max(0, eta - now);
+    this.estimatedTime.emit(`${Math.ceil(diffMs / 60000)} min`);
+  }
+
+  sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

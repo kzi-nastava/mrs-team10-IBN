@@ -338,7 +338,7 @@ public class DriverService {
 
     private String getAddressFromCoordinate(Coordinate coordinate) {
         try {
-            String url = String.format(
+            String url = String.format(Locale.US,
                     "https://api.mapbox.com/geocoding/v5/mapbox.places/%f,%f.json?access_token=%s",
                     coordinate.getLon(),
                     coordinate.getLat(),
@@ -898,7 +898,7 @@ public class DriverService {
             }
 
             // Now proceed with the API call
-            String url = String.format(
+            String url = String.format(Locale.US,
                     "https://api.mapbox.com/directions/v5/mapbox/driving/%f,%f;%f,%f?access_token=%s",
                     fromCoord.getLon(), fromCoord.getLat(),
                     toCoord.getLon(), toCoord.getLat(),
@@ -966,16 +966,17 @@ public class DriverService {
     private Map<String, Long> callMapboxMatrix(Coordinate source, List<Coordinate> destinations) {
         try {
             StringBuilder coords = new StringBuilder()
-                    .append(source.getLon()).append(",").append(source.getLat());
+                    .append(String.format(Locale.US, "%.6f,%.6f", source.getLon(), source.getLat()));
 
             for (Coordinate dest : destinations) {
                 coords.append(";")
-                        .append(dest.getLon()).append(",").append(dest.getLat());
+                        .append(String.format(Locale.US, "%.6f,%.6f", dest.getLon(), dest.getLat()));
             }
 
-            String url = String.format(
+
+            String url = String.format(Locale.US,
                     "https://api.mapbox.com/directions-matrix/v1/mapbox/driving/%s?sources=0&access_token=%s",
-                    coords,
+                    coords.toString(),
                     mapboxApiKey
             );
 

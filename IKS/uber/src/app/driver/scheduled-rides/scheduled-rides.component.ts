@@ -32,4 +32,17 @@ export class ScheduledRidesComponent {
   constructor(private rideService: RideService) {
     this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
   }
+    
+  onScroll(event: any) {
+    
+    const element = event.target as HTMLElement;
+
+    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 500;
+    
+    console.log('atBottom:', atBottom);
+    
+    if (atBottom) {
+      this.rideService.loadScheduledRides();
+    }
+  }
 }

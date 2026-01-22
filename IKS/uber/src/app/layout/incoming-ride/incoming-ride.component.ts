@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { Router } from '@angular/router';
 import { MapComponent } from '../../maps/map-basic/map.component';
-import { RouteService, RidePayload } from '../../service/route.service';
+import { RouteService, RidePayload, RideCancellation } from '../../service/route.service';
 import { Station } from '../../model/ride-history.model';
 
 @Component({
@@ -38,9 +38,20 @@ export class IncomingRideComponent {
     const currentTime = new Date().toISOString();
     this.routeService.startRide(this.ride.id, currentTime).subscribe({
       next: () => {
-        this.router.navigate(['/tracking-route']);
+        this.router.navigate([`/tracking-route/${this.ride.id}`]);
       },
       error: (err) => console.error('Error starting ride:', err),
     });
+  }
+
+  declineRide(reason: string){
+    const cancelledRide: RideCancellation = {
+      id: this.ride.id,
+      cancellationReason: reason,
+      cancelledByDriver: true
+    }
+    this.routeService.cancelRide(cancelledRide).subscribe({
+      next:(res) => this.router.navigate(["/home"])
+    })
   }
 }
