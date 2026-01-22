@@ -1,5 +1,6 @@
 package com.example.UberComp.controller;
 
+import com.example.UberComp.dto.PageDTO;
 import com.example.UberComp.dto.driver.AvailableDriverDTO;
 import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
@@ -14,6 +15,8 @@ import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.parser.Authorization;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,21 +37,22 @@ public class RideController {
     private final DriverService driverService;
     private RideService rideService;
 
-//    @PreAuthorize("hasRole('DRIVER')")
-    @GetMapping(value= "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDTO>> getRidesDriver(
-            Authentication auth) {
+    //    @PreAuthorize("hasRole('DRIVER')")
+    @GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
+
         Account account = (Account) auth.getPrincipal();
-        Collection<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId());
+        Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
+
         return ResponseEntity.ok(rides);
     }
 
+
     @GetMapping(value= "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDTO>> getRidesPassenger(
-            Authentication auth) {
+    public ResponseEntity<PageDTO<GetRideDTO>> getRidesPassenger(Authentication auth, Pageable pageable) {
         Account account = (Account) auth.getPrincipal();
-        Collection<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId());
-        return ResponseEntity.ok(rides);
+        Page<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId(), pageable);
+        return ResponseEntity.ok(new PageDTO<>(rides));
     }
 
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -99,9 +103,9 @@ public class RideController {
     }
 
     @GetMapping(value="/scheduledRides", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDTO>> scheduledRides(Authentication auth){
+    public ResponseEntity<Page<GetRideDTO>> scheduledRides(Authentication auth, Pageable pageable){
         Account acc = (Account) auth.getPrincipal();
-        Collection<GetRideDTO> scheduledRides = rideService.getScheduledRidesForDriver(acc.getUser().getId());
+        Page<GetRideDTO> scheduledRides = rideService.getScheduledRidesForDriver(acc.getUser().getId(), pageable);
         return ResponseEntity.ok(scheduledRides);
     }
 
