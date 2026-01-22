@@ -1,59 +1,61 @@
-<app-nav-bar></app-nav-bar>
+<div class="page-wrapper">
+  <app-nav-bar></app-nav-bar>
 
-<div class="date-container">
-  <mat-form-field>
-    <mat-label>From: </mat-label>
-    <input matInput [matDatepicker]="frompicker" (dateChange)="onFromDateChange($event)" />
-    <mat-datepicker-toggle matIconSuffix [for]="frompicker"></mat-datepicker-toggle>
-    <mat-datepicker #frompicker></mat-datepicker>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>To: </mat-label>
-    <input matInput [matDatepicker]="topicker" (dateChange)="onToDateChange($event)" />
-    <mat-datepicker-toggle matIconSuffix [for]="topicker"></mat-datepicker-toggle>
-    <mat-datepicker #topicker></mat-datepicker>
-  </mat-form-field>
-  @if (role == 'administrator') {
-    <select (change)="onSelectChange($event)">
-      <option value="" disabled selected hidden>Sort By</option>
-      <option value="price-asc">Price (ascending)</option>
-      <option value="price-desc">Price (descending)</option>
-      <option value="start-asc">Start (ascending)</option>
-      <option value="start-desc">Start (descending)</option>
-      <option value="end-asc">End (ascending)</option>
-      <option value="end-desc">End (descending)</option>
-    </select>
-  }
-</div>
+  <div class="date-container">
+    <mat-form-field>
+      <mat-label>From: </mat-label>
+      <input matInput [matDatepicker]="frompicker" (dateChange)="onFromDateChange($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="frompicker"></mat-datepicker-toggle>
+      <mat-datepicker #frompicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>To: </mat-label>
+      <input matInput [matDatepicker]="topicker" (dateChange)="onToDateChange($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="topicker"></mat-datepicker-toggle>
+      <mat-datepicker #topicker></mat-datepicker>
+    </mat-form-field>
+    @if (role == 'administrator') {
+      <select (change)="onSelectChange($event)">
+        <option value="" disabled selected hidden>Sort By</option>
+        <option value="price-asc">Price (ascending)</option>
+        <option value="price-desc">Price (descending)</option>
+        <option value="start-asc">Start (ascending)</option>
+        <option value="start-desc">Start (descending)</option>
+        <option value="end-asc">End (ascending)</option>
+        <option value="end-desc">End (descending)</option>
+      </select>
+    }
+  </div>
 
-<div class="container">
-  @for (ride of rides(); track ride.id) {
-    <div class="ride-card" (click)="openRideDialog(ride)">
-      <!-- <button class="fav-btn">❤️</button> -->
+  <div class="container" (scroll)="onScroll($event)">
+    @for (ride of rides(); track ride.id) {
+      <div class="ride-card" (click)="openRideDialog(ride)">
+        <!-- <button class="fav-btn">❤️</button> -->
 
-      <div class="locations">
-        <div class="location">
-          <span class="pin red"></span>
-          <input type="text" placeholder="{{ ride.startLocation }}" readonly />
+        <div class="locations">
+          <div class="location">
+            <span class="pin red"></span>
+            <input type="text" placeholder="{{ ride.startLocation }}" readonly />
+          </div>
+
+          <div class="location">
+            <span class="pin green"></span>
+            <input type="text" placeholder="{{ ride.endLocation }}" readonly />
+          </div>
         </div>
+        @if (role !== 'passenger') {
+          <div class="avatars">
+            <img *ngFor="let passenger of ride.passengers" [src]="passenger.image || 'pfp.png'" />
+          </div>
+        }
 
-        <div class="location">
-          <span class="pin green"></span>
-          <input type="text" placeholder="{{ ride.endLocation }}" readonly />
+        <div class="time">
+          <div class="time-box">{{ ride.startTime | date: 'dd/MM/yyyy' }}</div>
+          <div class="time-box">{{ ride.startTime | date: 'HH:mm' }}</div>
+          <div class="time-box">{{ ride.endTime | date: 'HH:mm' }}</div>
         </div>
+        <div class="price">{{ ride.price }} RSD</div>
       </div>
-      @if (role !== 'passenger') {
-        <div class="avatars">
-          <img *ngFor="let passenger of ride.passengers" [src]="passenger.image || 'pfp.png'" />
-        </div>
-      }
-
-      <div class="time">
-        <div class="time-box">{{ ride.startTime | date: 'dd/MM/yyyy' }}</div>
-        <div class="time-box">{{ ride.startTime | date: 'HH:mm' }}</div>
-        <div class="time-box">{{ ride.endTime | date: 'HH:mm' }}</div>
-      </div>
-      <div class="price">{{ ride.price }} RSD</div>
-    </div>
-  }
+    }
+  </div>
 </div>

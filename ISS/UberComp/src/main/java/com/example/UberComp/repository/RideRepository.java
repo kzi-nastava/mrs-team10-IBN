@@ -3,6 +3,9 @@ package com.example.UberComp.repository;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,16 +41,15 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     LEFT JOIN FETCH r.passengers
     WHERE r.driver.id = :driverId
 """)
-    List<Ride> getRidesDriver(@Param("driverId") Long driverId);
+    Page<Ride> getRidesDriver(@Param("driverId") Long driverId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"route", "route.stations", "passengers"})
     @Query("""
-        SELECT DISTINCT r FROM Ride r
-        JOIN FETCH r.passengers p
-        JOIN FETCH r.route rt
-        JOIN FETCH rt.stations
-        WHERE p.id = :userId
-        """)
-    List<Ride> getRidesPassenger(@Param("userId") Long userId);
+    SELECT r FROM Ride r
+    JOIN r.passengers p
+    WHERE p.id = :userId
+""")
+    Page<Ride> getRidesPassenger(@Param("userId") Long userId, Pageable pageable);
 
     Optional<Ride> findFirstByDriverAndStatusOrderByStartDesc(Driver driver, RideStatus status);
 

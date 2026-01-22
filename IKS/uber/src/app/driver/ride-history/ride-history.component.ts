@@ -32,23 +32,26 @@ import { CommonModule } from '@angular/common';
 })
 export class RideHistoryComponent {
   protected rides: Signal<Ride[]>;
-  protected user: User | null;
   protected fromDate: Date | null = null;
   protected toDate: Date | null = null;
   protected role: string | null;
 
   constructor(private rideService: RideService, private dialog: MatDialog, private authService: AuthService) {
     this.rides = computed(() => this.rideService.rides());
-    let logged = sessionStorage.getItem('loggedUser')
-    if (logged != null){
-      this.user = JSON.parse(logged) as User
-    } else {
-      this.user = null
-    }
     this.role = authService.role();
   }
 
+  onScroll(event: any) {
+    const element = event.target as HTMLElement;
+    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 500;
+    
+    if (atBottom) {
+      this.rideService.loadRides();
+    }
+  }
+
   onSelectChange(event: any){
+    this.rideService.resetRides();
     this.rides = computed(() => {
       const rides = this.rideService.rides();
       const criteria = event.target.value
@@ -65,6 +68,7 @@ export class RideHistoryComponent {
   }
 
   onFromDateChange(event: any){
+    this.rideService.resetRides();
     this.fromDate = event.target.value
     this.rides = computed(() => {
       const rides = this.rideService.rides();
@@ -78,6 +82,7 @@ export class RideHistoryComponent {
   }
 
   onToDateChange(event: any){
+    this.rideService.resetRides();
     this.toDate = event.target.value
     this.rides = computed(() => {
       const rides = this.rideService.rides();

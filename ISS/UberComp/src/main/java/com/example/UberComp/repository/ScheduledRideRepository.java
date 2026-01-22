@@ -3,6 +3,9 @@ package com.example.UberComp.repository;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.ScheduledRide;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,14 +29,27 @@ public interface ScheduledRideRepository extends JpaRepository<ScheduledRide, Lo
             @Param("end") LocalDateTime end
     );
 
-    @Query("""
-
-    SELECT DISTINCT r FROM ScheduledRide r
-    JOIN FETCH r.route rt
-    JOIN FETCH rt.stations
-    LEFT JOIN FETCH r.passengers
-    WHERE r.driver.id = :driverId
-    """)
-    List<ScheduledRide> getScheduledRidesForDriver(@Param("driverId") Long driverId);
+    @EntityGraph(attributePaths = {
+            "route",
+            "route.stations",
+            "passengers"
+    })
+    @Query(
+            value = """
+        SELECT r FROM ScheduledRide r
+        WHERE r.driver.id = :driverId
+        AND r.start > CURRENT_TIMESTAMP
+        ORDER BY r.start ASC
+    """,
+            countQuery = """
+        SELECT COUNT(r) FROM ScheduledRide r
+        WHERE r.driver.id = :driverId
+        AND r.start > CURRENT_TIMESTAMP
+    """
+    )
+    Page<ScheduledRide> getScheduledRidesForDriver(
+            @Param("driverId") Long driverId,
+            Pageable pageable
+    );
 
 }
