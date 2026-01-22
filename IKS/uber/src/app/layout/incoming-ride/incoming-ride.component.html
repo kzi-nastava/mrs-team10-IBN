@@ -2,26 +2,30 @@
 <div id="container">
   <h1>Incoming Ride</h1>
   <div id="places">
-    <mat-icon>place</mat-icon>
-    <p>Start Location: {{ route.at(0)?.address }}</p>
-    <br />
-    @for (station of route.slice(1, -1); track station) {
+    <div>
       <mat-icon>place</mat-icon>
-      <p>Station: {{ station.address }}</p>
-      <br />
+      <p>Start Location: {{ route.at(0)?.address }}</p>
+    </div>
+    @for (station of route.slice(1, -1); track station) {
+      <div>
+        <mat-icon>place</mat-icon>
+        <p>Station: {{ station.address }}</p>
+      </div>
     }
-    <mat-icon>place</mat-icon>
-    <p>Final Destination: {{ route.at(-1)?.address }}</p>
-    <br />
+    <div>
+      <mat-icon>place</mat-icon>
+      <p>Final Destination: {{ route.at(-1)?.address }}</p>
+    </div>
   </div>
-  <dialog #declineDialog>
+  <dialog animate.enter="enter-animation" animate.leave="leaving" #declineDialog>
     <h2>Reason for decline</h2>
-    <textarea placeholder="Enter your reason for declining this ride..."></textarea>
-    <button>Send</button>
+    <textarea placeholder="Enter your reason for declining this ride..." #reason></textarea>
+    <button class="form-button-one" (click)="declineRide(reason.value)">Send</button>
+    <button class="form-button-two" (click)="declineDialog.close()">Close</button>
   </dialog>
   <app-map [locations]="route"></app-map>
   <div>
-    <button id="accept" (click)="startRide()">Start</button>
-    <button (click)="declineDialog.show()">Decline</button>
+    <button class="form-button-one" (click)="startRide()">Start</button>
+    <button class="form-button-two" (click)="declineDialog.showModal()">Decline</button>
   </div>
 </div>

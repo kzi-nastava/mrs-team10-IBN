@@ -1,14 +1,15 @@
 div{
-    width:70%;
+    width:80%;
     margin: auto;
+    padding-bottom: 2px;
     align-items: center;
     text-align: center;
 }
 
 #places{
-    padding-left:30%;
-    text-align: left;
-    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 mat-icon, p{
@@ -36,14 +37,6 @@ h1{
     font-size: 60px;
 }
 
-#accept{
-    background-color: #A85F5F;
-}
-
-button{
-    background-color: #691D1D;
-}
-
 dialog, textarea{
     border-radius: 20px;
     border: none;
@@ -58,10 +51,25 @@ dialog{
     background-blend-mode: difference;
     width:40%;
     height: 40%;
+    animation: enter-animation 0.3s;
+}
+
+dialog::backdrop{
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: enter-animation 0.3s;
 }
 
 textarea{
-    width:60%;
+    width:70%;
     display:block;
     margin: auto;
+}
+
+@keyframes enter-animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

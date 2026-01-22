@@ -13,6 +13,7 @@ export interface Route {
 }
 
 export interface Ride {
+  status: 'Pending' | 'Ongoing' | 'CancelledByDriver' | 'CancelledByPassenger' | 'Panic' | 'Finished';
   id: number;
   startLocation: string;
   endLocation: string;
