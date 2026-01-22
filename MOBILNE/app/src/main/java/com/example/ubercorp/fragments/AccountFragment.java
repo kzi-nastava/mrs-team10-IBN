@@ -32,6 +32,7 @@ import androidx.navigation.Navigation;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.AccountDTO;
+import com.example.ubercorp.dto.ChangePasswordDTO;
 import com.example.ubercorp.dto.CreateUserDTO;
 import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.DriverDTO;
@@ -80,6 +81,8 @@ public class AccountFragment extends Fragment implements
     private TextInputEditText etFirstName, etLastName, etEmail, etAddress, etPhone;
     private ImageView ivProfilePic;
     private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
+    private TextInputEditText etCurrentPassword, etNewPassword, etConfirmPassword;
+    private TextView tvReq1, tvReq2, tvReq3;
 
     // Vehicle Edit
     private TextView tvVehicleModel, tvVehiclePlate;
@@ -174,6 +177,18 @@ public class AccountFragment extends Fragment implements
 
     @Override
     public void onProfileUpdateFailed(String error) {
+        Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPasswordChangeSuccess(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        clearPasswordFields();
+        hideChangePassword();
+    }
+
+    @Override
+    public void onPasswordChangeFailed(String error) {
         Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
     }
 
@@ -286,6 +301,12 @@ public class AccountFragment extends Fragment implements
         btnSendChanges = view.findViewById(R.id.btnSendChanges);
         btnSavePassword = view.findViewById(R.id.btnSavePassword);
         btnCancelPassword = view.findViewById(R.id.btnCancelPassword);
+        etCurrentPassword = view.findViewById(R.id.etCurrentPassword);
+        etNewPassword = view.findViewById(R.id.etNewPassword);
+        etConfirmPassword = view.findViewById(R.id.etConfirmPassword);
+        tvReq1 = view.findViewById(R.id.tvReq1);
+        tvReq2 = view.findViewById(R.id.tvReq2);
+        tvReq3 = view.findViewById(R.id.tvReq3);
 
         // Vehicle Edit
         tvVehicleModel = view.findViewById(R.id.etVehicleModel);
@@ -457,16 +478,57 @@ public class AccountFragment extends Fragment implements
 
     private void showChangePassword() {
         changePassword.setVisibility(View.VISIBLE);
-        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
     }
 
     private void hideChangePassword() {
         changePassword.setVisibility(View.GONE);
-        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
     }
 
     private void savePassword() {
-        hideChangePassword();
+        String currentPassword = etCurrentPassword.getText().toString().trim();
+        String newPassword = etNewPassword.getText().toString().trim();
+        String confirmPassword = etConfirmPassword.getText().toString().trim();
+
+        if (currentPassword.isEmpty()) {
+            Toast.makeText(getContext(), "Current password is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (newPassword.isEmpty()) {
+            Toast.makeText(getContext(), "New password is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (newPassword.length() < 8) {
+            Toast.makeText(getContext(), "Password must be at least 8 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!newPassword.matches(".*[A-Z].*")) {
+            Toast.makeText(getContext(), "Password must contain at least one uppercase letter", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!newPassword.matches(".*\\d.*")) {
+            Toast.makeText(getContext(), "Password must contain at least one number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ChangePasswordDTO changePasswordDTO = new ChangePasswordDTO(currentPassword, newPassword);
+        profileManager.changePassword(changePasswordDTO);
+    }
+
+    private void clearPasswordFields() {
+        if (etCurrentPassword != null) etCurrentPassword.setText("");
+        if (etNewPassword != null) etNewPassword.setText("");
+        if (etConfirmPassword != null) etConfirmPassword.setText("");
     }
 
     private void hideEditProfile() {

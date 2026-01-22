@@ -1,10 +1,12 @@
 package com.example.ubercorp.api;
 
+import com.example.ubercorp.dto.ChangePasswordDTO;
 import com.example.ubercorp.dto.CreateUserDTO;
 import com.example.ubercorp.dto.DriverChangeRequestDTO;
 import com.example.ubercorp.dto.GetProfileDTO;
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -31,4 +33,10 @@ public interface UserService {
 
     @POST("api/account/reject-change/{id}")
     Call<ResponseBody> rejectChange(@Header("Authorization") String authToken, @Path("id") Long id);
+
+    @PUT("api/account/me/change-password")
+    Call<ResponseBody> changePassword(
+            @Header("Authorization") String token,
+            @Body ChangePasswordDTO changePasswordDTO
+    );
 }

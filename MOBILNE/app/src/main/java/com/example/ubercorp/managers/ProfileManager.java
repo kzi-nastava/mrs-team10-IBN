@@ -9,6 +9,7 @@ import com.example.ubercorp.utils.JwtUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import java.util.Map;
 
 public class ProfileManager {
     private final Context context;
@@ -18,6 +19,8 @@ public class ProfileManager {
         void onProfileLoaded(CreateUserDTO user, AccountDTO account);
         void onProfileUpdateSuccess();
         void onProfileUpdateFailed(String error);
+        void onPasswordChangeSuccess(String message);
+        void onPasswordChangeFailed(String error);
     }
 
     public ProfileManager(Context context, ProfileUpdateListener listener) {
@@ -87,6 +90,69 @@ public class ProfileManager {
             @Override
             public void onFailure(Call<GetProfileDTO> call, Throwable t) {
                 listener.onProfileUpdateFailed(t.getMessage());
+            }
+        });
+    }
+
+    public void changePassword(ChangePasswordDTO changePasswordDTO) {
+        String token = getToken();
+        if (token == null) {
+            listener.onPasswordChangeFailed("No auth token");
+            return;
+        }
+
+        UserService userApi = ApiClient.getInstance().createService(UserService.class);
+        Call<okhttp3.ResponseBody> call = userApi.changePassword("Bearer " + token, changePasswordDTO);
+
+        call.enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, retrofit2.Response<okhttp3.ResponseBody> response) {
+                android.util.Log.d("ProfileManager", "Response code: " + response.code());
+
+                if (response.isSuccessful()) {
+                    String message = "Password changed successfully";
+
+                    try {
+                        if (response.body() != null) {
+                            String responseString = response.body().string();
+                            android.util.Log.d("ProfileManager", "Response body: " + responseString);
+
+                            if (!responseString.isEmpty()) {
+                                try {
+                                    org.json.JSONObject jsonObject = new org.json.JSONObject(responseString);
+                                    if (jsonObject.has("message")) {
+                                        message = jsonObject.getString("message");
+                                    }
+                                } catch (org.json.JSONException e) {
+                                    android.util.Log.e("ProfileManager", "Error parsing JSON: " + e.getMessage());
+                                    message = responseString;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        android.util.Log.d("ProfileManager", "No body or error reading body: " + e.getMessage());
+                    }
+
+                    android.util.Log.d("ProfileManager", "Success: " + message);
+                    listener.onPasswordChangeSuccess(message);
+                } else {
+                    String errorMsg = "Failed to change password";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg = response.errorBody().string();
+                            android.util.Log.e("ProfileManager", "Error body: " + errorMsg);
+                        }
+                    } catch (Exception e) {
+                        android.util.Log.e("ProfileManager", "Error reading error body", e);
+                    }
+                    listener.onPasswordChangeFailed(errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                android.util.Log.e("ProfileManager", "Network error: " + t.getMessage(), t);
+                listener.onPasswordChangeFailed(t.getMessage());
             }
         });
     }
