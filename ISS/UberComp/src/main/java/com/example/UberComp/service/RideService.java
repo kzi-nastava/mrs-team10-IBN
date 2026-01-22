@@ -12,6 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -63,19 +66,17 @@ public class RideService {
         return newRide;
     }
 
-    public Collection<GetRideDTO> getRidesDriver(Long driverId){
-        return rideRepository.getRidesDriver(driverId)
-                .stream()
-                .map(GetRideDTO::new)
-                .toList();
+    public Page<GetRideDTO> getRidesDriver(Long driverId, Pageable pageable){
+        return rideRepository
+                .getRidesDriver(driverId, pageable)
+                .map(GetRideDTO::new);
     }
 
-    public Collection<GetRideDTO> getRidesPassenger(Long passengerId){
-        return rideRepository.getRidesPassenger(passengerId)
-                .stream()
-                .map(GetRideDTO::new)
-                .toList();
+    public Page<GetRideDTO> getRidesPassenger(Long passengerId, Pageable pageable){
+        Page<Ride> ridesPage = rideRepository.getRidesPassenger(passengerId, pageable);
+        return new PageImpl<>(ridesPage.getContent().stream().map(GetRideDTO::new).toList(), pageable, ridesPage.getTotalElements());
     }
+
     @Transactional(readOnly = true)
     public GetRideDetailsDTO getRide(Long rideId){
         Ride ride = rideRepository.getRideWithRoute(rideId);
@@ -112,17 +113,10 @@ public class RideService {
         return new GetVehiclePositionDTO();
     }
 
-    public Collection<GetRideDTO> getScheduledRidesForDriver(Long id){
-        List<ScheduledRide> scheduledRides = scheduledRideRepository.getScheduledRidesForDriver(id);
-        ArrayList<ScheduledRide> futureScheduledRides = new ArrayList<>();
-        for (ScheduledRide ride: scheduledRides){
-            if (ride.getStart().isAfter(LocalDateTime.now()))
-                futureScheduledRides.add(ride);
-        }
-        return futureScheduledRides
-                .stream()
-                .map(GetRideDTO::new)
-                .toList();
+    public Page<GetRideDTO> getScheduledRidesForDriver(Long id, Pageable pageable){
+        Page<ScheduledRide> scheduledRides = scheduledRideRepository.getScheduledRidesForDriver(id, pageable);
+        return new PageImpl<>(scheduledRides.stream().map(GetRideDTO::new).toList(), pageable, scheduledRides.getTotalElements());
+
     }
 
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
