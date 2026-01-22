@@ -42,7 +42,7 @@ public class Coordinate {
     }
 
     public Coordinate(GetCoordinateDTO coord) {
-        this.id = coord.getId();
+        this.id = null;
         this.cachedAt = coord.getCachedAt();
         this.lat = coord.getLat();
         this.lon = coord.getLon();
