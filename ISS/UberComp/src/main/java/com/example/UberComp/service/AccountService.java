@@ -343,13 +343,7 @@ public class AccountService implements UserDetailsService {
         Map<String, String> finalOld = new HashMap<>();
         Map<String, String> finalNew = new HashMap<>();
 
-        if (hasVehicleChanges && hasProfileChanges) {
-            type = "both";
-            finalOld.putAll(vOld);
-            finalOld.putAll(pOld);
-            finalNew.putAll(vNew);
-            finalNew.putAll(pNew);
-        } else if (hasVehicleChanges) {
+        if (hasVehicleChanges) {
             type = "vehicle";
             finalOld = vOld;
             finalNew = vNew;

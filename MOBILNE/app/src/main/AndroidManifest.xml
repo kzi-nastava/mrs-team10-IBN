@@ -23,7 +23,7 @@
         tools:replace="android:allowBackup">
         <activity
             android:name=".activities.LauncherActivity"
-            android:exported="false" >
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

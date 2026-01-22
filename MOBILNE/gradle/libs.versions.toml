@@ -15,9 +15,11 @@ okhttp = "4.9.3"
 osmdroidAndroid = "6.1.14"
 gson = "2.10.1"
 secretsGradlePlugin = "2.0.1"
+retrofit = "3.0.0"
 
 
 [libraries]
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -35,6 +37,7 @@ osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref
 osmdroid-wms = { module = "org.osmdroid:osmdroid-wms", version.ref = "osmdroidAndroid" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 

@@ -7,30 +7,30 @@
     android:orientation="vertical"
     android:layout_marginBottom="16dp">
 
-    <!-- Change Label -->
+    <!-- Label -->
     <TextView
-        android:id="@+id/tvChangeLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Field Name:"
+        android:text="Profile Image:"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#212121"
         android:layout_marginBottom="8dp"/>
 
-    <!-- Comparison Container -->
+    <!-- Images Comparison -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <!-- Old Value -->
+        <!-- Old Image -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -38,25 +38,23 @@
                 android:text="Old:"
                 android:textSize="12sp"
                 android:textColor="#999999"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFF3E0">
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFF3E0"
+                app:strokeColor="#E65100"
+                app:strokeWidth="2dp">
 
-                <TextView
-                    android:id="@+id/tvOldValue"
+                <ImageView
+                    android:id="@+id/ivOldImage"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:padding="8dp"
-                    android:gravity="center_vertical"
-                    android:text="Old Value"
-                    android:textColor="#E65100"
-                    android:textSize="14sp" />
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_account"/>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
@@ -65,18 +63,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="→"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textColor="#666666"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginTop="20dp"/>
 
-        <!-- New Value -->
+        <!-- New Image -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -84,25 +83,23 @@
                 android:text="New:"
                 android:textSize="12sp"
                 android:textColor="#999999"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#E8F5E9">
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#E8F5E9"
+                app:strokeColor="#2E7D32"
+                app:strokeWidth="2dp">
 
-                <TextView
-                    android:id="@+id/tvNewValue"
+                <ImageView
+                    android:id="@+id/ivNewImage"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:padding="8dp"
-                    android:gravity="center_vertical"
-                    android:text="New Value"
-                    android:textColor="#2E7D32"
-                    android:textSize="14sp" />
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_account"/>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </LinearLayout>
