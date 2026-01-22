@@ -5,7 +5,7 @@ import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { RideApproxFormComponent } from '../../forms/ride-approx-form/ride-approx-form.component';
 import { Location } from '../../model/location.model';
 import { AuthService } from '../../service/auth.service';
-import { RideService } from '../../service/ride-history.service';
+import { CoordinateDTO, RideService } from '../../service/ride-history.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -35,7 +35,7 @@ export class HomeComponent {
     this.estimatedTimeOutput = eventData;
   }
 
-  onLocationAdded(address: string) {
+  onLocationAdded(address: CoordinateDTO) {
     this.rideForm.addLocationFromMap(address);
   }
 

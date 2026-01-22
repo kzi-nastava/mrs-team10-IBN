@@ -33,11 +33,19 @@ export interface VehicleLocationDTO {
   address?: string;
 }
 
+export interface CoordinateDTO {
+  id?: number | null;
+  lat: number;
+  lon: number;
+  address: string;
+  cachedAt?: string | null;
+}
+
 export interface CreateRideDTO {
-  startAddress: string;
-  destinationAddress: string;
+  startAddress: CoordinateDTO;
+  destinationAddress: CoordinateDTO;
   distance: number;
-  stops: string[];
+  stops: CoordinateDTO[];
   passengerEmails: string[];
   vehicleType: string;
   babySeat: boolean;

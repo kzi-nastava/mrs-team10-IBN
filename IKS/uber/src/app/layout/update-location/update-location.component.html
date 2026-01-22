@@ -1,0 +1,36 @@
+<div class="dialog-overlay" (click)="cancel()">
+  <div class="dialog-container" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h1>Update Location</h1>
+      <button class="close-btn" type="button" (click)="cancel()">x</button>
+    </div>
+    <div class="dialog-content">
+      <input
+        type="text"
+        [(ngModel)]="address"
+        placeholder="Enter address or click on map"
+        class="address-input"
+      />
+
+      <div class="map-container">
+        <app-map
+          [interactive]="true"
+          [showRemoveButton]="false"
+          (locationAdded)="onLocationSelected($event)"
+        >
+        </app-map>
+      </div>
+
+      <p>Select your location on the map or type your address</p>
+
+      <button
+        class="form-button-one"
+        type="button"
+        (click)="updateLocation()"
+        [disabled]="!address"
+      >
+        {{ isLoading ? 'Updating...' : 'Update Location' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -90,4 +90,20 @@ public class DriverController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PutMapping("/me/update-location")
+    public ResponseEntity<Void> updateLocation(
+            Authentication auth,
+            @RequestBody String address) {
+        try {
+            Account account = (Account) auth.getPrincipal();
+            Long userId = account.getUser().getId();
+            driverService.updateDriverLocation(userId, address);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
 }

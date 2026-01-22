@@ -31,18 +31,22 @@
     }
 
     <div class="dialog-footer">
-      <button
-        class="favorite-btn"
-        [class.is-favorite]="isFavorite$ | async"
-        (click)="toggleFavorite()"
-      >
-        <span class="heart-icon">{{ (isFavorite$ | async) ? '❤️' : '' }}</span>
-        {{ (isFavorite$ | async) ? 'In Favorites' : 'Add to Favorites' }}
-      </button>
+      @if (role === 'passenger') {
+        <button
+          class="favorite-btn"
+          [class.is-favorite]="isFavorite$ | async"
+          (click)="toggleFavorite()"
+        >
+          <span class="heart-icon">{{ (isFavorite$ | async) ? '❤️' : '' }}</span>
+          {{ (isFavorite$ | async) ? 'In Favorites' : 'Add to Favorites' }}
+        </button>
+      }
 
       <span class="price">{{ ride.price }} RSD</span>
 
-      <button class="order-btn">Order</button>
+      @if (role === 'passenger') {
+        <button class="order-btn">Order</button>
+      }
 
       @if (role == 'passenger') {
         <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>

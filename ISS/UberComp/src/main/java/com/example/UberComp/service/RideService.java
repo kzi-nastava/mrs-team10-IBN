@@ -48,6 +48,8 @@ public class RideService {
     private PanicSignalRepository panicSignalRepository;
     @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
+    @Autowired
+    private DriverService driverService;
 
     public IncomingRideDTO getIncomingRide(){
         IncomingRideDTO newRide = new IncomingRideDTO();
@@ -55,9 +57,9 @@ public class RideService {
         Route route = new Route();
         route.setId(1L);
         ArrayList<Coordinate> coordinates = new ArrayList<>();
-        coordinates.add(new Coordinate(1L, 45.2633078, 19.8311535, "Bulevar oslobođenja 7"));
-        coordinates.add(new Coordinate(2L, 45.240657, 19.812193, "Bulevar Patrijarha Pavla 60"));
-        coordinates.add(new Coordinate(3L, 45.2626426, 19.8150372, "Kornelija Stankovića 15"));
+        coordinates.add(new Coordinate(1L, 45.2633078, 19.8311535, "Bulevar oslobođenja 7", LocalDateTime.now()));
+        coordinates.add(new Coordinate(2L, 45.240657, 19.812193, "Bulevar Patrijarha Pavla 60", LocalDateTime.now()));
+        coordinates.add(new Coordinate(3L, 45.2626426, 19.8150372, "Kornelija Stankovića 15", LocalDateTime.now()));
         route.setStations(coordinates);
         newRide.setRoute(route);
         return newRide;
@@ -237,26 +239,26 @@ public class RideService {
         Route route = new Route();
         List<Coordinate> stations = new ArrayList<>();
 
-        Coordinate startCoord = new Coordinate();
-        startCoord.setAddress(dto.getStartAddress());
-        startCoord = coordinateRepository.save(startCoord);
-        stations.add(startCoord);
+        Optional<Coordinate> coord = coordinateRepository.findByAddress(dto.getStartAddress().getAddress());
+        if (coord.isEmpty())
+            coordinateRepository.save(new Coordinate(dto.getStartAddress()));
+        else stations.add(coord.get());
 
         if (dto.getStops() != null && !dto.getStops().isEmpty()) {
-            for (String stopAddress : dto.getStops()) {
-                if (stopAddress != null && !stopAddress.trim().isEmpty()) {
-                    Coordinate stopCoord = new Coordinate();
-                    stopCoord.setAddress(stopAddress);
-                    stopCoord = coordinateRepository.save(stopCoord);
-                    stations.add(stopCoord);
+            for (GetCoordinateDTO stopAddress : dto.getStops()) {
+                if (stopAddress != null) {
+                    coord = coordinateRepository.findByAddress(stopAddress.getAddress());
+                    if (coord.isEmpty())
+                        coordinateRepository.save(new Coordinate(stopAddress));
+                    else stations.add(coord.get());
                 }
             }
         }
 
-        Coordinate destCoord = new Coordinate();
-        destCoord.setAddress(dto.getDestinationAddress());
-        destCoord = coordinateRepository.save(destCoord);
-        stations.add(destCoord);
+        coord = coordinateRepository.findByAddress(dto.getDestinationAddress().getAddress());
+        if (coord.isEmpty())
+            coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
+        else stations.add(coord.get());
 
         route.setStations(stations);
         route = routeRepository.save(route);

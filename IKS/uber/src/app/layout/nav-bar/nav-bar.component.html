@@ -1,11 +1,29 @@
 <div class="top">
   <button mat-icon-button (click)="drawer.toggle()" [style.display]="loggedIn ? 'inline' : 'none'">
-      <mat-icon style="color: antiquewhite; ">menu</mat-icon>
+    <mat-icon style="color: antiquewhite">menu</mat-icon>
   </button>
-  <img class="nav-logo" src="logo.svg" [routerLink] ="[ '/home']"/>
-  <button class="form-button-one" [style.display]="!loggedIn ? 'inline' : 'none'" [routerLink] ="[ '/login']">Login</button>
-  <button class="form-button-two" [style.display]="!loggedIn ? 'inline' : 'none'" [routerLink] ="[ '/register']">Register</button>
+  <img class="nav-logo" src="logo.svg" [routerLink]="['/home']" />
+  <button
+    class="form-button-one"
+    [style.display]="!loggedIn ? 'inline' : 'none'"
+    [routerLink]="['/login']"
+  >
+    Login
+  </button>
+  <button
+    class="form-button-two"
+    [style.display]="!loggedIn ? 'inline' : 'none'"
+    [routerLink]="['/register']"
+  >
+    Register
+  </button>
   <span class="example-spacer"></span>
+
+  @if (isDriver) {
+    <button mat-icon-button (click)="openLocationUpdate()" matTooltip="Update your location">
+      <mat-icon style="color: antiquewhite">my_location</mat-icon>
+    </button>
+  }
 
   <div class="notification">
     <mat-icon>notifications</mat-icon>
@@ -46,7 +64,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="content">
-<!--
+    <!--
     <mat-toolbar color="primary">
 
       <button mat-icon-button (click)="drawer.toggle()">
