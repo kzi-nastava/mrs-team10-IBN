@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { Router, RouterModule } from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,8 +30,17 @@ export class NavBarComponent {
       const role = this.authService.role();
       this.isDriver = role === 'DRIVER' || role === 'driver';
     }
+  router: Router;
+  constructor(authService: AuthService, router: Router){
+    this.loggedIn = authService.isLoggedIn()
+    this.router = router
   }
   openLocationUpdate() {
     const dialogRef = this.dialog.open(UpdateLocationComponent);
+  }
+
+  logout(){
+    localStorage.clear();
+    this.router.navigate(["/home"]);
   }
 }

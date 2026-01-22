@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { HttpHeaders } from '@angular/common/http';
 import { AuthGuard } from '../auth/auth-guard';
 import { AuthService } from './auth.service';
+import { PageResponse } from '../model/page-response.model';
 
 export interface RideOrderResponseDTO {
   rideId: number;
@@ -75,19 +76,21 @@ export class RideService {
   private authService = inject(AuthService);
   private role = this.authService.role();
 
+  ridesPage = 0;
+  scheduledPage = 0;
+  pageSize = 5;
+
+  loadingRides = false;
+  hasMoreRides = true;
+
+  loadingScheduled = false;
+  hasMoreScheduled = true;
+
+
   constructor(private http: HttpClient) {
     this.loadRides();
     this.loadScheduledRides();
   }
-
-  // private getAuthHeaders() {
-  //   const token = localStorage.getItem('authToken');
-  //   return {
-  //     headers: new HttpHeaders({
-  //       Authorization: `Bearer ${token}`,
-  //     }),
-  //   };
-  // }
 
   private _rides = signal<Ride[]>([]);
   rides = this._rides.asReadonly();
@@ -96,23 +99,63 @@ export class RideService {
   scheduled_rides = this._scheduled_rides.asReadonly();
 
   loadRides() {
-    if (this.role == 'driver')
-      this.http
-        .get<Ride[]>(`${environment.apiHost}/rides/driver`)
-        .subscribe((rides) => this._rides.set(rides));
-    else if (this.role == 'passenger')
-      this.http
-        .get<Ride[]>(`${environment.apiHost}/rides/passenger`)
-        .subscribe((rides) => this._rides.set(rides));
+    if (this.loadingRides || !this.hasMoreRides) return;
+    this.loadingRides = true;
+
+    const url =
+      this.role === 'driver'
+        ? `${environment.apiHost}/rides/driver`
+        : `${environment.apiHost}/rides/passenger`;
+
+    this.http
+      .get<PageResponse<Ride>>(url, {
+        params: {
+          page: this.ridesPage,
+          size: this.pageSize,
+        },
+      })
+      .subscribe((res) => {
+        const current = this._rides();
+        this._rides.set([...current, ...res.content]);
+        this.ridesPage++;
+        this.hasMoreRides = this.ridesPage < res.totalPages;
+        this.loadingRides = false;
+      });
   }
 
   loadScheduledRides() {
+    if (this.loadingScheduled || !this.hasMoreScheduled) return;
+
+    this.loadingScheduled = true;
+
     this.http
-      .get<Ride[]>(`${environment.apiHost}/rides/scheduledRides`)
-      .subscribe((scheduled_rides) => {
-        this._scheduled_rides.set(scheduled_rides);
-        console.log(this.scheduled_rides());
+      .get<PageResponse<Ride>>(`${environment.apiHost}/rides/scheduledRides`, {
+        params: {
+          page: this.scheduledPage,
+          size: this.pageSize,
+        },
+      })
+      .subscribe((res) => {
+        const current = this._scheduled_rides();
+        this._scheduled_rides.set([...current, ...res.content]);
+        this.scheduledPage++;
+        this.hasMoreScheduled = this.scheduledPage < res.totalPages;
+        this.loadingScheduled = false;
       });
+  }
+
+  resetRides() {
+    this.ridesPage = 0;
+    this.hasMoreRides = true;
+    this.loadingRides = false;
+    this._rides.set([]);
+  }
+
+  resetScheduledRides() {
+    this.scheduledPage = 0;
+    this.hasMoreScheduled = true;
+    this.loadingScheduled = false;
+    this._scheduled_rides.set([]);
   }
 
   loadRideDetails(rideId: number): Observable<Ride> {

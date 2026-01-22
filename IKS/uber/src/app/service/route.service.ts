@@ -15,6 +15,10 @@ export class RouteService {
     return this.http.get<RidePayload>(`${environment.apiHost}/rides/incoming`);
   }
 
+  getOngoingRide(id: string){
+    return this.http.get<RidePayload>(`${environment.apiHost}/rides/${id}`)
+  }
+
   finishRide(id: number, time: string) {
     return this.http.post(`${environment.apiHost}/rides/finish/${id}`, { isotime: time });
   }
@@ -25,28 +29,35 @@ export class RouteService {
     });
   }
 
-  stopRide(id: number, passed: number, time: string, location: TrackingData) {
+  cancelRide(ride: RideCancellation) {
+    return this.http.put(`${environment.apiHost}/rides/cancel`, ride)
+  }
+
+  stopRide(id: number, passed: number, time: string, location: TrackingData, distance: number) {
     const body = {
-      id: id,
-      passed: passed,
-      lat: location.lat,
-      lon: location.lon,
-      address: location.address,
-      finishTime: time,
-    };
-    return this.http.post(`${environment.apiHost}/rides/stop`, body);
+      "id":id,
+      "passed":passed,
+      "lat": location.lat,
+      "lon": location.lon,
+      "address":location.address,
+      "distance": distance,
+      "finishTime":time
+    }
+    return this.http.put(`${environment.apiHost}/rides/stop`, body)
   }
 
   panic(id: number, passed: number, time: string, location: TrackingData) {
     const body = {
-      id: id,
-      passed: passed,
-      lat: location.lat,
-      lon: location.lon,
-      address: location.address,
-      finishTime: time,
-    };
-    return this.http.post(`${environment.apiHost}/rides/panic`, body);
+      "id":id,
+      "passed":passed,
+      "lat": location.lat,
+      "lon": location.lon,
+      "address":location.address,
+      "distance":0,
+      "finishTime":time
+    }
+    console.log(body)
+    return this.http.put(`${environment.apiHost}/rides/panic`, body)
   }
 
   // route: Location[] = [
@@ -70,4 +81,10 @@ export interface RidePayload {
   route: Route;
   startTime?: Date;
   endTime?: Date;
+}
+
+export interface RideCancellation{
+  id: number;
+  cancellationReason: string;
+  cancelledByDriver: boolean;
 }

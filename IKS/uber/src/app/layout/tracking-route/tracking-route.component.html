@@ -2,14 +2,21 @@
 <div id="container">
   <h1>Tracking Route</h1>
   <p class="subtitle">{{ subtitleText }}</p>
-  <!-- <app-tracking-map [stations]="route", (estimatedTime)="setTimeEvent($event)" (passingOutput)="passStationEvent($event)" (currentLocation)="getLocationEvent($event)"></app-tracking-map>-->
-  <app-tracking-map
+  <app-tracking-map 
+  [stations]="route"
+  [rideId]="this.rideId" 
+  (estimatedTime)="setTimeEvent($event)" 
+  (passingOutput)="passStationEvent($event)" 
+  (currentLocation)="getLocationEvent($event)"
+  (stateChange)="stateChangeEvent($event)"
+  (distanceOutput)="getDistanceEvent($event)"></app-tracking-map>
+  <!-- <app-tracking-map
   [stations]="route"
   (estimatedTime)="setTimeEvent($event)">
-  </app-tracking-map>
+  </app-tracking-map> -->
   @if(role == 'driver'){
     <div>
-      <button (click)="changeState()">{{ firstButtonText }}</button>
+      <button (click)="changeState()">Finish</button>
       <button id="panic" (click)="showPanicWarning()" (dblclick)="panic()">PANIC</button>
       <p class="errormsg" [style.display]="panicWarningDisplay ? 'block' : 'none'">Double click to broadcast a panic signal!</p>
     </div>

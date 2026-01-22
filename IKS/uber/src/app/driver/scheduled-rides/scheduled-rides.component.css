@@ -12,11 +12,40 @@ mat-form-field input {
   border-radius: 1rem;
 }
 
+body, html {
+  overflow: hidden !important;
+  height: 100vh;
+  margin: 0;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 97vh;
+  overflow: hidden;
+}
+
+div.date-container {
+  flex-shrink: 0; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5vh;
+  gap: 5%;
+  z-index: 1;
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .container {
+  flex: 1; 
+  overflow-y: auto; 
+  overflow-x: hidden;
+  
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 4rem;              
-  padding: 4rem 4rem 4rem 2rem;
+  padding: 2rem 4rem 4rem 2rem;
   box-sizing: border-box;
 }
 

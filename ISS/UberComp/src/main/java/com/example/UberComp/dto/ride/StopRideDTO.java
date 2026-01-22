@@ -12,6 +12,7 @@ public class StopRideDTO {
     private int passed;
     private double lat;
     private double lon;
+    private double distance;
     private String address;
     private String finishTime;
 }
