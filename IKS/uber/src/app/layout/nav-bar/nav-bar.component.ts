@@ -3,7 +3,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import {Router, RouterModule} from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import { AuthService } from '../../service/auth.service';
 
 
@@ -18,7 +18,14 @@ import { AuthService } from '../../service/auth.service';
 })
 export class NavBarComponent {
   loggedIn: boolean;
-  constructor(authService: AuthService){
+  router: Router;
+  constructor(authService: AuthService, router: Router){
     this.loggedIn = authService.isLoggedIn()
+    this.router = router
+  }
+
+  logout(){
+    localStorage.clear();
+    this.router.navigate(["/home"]);
   }
 }

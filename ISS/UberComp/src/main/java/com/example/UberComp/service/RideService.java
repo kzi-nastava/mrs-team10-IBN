@@ -49,17 +49,11 @@ public class RideService {
     @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
 
-    public IncomingRideDTO getIncomingRide(){
-        IncomingRideDTO newRide = new IncomingRideDTO();
-        newRide.setId(0L);
-        Route route = new Route();
-        route.setId(1L);
-        ArrayList<Coordinate> coordinates = new ArrayList<>();
-        coordinates.add(new Coordinate(1L, 45.2633078, 19.8311535, "Bulevar oslobođenja 7"));
-        coordinates.add(new Coordinate(2L, 45.240657, 19.812193, "Bulevar Patrijarha Pavla 60"));
-        coordinates.add(new Coordinate(3L, 45.2626426, 19.8150372, "Kornelija Stankovića 15"));
-        route.setStations(coordinates);
-        newRide.setRoute(route);
+    @Transactional
+    public IncomingRideDTO getIncomingRide(Driver driver){
+        Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(driver, RideStatus.Pending);
+        if(rideOptional.isEmpty()) return null;
+        IncomingRideDTO newRide = new IncomingRideDTO(rideOptional.get());
         return newRide;
     }
 
@@ -138,6 +132,7 @@ public class RideService {
 
     public FinishedRideDTO stopRide(StopRideDTO stopRideDTO, boolean panic) {
         Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow();
+        Route stoppedRoute = ride.getRoute();
         Coordinate newCoordinate = new Coordinate();
         newCoordinate.setLat(stopRideDTO.getLat());
         newCoordinate.setLon(stopRideDTO.getLon());
@@ -145,23 +140,26 @@ public class RideService {
         Coordinate savedCoord = coordinateRepository.save(newCoordinate);
         List<Coordinate> newStations = ride.getRoute().getStations().subList(0, stopRideDTO.getPassed());
         newStations.add(savedCoord);
-        Route newRoute = new Route();
-        newRoute.setStations(newStations);
-        Route savedRoute = routeRepository.save(newRoute);
-        ride.setRoute(savedRoute);
-        ride.setFinish(LocalDateTime.parse(stopRideDTO.getFinishTime()));
+        stoppedRoute.setStations(newStations);
+        routeRepository.save(stoppedRoute);
+        Instant instant = Instant.parse(stopRideDTO.getFinishTime());
+        ride.setFinish(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
         Driver driver = ride.getDriver();
         if(panic) {
             PanicSignal panicSignal = new PanicSignal();
             panicSignal.setRide(ride);
             panicSignalRepository.save(panicSignal);
             ride.setStatus(RideStatus.Panic);
+            ride.setPrice(0.0);
             driver.setStatus(DriverStatus.PANIC);
         }
         else {
+            double newPrice = calculatePrice(stopRideDTO.getId(), stopRideDTO.getDistance()).getPrice();
+            ride.setPrice(newPrice);
             ride.setStatus(RideStatus.Finished);
             driver.setStatus(DriverStatus.ONLINE);
         }
+
         rideRepository.save(ride);
         driverRepository.save(driver);
         return new FinishedRideDTO(ride);
@@ -174,6 +172,13 @@ public class RideService {
         started.setStart(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
         rideRepository.save(started);
         return new StartedRideDTO(started.getId(), started.getStart());
+    }
+
+    public PriceDTO calculatePrice(Long rideId, double distance){
+        Ride ride = rideRepository.findById(rideId).get();
+        double basePrice = ride.getDriver().getVehicle().getVehicleType().getPrice();
+        double totalPrice = basePrice + distance * 120;
+        return new PriceDTO(totalPrice);
     }
 
     public PriceDTO calculatePrice(CreateRideDTO dto) {
@@ -384,5 +389,22 @@ public class RideService {
 
     public boolean hasOngoingRide(Long userId) {
         return rideRepository.existsByPassengerIdAndStatus(userId, RideStatus.Ongoing);
+    }
+
+    public boolean cancelRide(CancelRideDTO cancelled){
+        Optional<Ride> rideOptional = rideRepository.findById(cancelled.getId());
+        if(rideOptional.isEmpty()) return false;
+        Ride cancelledRide = rideOptional.get();
+        Driver driver = cancelledRide.getDriver();
+        driver.setStatus(DriverStatus.ONLINE);
+        if(cancelled.isCancelledByDriver()){
+            cancelledRide.setStatus(RideStatus.CancelledByDriver);
+            cancelledRide.setCancellationReason(cancelled.getCancellationReason());
+        } else {
+            cancelledRide.setStatus(RideStatus.CancelledByPassenger);
+        }
+        driverRepository.save(driver);
+        rideRepository.save(cancelledRide);
+        return true;
     }
 }

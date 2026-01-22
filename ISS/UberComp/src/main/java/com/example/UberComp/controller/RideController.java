@@ -13,6 +13,7 @@ import com.example.UberComp.model.Ride;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -69,9 +70,11 @@ public class RideController {
     }
 
     @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<IncomingRideDTO> getIncomingRide(){
-        IncomingRideDTO ride = rideService.getIncomingRide();
-        if(ride == null) return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.NO_CONTENT);
+    public ResponseEntity<IncomingRideDTO> getIncomingRide(Authentication auth){
+        Account account = (Account) auth.getPrincipal();
+        Driver driver = (Driver) account.getUser();
+        IncomingRideDTO ride = rideService.getIncomingRide(driver);
+        if(ride == null) return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.NOT_FOUND);
         return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.OK);
     }
 
@@ -204,10 +207,19 @@ public class RideController {
         Account account = (Account) auth.getPrincipal();
         boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
         return ResponseEntity.ok(hasRide);
-      
-    @PostMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    }
+
+    @PutMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> panic(@RequestBody StopRideDTO panic) {
         FinishedRideDTO panicked = rideService.stopRide(panic, true);
         return new ResponseEntity<>(panicked, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/cancel", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> cancelRide(@RequestBody CancelRideDTO cancelRideDTO){
+        if(rideService.cancelRide(cancelRideDTO)){
+            return ResponseEntity.ok(null);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 }
