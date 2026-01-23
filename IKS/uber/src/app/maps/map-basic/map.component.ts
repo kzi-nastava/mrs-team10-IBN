@@ -6,6 +6,7 @@ import {
   SimpleChanges,
   Output,
   EventEmitter,
+  OnDestroy,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { Observable } from 'rxjs';
@@ -29,7 +30,7 @@ interface RoutingOptionsWithMarker extends L.Routing.RoutingControlOptions {
   templateUrl: '../map-home/map.component.html',
   styleUrl: '../map-home/map.component.css',
 })
-export class MapComponent implements AfterViewInit, OnChanges {
+export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() showRemoveButton!: boolean;
   @Input() locations: Location[] = [];
   @Input() stations: Station[] = [];
@@ -92,35 +93,55 @@ export class MapComponent implements AfterViewInit, OnChanges {
       iconAnchor: [15, 15],
     });
 
-    this.initMap();
-    if (this.interactive) this.registerOnClick();
-
-    if (this.locations && this.locations.length > 0) {
-      this.updateLocationsFromInput();
-    }
-
     setTimeout(() => {
-      this.map.invalidateSize();
+      this.initMap();
+      if (this.interactive) this.registerOnClick();
 
-      if (this.stations && this.stations.length > 0) {
-        console.log('Loading stations in ngAfterViewInit:', this.stations);
-        this.loadFromStations();
-      } else if (this.locations && this.locations.length > 0) {
+      if (this.locations && this.locations.length > 0) {
         this.updateLocationsFromInput();
       }
-    }, 100);
+
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+
+          if (this.stations && this.stations.length > 0) {
+            console.log('Loading stations in ngAfterViewInit:', this.stations);
+            this.loadFromStations();
+          } else if (this.locations && this.locations.length > 0) {
+            this.updateLocationsFromInput();
+          }
+        }
+      }, 100);
+    }, 0);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
-      this.updateLocationsFromInput();
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.off();
+      this.map.remove();
     }
-    if (changes['stations'] && this.map && this.stations.length > 0) {
-      this.loadFromStations();
+
+    if (this.routeControl) {
+      this.routeControl.getPlan().setWaypoints([]);
+      this.routeControl = undefined;
     }
+
+    this.points.forEach((p) => {
+      if (p.marker) {
+        p.marker.off();
+        p.marker.remove();
+      }
+    });
+    this.points = [];
   }
 
   private initMap(): void {
+    const container = L.DomUtil.get('map');
+    if (container != null) {
+      (container as any)._leaflet_id = null;
+    }
+
     this.map = L.map('map', {
       center: [45.242, 19.8227],
       zoom: 12.75,
@@ -138,6 +159,15 @@ export class MapComponent implements AfterViewInit, OnChanges {
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['locations'] && this.map && !this.isUpdatingFromParent) {
+      this.updateLocationsFromInput();
+    }
+    if (changes['stations'] && this.map && this.stations.length > 0) {
+      this.loadFromStations();
+    }
   }
 
   private async updateLocationsFromInput(): Promise<void> {

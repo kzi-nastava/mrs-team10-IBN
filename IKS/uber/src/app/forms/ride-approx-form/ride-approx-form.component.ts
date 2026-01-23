@@ -24,6 +24,8 @@ export class RideApproxFormComponent {
 
   routeOutput = output<Location[]>();
 
+  private addressCoordinates = new Map<string, { lat: number; lon: number }>();
+
   get stations() {
     return this.endpoints.get('stations') as FormArray;
   }
@@ -40,19 +42,27 @@ export class RideApproxFormComponent {
     this.stations.removeAt(index);
   }
 
-  addLocationFromMap(address: string) {
+  addLocationFromMap(location: { address: string; lat: number; lon: number }) {
+    this.addressCoordinates.set(location.address, { lat: location.lat, lon: location.lon });
+
     const startLoc = this.endpoints.get('startLoc')?.value;
     const destination = this.endpoints.get('destination')?.value;
 
     if (!startLoc) {
-      this.endpoints.get('startLoc')?.setValue(address);
+      this.endpoints.get('startLoc')?.setValue(location.address);
     } else if (!destination) {
-      this.endpoints.get('destination')?.setValue(address);
+      this.endpoints.get('destination')?.setValue(location.address);
     } else {
       if (this.isLoggedIn()) {
         this.addStation();
         this.stations.at(this.stations.length - 1).setValue(destination);
-        this.endpoints.get('destination')?.setValue(address);
+
+        const destCoords = this.addressCoordinates.get(destination);
+        if (destCoords) {
+          this.addressCoordinates.set(destination, destCoords);
+        }
+
+        this.endpoints.get('destination')?.setValue(location.address);
       } else {
         this.showError('You need to be logged in to add more than 2 locations');
         this.cd.detectChanges();
@@ -92,6 +102,7 @@ export class RideApproxFormComponent {
     this.endpoints.get('startLoc')?.setValue('');
     this.endpoints.get('destination')?.setValue('');
     this.stations.clear();
+    this.addressCoordinates.clear();
     this.getRoute();
   }
 
@@ -103,8 +114,11 @@ export class RideApproxFormComponent {
     const destination = this.endpoints.controls['destination'].value;
 
     if (startLoc) {
+      const coords = this.addressCoordinates.get(startLoc);
       route.push({
         address: startLoc,
+        lat: coords?.lat || 0,
+        lon: coords?.lon || 0,
         type: 'pickup',
         index: order,
       });
@@ -113,8 +127,11 @@ export class RideApproxFormComponent {
 
     for (let val of this.stations.getRawValue()) {
       if (val) {
+        const coords = this.addressCoordinates.get(val);
         route.push({
           address: val,
+          lat: coords?.lat || 0,
+          lon: coords?.lon || 0,
           type: 'stop',
           index: order,
         });
@@ -123,8 +140,11 @@ export class RideApproxFormComponent {
     }
 
     if (destination) {
+      const coords = this.addressCoordinates.get(destination);
       route.push({
         address: destination,
+        lat: coords?.lat || 0,
+        lon: coords?.lon || 0,
         type: 'destination',
         index: order,
       });

@@ -34,7 +34,6 @@ public class DriverService {
     private final ObjectMapper objectMapper;
     private final RideRepository rideRepository;
     private final ScheduledRideRepository scheduledRideRepository;
-    private final GeocodingCacheRepository geocodingCacheRepository;
     private final CoordinateRepository coordinateRepository;
     private final String mapboxApiKey;
 
@@ -56,7 +55,6 @@ public class DriverService {
             ObjectMapper objectMapper,
             RideRepository rideRepository,
             ScheduledRideRepository scheduledRideRepository,
-            GeocodingCacheRepository geocodingCacheRepository,
             CoordinateRepository coordinateRepository,
             @Value("${mapbox.api.key:YOUR_DEFAULT_KEY}") String mapboxApiKey) {
         this.driverRepository = driverRepository;
@@ -67,7 +65,6 @@ public class DriverService {
         this.objectMapper = objectMapper;
         this.rideRepository = rideRepository;
         this.scheduledRideRepository = scheduledRideRepository;
-        this.geocodingCacheRepository = geocodingCacheRepository;
         this.coordinateRepository = coordinateRepository;
         this.mapboxApiKey = mapboxApiKey;
     }
@@ -182,8 +179,8 @@ public class DriverService {
             return null;
         }
 
-        Coordinate pickupLocation = geocodeAddressWithCache(rideDTO.getStartAddress());
-        Coordinate dropoffLocation = geocodeAddressWithCache(rideDTO.getDestinationAddress());
+        Coordinate pickupLocation = geocodeAddressWithCache(rideDTO.getStartAddress().getAddress());
+        Coordinate dropoffLocation = geocodeAddressWithCache(rideDTO.getDestinationAddress().getAddress());
 
         if (pickupLocation == null || dropoffLocation == null) {
             return null;
@@ -792,23 +789,23 @@ public class DriverService {
     private Coordinate geocodeAddressWithCache(String address) {
         LocalDateTime cacheExpiry = LocalDateTime.now().minusHours(24);
 
-        Optional<GeocodingCache> cached = geocodingCacheRepository
+        Optional<Coordinate> cached = coordinateRepository
                 .findByAddressAndCachedAtAfter(address, cacheExpiry);
 
         if (cached.isPresent()) {
-            GeocodingCache cache = cached.get();
-            return new Coordinate(cache.getLatitude(), cache.getLongitude());
+            Coordinate cache = cached.get();
+            return new Coordinate(cache.getLat(), cache.getLon(), cache.getAddress());
         }
 
         Coordinate coord = callMapboxGeocoding(address);
 
         if (coord != null) {
-            GeocodingCache newCache = new GeocodingCache();
+            Coordinate newCache = new Coordinate();
             newCache.setAddress(address);
-            newCache.setLatitude(coord.getLat());
-            newCache.setLongitude(coord.getLon());
+            newCache.setLat(coord.getLat());
+            newCache.setLon(coord.getLon());
             newCache.setCachedAt(LocalDateTime.now());
-            geocodingCacheRepository.save(newCache);
+            coordinateRepository.save(newCache);
         }
 
         return coord;
@@ -834,7 +831,7 @@ public class DriverService {
                 List<Map<String, Object>> features = (List<Map<String, Object>>) response.get("features");
                 if (!features.isEmpty()) {
                     List<Double> coordinates = (List<Double>) features.get(0).get("center");
-                    return new Coordinate(coordinates.get(1), coordinates.get(0));
+                    return new Coordinate(coordinates.get(1), coordinates.get(0), fullAddress);
                 }
             }
         } catch (Exception e) {
@@ -1033,13 +1030,14 @@ public class DriverService {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-        Coordinate location = geocodeAddressWithCache(address);
-        if (location == null) {
-            throw new RuntimeException("Error with geocoding: " + address);
-        }
+        Coordinate newLocation = geocodeAddressWithCache(address);
+        Optional<Coordinate> location = coordinateRepository.findByLatAndLon(newLocation.getLat(), newLocation.getLon());
+        if (location.isEmpty()) {
+            newLocation = coordinateRepository.save(newLocation);
+        } else newLocation = location.get();
 
         Vehicle vehicle = driver.getVehicle();
-        vehicle.setLocation(location);
+        vehicle.setLocation(newLocation);
         vehicleRepository.save(vehicle);
     }
 

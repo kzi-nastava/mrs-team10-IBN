@@ -1,11 +1,13 @@
-import {Component} from '@angular/core';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatToolbarModule} from '@angular/material/toolbar';
+import { Component, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
-
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UpdateLocationComponent } from '../update-location/update-location.component';
 
 /**
  * @title Toolbar overview
@@ -17,15 +19,22 @@ import { AuthService } from '../../service/auth.service';
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, RouterModule],
 })
 export class NavBarComponent {
+  isDriver = false;
   loggedIn: boolean;
-  router: Router;
-  constructor(authService: AuthService, router: Router){
-    this.loggedIn = authService.isLoggedIn()
-    this.router = router
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+
+  constructor() {
+    this.loggedIn = this.authService.isLoggedIn();
+    if (this.loggedIn) {
+      const role = this.authService.role();
+      this.isDriver = role === 'DRIVER' || role === 'driver';
+    }
   }
 
-  logout(){
+  logout() {
     localStorage.clear();
-    this.router.navigate(["/home"]);
+    this.router.navigate(['/home']);
   }
 }
