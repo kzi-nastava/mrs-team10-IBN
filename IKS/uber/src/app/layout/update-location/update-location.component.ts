@@ -1,12 +1,11 @@
-import { Component, inject, ViewChild, AfterViewInit } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, inject, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MapComponent } from '../../maps/map-basic/map.component';
-import { AuthService } from '../../service/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-update-location-dialog',
+  selector: 'app-update-location',
   standalone: true,
   imports: [FormsModule, MapComponent],
   templateUrl: './update-location.component.html',
@@ -18,7 +17,10 @@ export class UpdateLocationComponent implements AfterViewInit {
   address: string = '';
   isLoading: boolean = false;
   private http = inject(HttpClient);
-  private dialogRef = inject(MatDialogRef<UpdateLocationComponent>);
+  isDriverActive: boolean = false;
+  successMessage: string | null = '';
+  errorMessage: string | null = '';
+  private cd = inject(ChangeDetectorRef);
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -29,6 +31,9 @@ export class UpdateLocationComponent implements AfterViewInit {
   }
 
   onLocationSelected(address: string) {
+    if (!address.toLowerCase().includes('novi sad')) {
+      address = address + ', Novi Sad, Serbia';
+    }
     this.address = address;
   }
 
@@ -46,21 +51,48 @@ export class UpdateLocationComponent implements AfterViewInit {
 
     this.isLoading = true;
     this.http
-      .put('/api/drivers/me/update-location', this.address, this.getAuthHeaders())
+      .put(`${environment.apiHost}/drivers/me/update-location`, this.address, this.getAuthHeaders())
       .subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true);
+          this.showSuccess('Location updated successfully!');
+          this.mapComponent.clearAll();
         },
         error: (err) => {
           console.error('Failed to update location', err);
           this.isLoading = false;
-          this.dialogRef.close(false);
+          this.mapComponent.clearAll();
         },
       });
   }
 
-  cancel() {
-    this.dialogRef.close(false);
+  getStatusColor(): string {
+    return this.isDriverActive ? '#10b981' : '#ef4444';
+  }
+
+  getStatusText(): string {
+    return this.isDriverActive ? 'ONLINE' : 'OFFLINE';
+  }
+
+  goOnline() {
+    this.isDriverActive = !this.isDriverActive;
+  }
+
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.successMessage = null;
+      this.cd.detectChanges();
+    }, 3000);
+  }
+
+  showError(message: string) {
+    this.errorMessage = message;
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.errorMessage = null;
+      this.cd.detectChanges();
+    }, 3000);
   }
 }

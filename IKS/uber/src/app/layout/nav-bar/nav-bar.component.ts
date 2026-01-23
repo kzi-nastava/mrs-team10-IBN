@@ -33,10 +33,6 @@ export class NavBarComponent {
     }
   }
 
-  openLocationUpdate() {
-    const dialogRef = this.dialog.open(UpdateLocationComponent);
-  }
-
   logout() {
     localStorage.clear();
     this.router.navigate(['/home']);

@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface CoordinateRepository extends JpaRepository<Coordinate, Long> {
     Optional<Coordinate> findByAddressAndCachedAtAfter(String address, LocalDateTime after);
-    Optional<Coordinate> findByAddress(String address);
+    Optional<Coordinate> findByLatAndLon(Double lat, Double lon);
 }

@@ -794,7 +794,7 @@ public class DriverService {
 
         if (cached.isPresent()) {
             Coordinate cache = cached.get();
-            return new Coordinate(cache.getLat(), cache.getLon());
+            return new Coordinate(cache.getLat(), cache.getLon(), cache.getAddress());
         }
 
         Coordinate coord = callMapboxGeocoding(address);
@@ -831,7 +831,7 @@ public class DriverService {
                 List<Map<String, Object>> features = (List<Map<String, Object>>) response.get("features");
                 if (!features.isEmpty()) {
                     List<Double> coordinates = (List<Double>) features.get(0).get("center");
-                    return new Coordinate(coordinates.get(1), coordinates.get(0));
+                    return new Coordinate(coordinates.get(1), coordinates.get(0), fullAddress);
                 }
             }
         } catch (Exception e) {
@@ -1030,13 +1030,14 @@ public class DriverService {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-        Coordinate location = geocodeAddressWithCache(address);
-        if (location == null) {
-            throw new RuntimeException("Error with geocoding: " + address);
-        }
+        Coordinate newLocation = geocodeAddressWithCache(address);
+        Optional<Coordinate> location = coordinateRepository.findByLatAndLon(newLocation.getLat(), newLocation.getLon());
+        if (location.isEmpty()) {
+            newLocation = coordinateRepository.save(newLocation);
+        } else newLocation = location.get();
 
         Vehicle vehicle = driver.getVehicle();
-        vehicle.setLocation(location);
+        vehicle.setLocation(newLocation);
         vehicleRepository.save(vehicle);
     }
 

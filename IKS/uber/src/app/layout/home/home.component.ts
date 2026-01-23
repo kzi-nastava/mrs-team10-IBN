@@ -7,10 +7,18 @@ import { Location } from '../../model/location.model';
 import { AuthService } from '../../service/auth.service';
 import { CoordinateDTO, RideService } from '../../service/ride-history.service';
 import { firstValueFrom } from 'rxjs';
+import { UpdateLocationComponent } from '../update-location/update-location.component';
+import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterModule, MapComponent, NavBarComponent, RideApproxFormComponent],
+  imports: [
+    RouterModule,
+    MapComponent,
+    NavBarComponent,
+    RideApproxFormComponent,
+    UpdateLocationComponent,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -19,12 +27,15 @@ export class HomeComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private rideService = inject(RideService);
-
   routeOutput: Location[] = [];
   estimatedTimeOutput: String = '';
 
   isUserLoggedIn(): boolean {
     return this.authService.isLoggedIn();
+  }
+
+  isDriver(): boolean {
+    return this.authService.role() === 'driver' || this.authService.role() === 'DRIVER';
   }
 
   routeOutputEvent(eventData: Location[]) {

@@ -238,25 +238,31 @@ public class RideService {
         Route route = new Route();
         List<Coordinate> stations = new ArrayList<>();
 
-        Optional<Coordinate> coord = coordinateRepository.findByAddress(dto.getStartAddress().getAddress());
-        if (coord.isEmpty())
-            coordinateRepository.save(new Coordinate(dto.getStartAddress()));
+        Optional<Coordinate> coord = coordinateRepository.findByLatAndLon(dto.getStartAddress().getLat(), dto.getStartAddress().getLon());
+        if (coord.isEmpty()) {
+            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getStartAddress()));
+            stations.add(newC);
+        }
         else stations.add(coord.get());
 
         if (dto.getStops() != null && !dto.getStops().isEmpty()) {
             for (GetCoordinateDTO stopAddress : dto.getStops()) {
                 if (stopAddress != null) {
-                    coord = coordinateRepository.findByAddress(stopAddress.getAddress());
-                    if (coord.isEmpty())
-                        coordinateRepository.save(new Coordinate(stopAddress));
+                    coord = coordinateRepository.findByLatAndLon(stopAddress.getLat(), stopAddress.getLon());
+                    if (coord.isEmpty()) {
+                        Coordinate newC = coordinateRepository.save(new Coordinate(stopAddress));
+                        stations.add(newC);
+                    }
                     else stations.add(coord.get());
                 }
             }
         }
 
-        coord = coordinateRepository.findByAddress(dto.getDestinationAddress().getAddress());
-        if (coord.isEmpty())
-            coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
+        coord = coordinateRepository.findByLatAndLon(dto.getDestinationAddress().getLat(), dto.getDestinationAddress().getLon());
+        if (coord.isEmpty()) {
+            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
+            stations.add(newC);
+        }
         else stations.add(coord.get());
 
         route.setStations(stations);
