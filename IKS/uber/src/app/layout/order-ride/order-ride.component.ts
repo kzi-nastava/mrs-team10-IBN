@@ -11,6 +11,7 @@ import {
   CreateRideDTO,
   PriceDTO,
   RideOrderResponseDTO,
+  CoordinateDTO,
 } from '../../service/ride-history.service';
 
 @Component({
@@ -63,7 +64,7 @@ export class OrderRideComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
-  private lastRouteSignature = '';
+  private addressCoordinates = new Map<string, { lat: number; lon: number }>();
 
   constructor(
     private router: Router,
@@ -84,9 +85,22 @@ export class OrderRideComponent implements OnInit {
       const destination = this.locations.find((loc) => loc.type === 'destination');
       const stops = this.locations.filter((loc) => loc.type === 'stop');
 
-      if (pickup) this.fromLocation = pickup.address;
-      if (destination) this.toLocation = destination.address;
-      this.stops = stops.map((s) => s.address);
+      if (pickup) {
+        this.fromLocation = pickup.address;
+        this.addressCoordinates.set(pickup.address, { lat: pickup.lat, lon: pickup.lon });
+      }
+      if (destination) {
+        this.toLocation = destination.address;
+        this.addressCoordinates.set(destination.address, {
+          lat: destination.lat,
+          lon: destination.lon,
+        });
+      }
+
+      this.stops = stops.map((s) => {
+        this.addressCoordinates.set(s.address, { lat: s.lat, lon: s.lon });
+        return s.address;
+      });
 
       this.updateLocationText();
     }
@@ -110,6 +124,26 @@ export class OrderRideComponent implements OnInit {
     }
   }
 
+  normalizeAddress = (addr: string) => {
+    if (!addr.toLowerCase().includes('novi sad')) {
+      return `${addr}, Novi Sad`;
+    }
+    return addr;
+  };
+
+  private toCoordinateDTO(originalAddress: string): CoordinateDTO {
+    const normalizedAddress = this.normalizeAddress(originalAddress);
+    const coords = this.addressCoordinates.get(originalAddress);
+
+    return {
+      id: null,
+      lat: coords?.lat || 0,
+      lon: coords?.lon || 0,
+      address: normalizedAddress,
+      cachedAt: null,
+    };
+  }
+
   calculatePrice() {
     if (!this.fromLocation || !this.toLocation) {
       this.showError('Please select pickup and destination locations');
@@ -123,21 +157,16 @@ export class OrderRideComponent implements OnInit {
 
     this.isCalculating = true;
 
-    let scheduledDateTime: string | null = null;
-    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
-      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
-    }
-
     const dto: CreateRideDTO = {
-      startAddress: this.fromLocation,
-      destinationAddress: this.toLocation,
+      startAddress: this.toCoordinateDTO(this.fromLocation),
+      destinationAddress: this.toCoordinateDTO(this.toLocation),
       distance: this.estimatedDistance,
-      stops: this.stops.filter((s) => s.trim() !== ''),
+      stops: this.stops.filter((s) => s.trim() !== '').map((s) => this.toCoordinateDTO(s)),
       passengerEmails: this.passengerEmails.filter((e) => e.trim() !== ''),
       vehicleType: this.selectedCar,
       babySeat: this.isBabyTravel,
       petFriendly: this.isPetTravel,
-      scheduled: scheduledDateTime || '',
+      scheduled: this.getScheduledDateTime() || '',
       price: 0,
       estimatedDuration: this.estimatedDuration || 30,
     };
@@ -166,6 +195,13 @@ export class OrderRideComponent implements OnInit {
     });
   }
 
+  private getScheduledDateTime(): string | null {
+    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      return `${this.rideDate} ${this.rideTime}:00`;
+    }
+    return null;
+  }
+
   orderRide() {
     if (!this.totalPrice) {
       this.showError('Please calculate price first');
@@ -179,29 +215,17 @@ export class OrderRideComponent implements OnInit {
 
     this.isOrdering = true;
 
-    let scheduledDateTime: string | null = null;
-    if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
-      scheduledDateTime = `${this.rideDate} ${this.rideTime}:00`;
-    }
-
-    const normalizeAddress = (addr: string) => {
-      if (!addr.toLowerCase().includes('novi sad')) {
-        return `${addr}, Novi Sad`;
-      }
-      return addr;
-    };
-
     const dto: CreateRideDTO = {
-      startAddress: normalizeAddress(this.fromLocation),
-      destinationAddress: normalizeAddress(this.toLocation),
+      startAddress: this.toCoordinateDTO(this.fromLocation),
+      destinationAddress: this.toCoordinateDTO(this.toLocation),
       distance: this.estimatedDistance,
-      stops: this.stops.filter((s) => s.trim() !== '').map((s) => normalizeAddress(s)),
+      stops: this.stops.filter((s) => s.trim() !== '').map((s) => this.toCoordinateDTO(s)),
       passengerEmails: this.passengerEmails.filter((e) => e.trim() !== ''),
       vehicleType: this.selectedCar,
       babySeat: this.isBabyTravel,
       petFriendly: this.isPetTravel,
-      scheduled: scheduledDateTime || '',
-      price: this.totalPrice,
+      scheduled: this.getScheduledDateTime() || '',
+      price: this.totalPrice!,
       estimatedDuration: this.estimatedDuration || 30,
     };
 
@@ -226,9 +250,7 @@ export class OrderRideComponent implements OnInit {
 
           this.showSuccess(successMsg);
         } else {
-          let errorMsg = 'No available drivers. ';
-          this.showError(errorMsg);
-          return;
+          this.showError('No available drivers.');
         }
       },
       error: (error) => {
@@ -373,14 +395,16 @@ export class OrderRideComponent implements OnInit {
     return this.currentLocations;
   }
 
-  onLocationAdded(address: string) {
+  onLocationAdded(location: { address: string; lat: number; lon: number }) {
+    this.addressCoordinates.set(location.address, { lat: location.lat, lon: location.lon });
+
     if (!this.fromLocation || this.fromLocation.trim() === '') {
-      this.fromLocation = address;
+      this.fromLocation = location.address;
     } else if (!this.toLocation || this.toLocation.trim() === '') {
-      this.toLocation = address;
+      this.toLocation = location.address;
     } else {
       this.stops.push(this.toLocation);
-      this.toLocation = address;
+      this.toLocation = location.address;
     }
 
     this.updateLocationText();

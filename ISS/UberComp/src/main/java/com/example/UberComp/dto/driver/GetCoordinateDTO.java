@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,11 +17,13 @@ public class GetCoordinateDTO {
     private Double lat;
     private Double lon;
     private String address;
+    private LocalDateTime cachedAt;
 
     public GetCoordinateDTO(Coordinate coordinate) {
         this.id = coordinate.getId();
         this.lat = coordinate.getLat();
         this.lon = coordinate.getLon();
         this.address = coordinate.getAddress();
+        this.cachedAt = coordinate.getCachedAt();
     }
 }

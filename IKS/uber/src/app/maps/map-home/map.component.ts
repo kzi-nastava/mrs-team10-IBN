@@ -35,7 +35,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Input() locations: Location[] = [];
   @Input() stations: Station[] = [];
   @Input() interactive: boolean = true;
-  @Output() locationAdded = new EventEmitter<string>();
+  @Output() locationAdded = new EventEmitter<{ address: string; lat: number; lon: number }>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
   @Output() routeCalculated = new EventEmitter<{ distance: number; duration: number }>();
@@ -277,7 +277,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
         this.addPointWithIcon(lat, lng, this.PinIcon, address);
 
         if (address) {
-          this.locationAdded.emit(address);
+          this.locationAdded.emit({ address, lat, lon: lng });
         }
       } catch (error) {
         console.error('Error reverse geocoding:', error);

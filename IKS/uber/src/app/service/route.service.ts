@@ -46,7 +46,7 @@ export class RouteService {
     return this.http.put(`${environment.apiHost}/rides/stop`, body)
   }
 
-  panic(id: number, passed:number, time:string, location:TrackingData){
+  panic(id: number, passed: number, time: string, location: TrackingData) {
     const body = {
       "id":id,
       "passed":passed,
@@ -60,20 +60,20 @@ export class RouteService {
     return this.http.put(`${environment.apiHost}/rides/panic`, body)
   }
 
-  route: Location[] = [
-    {
-      address: 'Bulevar oslobođenja 7',
-      type: 'pickup',
-    },
-    {
-      address: 'Bulevar Patrijarha Pavla 60',
-      type: 'stop',
-    },
-    {
-      address: 'Kornelija Stankovića 15',
-      type: 'destination',
-    },
-  ];
+  // route: Location[] = [
+  //   {
+  //     address: 'Bulevar oslobođenja 7',
+  //     type: 'pickup',
+  //   },
+  //   {
+  //     address: 'Bulevar Patrijarha Pavla 60',
+  //     type: 'stop',
+  //   },
+  //   {
+  //     address: 'Kornelija Stankovića 15',
+  //     type: 'destination',
+  //   },
+  // ];
 }
 
 export interface RidePayload {
