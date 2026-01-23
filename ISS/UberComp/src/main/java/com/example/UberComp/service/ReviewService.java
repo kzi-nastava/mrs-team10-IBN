@@ -12,6 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +28,7 @@ public class ReviewService {
     @Autowired
     private RideRepository rideRepository;
 
+    @Transactional
     public CreatedReviewDTO createReview(CreateReviewDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -31,6 +36,9 @@ public class ReviewService {
         Ride ride = rideRepository.findById(dto.getRideId())
                 .orElseThrow(() -> new RuntimeException("Ride not found"));
 
+        if (!ride.getPassengers().contains(user)) {
+            throw new ResponseStatusException(FORBIDDEN, "You are not allowed to rate this ride");
+        }
         Review review = new Review(dto, user, ride);
 
         Review saved = reviewRepository.save(review);

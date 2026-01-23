@@ -8,6 +8,7 @@ import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
+import com.example.UberComp.utils.EmailUtils;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -52,6 +53,7 @@ public class RideService {
     @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
     @Autowired
+    private EmailUtils emailUtils;
     private DriverService driverService;
 
     @Transactional
@@ -123,6 +125,7 @@ public class RideService {
         ride.setFinish(LocalDateTime.parse(finish.getIsotime()));
         // ride.setPrice(); price calculation
         rideRepository.save(ride);
+        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", rideId);
         return new FinishedRideDTO(ride);
     }
 
@@ -158,6 +161,7 @@ public class RideService {
 
         rideRepository.save(ride);
         driverRepository.save(driver);
+        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         return new FinishedRideDTO(ride);
     }
 

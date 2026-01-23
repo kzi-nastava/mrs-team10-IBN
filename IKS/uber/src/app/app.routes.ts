@@ -85,7 +85,7 @@ export const routes: Routes = [
     data: { role: ['passenger'] },
   },
   {
-    path: 'rating',
+    path: 'rating/:rideId',
     component: RateDriverVehicleComponent,
     canActivate: [AuthGuard],
     data: { role: ['passenger'] },

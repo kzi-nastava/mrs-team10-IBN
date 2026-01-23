@@ -27,6 +27,7 @@ public class GetRideDetailsDTO {
     private Double price;
     private RideStatus status;
     private Boolean canceled;
+    private Boolean panic = false;
 
     public GetRideDetailsDTO(Ride ride){
         id = ride.getId();
@@ -39,9 +40,13 @@ public class GetRideDetailsDTO {
         }
         price = ride.getPrice();
         status = ride.getStatus();
+        if (ride.getStatus()==RideStatus.Panic){
+            panic = true;
+        }
         if (ride.getCancellationReason()!=null)
             canceled = true;
         else
             canceled = false;
+
     }
 }
