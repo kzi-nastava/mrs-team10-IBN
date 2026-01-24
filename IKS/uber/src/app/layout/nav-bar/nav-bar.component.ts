@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
@@ -19,13 +19,14 @@ import { AuthService } from '../../service/auth.service';
 export class NavBarComponent {
   loggedIn: boolean;
   router: Router;
-  constructor(authService: AuthService, router: Router){
+  constructor(authService: AuthService, router: Router, cdr: ChangeDetectorRef){
     this.loggedIn = authService.isLoggedIn()
     this.router = router
   }
 
   logout(){
     localStorage.clear();
+    this.loggedIn = false;
     this.router.navigate(["/home"]);
   }
 }

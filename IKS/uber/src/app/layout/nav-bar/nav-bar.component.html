@@ -12,7 +12,7 @@
   </div>
 </div>
 
-<mat-sidenav-container>
+<mat-sidenav-container [style.display]="loggedIn ? 'inline' : 'none'">
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
     <div class="item" [routerLink]="['/account']">
       <mat-icon>account_circle</mat-icon>
