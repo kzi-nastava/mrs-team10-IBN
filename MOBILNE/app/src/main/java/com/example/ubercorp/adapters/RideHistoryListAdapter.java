@@ -14,18 +14,19 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.interfaces.onRideClickListener;
-import com.example.ubercorp.model.Ride;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
-public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
+public class RideHistoryListAdapter extends ArrayAdapter<RideDTO> {
 
-    private ArrayList<Ride> aRides;
+    private ArrayList<RideDTO> aRides;
     private onRideClickListener listener;
-    public RideHistoryListAdapter(@NonNull Context context, ArrayList<Ride> rides, onRideClickListener listener) {
+    public RideHistoryListAdapter(@NonNull Context context, ArrayList<RideDTO> rides, onRideClickListener listener) {
         super(context, R.layout.ride_card_item, rides);
         aRides = rides;
         this.listener = listener;
@@ -40,7 +41,7 @@ public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
 
     @Nullable
     @Override
-    public Ride getItem(int position) {
+    public RideDTO getItem(int position) {
         return aRides.get(position);
     }
 
@@ -53,7 +54,7 @@ public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        Ride ride = getItem(position);
+        RideDTO ride = getItem(position);
         if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.ride_card_item,
                     parent, false);
@@ -68,10 +69,11 @@ public class RideHistoryListAdapter extends ArrayAdapter<Ride> {
         if(ride != null) {
             startLocation.setText(ride.getStartLocation());
             destination.setText(ride.getDestination());
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            start.setText(sdf.format(ride.getStart()));
-            end.setText(sdf.format(ride.getEnd()));
-            price.setText(ride.getPrice().toString());
+
+            start.setText(ride.getStartTime().substring(11,16));
+
+            end.setText(ride.getEndTime().substring(11,16));
+            price.setText(ride.getPrice().toString() + " RSD");
             // Handle click on the item at 'position'
             rideCard.setOnClickListener(v -> {
                 if (listener != null) {

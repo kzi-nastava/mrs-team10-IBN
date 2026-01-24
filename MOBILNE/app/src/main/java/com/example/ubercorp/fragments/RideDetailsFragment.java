@@ -9,12 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
-import com.example.ubercorp.model.Ride;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.model.User;
 
 import java.text.SimpleDateFormat;
@@ -24,7 +23,7 @@ import java.util.Locale;
 
 public class RideDetailsFragment extends Fragment {
 
-    private Ride ride;
+    private RideDTO ride;
 
     private FragmentRideDetailsBinding binding;
 
@@ -37,7 +36,7 @@ public class RideDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null){
-            ride = (Ride) getArguments().getParcelable("ride");
+            ride = (RideDTO) getArguments().getParcelable("ride");
         }
 
     }
@@ -56,8 +55,8 @@ public class RideDetailsFragment extends Fragment {
 
         if (ride != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            binding.startTimeDetail.setText(sdf.format(ride.getStart()));
-            binding.endTimeDetail.setText(sdf.format(ride.getEnd()));
+            //binding.startTimeDetail.setText(sdf.format(ride.getStart()));
+            //binding.endTimeDetail.setText(sdf.format(ride.getEstimatedTimeArrival()));
             binding.priceDetail.setText(ride.getPrice()+" RSD");
             // passengers
             GridLayout passengersLayout = binding.passengers;
