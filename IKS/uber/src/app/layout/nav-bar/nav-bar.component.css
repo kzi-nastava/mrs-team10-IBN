@@ -86,15 +86,16 @@ mat-sidenav-container {
 }
 
 .top {
-  display: flex;              
-  align-items: center;        
-  height: 64px;              
+  display: flex;
+  align-items: center;
+  height: 64px;
   padding: 0 16px;
 
 }
 
 .notification {
   color: yellow;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
