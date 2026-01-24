@@ -71,7 +71,6 @@ export class TrackingRouteComponent {
 
   getLocationEvent(eventData: TrackingData){
     this.currentLocation = eventData;
-    console.log(this.currentLocation);
   }
 
   getDistanceEvent(eventData: number){

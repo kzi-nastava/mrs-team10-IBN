@@ -51,6 +51,37 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 """)
     Page<Ride> getRidesPassenger(@Param("userId") Long userId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"route", "route.stations", "passengers"})
+    @Query("""
+    SELECT r FROM Ride r
+    JOIN r.passengers p
+    WHERE p.id = :userId 
+    AND r.start BETWEEN :startFrom AND :startTo """)
+    Page<Ride> getRidesPassengerWithDateFilter(@Param("userId") Long userId,
+                                               @Param("startFrom") LocalDateTime startFrom,
+                                               @Param("startTo") LocalDateTime startTo,
+                                               Pageable pageable);
+
+    @EntityGraph(attributePaths = {"route", "route.stations", "passengers"})
+    @Query("""
+    SELECT r FROM Ride r
+    JOIN r.passengers p
+    WHERE p.id = :userId 
+    AND r.start >= :startFrom """)
+    Page<Ride> getRidesPassengerFromDate(@Param("userId") Long userId,
+                                         @Param("startFrom") LocalDateTime startFrom,
+                                         Pageable pageable);
+
+    @EntityGraph(attributePaths = {"route", "route.stations", "passengers"})
+    @Query("""
+    SELECT r FROM Ride r
+    JOIN r.passengers p
+    WHERE p.id = :userId 
+    AND r.start <= :startTo """)
+    Page<Ride> getRidesPassengerToDate(@Param("userId") Long userId,
+                                       @Param("startTo") LocalDateTime startTo,
+                                       Pageable pageable);
+
     Optional<Ride> findFirstByDriverAndStatusOrderByStartDesc(Driver driver, RideStatus status);
 
     @Query("""

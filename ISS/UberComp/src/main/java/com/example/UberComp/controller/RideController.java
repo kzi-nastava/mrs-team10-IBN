@@ -7,16 +7,15 @@ import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.RideStatus;
-import com.example.UberComp.model.Account;
-import com.example.UberComp.model.Driver;
-import com.example.UberComp.model.PanicSignal;
-import com.example.UberComp.model.Ride;
+import com.example.UberComp.model.*;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.parser.Authorization;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,8 +35,9 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/rides")
 public class RideController {
-
+    @Autowired
     private final DriverService driverService;
+    @Autowired
     private RideService rideService;
 
     //    @PreAuthorize("hasRole('DRIVER')")
@@ -47,11 +50,30 @@ public class RideController {
         return ResponseEntity.ok(rides);
     }
 
+    @GetMapping(value = "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageDTO<GetRideDTO>> getRidesPassenger(
+            Authentication auth,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String startFrom,
+            @RequestParam(required = false) String startTo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
 
-    @GetMapping(value= "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageDTO<GetRideDTO>> getRidesPassenger(Authentication auth, Pageable pageable) {
         Account account = (Account) auth.getPrincipal();
-        Page<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId(), pageable);
+        LocalDateTime startFromFormatted = null;
+        if(startFrom != null)
+            startFromFormatted = LocalDateTime.ofInstant(Instant.parse(startFrom), ZoneId.systemDefault());
+        LocalDateTime startToFormatted = null;
+        if(startTo != null)
+            startToFormatted = LocalDateTime.ofInstant(Instant.parse(startTo), ZoneId.systemDefault());
+
+        Page<GetRideDTO> rides = rideService.getRidesPassenger(
+                account.getUser().getId(),
+                sort,
+                startFromFormatted,
+                startToFormatted,
+                page,
+                size);
         return ResponseEntity.ok(new PageDTO<>(rides));
     }
 
