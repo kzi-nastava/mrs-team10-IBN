@@ -18,7 +18,7 @@ public class RideDTO implements Parcelable{
 
         private RouteDTO route;
 
-        private ArrayList<User> passengers;
+        private ArrayList<CreatedUserDTO> passengers;
 
         private DriverDTO driver;
 
@@ -54,7 +54,7 @@ public class RideDTO implements Parcelable{
 
         public RideDTO(){}
 
-        public RideDTO(Long id, String startLocation, String destination, String start, String end, Double price, ArrayList<User> passengers){
+        public RideDTO(Long id, String startLocation, String destination, String start, String end, Double price, ArrayList<CreatedUserDTO> passengers){
             this.id = id;
             this.startLocation = startLocation;
             this.endLocation = destination;
@@ -100,11 +100,11 @@ public class RideDTO implements Parcelable{
         this.route = route;
     }
 
-    public ArrayList<User> getPassengers() {
+    public ArrayList<CreatedUserDTO> getPassengers() {
         return passengers;
     }
 
-    public void setPassengers(ArrayList<User> passengers) {
+    public void setPassengers(ArrayList<CreatedUserDTO> passengers) {
         this.passengers = passengers;
     }
 

@@ -57,7 +57,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     private void loadNextPage() {
         if (isLastPage) return;
 
-        rideManager.loadDriverRides(currentPage, 10, new Callback<GetRideDTO>() {
+        rideManager.loadDriverRides(currentPage, 10, new Callback<>() {
             @Override
             public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
                 if (response.isSuccessful() && response.body() != null) {
