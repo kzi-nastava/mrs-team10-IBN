@@ -119,7 +119,7 @@ public class RideService {
     }
 
     private Sort buildSort(String sortParam) {
-        if(sortParam == null) return Sort.by(Sort.Direction.ASC, "start");
+        if(sortParam == null) return Sort.by(Sort.Direction.DESC, "start");
         return switch (sortParam) {
             case "price-asc" -> Sort.by(Sort.Direction.ASC, "price");
             case "price-desc" -> Sort.by(Sort.Direction.DESC, "price");
@@ -127,7 +127,7 @@ public class RideService {
             case "start-desc" -> Sort.by(Sort.Direction.DESC, "start");
             case "end-asc" -> Sort.by(Sort.Direction.ASC, "estimatedTimeArrival");
             case "end-desc" -> Sort.by(Sort.Direction.DESC, "estimatedTimeArrival");
-            default -> Sort.by(Sort.Direction.ASC, "start"); // default sorting
+            default -> Sort.by(Sort.Direction.DESC, "start"); // default sorting
         };
     }
 
