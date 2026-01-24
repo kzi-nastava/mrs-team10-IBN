@@ -1,5 +1,6 @@
 package com.example.UberComp.dto.driver;
 
+import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.Route;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +19,7 @@ public class GetVehiclePositionDTO {
     private RouteDTO route;
     @JsonProperty("isBusy")
     private boolean isBusy;
+    private VehicleLocationDTO vehicleLocation;
 
     public GetVehiclePositionDTO(Ride ride, boolean isBusy){
         this.id = ride.getId();
@@ -25,6 +27,7 @@ public class GetVehiclePositionDTO {
         this.estimatedTimeArrival = ride.getEstimatedTimeArrival();
         this.route = new RouteDTO(ride.getRoute());
         this.isBusy = isBusy;
+        this.vehicleLocation = new VehicleLocationDTO(ride.getDriver().getVehicle().getLocation());
     }
 
     public GetVehiclePositionDTO() {

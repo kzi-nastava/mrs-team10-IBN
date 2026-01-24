@@ -214,19 +214,6 @@ export class UserFormComponent implements OnChanges {
     return false;
   }
 
-  getStatusColor(): string {
-    return this.isDriverActive ? '#10b981' : '#ef4444';
-  }
-
-  getStatusText(): string {
-    return this.isDriverActive ? 'Online' : 'Offline';
-  }
-
-  goOnline() {
-    this.isDriverActive = !this.isDriverActive;
-    this.onToggleStatus?.();
-  }
-
   markFieldTouched(field?: 'firstName' | 'lastName' | 'address' | 'phone' | 'email') {
     this.formTouched = true;
     if (field) {
