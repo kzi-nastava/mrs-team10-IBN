@@ -58,15 +58,44 @@ public class RideService {
         return newRide;
     }
 
-    public Page<GetRideDTO> getRidesDriver(Long driverId, Pageable pageable){
-        return rideRepository
-                .getRidesDriver(driverId, pageable)
-                .map(GetRideDTO::new);
+    public Page<GetRideDTO> getRidesDriver(Long driverId, String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesDriverWithDateFilter(driverId, startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesDriverFromDate(driverId, startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesDriverToDate(driverId, startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesDriver(driverId, pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
     }
 
-    public Page<GetRideDTO> getRidesPassenger(Long passengerId, Pageable pageable){
-        Page<Ride> ridesPage = rideRepository.getRidesPassenger(passengerId, pageable);
-        return new PageImpl<>(ridesPage.getContent().stream().map(GetRideDTO::new).toList(), pageable, ridesPage.getTotalElements());
+    public Page<GetRideDTO> getRidesAdmin(String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesAdminWithDateFilter(startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesAdminFromDate(startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesAdminToDate(startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesAdmin(pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
     }
 
     public Page<GetRideDTO> getRidesPassenger(Long userId, String sortParam,

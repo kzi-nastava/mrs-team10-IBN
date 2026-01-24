@@ -6,6 +6,7 @@ import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.service.DriverService;
@@ -41,17 +42,17 @@ public class RideController {
     private RideService rideService;
 
     //    @PreAuthorize("hasRole('DRIVER')")
-    @GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
+    //@GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
+    //public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
+//
+    //    Account account = (Account) auth.getPrincipal();
+    //    Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
+//
+    //    return ResponseEntity.ok(rides);
+    //}
 
-        Account account = (Account) auth.getPrincipal();
-        Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
-
-        return ResponseEntity.ok(rides);
-    }
-
-    @GetMapping(value = "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageDTO<GetRideDTO>> getRidesPassenger(
+    @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageDTO<GetRideDTO>> getRidesDriver(
             Authentication auth,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String startFrom,
@@ -67,32 +68,33 @@ public class RideController {
         if(startTo != null)
             startToFormatted = LocalDateTime.ofInstant(Instant.parse(startTo), ZoneId.systemDefault());
 
-        Page<GetRideDTO> rides = rideService.getRidesPassenger(
-                account.getUser().getId(),
-                sort,
-                startFromFormatted,
-                startToFormatted,
-                page,
-                size);
+        Page<GetRideDTO> rides = null;
+        switch(account.getAccountType()){
+            case PASSENGER ->
+                    rides = rideService.getRidesPassenger(
+                            account.getUser().getId(),
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+            case DRIVER ->
+                    rides = rideService.getRidesDriver(
+                            account.getUser().getId(),
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+            case ADMINISTRATOR ->
+                    rides = rideService.getRidesAdmin(
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+        }
         return ResponseEntity.ok(new PageDTO<>(rides));
-    }
-
-    @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDetailsDTO>> getRideHistory(){
-        ArrayList<GetRideDetailsDTO> allRides = new ArrayList<>();
-
-        GetRideDetailsDTO finishedRide = new GetRideDetailsDTO();
-        finishedRide.setId(1L);
-        finishedRide.setStatus(RideStatus.Finished);
-
-        GetRideDetailsDTO panickedRide = new GetRideDetailsDTO();
-        panickedRide.setId(2L);
-        panickedRide.setStatus(RideStatus.Panic);
-
-        allRides.add(finishedRide);
-        allRides.add(panickedRide);
-
-        return new ResponseEntity<Collection<GetRideDetailsDTO>>(allRides, HttpStatus.OK);
     }
 
     @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -39,9 +39,85 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     JOIN FETCH r.route rt
     JOIN FETCH rt.stations
     LEFT JOIN FETCH r.passengers
+""")
+    Page<Ride> getRidesAdmin(Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.start BETWEEN :startFrom AND :startTo
+""")
+    Page<Ride> getRidesAdminWithDateFilter(@Param("startFrom") LocalDateTime startFrom,
+                                           @Param("startTo") LocalDateTime startTo,
+                                           Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.start >= :startFrom
+""")
+    Page<Ride> getRidesAdminFromDate(@Param("startFrom") LocalDateTime startFrom,
+                                     Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.start <= :startTo
+""")
+    Page<Ride> getRidesAdminToDate(@Param("startTo") LocalDateTime startTo,
+                                   Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
     WHERE r.driver.id = :driverId
 """)
     Page<Ride> getRidesDriver(@Param("driverId") Long driverId, Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.driver.id = :driverId
+    AND r.start BETWEEN :startFrom AND :startTo
+""")
+    Page<Ride> getRidesDriverWithDateFilter(@Param("driverId") Long driverId,
+                                            @Param("startFrom") LocalDateTime startFrom,
+                                            @Param("startTo") LocalDateTime startTo,
+                                            Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.driver.id = :driverId
+    AND r.start >= :startFrom
+""")
+    Page<Ride> getRidesDriverFromDate(@Param("driverId") Long driverId,
+                                      @Param("startFrom") LocalDateTime startFrom,
+                                      Pageable pageable);
+
+    @Query("""
+    SELECT DISTINCT r FROM Ride r
+    JOIN FETCH r.route rt
+    JOIN FETCH rt.stations
+    LEFT JOIN FETCH r.passengers
+    WHERE r.driver.id = :driverId
+    AND r.start <= :startTo
+""")
+    Page<Ride> getRidesDriverToDate(@Param("driverId") Long driverId,
+                                    @Param("startTo") LocalDateTime startTo,
+                                    Pageable pageable);
 
     @EntityGraph(attributePaths = {"route", "route.stations", "passengers"})
     @Query("""

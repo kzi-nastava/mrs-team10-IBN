@@ -93,10 +93,7 @@ export class RideService {
     if (this.loadingRides || !this.hasMoreRides) return;
     this.loadingRides = true;
 
-    const url =
-      this.role === 'driver'
-        ? `${environment.apiHost}/rides/driver${query}`
-        : `${environment.apiHost}/rides/passenger${query}`;
+    const url = `${environment.apiHost}/rides/history${query}`
 
     this.http
       .get<PageResponse<Ride>>(url, {
