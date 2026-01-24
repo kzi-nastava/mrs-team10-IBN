@@ -12,6 +12,12 @@ export interface Route {
   stations: Station[];
 }
 
+export interface vehicleLocation{
+  latitude: number,
+  longitude: number,
+  address: string
+}
+
 export interface Ride {
   status: 'Pending' | 'Ongoing' | 'CancelledByDriver' | 'CancelledByPassenger' | 'Panic' | 'Finished';
   id: number;
@@ -26,4 +32,5 @@ export interface Ride {
   canceled: boolean;
   panic: boolean
   isBusy: boolean
+  vehicleLocation: vehicleLocation
 }

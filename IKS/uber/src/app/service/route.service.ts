@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Route, Station } from '../model/ride-history.model';
 import { TrackingData } from '../layout/tracking-route/tracking-route.component';
+import { Ride } from '../model/ride-history.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,12 +16,19 @@ export class RouteService {
     return this.http.get<RidePayload>(`${environment.apiHost}/rides/incoming`);
   }
 
-  getOngoingRide(id: string){
-    return this.http.get<RidePayload>(`${environment.apiHost}/rides/${id}`)
+  getOngoingRide(id: string) {
+    return this.http.get<RidePayload>(`${environment.apiHost}/rides/${id}`);
+  }
+
+  getTrackingRide() {
+    return this.http.get<RidePayload>(`${environment.apiHost}/rides/trackingRidePassenger`);
   }
 
   finishRide(id: number, time: string) {
-    return this.http.post(`${environment.apiHost}/rides/finish/${id}`, { isotime: time });
+    const body = {
+      isotime: time,
+    };
+    return this.http.put(`${environment.apiHost}/rides/finish/${id}`, body);
   }
 
   startRide(id: number, time: string) {
@@ -30,34 +38,34 @@ export class RouteService {
   }
 
   cancelRide(ride: RideCancellation) {
-    return this.http.put(`${environment.apiHost}/rides/cancel`, ride)
+    return this.http.put(`${environment.apiHost}/rides/cancel`, ride);
   }
 
   stopRide(id: number, passed: number, time: string, location: TrackingData, distance: number) {
     const body = {
-      "id":id,
-      "passed":passed,
-      "lat": location.lat,
-      "lon": location.lon,
-      "address":location.address,
-      "distance": distance,
-      "finishTime":time
-    }
-    return this.http.put(`${environment.apiHost}/rides/stop`, body)
+      id: id,
+      passed: passed,
+      lat: location.lat,
+      lon: location.lon,
+      address: location.address,
+      distance: distance,
+      isotime: time,
+    };
+    return this.http.put(`${environment.apiHost}/rides/stop`, body);
   }
 
   panic(id: number, passed: number, time: string, location: TrackingData) {
     const body = {
-      "id":id,
-      "passed":passed,
-      "lat": location.lat,
-      "lon": location.lon,
-      "address":location.address,
-      "distance":0,
-      "finishTime":time
-    }
-    console.log(body)
-    return this.http.put(`${environment.apiHost}/rides/panic`, body)
+      id: id,
+      passed: passed,
+      lat: location.lat,
+      lon: location.lon,
+      address: location.address,
+      distance: 0,
+      finishTime: time,
+    };
+    console.log(body);
+    return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
 
   // route: Location[] = [
@@ -83,7 +91,7 @@ export interface RidePayload {
   endTime?: Date;
 }
 
-export interface RideCancellation{
+export interface RideCancellation {
   id: number;
   cancellationReason: string;
   cancelledByDriver: boolean;

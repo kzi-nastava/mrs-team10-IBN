@@ -86,16 +86,17 @@ public class RideService {
     public ArrayList<GetVehiclePositionDTO> getActiveRides() {
         ArrayList<GetVehiclePositionDTO> activeRides = new ArrayList<>();
         List<Driver> activeDrivers = driverRepository.findByStatus(DriverStatus.DRIVING);
-        for(Driver driver: activeDrivers) {
+        for (Driver driver : activeDrivers) {
             Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
             if (ride != null)
                 activeRides.add(new GetVehiclePositionDTO(ride, true));
         }
         activeDrivers = driverRepository.findByStatus(DriverStatus.ONLINE);
-        for(Driver driver: activeDrivers) {
-            Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
-            if (ride != null)
-                activeRides.add(new GetVehiclePositionDTO(ride, false));
+        for (Driver driver : activeDrivers) {
+            GetVehiclePositionDTO vehiclePositionDTO = new GetVehiclePositionDTO();
+            vehiclePositionDTO.setVehicleLocation(new VehicleLocationDTO(driver.getVehicle().getLocation()));
+            vehiclePositionDTO.setBusy(false);
+            activeRides.add(vehiclePositionDTO);
         }
         return activeRides;
     }
@@ -122,8 +123,8 @@ public class RideService {
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStatus(RideStatus.Finished);
-        ride.setFinish(LocalDateTime.parse(finish.getIsotime()));
-        // ride.setPrice(); price calculation
+        Instant instant = Instant.parse(finish.getIsotime());
+        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
         rideRepository.save(ride);
         emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", rideId);
         return new FinishedRideDTO(ride);
