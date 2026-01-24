@@ -211,14 +211,6 @@ export class AccountComponent implements OnInit {
     return (this.hoursWorkedToday / this.maxHoursPerDay) * 100;
   }
 
-  getStatusColor(): string {
-    return this.isDriverActive ? '#10b981' : '#ef4444';
-  }
-
-  getStatusText(): string {
-    return this.isDriverActive ? 'Active' : 'Inactive';
-  }
-
   showSuccess(message: string) {
     this.successMessage = message;
     this.cd.detectChanges();

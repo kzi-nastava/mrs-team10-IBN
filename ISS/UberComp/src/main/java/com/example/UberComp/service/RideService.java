@@ -8,6 +8,7 @@ import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
+import com.example.UberComp.utils.EmailUtils;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
@@ -51,6 +52,9 @@ public class RideService {
     private PanicSignalRepository panicSignalRepository;
     @Autowired
     private FavoriteRouteRepository favoriteRouteRepository;
+    @Autowired
+    private EmailUtils emailUtils;
+    private DriverService driverService;
 
     @Transactional
     public IncomingRideDTO getIncomingRide(Driver driver){
@@ -82,16 +86,17 @@ public class RideService {
     public ArrayList<GetVehiclePositionDTO> getActiveRides() {
         ArrayList<GetVehiclePositionDTO> activeRides = new ArrayList<>();
         List<Driver> activeDrivers = driverRepository.findByStatus(DriverStatus.DRIVING);
-        for(Driver driver: activeDrivers) {
+        for (Driver driver : activeDrivers) {
             Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
             if (ride != null)
                 activeRides.add(new GetVehiclePositionDTO(ride, true));
         }
         activeDrivers = driverRepository.findByStatus(DriverStatus.ONLINE);
-        for(Driver driver: activeDrivers) {
-            Ride ride = rideRepository.findFirstByDriver_IdOrderByStartDesc(driver.getId());
-            if (ride != null)
-                activeRides.add(new GetVehiclePositionDTO(ride, false));
+        for (Driver driver : activeDrivers) {
+            GetVehiclePositionDTO vehiclePositionDTO = new GetVehiclePositionDTO();
+            vehiclePositionDTO.setVehicleLocation(new VehicleLocationDTO(driver.getVehicle().getLocation()));
+            vehiclePositionDTO.setBusy(false);
+            activeRides.add(vehiclePositionDTO);
         }
         return activeRides;
     }
@@ -118,9 +123,10 @@ public class RideService {
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStatus(RideStatus.Finished);
-        ride.setFinish(LocalDateTime.parse(finish.getIsotime()));
-        // ride.setPrice(); price calculation
+        Instant instant = Instant.parse(finish.getIsotime());
+        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
         rideRepository.save(ride);
+        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", rideId);
         return new FinishedRideDTO(ride);
     }
 
@@ -156,6 +162,7 @@ public class RideService {
 
         rideRepository.save(ride);
         driverRepository.save(driver);
+        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         return new FinishedRideDTO(ride);
     }
 
@@ -236,26 +243,32 @@ public class RideService {
         Route route = new Route();
         List<Coordinate> stations = new ArrayList<>();
 
-        Coordinate startCoord = new Coordinate();
-        startCoord.setAddress(dto.getStartAddress());
-        startCoord = coordinateRepository.save(startCoord);
-        stations.add(startCoord);
+        Optional<Coordinate> coord = coordinateRepository.findByLatAndLon(dto.getStartAddress().getLat(), dto.getStartAddress().getLon());
+        if (coord.isEmpty()) {
+            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getStartAddress()));
+            stations.add(newC);
+        }
+        else stations.add(coord.get());
 
         if (dto.getStops() != null && !dto.getStops().isEmpty()) {
-            for (String stopAddress : dto.getStops()) {
-                if (stopAddress != null && !stopAddress.trim().isEmpty()) {
-                    Coordinate stopCoord = new Coordinate();
-                    stopCoord.setAddress(stopAddress);
-                    stopCoord = coordinateRepository.save(stopCoord);
-                    stations.add(stopCoord);
+            for (GetCoordinateDTO stopAddress : dto.getStops()) {
+                if (stopAddress != null) {
+                    coord = coordinateRepository.findByLatAndLon(stopAddress.getLat(), stopAddress.getLon());
+                    if (coord.isEmpty()) {
+                        Coordinate newC = coordinateRepository.save(new Coordinate(stopAddress));
+                        stations.add(newC);
+                    }
+                    else stations.add(coord.get());
                 }
             }
         }
 
-        Coordinate destCoord = new Coordinate();
-        destCoord.setAddress(dto.getDestinationAddress());
-        destCoord = coordinateRepository.save(destCoord);
-        stations.add(destCoord);
+        coord = coordinateRepository.findByLatAndLon(dto.getDestinationAddress().getLat(), dto.getDestinationAddress().getLon());
+        if (coord.isEmpty()) {
+            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
+            stations.add(newC);
+        }
+        else stations.add(coord.get());
 
         route.setStations(stations);
         route = routeRepository.save(route);

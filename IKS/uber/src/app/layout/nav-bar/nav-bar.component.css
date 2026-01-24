@@ -6,7 +6,7 @@
   height: 100vh;
 }
 
-mat-sidenav-container{
+mat-sidenav-container {
   position: absolute;
   height: 90vh;
 }
@@ -72,7 +72,6 @@ button {
   font-size: 14px;
 }
 
-
 mat-sidenav-container {
   position: absolute;
   z-index: 2;
@@ -90,7 +89,6 @@ mat-sidenav-container {
   align-items: center;
   height: 64px;
   padding: 0 16px;
-
 }
 
 .notification {
@@ -125,4 +123,3 @@ mat-sidenav-container {
     width: 25vw;
   }
 }
-

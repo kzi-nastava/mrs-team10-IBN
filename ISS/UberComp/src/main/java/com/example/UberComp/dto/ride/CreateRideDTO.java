@@ -1,5 +1,8 @@
 package com.example.UberComp.dto.ride;
 
+import com.example.UberComp.dto.driver.CoordinateDTO;
+import com.example.UberComp.dto.driver.GetCoordinateDTO;
+import com.example.UberComp.model.Coordinate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,10 +15,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateRideDTO {
-    private String startAddress;
-    private String destinationAddress;
+    private GetCoordinateDTO startAddress;
+    private GetCoordinateDTO destinationAddress;
     private Double distance;
-    private List<String> stops;
+    private List<GetCoordinateDTO> stops;
     private List<String> passengerEmails;
     private String vehicleType;
     private Boolean babySeat;

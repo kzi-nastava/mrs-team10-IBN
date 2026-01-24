@@ -35,7 +35,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
   @Input() locations: Location[] = [];
   @Input() stations: Station[] = [];
   @Input() interactive: boolean = true;
-  @Output() locationAdded = new EventEmitter<string>();
+  @Output() locationAdded = new EventEmitter<{ address: string; lat: number; lon: number }>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
   @Output() routeCalculated = new EventEmitter<{ distance: number; duration: number }>();
@@ -277,7 +277,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
         this.addPointWithIcon(lat, lng, this.PinIcon, address);
 
         if (address) {
-          this.locationAdded.emit(address);
+          this.locationAdded.emit({ address, lat, lon: lng });
         }
       } catch (error) {
         console.error('Error reverse geocoding:', error);
@@ -388,46 +388,52 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   async getVehiclePositions() {
     while (this.getVehiclesOnHome) {
+      this.vehicleLayer.clearLayers();
       try {
         const rides = await firstValueFrom(
           this.http.get<Ride[]>(`${environment.apiHost}/rides/activeRides`),
         );
 
         for (const ride of rides) {
-          const now = Date.now();
-          const start = new Date(ride.startTime).getTime();
-          const eta = new Date(ride.estimatedTimeArrival).getTime();
-          let progress = 0;
-          if (eta > start) progress = (now - start) / (eta - start);
-          progress = Math.max(0, Math.min(1, progress));
+          if (ride.isBusy) {
+            const now = Date.now();
+            const start = new Date(ride.startTime).getTime();
+            const eta = new Date(ride.estimatedTimeArrival).getTime();
+            let progress = 0;
+            if (eta > start) progress = (now - start) / (eta - start);
+            progress = Math.max(0, Math.min(1, progress));
 
-          const waypoints = ride.route.stations
-            .filter((s) => s.lat != null && s.lon != null)
-            .map((s) => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
+            const waypoints = ride.route.stations
+              .filter((s) => s.lat != null && s.lon != null)
+              .map((s) => L.Routing.waypoint(new L.LatLng(s.lat, s.lon)));
 
-          if (waypoints.length < 2) continue;
+            if (waypoints.length < 2) continue;
 
-          const router = L.Routing.mapbox(environment.apiKey, { profile: 'mapbox/driving' });
+            const router = L.Routing.mapbox(environment.apiKey, { profile: 'mapbox/driving' });
 
-          (router as any).route(waypoints, (err: any, routes: any[]) => {
-            if (err || !routes?.length) return;
+            (router as any).route(waypoints, (err: any, routes: any[]) => {
+              if (err || !routes?.length) return;
+              const coords = routes[0].coordinates;
+              if (!coords?.length) return;
 
-            const coords = routes[0].coordinates;
-            if (!coords?.length) return;
+              const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
+              const pos = coords[index];
 
-            const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
-            const pos = coords[index];
-
-            L.marker([pos.lat, pos.lng], {
-              icon: ride.isBusy ? this.RedCarIcon : this.GreenCarIcon,
+              console.log(ride);
+              L.marker([pos.lat, pos.lng], {
+                icon: this.RedCarIcon,
+              }).addTo(this.vehicleLayer);
+            });
+          } else {
+            L.marker([ride.vehicleLocation.latitude, ride.vehicleLocation.longitude], {
+              icon: this.GreenCarIcon,
             }).addTo(this.vehicleLayer);
-          });
+          }
         }
       } catch (err) {
         console.error(err);
       }
 
-      this.vehicleLayer.clearLayers();
       await this.sleep(3000);
     }
   }
