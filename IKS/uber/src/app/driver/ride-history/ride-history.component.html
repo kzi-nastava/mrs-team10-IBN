@@ -14,17 +14,15 @@
       <mat-datepicker-toggle matIconSuffix [for]="topicker"></mat-datepicker-toggle>
       <mat-datepicker #topicker></mat-datepicker>
     </mat-form-field>
-    @if (role == 'administrator') {
-      <select (change)="onSelectChange($event)">
-        <option value="" disabled selected hidden>Sort By</option>
-        <option value="price-asc">Price (ascending)</option>
-        <option value="price-desc">Price (descending)</option>
-        <option value="start-asc">Start (ascending)</option>
-        <option value="start-desc">Start (descending)</option>
-        <option value="end-asc">End (ascending)</option>
-        <option value="end-desc">End (descending)</option>
-      </select>
-    }
+    <select (change)="onSelectChange($event)">
+      <option value="" disabled selected hidden>Sort By</option>
+      <option value="price-asc">Price (ascending)</option>
+      <option value="price-desc">Price (descending)</option>
+      <option value="start-asc">Start (ascending)</option>
+      <option value="start-desc">Start (descending)</option>
+      <option value="end-asc">End (ascending)</option>
+      <option value="end-desc">End (descending)</option>
+    </select>
   </div>
 
   <div class="container" (scroll)="onScroll($event)">

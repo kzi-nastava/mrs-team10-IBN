@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { Component } from '@angular/core';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatToolbarModule} from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
@@ -21,20 +21,15 @@ import { UpdateLocationComponent } from '../update-location/update-location.comp
 export class NavBarComponent {
   isDriver = false;
   loggedIn: boolean;
-  private authService = inject(AuthService);
-  private dialog = inject(MatDialog);
-  private router = inject(Router);
-
-  constructor() {
-    this.loggedIn = this.authService.isLoggedIn();
-    if (this.loggedIn) {
-      const role = this.authService.role();
-      this.isDriver = role === 'DRIVER' || role === 'driver';
-    }
+  router: Router;
+  constructor(authService: AuthService, router: Router){
+    this.loggedIn = authService.isLoggedIn()
+    this.router = router
   }
 
   logout() {
     localStorage.clear();
-    this.router.navigate(['/home']);
+    this.loggedIn = false;
+    this.router.navigate(["/home"]);
   }
 }

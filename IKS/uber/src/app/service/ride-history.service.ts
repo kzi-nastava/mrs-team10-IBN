@@ -72,7 +72,6 @@ export interface GetRideDTO {
   providedIn: 'root',
 })
 export class RideService {
-  private apiUrl = 'http://localhost:8090/api';
   private authService = inject(AuthService);
   private role = this.authService.role();
 
@@ -88,7 +87,7 @@ export class RideService {
 
 
   constructor(private http: HttpClient) {
-    this.loadRides();
+    this.loadRides(window.location.search);
     this.loadScheduledRides();
   }
 
@@ -98,14 +97,11 @@ export class RideService {
   private _scheduled_rides = signal<Ride[]>([]);
   scheduled_rides = this._scheduled_rides.asReadonly();
 
-  loadRides() {
+  loadRides(query: string) {
     if (this.loadingRides || !this.hasMoreRides) return;
     this.loadingRides = true;
 
-    const url =
-      this.role === 'driver'
-        ? `${environment.apiHost}/rides/driver`
-        : `${environment.apiHost}/rides/passenger`;
+    const url = `${environment.apiHost}/rides/history${query}`
 
     this.http
       .get<PageResponse<Ride>>(url, {
@@ -163,27 +159,27 @@ export class RideService {
   }
 
   calculatePrice(dto: CreateRideDTO): Observable<PriceDTO> {
-    return this.http.post<PriceDTO>(`${this.apiUrl}/rides/calculate-price`, dto);
+    return this.http.post<PriceDTO>(`${environment.apiHost}/rides/calculate-price`, dto);
   }
 
   orderRide(dto: CreateRideDTO): Observable<RideOrderResponseDTO> {
-    return this.http.post<RideOrderResponseDTO>(`${this.apiUrl}/rides`, dto);
+    return this.http.post<RideOrderResponseDTO>(`${environment.apiHost}/rides`, dto);
   }
 
   getFavoriteRoutes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/rides/favorites`);
+    return this.http.get<any[]>(`${environment.apiHost}/rides/favorites`);
   }
 
   addToFavorites(routeId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/rides/history/${routeId}/add-to-favorites`, {});
+    return this.http.put(`${environment.apiHost}/rides/history/${routeId}/add-to-favorites`, {});
   }
 
   removeFromFavorites(routeId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/rides/favorites/by-favorite-id/${routeId}`);
+    return this.http.delete<void>(`${environment.apiHost}/rides/favorites/by-favorite-id/${routeId}`);
   }
 
   removeFromOtherFavorites(routeId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/rides/history/by-route-id/${routeId}`);
+    return this.http.delete<void>(`${environment.apiHost}/rides/history/by-route-id/${routeId}`);
   }
 
   hasOngoingRide(): Observable<boolean> {

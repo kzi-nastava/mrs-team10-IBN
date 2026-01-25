@@ -13,9 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -64,15 +62,77 @@ public class RideService {
         return newRide;
     }
 
-    public Page<GetRideDTO> getRidesDriver(Long driverId, Pageable pageable){
-        return rideRepository
-                .getRidesDriver(driverId, pageable)
-                .map(GetRideDTO::new);
+    public Page<GetRideDTO> getRidesDriver(Long driverId, String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesDriverWithDateFilter(driverId, startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesDriverFromDate(driverId, startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesDriverToDate(driverId, startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesDriver(driverId, pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
     }
 
-    public Page<GetRideDTO> getRidesPassenger(Long passengerId, Pageable pageable){
-        Page<Ride> ridesPage = rideRepository.getRidesPassenger(passengerId, pageable);
-        return new PageImpl<>(ridesPage.getContent().stream().map(GetRideDTO::new).toList(), pageable, ridesPage.getTotalElements());
+    public Page<GetRideDTO> getRidesAdmin(String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesAdminWithDateFilter(startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesAdminFromDate(startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesAdminToDate(startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesAdmin(pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
+    }
+
+    public Page<GetRideDTO> getRidesPassenger(Long userId, String sortParam,
+                                              LocalDateTime startFrom, LocalDateTime startTo,
+                                              int page, int size) {
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesPassengerWithDateFilter(userId, startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesPassengerFromDate(userId, startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesPassengerToDate(userId, startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesPassenger(userId, pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
+    }
+
+    private Sort buildSort(String sortParam) {
+        if(sortParam == null) return Sort.by(Sort.Direction.DESC, "start");
+        return switch (sortParam) {
+            case "price-asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price-desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "start-asc" -> Sort.by(Sort.Direction.ASC, "start");
+            case "start-desc" -> Sort.by(Sort.Direction.DESC, "start");
+            case "end-asc" -> Sort.by(Sort.Direction.ASC, "estimatedTimeArrival");
+            case "end-desc" -> Sort.by(Sort.Direction.DESC, "estimatedTimeArrival");
+            default -> Sort.by(Sort.Direction.DESC, "start"); // default sorting
+        };
     }
 
     @Transactional(readOnly = true)
