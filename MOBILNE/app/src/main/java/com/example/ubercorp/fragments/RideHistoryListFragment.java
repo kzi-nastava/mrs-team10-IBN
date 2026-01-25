@@ -35,6 +35,8 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     private RideManager rideManager;
     private int currentPage = 0;
     private boolean isLastPage = false;
+    private String startFrom;
+    private String startTo;
 
     public RideHistoryListFragment() {
     }
@@ -42,6 +44,12 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            startFrom = getArguments().getString("startDate");
+            startTo = getArguments().getString("endDate");
+        }
+
         adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
         setListAdapter(adapter);
         rideManager = new RideManager(requireContext());
@@ -71,11 +79,16 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     private void loadNextPage() {
         if (isLastPage) return;
 
-        rideManager.loadDriverRides(currentPage, 2, new Callback<>() {
+        Log.d("RideHistoryList", "Loading page: " + currentPage +
+                ", From: " + startFrom + ", To: " + startTo);
+
+        rideManager.loadDriverRides(currentPage, 2, startFrom, startTo, new Callback<>() {
             @Override
             public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
+                Log.d("RideHistoryList", "Response code: " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
                     GetRideDTO dto = response.body();
+                    Log.d("RideHistoryList", "Rides count: " + dto.getContent().size());
                     for (RideDTO r : dto.getContent()) {
                         mRides.add(r);
                     }
@@ -83,14 +96,17 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
 
                     currentPage++;
                     isLastPage = currentPage >= dto.getTotalPages();
+                } else {
+                    Log.e("RideHistoryList", "Response not successful");
                 }
             }
             @Override
             public void onFailure(Call<GetRideDTO> call, Throwable t) {
-                Log.e("RideHistory", t.getMessage());
+                Log.e("RideHistoryList", "Error: " + t.getMessage());
             }
         });
     }
+
 
     @Nullable
     @Override

@@ -70,6 +70,7 @@ public class RideHistoryListAdapter extends ArrayAdapter<RideDTO> {
         TextView start = convertView.findViewById(R.id.startTime);
         TextView end = convertView.findViewById(R.id.endTime);
         TextView price = convertView.findViewById(R.id.price);
+        TextView date = convertView.findViewById(R.id.startDate);
 
         if(ride != null) {
             startLocation.setText(ride.getStartLocation());
@@ -79,6 +80,8 @@ public class RideHistoryListAdapter extends ArrayAdapter<RideDTO> {
 
             end.setText(ride.getEndTime().substring(11,16));
             price.setText(ride.getPrice().toString() + " RSD");
+            date.setText(ride.getStartTime().substring(0,10));
+
 
             LinearLayout avatarsLayout = convertView.findViewById(R.id.avatars);
 

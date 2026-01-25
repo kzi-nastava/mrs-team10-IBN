@@ -25,14 +25,14 @@ public class RideManager {
         return sharedPref.getString("auth_token", null);
     }
 
-    public void loadDriverRides ( int page, int size, Callback<GetRideDTO> callback){
+    public void loadDriverRides ( int page, int size, String startFrom, String startTo, Callback<GetRideDTO> callback){
         String token = getToken();
         if (token == null) return;
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
 
         Call<GetRideDTO> call =
-                api.getRidesDriver("Bearer " + token, page, size);
+                api.getRidesDriver("Bearer " + token, page, size, startFrom, startTo);
 
         call.enqueue(callback);
     }
