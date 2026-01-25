@@ -3,46 +3,100 @@ package com.example.ubercorp.fragments;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideHistoryBinding;
-import com.example.ubercorp.model.Ride;
-import com.example.ubercorp.model.User;
+import com.example.ubercorp.dto.GetRideDTO;
+import com.example.ubercorp.dto.RideDTO;
+import com.example.ubercorp.managers.RideManager;
 
 import java.util.ArrayList;
-import java.util.Date;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import android.widget.EditText;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class RideHistoryFragment extends Fragment {
-
-    public static ArrayList<Ride> rides = new ArrayList<Ride>();
-    private RideHistoryViewModel ridesViewModel;
     private FragmentRideHistoryBinding binding;
+    private SimpleDateFormat dateFormat;
+    private RideManager rideManager;
 
-    private boolean isFirstSelection;
-
-    public RideHistoryFragment() {
-    }
-    public static RideHistoryFragment newInstance() {
-        return new RideHistoryFragment();
-    }
+    public RideHistoryFragment() {}
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ridesViewModel = new ViewModelProvider(this).get(RideHistoryViewModel.class);
 
         binding = FragmentRideHistoryBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
 
-        prepareRidesList(rides);
+        dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 
-        FragmentTransition.to(RideHistoryListFragment.newInstance(rides), getActivity(), false,
-                R.id.scroll_rides_list);
+        EditText editTextStartDate = binding.editTextStartDate;
+        EditText editTextEndDate = binding.editTextEndDate;
 
-        return root;
+        Calendar today = Calendar.getInstance();
+        editTextStartDate.setText(dateFormat.format(today.getTime()));
+        editTextEndDate.setText(dateFormat.format(today.getTime()));
+
+        editTextStartDate.setOnClickListener(v -> showMaterialDatePicker(true));
+        editTextEndDate.setOnClickListener(v -> showMaterialDatePicker(false));
+
+        FragmentTransition.to(
+                new RideHistoryListFragment(),
+                getActivity(),
+                false,
+                R.id.scroll_rides_list
+        );
+
+        return binding.getRoot();
+    }
+
+    private void showMaterialDatePicker(boolean isStartDate) {
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText(isStartDate ? "Pick start date" : "Pick end date: ")
+                .build();
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(selection);
+
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String isoDate = isoFormat.format(calendar.getTime());
+
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+            String displayDate = displayFormat.format(calendar.getTime());
+
+            if (isStartDate) {
+                binding.editTextStartDate.setText(displayDate);
+                binding.editTextStartDate.setTag(isoDate);
+            } else {
+                binding.editTextEndDate.setText(displayDate);
+                binding.editTextEndDate.setTag(isoDate);
+            }
+
+            String startDate = (String) binding.editTextStartDate.getTag();
+            String endDate = (String) binding.editTextEndDate.getTag();
+
+            RideHistoryListFragment fragment = new RideHistoryListFragment();
+            Bundle args = new Bundle();
+            args.putString("startDate", startDate + "T00:00:00Z");
+            args.putString("endDate", endDate + "T23:59:59Z");
+            fragment.setArguments(args);
+
+            FragmentTransition.to(
+                    fragment,
+                    getActivity(),
+                    false,
+                    R.id.scroll_rides_list
+            );
+        });
+
+        datePicker.show(getParentFragmentManager(), "DATE_PICKER");
     }
 
     @Override
@@ -51,21 +105,5 @@ public class RideHistoryFragment extends Fragment {
         binding = null;
     }
 
-    private void prepareRidesList(ArrayList<Ride> rides){
-        rides.clear();
-        ArrayList<User> users = new ArrayList<>();
-        users.add(new User(1L, "Ivana Ignjatic", "066 066 00 00"));
-        users.add(new User(1L, "Niksa Cvorovic", "066 066 00 00"));
-        users.add(new User(1L, "Bojana Paunovic", "066 066 00 00"));
 
-        rides.add(new Ride(1L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(2L, "Alekse Santica 4, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(3L, "Alekse Santica 3, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(4L, "Alekse Santica 2, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(5L, "Alekse Santica 1, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(6L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(7L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(8L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-        rides.add(new Ride(9L, "Alekse Santica 5, Novi Sad", "Mileve Maric 40, Novi Sad", new Date(12,12,2025), new Date(12,12,2025), 824.00, users));
-    }
 }

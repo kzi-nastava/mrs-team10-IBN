@@ -274,7 +274,7 @@ public class RouteFragment extends Fragment {
         }
     }
 
-    private List<GeoPoint> getRoute(List<GeoPoint> stations) throws IOException, JSONException {
+    public List<GeoPoint> getRoute(List<GeoPoint> stations) throws IOException, JSONException {
         try {
             String urlString = buildQueryString(stations);
             Log.i("RouteFragment", "Requesting route: " + urlString);
@@ -331,7 +331,7 @@ public class RouteFragment extends Fragment {
         return null;
     }
 
-    private void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {
+    public void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {
         Polyline routeLine = new Polyline();
         routeLine.setPoints(routePoints);
         routeLine.setColor(0xFF0000FF);

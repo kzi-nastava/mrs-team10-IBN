@@ -1,6 +1,9 @@
 package com.example.ubercorp.api;
 
 import com.example.ubercorp.BuildConfig;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -14,9 +17,14 @@ public class ApiClient {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .build();
 
+        Gson gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                .create();
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.API_HOST)
                 .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
                 .build();
     }

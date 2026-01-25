@@ -1,7 +1,7 @@
 package com.example.ubercorp.interfaces;
 
-import com.example.ubercorp.model.Ride;
+import com.example.ubercorp.dto.RideDTO;
 
 public interface onRideClickListener {
-    void onRideClick(Ride ride);
+    void onRideClick(RideDTO ride);
 }
