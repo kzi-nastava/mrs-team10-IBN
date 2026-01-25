@@ -29,4 +29,10 @@
             android:icon="@drawable/ic_car"
             android:orderInCategory="500" />
     </group>
+    <group android:id="@+id/logout_group">
+        <item android:id="@+id/logout"
+            android:title="Logout"
+            android:icon="@drawable/ic_logout"
+            android:orderInCategory="600" />
+    </group>
 </menu>
