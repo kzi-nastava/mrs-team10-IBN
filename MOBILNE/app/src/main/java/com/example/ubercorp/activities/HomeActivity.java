@@ -11,16 +11,16 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.ActivityHomeBinding;
-import com.example.ubercorp.fragments.OrderRideFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.HashSet;
@@ -37,7 +37,6 @@ public class HomeActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private Set<Integer> topLevelDestinations = new HashSet<>();
-    //private Button orderRideButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,22 +61,86 @@ public class HomeActivity extends AppCompatActivity {
         navController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
             Log.i("UberComp", "Destination Changed");
         });
-        //orderRideButton = findViewById(R.id.orderRideButton);
 
         mAppBarConfiguration = new AppBarConfiguration
                 .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment)
                 .setOpenableLayout(drawer)
                 .build();
 
-
-
-        NavigationUI.setupWithNavController(navigationView, navController);
-
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
-//        orderRideButton.setOnClickListener(v -> {
-//            navController.navigate(R.id.orderRideFragment);
-//        });
+        updateMenuVisibility();
+        setupNavigation();
+    }
+
+    private boolean isUserLoggedIn() {
+        SharedPreferences sharedPref = getSharedPreferences("uber_corp", MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+        return token != null && !token.isEmpty();
+    }
+
+    private void updateMenuVisibility() {
+        Menu menu = navigationView.getMenu();
+        boolean isLoggedIn = isUserLoggedIn();
+
+        MenuItem accountItem = menu.findItem(R.id.accountFragment);
+        MenuItem logoutItem = menu.findItem(R.id.logout);
+
+        if (accountItem != null) {
+            accountItem.setVisible(isLoggedIn);
+        }
+        if (logoutItem != null) {
+            logoutItem.setVisible(isLoggedIn);
+        }
+    }
+
+    private void setupNavigation() {
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.logout) {
+                showLogoutDialog();
+                return true;
+            } else if (id == R.id.routeFragment) {
+                navController.navigate(R.id.routeFragment);
+            } else if (id == R.id.accountFragment) {
+                navController.navigate(R.id.accountFragment);
+            } else if (id == R.id.rating) {
+                navController.navigate(R.id.rating);
+            } else if (id == R.id.ride_history) {
+                navController.navigate(R.id.ride_history);
+            } else if (id == R.id.tracking_ride) {
+                navController.navigate(R.id.tracking_ride);
+            }
+
+            drawer.closeDrawers();
+            return true;
+        });
+    }
+
+    private void showLogoutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    performLogout();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .show();
+    }
+
+    private void performLogout() {
+        SharedPreferences sharedPref = getSharedPreferences("uber_corp", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -91,10 +154,15 @@ public class HomeActivity extends AppCompatActivity {
         return NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public boolean onSupportNavigateUp() {
         navController = Navigation.findNavController(this, R.id.fragment_nav_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration) || super.onSupportNavigateUp();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateMenuVisibility();
     }
 }
