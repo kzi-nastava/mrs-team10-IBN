@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal,  } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal,  } from '@angular/core';
 import { NotificationService, AppNotification } from '../../service/notification.service';
 import { NavBarComponent } from "../nav-bar/nav-bar.component";
 import { MatIconModule } from '@angular/material/icon';
@@ -21,12 +21,12 @@ export class NotificationTabComponent implements OnInit{
     this.notificationService.loadNotifications().subscribe({
       next: (res) => this.notifications.set(res)
     })
-    let ws = new SockJS(`http://localhost:8090/socket`);
+    let ws = new SockJS(`${environment.socketHost}`);
     this.stompClient = Stomp.over(ws);
     let that = this;
 
     this.stompClient.connect({}, function () {
-      that.stompClient!.subscribe("/notifications/panic", (message: Stomp.Message) => {
+      that.stompClient!.subscribe("/notifications/admin", (message: Stomp.Message) => {
         that.handleResult(message);
       });
     });

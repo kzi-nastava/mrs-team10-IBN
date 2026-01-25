@@ -26,7 +26,7 @@ public class NotificationController {
     }
 
     @MessageMapping("/panic") // activates on /ws/panic
-    @SendTo("/notifications/panic") // send messages to topic /notification/panic
+    @SendTo("/notifications/admin") // send messages to topic /notification/admin
     public Notification broadcastPanicNotification(String rawNotif){
         ObjectMapper mapper = new ObjectMapper();
         try {
