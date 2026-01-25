@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ubercorp.R;
 import com.example.ubercorp.activities.enums.RideStatus;
 import com.example.ubercorp.managers.RouteManager;
@@ -22,12 +23,14 @@ import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,56 +124,31 @@ public class RideDetailsFragment extends Fragment {
 
                 ((TextView) view.findViewById(R.id.user_name)).setText(user.getName() + " "+ user.getLastName());
                 ((TextView) view.findViewById(R.id.phone_number)).setText(user.getPhone());
+                ShapeableImageView imageView = view.findViewById(R.id.profile_pic);
 
+                String imagePath = user.getImage();
+
+                if (imagePath == null || imagePath.isEmpty()) {
+                    imageView.setImageResource(R.drawable.placeholderpfp);
+                } else {
+                    File imgFile = new File(imagePath);
+
+                    if (imgFile.exists()) {
+                        Glide.with(view.getContext())
+                                .load(imgFile)
+                                .placeholder(R.drawable.placeholderpfp)
+                                .error(R.drawable.placeholderpfp)
+                                .into(imageView);
+                    } else {
+                        imageView.setImageResource(R.drawable.placeholderpfp);
+                    }
+                }
                 passengersLayout.addView(view);
             }
 
         }
 
     }
-
-    private void drawRouteOnMap(List<GeoPoint> routePoints, List<GeoPoint> stations) {
-        if (binding.map == null || routePoints == null || routePoints.isEmpty()) return;
-
-        // 1️⃣ Polyline rute
-        Polyline routeLine = new Polyline();
-        routeLine.setPoints(routePoints);
-        routeLine.setColor(0xFF0077CC); // plava
-        routeLine.setWidth(10.0f);
-
-        // 2️⃣ Očisti postojeće overlay-e
-        binding.map.getOverlays().clear();
-        binding.map.getOverlays().add(routeLine);
-
-        // 3️⃣ Dodaj markere na sve stanice
-        for (GeoPoint station : stations) {
-            Marker marker = new Marker(binding.map);
-            marker.setPosition(station);
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            marker.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.ic_location));
-            binding.map.getOverlays().add(marker);
-        }
-
-        // 4️⃣ Centrira mapu na BoundingBox
-        double minLat = routePoints.get(0).getLatitude();
-        double maxLat = routePoints.get(0).getLatitude();
-        double minLon = routePoints.get(0).getLongitude();
-        double maxLon = routePoints.get(0).getLongitude();
-
-        for (GeoPoint p : routePoints) {
-            if (p.getLatitude() < minLat) minLat = p.getLatitude();
-            if (p.getLatitude() > maxLat) maxLat = p.getLatitude();
-            if (p.getLongitude() < minLon) minLon = p.getLongitude();
-            if (p.getLongitude() > maxLon) maxLon = p.getLongitude();
-        }
-
-        BoundingBox bbox = new BoundingBox(maxLat, maxLon, minLat, minLon);
-        binding.map.zoomToBoundingBox(bbox, true, 100); // 100 px padding
-
-        binding.map.invalidate();
-    }
-
-
 
     @Override
     public void onDestroyView(){

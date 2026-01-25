@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideHistoryListBinding;
 import com.example.ubercorp.dto.GetRideDTO;
@@ -29,52 +31,60 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
 
     private RideHistoryListAdapter adapter;
     private FragmentRideHistoryListBinding binding;
-
     private ArrayList<RideDTO> mRides = new ArrayList<>();
     private RideManager rideManager;
-
     private int currentPage = 0;
     private boolean isLastPage = false;
-
-
 
     public RideHistoryListFragment() {
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
         setListAdapter(adapter);
-
         rideManager = new RideManager(requireContext());
-
         loadNextPage();
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+                if (!isLastPage && totalItemCount > 0 &&
+                        (firstVisibleItem + visibleItemCount >= totalItemCount)) {
+                    loadNextPage();
+                }
+            }
+        });
+    }
+
 
     private void loadNextPage() {
         if (isLastPage) return;
 
-        rideManager.loadDriverRides(currentPage, 10, new Callback<>() {
+        rideManager.loadDriverRides(currentPage, 2, new Callback<>() {
             @Override
             public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
                 if (response.isSuccessful() && response.body() != null) {
-
                     GetRideDTO dto = response.body();
-
                     for (RideDTO r : dto.getContent()) {
                         mRides.add(r);
                     }
-
                     adapter.notifyDataSetChanged();
 
                     currentPage++;
                     isLastPage = currentPage >= dto.getTotalPages();
                 }
             }
-
             @Override
             public void onFailure(Call<GetRideDTO> call, Throwable t) {
                 Log.e("RideHistory", t.getMessage());
@@ -82,13 +92,10 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
         });
     }
 
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         binding = FragmentRideHistoryListBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
