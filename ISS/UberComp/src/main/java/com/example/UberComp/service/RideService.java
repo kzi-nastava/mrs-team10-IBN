@@ -197,7 +197,8 @@ public class RideService {
         newCoordinate.setLat(stopRideDTO.getLat());
         newCoordinate.setLon(stopRideDTO.getLon());
         newCoordinate.setAddress(stopRideDTO.getAddress());
-        Coordinate savedCoord = coordinateRepository.save(newCoordinate);
+        Coordinate savedCoord = saveOrGetCoordinate(newCoordinate);
+
         List<Coordinate> newStations = ride.getRoute().getStations().subList(0, stopRideDTO.getPassed());
         newStations.add(savedCoord);
         stoppedRoute.setStations(newStations);
@@ -303,32 +304,20 @@ public class RideService {
         Route route = new Route();
         List<Coordinate> stations = new ArrayList<>();
 
-        Optional<Coordinate> coord = coordinateRepository.findByLatAndLon(dto.getStartAddress().getLat(), dto.getStartAddress().getLon());
-        if (coord.isEmpty()) {
-            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getStartAddress()));
-            stations.add(newC);
-        }
-        else stations.add(coord.get());
+        Coordinate startCoord = saveOrGetCoordinate(new Coordinate(dto.getStartAddress()));
+        stations.add(startCoord);
 
         if (dto.getStops() != null && !dto.getStops().isEmpty()) {
             for (GetCoordinateDTO stopAddress : dto.getStops()) {
                 if (stopAddress != null) {
-                    coord = coordinateRepository.findByLatAndLon(stopAddress.getLat(), stopAddress.getLon());
-                    if (coord.isEmpty()) {
-                        Coordinate newC = coordinateRepository.save(new Coordinate(stopAddress));
-                        stations.add(newC);
-                    }
-                    else stations.add(coord.get());
+                    Coordinate stopCoord = saveOrGetCoordinate(new Coordinate(stopAddress));
+                    stations.add(stopCoord);
                 }
             }
         }
 
-        coord = coordinateRepository.findByLatAndLon(dto.getDestinationAddress().getLat(), dto.getDestinationAddress().getLon());
-        if (coord.isEmpty()) {
-            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
-            stations.add(newC);
-        }
-        else stations.add(coord.get());
+        Coordinate destCoord = saveOrGetCoordinate(new Coordinate(dto.getDestinationAddress()));
+        stations.add(destCoord);
 
         route.setStations(stations);
         route = routeRepository.save(route);
@@ -473,5 +462,61 @@ public class RideService {
         driverRepository.save(driver);
         rideRepository.save(cancelledRide);
         return true;
+    }
+
+    private Coordinate saveOrGetCoordinate(Coordinate coordinate) {
+        if (coordinate == null) {
+            return null;
+        }
+
+        if (coordinate.getId() != null) {
+            return coordinate;
+        }
+
+        if (coordinate.getAddress() != null && !coordinate.getAddress().trim().isEmpty()) {
+            String address = coordinate.getAddress();
+            if (!address.toLowerCase().contains("novi sad")) {
+                address = address + ", Novi Sad, Serbia";
+                coordinate.setAddress(address);
+            }
+
+            Optional<Coordinate> existingByAddress = coordinateRepository.findByAddress(address);
+            if (existingByAddress.isPresent()) {
+                return existingByAddress.get();
+            }
+        }
+
+        if (coordinate.getLat() != null && coordinate.getLon() != null) {
+            Optional<Coordinate> existing = coordinateRepository.findByLatAndLon(
+                    coordinate.getLat(),
+                    coordinate.getLon()
+            );
+
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+
+        try {
+            return coordinateRepository.save(coordinate);
+        } catch (Exception e) {
+            if (coordinate.getAddress() != null) {
+                Optional<Coordinate> byAddress = coordinateRepository.findByAddress(coordinate.getAddress());
+                if (byAddress.isPresent()) {
+                    return byAddress.get();
+                }
+            }
+
+            if (coordinate.getLat() != null && coordinate.getLon() != null) {
+                Optional<Coordinate> byLatLon = coordinateRepository.findByLatAndLon(
+                        coordinate.getLat(),
+                        coordinate.getLon()
+                );
+                if (byLatLon.isPresent()) {
+                    return byLatLon.get();
+                }
+            }
+            throw new RuntimeException("Failed to save coordinate: " + e.getMessage());
+        }
     }
 }

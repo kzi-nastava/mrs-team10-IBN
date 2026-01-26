@@ -28,6 +28,9 @@ public class RouteManager {
     private Context context;
     private List<Marker> markers = new ArrayList<>();
 
+    private double estimatedDistance = 0.0;
+    private int estimatedDuration = 0;
+
     public RouteManager(MapView mapView, Context context){
         this.mapView = mapView;
         this.context = context;
@@ -82,6 +85,12 @@ public class RouteManager {
                     double lat = point.getDouble(1);
                     routePoints.add(new GeoPoint(lat, lon));
                 }
+                estimatedDistance = json.getJSONArray("routes")
+                        .getJSONObject(0).getDouble("distance") / 1000.0;
+
+                double durationSeconds = json.getJSONArray("routes")
+                        .getJSONObject(0).getDouble("duration");
+                estimatedDuration = (int) (durationSeconds / 60);
             }
 
             conn.disconnect();
@@ -106,6 +115,14 @@ public class RouteManager {
             markers.add(marker);
             mapView.getOverlays().add(marker);
         }
+    }
+
+    public double getEstimatedDistance() {
+        return estimatedDistance;
+    }
+
+    public int getEstimatedDuration() {
+        return estimatedDuration;
     }
 
     public void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {

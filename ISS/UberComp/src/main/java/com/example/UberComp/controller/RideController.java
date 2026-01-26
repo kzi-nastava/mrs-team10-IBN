@@ -6,6 +6,7 @@ import com.example.UberComp.dto.driver.DriverDTO;
 import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
 import com.example.UberComp.dto.driver.RouteDTO;
 import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
@@ -115,6 +116,7 @@ public class RideController {
 
     @GetMapping(value = "/activeRides", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehiclePositionDTO>> activeRides(){
+        driverService.updateAllDriverLocation();
         Collection<GetVehiclePositionDTO> activeRides = rideService.getActiveRides();
         return ResponseEntity.ok(activeRides);
     }

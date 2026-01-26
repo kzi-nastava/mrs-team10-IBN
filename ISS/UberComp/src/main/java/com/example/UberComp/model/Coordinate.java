@@ -27,18 +27,14 @@ public class Coordinate {
 
     private String address;
 
-    @Column(name = "cached_at", nullable = false)
-    private LocalDateTime cachedAt;
-
     public Coordinate() {
-        this.cachedAt = LocalDateTime.now();
+
     }
 
     public Coordinate(Double lat, Double lon, String address) {
         this.id = null;
         this.lat = lat;
         this.lon = lon;
-        this.cachedAt = LocalDateTime.now();
         this.address = address;
         if (!address.toLowerCase().contains("novi sad")) {
             this.address += ", Novi Sad, Serbia";
@@ -47,8 +43,6 @@ public class Coordinate {
 
     public Coordinate(GetCoordinateDTO coord) {
         this.id = null;
-        this.cachedAt = coord.getCachedAt();
-        if (this.cachedAt == null) this.cachedAt = LocalDateTime.now();
         this.lat = coord.getLat();
         this.lon = coord.getLon();
         this.address = coord.getAddress();

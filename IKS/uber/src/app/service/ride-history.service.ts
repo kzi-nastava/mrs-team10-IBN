@@ -39,7 +39,6 @@ export interface CoordinateDTO {
   lat: number;
   lon: number;
   address: string;
-  cachedAt?: string | null;
 }
 
 export interface CreateRideDTO {
@@ -85,7 +84,6 @@ export class RideService {
   loadingScheduled = false;
   hasMoreScheduled = true;
 
-
   constructor(private http: HttpClient) {
     this.loadRides(window.location.search);
     this.loadScheduledRides();
@@ -101,7 +99,7 @@ export class RideService {
     if (this.loadingRides || !this.hasMoreRides) return;
     this.loadingRides = true;
 
-    const url = `${environment.apiHost}/rides/history${query}`
+    const url = `${environment.apiHost}/rides/history${query}`;
 
     this.http
       .get<PageResponse<Ride>>(url, {
@@ -175,7 +173,9 @@ export class RideService {
   }
 
   removeFromFavorites(routeId: number): Observable<void> {
-    return this.http.delete<void>(`${environment.apiHost}/rides/favorites/by-favorite-id/${routeId}`);
+    return this.http.delete<void>(
+      `${environment.apiHost}/rides/favorites/by-favorite-id/${routeId}`,
+    );
   }
 
   removeFromOtherFavorites(routeId: number): Observable<void> {
