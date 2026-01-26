@@ -1,5 +1,5 @@
 <app-nav-bar></app-nav-bar>
-<div id="container">
+<div *ngIf="ride; else noRide" id="container">
   <h1>Incoming Ride</h1>
   <div id="places">
     <div>
@@ -29,3 +29,10 @@
     <button class="form-button-two" (click)="declineDialog.showModal()">Decline</button>
   </div>
 </div>
+
+<ng-template #noRide>
+  <div id="container" class="no-ride">
+    <h2>No incoming ride 🚕</h2>
+    <p>Please wait for a new request.</p>
+  </div>
+</ng-template>
