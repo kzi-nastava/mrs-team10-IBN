@@ -140,7 +140,6 @@ export class OrderRideComponent implements OnInit {
       lat: coords?.lat || 0,
       lon: coords?.lon || 0,
       address: normalizedAddress,
-      cachedAt: null,
     };
   }
 

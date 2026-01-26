@@ -10,6 +10,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/orderRide"
         android:fillViewport="true">
 
         <LinearLayout
@@ -187,8 +188,19 @@
                     android:layout_height="match_parent" />
 
             </androidx.cardview.widget.CardView>
-
         </LinearLayout>
     </ScrollView>
-
+    <Button
+        android:id="@+id/orderRide"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/btn_color_2"
+        android:padding="16dp"
+        android:text="Order Ride"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

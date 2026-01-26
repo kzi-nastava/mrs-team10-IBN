@@ -1,7 +1,7 @@
 <app-nav-bar></app-nav-bar>
 <router-outlet></router-outlet>
 <div class="container">
-  @if (isUserLoggedIn() && !isDriver()) {
+  @if (!isDriver()) {
     <div class="left-panel">
       <app-ride-approx-form
         #rideForm

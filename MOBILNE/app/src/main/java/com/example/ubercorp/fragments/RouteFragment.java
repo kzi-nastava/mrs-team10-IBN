@@ -9,6 +9,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.TypedValueCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -59,12 +60,16 @@ public class RouteFragment extends Fragment {
     private Button confirmButton;
     private Button addStopBtn;
     private Button removeStopBtn;
+    private Button orderRideButton;
     private boolean isDropdownOpen = false;
     private CardView locationDisplay;
     private CardView dropdownContent;
     private LinearLayout stopsContainer;
     private TextView locationText;
     private TextView timeText;
+
+    private double estimatedDistance = 0.0;
+    private int estimatedDuration = 0;
 
     @Nullable
     @Override
@@ -88,6 +93,7 @@ public class RouteFragment extends Fragment {
         stopsContainer = view.findViewById(R.id.stopsContainer);
         locationText = view.findViewById(R.id.locationText);
         timeText = view.findViewById(R.id.timeText);
+        orderRideButton = view.findViewById(R.id.orderRide);
 
         drawRouteButton.setOnClickListener(v -> {
             String startAddress = startAddressInput.getText().toString().trim();
@@ -107,8 +113,37 @@ public class RouteFragment extends Fragment {
         });
         addStopBtn.setOnClickListener(v -> addStop());
         removeStopBtn.setOnClickListener(v -> removeStop());
+        orderRideButton.setOnClickListener(v -> navigateToOrderRide());
 
         return view;
+    }
+
+    private void navigateToOrderRide() {
+        String startAddress = startAddressInput.getText().toString().trim();
+        String endAddress = endAddressInput.getText().toString().trim();
+
+        if (startAddress.isEmpty() || endAddress.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter start and end addresses first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bundle args = new Bundle();
+        args.putString("fromLocation", startAddress);
+        args.putString("toLocation", endAddress);
+
+        ArrayList<String> stopsList = new ArrayList<>();
+        for (EditText stationInput : stationInputList) {
+            String stop = stationInput.getText().toString().trim();
+            if (!stop.isEmpty()) {
+                stopsList.add(stop);
+            }
+        }
+        args.putStringArrayList("stops", stopsList);
+
+        args.putDouble("estimatedDistance", estimatedDistance);
+        args.putInt("estimatedDuration", estimatedDuration);
+
+        Navigation.findNavController(requireView()).navigate(R.id.action_routeFragment_to_orderRideFragment, args);
     }
 
     private void addStop() {
@@ -201,50 +236,50 @@ public class RouteFragment extends Fragment {
 
     private GeoPoint getCoordinatesFromAddress(String address) throws IOException, JSONException, InterruptedException {
         try {
-        Thread.sleep(1000); // Rate limiting
+            Thread.sleep(1000);
 
-        String encodedAddress = URLEncoder.encode(address + ", Novi Sad, Serbia", "UTF-8");
-        String urlString = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
+            String encodedAddress = URLEncoder.encode(address + ", Novi Sad, Serbia", "UTF-8");
+            String urlString = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
 
-        Log.i("RouteFragment", "Requesting: " + urlString);
+            Log.i("RouteFragment", "Requesting: " + urlString);
 
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("User-Agent", "UberCorp/1.0");
-        conn.setConnectTimeout(30000);
-        conn.setReadTimeout(30000);
-        conn.connect();
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "UberCorp/1.0");
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            conn.connect();
 
-        int responseCode = conn.getResponseCode();
-        Log.i("RouteFragment", "Response code: " + responseCode);
+            int responseCode = conn.getResponseCode();
+            Log.i("RouteFragment", "Response code: " + responseCode);
 
-        if (responseCode == 200) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+
+                String responseBody = result.toString();
+                Log.i("RouteFragment", "Response: " + responseBody);
+
+                JSONArray results = new JSONArray(responseBody);
+                if (results.length() > 0) {
+                    JSONObject resultObj = results.getJSONObject(0);
+                    double lat = resultObj.getDouble("lat");
+                    double lon = resultObj.getDouble("lon");
+                    return new GeoPoint(lat, lon);
+                }
             }
-            reader.close();
 
-            String responseBody = result.toString();
-            Log.i("RouteFragment", "Response: " + responseBody);
-
-            JSONArray results = new JSONArray(responseBody);
-            if (results.length() > 0) {
-                JSONObject resultObj = results.getJSONObject(0);
-                double lat = resultObj.getDouble("lat");
-                double lon = resultObj.getDouble("lon");
-                return new GeoPoint(lat, lon);
-            }
+            conn.disconnect();
+        } catch (Exception e) {
+            Log.e("RouteFragment", "Error: " + e.getMessage(), e);
         }
-
-        conn.disconnect();
-    } catch (Exception e) {
-        Log.e("RouteFragment", "Error: " + e.getMessage(), e);
-    }
-    return null;
+        return null;
     }
 
     private String buildQueryString(List<GeoPoint> stations){
@@ -305,11 +340,15 @@ public class RouteFragment extends Fragment {
                         .getJSONObject("geometry")
                         .getJSONArray("coordinates");
 
-                Double duration = json.getJSONArray("routes")
-                        .getJSONObject(0).getDouble("duration") / 60;
+                double durationSeconds = json.getJSONArray("routes")
+                        .getJSONObject(0).getDouble("duration");
+                estimatedDuration = (int) (durationSeconds / 60);
+
+                estimatedDistance = json.getJSONArray("routes")
+                        .getJSONObject(0).getDouble("distance") / 1000.0;
 
                 requireActivity().runOnUiThread(() ->
-                        timeText.setText("Estimated time: " + duration.intValue() + " minutes")
+                        timeText.setText("Estimated time: " + estimatedDuration + " minutes")
                 );
 
                 List<GeoPoint> routePoints = new ArrayList<>();
@@ -351,5 +390,21 @@ public class RouteFragment extends Fragment {
 
     private void showToast(String message) {
         requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mapView != null) {
+            mapView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mapView != null) {
+            mapView.onPause();
+        }
     }
 }

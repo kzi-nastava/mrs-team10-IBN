@@ -5,9 +5,12 @@ import android.content.SharedPreferences;
 
 import com.example.ubercorp.api.ApiClient;
 import com.example.ubercorp.api.RideService;
+import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
+import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideDTO;
+import com.example.ubercorp.dto.RideOrderResponseDTO;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,4 +51,21 @@ public class RideManager {
         call.enqueue(callback);
     }
 
+    public void createRide(CreateRideDTO rideDTO, Callback<RideOrderResponseDTO> callback) {
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<RideOrderResponseDTO> call = api.createRide("Bearer " + token, rideDTO);
+        call.enqueue(callback);
+    }
+
+    public void calculatePrice(CreateRideDTO rideDTO, Callback<PriceDTO> callback) {
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<PriceDTO> call = api.calculatePrice("Bearer " + token, rideDTO);
+        call.enqueue(callback);
+    }
 }
