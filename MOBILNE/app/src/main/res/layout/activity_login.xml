@@ -8,76 +8,82 @@
     android:background="@color/background"
     tools:context=".activities.LoginActivity">
 
-    <LinearLayout
-        android:paddingTop="100dp"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
+        android:fillViewport="true">
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <LinearLayout
+            android:paddingTop="100dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/logo" />
+            android:orientation="vertical"
+            android:gravity="center"
+            tools:layout_editor_absoluteX="1dp"
+            tools:layout_editor_absoluteY="1dp">
 
-        <EditText
-            android:id="@+id/emailField"
-            android:inputType="text"
-            android:hint="E-mail"
-            style="@style/textFieldStyle" />
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/logo" />
 
-        <EditText
-            android:id="@+id/passwordField"
-            android:inputType="textPassword"
-            android:hint="Password"
-            style="@style/textFieldStyle" />
+            <EditText
+                android:id="@+id/emailField"
+                android:inputType="text"
+                android:hint="E-mail"
+                style="@style/textFieldStyle" />
 
-        <Button
-            android:layout_marginTop="20dp"
-            android:id="@+id/loginButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Sign In"
-            android:backgroundTint="@color/btn_color_1"
-            android:textAllCaps="false" />
+            <EditText
+                android:id="@+id/passwordField"
+                android:inputType="textPassword"
+                android:hint="Password"
+                style="@style/textFieldStyle" />
 
-        <Button
-            android:layout_marginTop="20dp"
-            android:id="@+id/forgotPasswordButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Forgot Password"
-            android:backgroundTint="@color/btn_color_3"
-            android:textAllCaps="false" />
+            <Button
+                android:layout_marginTop="20dp"
+                android:id="@+id/loginButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Sign In"
+                android:backgroundTint="@color/btn_color_1"
+                android:textAllCaps="false" />
 
-        <Button
-            android:layout_marginTop="20dp"
-            android:id="@+id/continueButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Continue As Guest"
-            android:backgroundTint="@color/btn_color_2"
-            android:fontFamily="@font/mandali_regular"
-            android:textAllCaps="false" />
+            <Button
+                android:layout_marginTop="20dp"
+                android:id="@+id/forgotPasswordButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password"
+                android:backgroundTint="@color/btn_color_3"
+                android:textAllCaps="false" />
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <Button
+                android:layout_marginTop="20dp"
+                android:id="@+id/continueButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Continue As Guest"
+                android:backgroundTint="@color/btn_color_2"
+                android:fontFamily="@font/mandali_regular"
+                android:textAllCaps="false" />
 
-        <Button
-            android:layout_marginBottom="20dp"
-            android:id="@+id/registerButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Register"
-            android:backgroundTint="@color/btn_color_1"
-            android:fontFamily="@font/mandali_regular"
-            android:textAllCaps="false" />
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_marginBottom="20dp"
+                android:id="@+id/registerButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Register"
+                android:backgroundTint="@color/btn_color_1"
+                android:fontFamily="@font/mandali_regular"
+                android:textAllCaps="false" />
 
 
-    </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

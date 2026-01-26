@@ -14,6 +14,7 @@ import com.example.UberComp.service.AccountService;
 import com.example.UberComp.utils.EmailUtils;
 import com.example.UberComp.utils.TokenUtils;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,7 +39,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthTokenDTO> createAuthenticationToken(
-            @RequestBody LogAccountDTO authRequest, HttpServletResponse response) {
+            @Valid @RequestBody LogAccountDTO authRequest, HttpServletResponse response) {
         Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authRequest.getEmail(), authRequest.getPassword()));
 
@@ -52,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetProfileDTO> createAccount(@RequestBody RegisterDTO userData) throws Exception{
+    public ResponseEntity<GetProfileDTO> createAccount(@Valid @RequestBody RegisterDTO userData) throws Exception{
         User registered = accountService.register(userData);
         if (registered == null) return new ResponseEntity<>(HttpStatus.CONFLICT);
         AccountDTO registeredDTO = new AccountDTO(userData.getEmail());
@@ -73,7 +74,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> forgotPassword(@RequestBody AccountDTO account){
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody AccountDTO account){
         if(accountService.generatePasswordResetToken(account.getEmail())){
             return ResponseEntity.ok(null);
         }
@@ -89,7 +90,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/set-password/{token}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> setPassword(@PathVariable String token, @RequestBody SetPasswordDTO password){
+    public ResponseEntity<Void> setPassword(@PathVariable String token, @Valid @RequestBody SetPasswordDTO password){
         if(accountService.setPassword(token, password)){
             return ResponseEntity.ok(null);
         }
