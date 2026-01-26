@@ -126,7 +126,7 @@ export class TrackingRouteComponent {
         .stopRide(this.rideId!, this.passed, now.toISOString(), location, this.distance)
         .subscribe({
           next: (res) => {
-            this.router.navigate(['/home']);
+            this.router.navigate(['/incoming-ride']);
           },
         });
     }

@@ -1,4 +1,4 @@
-import { Component, Signal, computed, inject } from '@angular/core';
+import { Component, OnInit, Signal, computed, inject } from '@angular/core';
 import { Ride } from '../../model/ride-history.model';
 import { RideService } from '../../service/ride-history.service';
 import { NavBarComponent } from '../../layout/nav-bar/nav-bar.component';
@@ -26,21 +26,25 @@ import { RouterLink } from '@angular/router';
   templateUrl: './scheduled-rides.component.html',
   styleUrl: './scheduled-rides.component.css',
 })
-export class ScheduledRidesComponent {
+export class ScheduledRidesComponent implements OnInit {
   protected scheduled_rides: Signal<Ride[]>;
 
   constructor(private rideService: RideService) {
     this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
   }
-    
+
+  ngOnInit(): void {
+    console.log('da');
+    this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
+  }
+
   onScroll(event: any) {
-    
     const element = event.target as HTMLElement;
 
     const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 500;
-    
+
     console.log('atBottom:', atBottom);
-    
+
     if (atBottom) {
       this.rideService.loadScheduledRides();
     }

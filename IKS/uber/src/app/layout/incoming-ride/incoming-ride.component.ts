@@ -5,10 +5,11 @@ import { Router } from '@angular/router';
 import { MapComponent } from '../../maps/map-basic/map.component';
 import { RouteService, RidePayload, RideCancellation } from '../../service/route.service';
 import { Station } from '../../model/ride-history.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-incoming-ride',
-  imports: [MatIconModule, NavBarComponent, MapComponent],
+  imports: [MatIconModule, NavBarComponent, MapComponent, CommonModule],
   templateUrl: './incoming-ride.component.html',
   styleUrls: ['./incoming-ride.component.css'],
 })
@@ -23,6 +24,7 @@ export class IncomingRideComponent {
   constructor() {
     this.routeService.getRide().subscribe({
       next: (response) => {
+        if (!response) return;
         this.ride = response;
         this.route = [...response.route.stations];
         console.log('Loaded ride:', this.route);
@@ -44,14 +46,14 @@ export class IncomingRideComponent {
     });
   }
 
-  declineRide(reason: string){
+  declineRide(reason: string) {
     const cancelledRide: RideCancellation = {
       id: this.ride.id,
       cancellationReason: reason,
-      cancelledByDriver: true
-    }
+      cancelledByDriver: true,
+    };
     this.routeService.cancelRide(cancelledRide).subscribe({
-      next:(res) => this.router.navigate(["/home"])
-    })
+      next: (res) => this.router.navigate(['/home']),
+    });
   }
 }
