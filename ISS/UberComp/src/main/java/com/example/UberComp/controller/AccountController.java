@@ -30,19 +30,6 @@ class AccountController {
     @Autowired
     private AccountService accountService;
 
-    //@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    //public ResponseEntity<Collection<GetAccountDTO>> getAccounts(){
-    //    ArrayList<GetAccountDTO> accounts = new ArrayList<GetAccountDTO>();
-//
-    //    GetAccountDTO acc1 = new GetAccountDTO("user@gmail.com", AccountType.PASSENGER, AccountStatus.UNVERIFIED, null);
-    //    GetAccountDTO acc2 = new GetAccountDTO("niksa@gmail.com", AccountType.PASSENGER, AccountStatus.VERIFIED, null);
-//
-    //    accounts.add(acc1);
-    //    accounts.add(acc2);
-//
-    //    return new ResponseEntity<Collection<GetAccountDTO>>(accounts,HttpStatus.OK);
-    //}
-
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
         UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
