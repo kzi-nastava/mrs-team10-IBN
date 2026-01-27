@@ -70,6 +70,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
   constructor(private http: HttpClient) {}
 
   ngAfterViewInit(): void {
+    this.clearAll();
     this.initializeIcons();
     this.initMap();
     this.vehicleLayer = L.layerGroup().addTo(this.map);

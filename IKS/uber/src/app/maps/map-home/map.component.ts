@@ -90,13 +90,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
       className: 'car-icon',
     });
 
@@ -437,6 +437,27 @@ export class MapComponent implements AfterViewInit, OnChanges {
       await this.sleep(3000);
     }
   }
+
+public async geocodeAddress(address: string): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const normalizedAddress = address.toLowerCase().includes('novi sad') 
+      ? address 
+      : `${address}, Novi Sad, Serbia`;
+    
+    const result = await firstValueFrom(this.searchStreet(normalizedAddress));
+    
+    if (result && result.length > 0) {
+      return {
+        lat: parseFloat(result[0].lat),
+        lon: parseFloat(result[0].lon)
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+}
 
   sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));

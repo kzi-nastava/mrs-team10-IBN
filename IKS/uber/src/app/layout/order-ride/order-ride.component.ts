@@ -340,35 +340,70 @@ export class OrderRideComponent implements OnInit {
   }
 
   confirmSelection() {
-    const newLocationParts = [];
-    if (this.fromLocation) newLocationParts.push(this.fromLocation);
-    const validStops = this.stops.filter((s) => s.trim() !== '');
-    if (validStops.length > 0) newLocationParts.push(...validStops);
-    if (this.toLocation) newLocationParts.push(this.toLocation);
+  const newLocationParts = [];
+  if (this.fromLocation) newLocationParts.push(this.fromLocation);
+  const validStops = this.stops.filter((s) => s.trim() !== '');
+  if (validStops.length > 0) newLocationParts.push(...validStops);
+  if (this.toLocation) newLocationParts.push(this.toLocation);
 
-    const newLocationText = newLocationParts.join(' → ');
-    const locationsChanged = newLocationText !== this.locationText;
+  const newLocationText = newLocationParts.join(' → ');
+  const locationsChanged = newLocationText !== this.locationText;
 
-    this.locationText = newLocationText;
+  this.locationText = newLocationText;
 
-    if (this.timeOption === 'now') {
-      this.timeText = 'Leave now';
-    } else {
-      this.timeText = `${this.rideDate} at ${this.rideTime}`;
-    }
+  if (this.timeOption === 'now') {
+    this.timeText = 'Leave now';
+  } else {
+    this.timeText = `${this.rideDate} at ${this.rideTime}`;
+  }
 
-    this.isDropdownOpen = false;
+  this.isDropdownOpen = false;
 
-    if (locationsChanged) {
-      this.totalPrice = null;
-      this.estimatedDistance = 0;
-      this.estimatedDuration = null;
+  if (locationsChanged) {
+    this.totalPrice = null;
+    this.estimatedDistance = 0;
+    this.estimatedDuration = null;
 
+    this.geocodeMissingAddresses().then(() => {
       this.updateMapLocations();
-
       this.cd.detectChanges();
+    });
+  }
+}
+
+private async geocodeMissingAddresses(): Promise<void> {
+  const addressesToGeocode: string[] = [];
+
+  if (this.fromLocation && !this.addressCoordinates.has(this.fromLocation)) {
+    addressesToGeocode.push(this.fromLocation);
+  }
+
+  this.stops.forEach(stop => {
+    if (stop.trim() && !this.addressCoordinates.has(stop)) {
+      addressesToGeocode.push(stop);
+    }
+  });
+
+  if (this.toLocation && !this.addressCoordinates.has(this.toLocation)) {
+    addressesToGeocode.push(this.toLocation);
+  }
+
+  for (const address of addressesToGeocode) {
+    try {
+      const coords = await this.mapComponent.geocodeAddress(address);
+      if (coords) {
+        this.addressCoordinates.set(address, coords);
+        console.log(`Geocoded ${address}:`, coords);
+      } else {
+        this.addressCoordinates.set(address, { lat: 0, lon: 0 });
+        console.warn(`Failed to geocode ${address}, will let backend handle it`);
+      }
+    } catch (error) {
+      console.error(`Error geocoding ${address}:`, error);
+      this.addressCoordinates.set(address, { lat: 0, lon: 0 });
     }
   }
+}
 
   updateMapLocations() {
     const locations = [];

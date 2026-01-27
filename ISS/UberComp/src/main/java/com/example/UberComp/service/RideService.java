@@ -52,7 +52,8 @@ public class RideService {
     private FavoriteRouteRepository favoriteRouteRepository;
     @Autowired
     private EmailUtils emailUtils;
-    private DriverService driverService;
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @Transactional
     public IncomingRideDTO getIncomingRide(Driver driver){
@@ -183,9 +184,15 @@ public class RideService {
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStatus(RideStatus.Finished);
+        Driver driver = ride.getDriver();
+        driver.setStatus(DriverStatus.ONLINE);
         Instant instant = Instant.parse(finish.getIsotime());
         ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
         rideRepository.save(ride);
+        Vehicle vehicle = driver.getVehicle();
+        vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));
+        vehicleRepository.save(vehicle);
+        driverRepository.save(driver);
         emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", rideId);
         return new FinishedRideDTO(ride);
     }
@@ -219,11 +226,13 @@ public class RideService {
             ride.setPrice(newPrice);
             ride.setStatus(RideStatus.Finished);
             driver.setStatus(DriverStatus.ONLINE);
+            emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         }
-
+        Vehicle vehicle = driver.getVehicle();
+        vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));
+        vehicleRepository.save(vehicle);
         rideRepository.save(ride);
         driverRepository.save(driver);
-        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         return new FinishedRideDTO(ride);
     }
 

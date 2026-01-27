@@ -23,7 +23,7 @@
     <button class="form-button-one" (click)="declineRide(reason.value)">Send</button>
     <button class="form-button-two" (click)="declineDialog.close()">Close</button>
   </dialog>
-  <app-map [locations]="route"></app-map>
+  <app-map [locations]="route" [interactive]="false"></app-map>
   <div>
     <button class="form-button-one" (click)="startRide()">Start</button>
     <button class="form-button-two" (click)="declineDialog.showModal()">Decline</button>
