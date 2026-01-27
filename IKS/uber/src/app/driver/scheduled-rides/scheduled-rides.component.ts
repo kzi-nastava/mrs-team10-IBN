@@ -30,12 +30,12 @@ export class ScheduledRidesComponent implements OnInit {
   protected scheduled_rides: Signal<Ride[]>;
 
   constructor(private rideService: RideService) {
-    this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
+    this.scheduled_rides = this.rideService.scheduled_rides;
   }
 
   ngOnInit(): void {
-    console.log('da');
-    this.scheduled_rides = computed(() => this.rideService.scheduled_rides());
+    this.rideService.resetScheduledRides();
+    this.rideService.loadScheduledRides();
   }
 
   onScroll(event: any) {

@@ -180,7 +180,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
       const lat = station.lat;
       const lon = station.lon;
 
-      // Get address from reverse geocoding
       let addressString = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
       try {
         const addressResult = await this.reverseSearch(lat, lon).toPromise();
@@ -192,7 +191,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
         console.warn('Could not get address from reverse geocoding:', err);
       }
 
-      // Determine icon based on position
       let icon = this.PinIcon;
       if (index === 0) {
         icon = this.PickupIcon;

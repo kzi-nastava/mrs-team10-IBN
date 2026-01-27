@@ -1,10 +1,7 @@
 package com.example.UberComp.controller;
 
 import com.example.UberComp.dto.PageDTO;
-import com.example.UberComp.dto.driver.AvailableDriverDTO;
-import com.example.UberComp.dto.driver.DriverDTO;
-import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
-import com.example.UberComp.dto.driver.RouteDTO;
+import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.enums.AccountType;
@@ -176,6 +173,23 @@ public class RideController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
+
+        GetCoordinateDTO start = dto.getStartAddress();
+        if (start.getLon() == 0 || start.getLat() == 0) {
+            dto.setStartAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(start.getAddress())));
+        }
+
+        for (int i = 0; i < dto.getStops().size(); ++i) {
+            GetCoordinateDTO stop = dto.getStops().get(i);
+            if (stop.getLon() == 0 || stop.getLat() == 0) {
+                dto.getStops().set(i, new GetCoordinateDTO(driverService.geocodeAddressWithCache(stop.getAddress())));
+            }
+        }
+
+        GetCoordinateDTO end = dto.getDestinationAddress();
+        if (end.getLon() == 0 || end.getLat() == 0) {
+            dto.setDestinationAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(end.getAddress())));
+        }
 
         AvailableDriverDTO availableDriver = driverService.getAvailableDriver(dto);
 

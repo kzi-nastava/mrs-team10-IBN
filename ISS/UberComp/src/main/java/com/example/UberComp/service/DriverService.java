@@ -880,7 +880,7 @@ public class DriverService {
         return location;
     }
 
-    private Coordinate geocodeAddressWithCache(String address) {
+    public Coordinate geocodeAddressWithCache(String address) {
         Optional<Coordinate> cached = coordinateRepository
                 .findByAddress(address);
 

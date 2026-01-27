@@ -57,7 +57,7 @@ public class RideService {
 
     @Transactional
     public IncomingRideDTO getIncomingRide(Driver driver){
-        Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(driver, RideStatus.Pending);
+        Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartAsc(driver, RideStatus.Pending);
         if(rideOptional.isEmpty()) return null;
         IncomingRideDTO newRide = new IncomingRideDTO(rideOptional.get());
         return newRide;
@@ -164,11 +164,11 @@ public class RideService {
 
     @Transactional(readOnly = true)
     public GetVehiclePositionDTO getTrackingRide(Long id) {
-        Ride ride = rideRepository.findFirstByPassengersIdOrderByStartDesc(id);
-        if(ride != null) {
-            if (ride.getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
+        Optional<Ride> ride = rideRepository.findFirstByPassengersIdOrderByStartAsc(id);
+        if(ride.isPresent()) {
+            if (ride.get().getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
                 return new GetVehiclePositionDTO();
-            return new GetVehiclePositionDTO(ride, true);
+            return new GetVehiclePositionDTO(ride.get(), true);
         }
         return new GetVehiclePositionDTO();
     }

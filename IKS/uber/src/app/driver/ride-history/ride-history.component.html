@@ -52,7 +52,7 @@
           <div class="time-box">{{ ride.startTime | date: 'HH:mm' }}</div>
           <div class="time-box">{{ ride.endTime | date: 'HH:mm' }}</div>
         </div>
-        <div class="price">{{ ride.price }} RSD</div>
+        <div class="price">{{ ride.price | number: '1.2-2' }} RSD</div>
       </div>
     }
   </div>
