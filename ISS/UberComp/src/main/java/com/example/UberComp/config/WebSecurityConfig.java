@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
+@EnableScheduling
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {

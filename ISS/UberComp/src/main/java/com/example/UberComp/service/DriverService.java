@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +41,7 @@ public class DriverService {
     private static final int MAX_UPTIME_MINUTES = 480;
     private static final int UPTIME_TOLERANCE_MINUTES = 10;
     private static final int MAX_SCHEDULE_HOURS = 5;
-    private static final double MAX_DISTANCE_KM = 15.0;
+    private static final double MAX_DISTANCE_KM = 5.0;
     private static final long MAX_PICKUP_TIME_MINUTES = 10;
 
     private final Map<String, CachedTravelTime> travelTimeCache = new ConcurrentHashMap<>();
@@ -1022,31 +1023,34 @@ public class DriverService {
         }
 
         Map<String, Long> results = new HashMap<>();
+        List<Coordinate> uncachedDestinations = new ArrayList<>();
 
-        // Check cache first
         for (Coordinate dest : destinations) {
             String key = formatCoordinateKey(source, dest);
             CachedTravelTime cached = travelTimeCache.get(key);
+
             if (cached != null && !cached.isExpired()) {
                 results.put(key, cached.travelTime);
+            } else {
+                uncachedDestinations.add(dest);
             }
         }
 
-        // If all are cached, return
-        if (results.size() == destinations.size()) {
+        if (uncachedDestinations.isEmpty()) {
             return results;
         }
 
         List<List<Coordinate>> batches = new ArrayList<>();
-        for (int i = 0; i < destinations.size(); i += 24) {
-            batches.add(destinations.subList(i, Math.min(i + 24, destinations.size())));
+        for (int i = 0; i < uncachedDestinations.size(); i += 24) {
+            batches.add(uncachedDestinations.subList(
+                    i, Math.min(i + 24, uncachedDestinations.size())
+            ));
         }
 
         for (List<Coordinate> batch : batches) {
             Map<String, Long> batchResults = callMapboxMatrix(source, batch);
             results.putAll(batchResults);
 
-            // Cache results
             for (Map.Entry<String, Long> entry : batchResults.entrySet()) {
                 travelTimeCache.put(entry.getKey(), new CachedTravelTime(entry.getValue()));
             }
@@ -1159,5 +1163,11 @@ public class DriverService {
         boolean isExpired() {
             return System.currentTimeMillis() - timestamp > TRAVEL_TIME_CACHE_TTL_MS;
         }
+    }
+
+    @Scheduled(fixedRate = 600000)
+    public void cleanExpiredCache() {
+        travelTimeCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        System.out.println("deleted");
     }
 }
