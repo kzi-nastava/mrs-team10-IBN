@@ -462,6 +462,7 @@ public class RideService {
         Ride cancelledRide = rideOptional.get();
         Driver driver = cancelledRide.getDriver();
         driver.setStatus(DriverStatus.ONLINE);
+        cancelledRide.setPrice(0.0);
         if(cancelled.isCancelledByDriver()){
             cancelledRide.setStatus(RideStatus.CancelledByDriver);
             cancelledRide.setCancellationReason(cancelled.getCancellationReason());

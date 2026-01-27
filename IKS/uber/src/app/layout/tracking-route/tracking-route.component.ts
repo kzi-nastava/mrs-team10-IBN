@@ -107,9 +107,6 @@ export class TrackingRouteComponent {
       this.subtitleText =
         'Panic signal has been broadcast. Help is on the way. Please remain calm.';
       this.cdr.detectChanges();
-      if (eventData.location) {
-        this.changeState(eventData.location);
-      }
     }
   }
 
