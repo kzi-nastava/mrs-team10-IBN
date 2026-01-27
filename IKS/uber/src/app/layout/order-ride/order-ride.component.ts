@@ -154,6 +154,11 @@ export class OrderRideComponent implements OnInit {
       return;
     }
 
+    const scheduledDateTime = this.getScheduledDateTime();
+    if (this.timeOption === 'scheduled' && scheduledDateTime === null) {
+      return;
+    }
+
     this.isCalculating = true;
 
     const dto: CreateRideDTO = {
@@ -196,6 +201,20 @@ export class OrderRideComponent implements OnInit {
 
   private getScheduledDateTime(): string | null {
     if (this.timeOption === 'scheduled' && this.rideDate && this.rideTime) {
+      const scheduledDateTime = new Date(`${this.rideDate}T${this.rideTime}:00`);
+      const now = new Date();
+      const fiveHoursFromNow = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+
+      if (scheduledDateTime <= now) {
+        this.showError('Scheduled time cannot be in the past');
+        return null;
+      }
+
+      if (scheduledDateTime > fiveHoursFromNow) {
+        this.showError('Rides can only be scheduled up to 5 hours in advance');
+        return null;
+      }
+
       return `${this.rideDate} ${this.rideTime}:00`;
     }
     return null;
@@ -209,6 +228,11 @@ export class OrderRideComponent implements OnInit {
 
     if (this.estimatedDistance === 0) {
       this.showError('Invalid route distance');
+      return;
+    }
+
+    const scheduledDateTime = this.getScheduledDateTime();
+    if (this.timeOption === 'scheduled' && scheduledDateTime === null) {
       return;
     }
 
