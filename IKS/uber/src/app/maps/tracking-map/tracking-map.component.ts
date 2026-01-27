@@ -141,6 +141,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
+    this.passingOutput.emit(this.passedCount);
   }
 
   private async updateLocationsFromInput(): Promise<void> {
