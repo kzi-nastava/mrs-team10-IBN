@@ -13,9 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -54,25 +52,88 @@ public class RideService {
     private FavoriteRouteRepository favoriteRouteRepository;
     @Autowired
     private EmailUtils emailUtils;
-    private DriverService driverService;
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @Transactional
     public IncomingRideDTO getIncomingRide(Driver driver){
-        Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(driver, RideStatus.Pending);
+        Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartAsc(driver, RideStatus.Pending);
         if(rideOptional.isEmpty()) return null;
         IncomingRideDTO newRide = new IncomingRideDTO(rideOptional.get());
         return newRide;
     }
 
-    public Page<GetRideDTO> getRidesDriver(Long driverId, Pageable pageable){
-        return rideRepository
-                .getRidesDriver(driverId, pageable)
-                .map(GetRideDTO::new);
+    public Page<GetRideDTO> getRidesDriver(Long driverId, String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesDriverWithDateFilter(driverId, startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesDriverFromDate(driverId, startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesDriverToDate(driverId, startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesDriver(driverId, pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
     }
 
-    public Page<GetRideDTO> getRidesPassenger(Long passengerId, Pageable pageable){
-        Page<Ride> ridesPage = rideRepository.getRidesPassenger(passengerId, pageable);
-        return new PageImpl<>(ridesPage.getContent().stream().map(GetRideDTO::new).toList(), pageable, ridesPage.getTotalElements());
+    public Page<GetRideDTO> getRidesAdmin(String sortParam,
+                                           LocalDateTime startFrom, LocalDateTime startTo,
+                                           int page, int size){
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesAdminWithDateFilter(startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesAdminFromDate(startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesAdminToDate(startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesAdmin(pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
+    }
+
+    public Page<GetRideDTO> getRidesPassenger(Long userId, String sortParam,
+                                              LocalDateTime startFrom, LocalDateTime startTo,
+                                              int page, int size) {
+        Sort sort = buildSort(sortParam);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Ride> rides;
+        if (startFrom != null && startTo != null) {
+            rides = rideRepository.getRidesPassengerWithDateFilter(userId, startFrom, startTo, pageable);
+        } else if (startFrom != null) {
+            rides = rideRepository.getRidesPassengerFromDate(userId, startFrom, pageable);
+        } else if (startTo != null) {
+            rides = rideRepository.getRidesPassengerToDate(userId, startTo, pageable);
+        } else {
+            rides = rideRepository.getRidesPassenger(userId, pageable);
+        }
+
+        return new PageImpl<>(rides.getContent().stream().map(GetRideDTO::new).toList(), pageable, rides.getTotalElements());
+    }
+
+    private Sort buildSort(String sortParam) {
+        if(sortParam == null) return Sort.by(Sort.Direction.DESC, "start");
+        return switch (sortParam) {
+            case "price-asc" -> Sort.by(Sort.Direction.ASC, "price");
+            case "price-desc" -> Sort.by(Sort.Direction.DESC, "price");
+            case "start-asc" -> Sort.by(Sort.Direction.ASC, "start");
+            case "start-desc" -> Sort.by(Sort.Direction.DESC, "start");
+            case "end-asc" -> Sort.by(Sort.Direction.ASC, "estimatedTimeArrival");
+            case "end-desc" -> Sort.by(Sort.Direction.DESC, "estimatedTimeArrival");
+            default -> Sort.by(Sort.Direction.DESC, "start"); // default sorting
+        };
     }
 
     @Transactional(readOnly = true)
@@ -103,11 +164,11 @@ public class RideService {
 
     @Transactional(readOnly = true)
     public GetVehiclePositionDTO getTrackingRide(Long id) {
-        Ride ride = rideRepository.findFirstByPassengersIdOrderByStartDesc(id);
-        if(ride != null) {
-            if (ride.getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
+        Optional<Ride> ride = rideRepository.findFirstByPassengersIdAndStatusOrderByStartAsc(id, RideStatus.Ongoing);
+        if(ride.isPresent()) {
+            if (ride.get().getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
                 return new GetVehiclePositionDTO();
-            return new GetVehiclePositionDTO(ride, true);
+            return new GetVehiclePositionDTO(ride.get(), true);
         }
         return new GetVehiclePositionDTO();
     }
@@ -123,9 +184,15 @@ public class RideService {
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStatus(RideStatus.Finished);
+        Driver driver = ride.getDriver();
+        driver.setStatus(DriverStatus.ONLINE);
         Instant instant = Instant.parse(finish.getIsotime());
         ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
         rideRepository.save(ride);
+        Vehicle vehicle = driver.getVehicle();
+        vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));
+        vehicleRepository.save(vehicle);
+        driverRepository.save(driver);
         emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", rideId);
         return new FinishedRideDTO(ride);
     }
@@ -137,7 +204,8 @@ public class RideService {
         newCoordinate.setLat(stopRideDTO.getLat());
         newCoordinate.setLon(stopRideDTO.getLon());
         newCoordinate.setAddress(stopRideDTO.getAddress());
-        Coordinate savedCoord = coordinateRepository.save(newCoordinate);
+        Coordinate savedCoord = saveOrGetCoordinate(newCoordinate);
+
         List<Coordinate> newStations = ride.getRoute().getStations().subList(0, stopRideDTO.getPassed());
         newStations.add(savedCoord);
         stoppedRoute.setStations(newStations);
@@ -158,11 +226,13 @@ public class RideService {
             ride.setPrice(newPrice);
             ride.setStatus(RideStatus.Finished);
             driver.setStatus(DriverStatus.ONLINE);
+            emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         }
-
+        Vehicle vehicle = driver.getVehicle();
+        vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));
+        vehicleRepository.save(vehicle);
         rideRepository.save(ride);
         driverRepository.save(driver);
-        emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         return new FinishedRideDTO(ride);
     }
 
@@ -243,32 +313,20 @@ public class RideService {
         Route route = new Route();
         List<Coordinate> stations = new ArrayList<>();
 
-        Optional<Coordinate> coord = coordinateRepository.findByLatAndLon(dto.getStartAddress().getLat(), dto.getStartAddress().getLon());
-        if (coord.isEmpty()) {
-            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getStartAddress()));
-            stations.add(newC);
-        }
-        else stations.add(coord.get());
+        Coordinate startCoord = saveOrGetCoordinate(new Coordinate(dto.getStartAddress()));
+        stations.add(startCoord);
 
         if (dto.getStops() != null && !dto.getStops().isEmpty()) {
             for (GetCoordinateDTO stopAddress : dto.getStops()) {
                 if (stopAddress != null) {
-                    coord = coordinateRepository.findByLatAndLon(stopAddress.getLat(), stopAddress.getLon());
-                    if (coord.isEmpty()) {
-                        Coordinate newC = coordinateRepository.save(new Coordinate(stopAddress));
-                        stations.add(newC);
-                    }
-                    else stations.add(coord.get());
+                    Coordinate stopCoord = saveOrGetCoordinate(new Coordinate(stopAddress));
+                    stations.add(stopCoord);
                 }
             }
         }
 
-        coord = coordinateRepository.findByLatAndLon(dto.getDestinationAddress().getLat(), dto.getDestinationAddress().getLon());
-        if (coord.isEmpty()) {
-            Coordinate newC = coordinateRepository.save(new Coordinate(dto.getDestinationAddress()));
-            stations.add(newC);
-        }
-        else stations.add(coord.get());
+        Coordinate destCoord = saveOrGetCoordinate(new Coordinate(dto.getDestinationAddress()));
+        stations.add(destCoord);
 
         route.setStations(stations);
         route = routeRepository.save(route);
@@ -402,16 +460,76 @@ public class RideService {
         Optional<Ride> rideOptional = rideRepository.findById(cancelled.getId());
         if(rideOptional.isEmpty()) return false;
         Ride cancelledRide = rideOptional.get();
+        if(!cancelled.isCancelledByDriver() &&
+                Duration.between(LocalDateTime.now(), cancelledRide.getStart()).toMinutes() < 10)
+            return false;
         Driver driver = cancelledRide.getDriver();
         driver.setStatus(DriverStatus.ONLINE);
+        cancelledRide.setPrice(0.0);
         if(cancelled.isCancelledByDriver()){
             cancelledRide.setStatus(RideStatus.CancelledByDriver);
-            cancelledRide.setCancellationReason(cancelled.getCancellationReason());
         } else {
             cancelledRide.setStatus(RideStatus.CancelledByPassenger);
         }
+        cancelledRide.setCancellationReason(cancelled.getCancellationReason());
         driverRepository.save(driver);
         rideRepository.save(cancelledRide);
         return true;
+    }
+
+    private Coordinate saveOrGetCoordinate(Coordinate coordinate) {
+        if (coordinate == null) {
+            return null;
+        }
+
+        if (coordinate.getId() != null) {
+            return coordinate;
+        }
+
+        if (coordinate.getAddress() != null && !coordinate.getAddress().trim().isEmpty()) {
+            String address = coordinate.getAddress();
+            if (!address.toLowerCase().contains("novi sad")) {
+                address = address + ", Novi Sad, Serbia";
+                coordinate.setAddress(address);
+            }
+
+            Optional<Coordinate> existingByAddress = coordinateRepository.findByAddress(address);
+            if (existingByAddress.isPresent()) {
+                return existingByAddress.get();
+            }
+        }
+
+        if (coordinate.getLat() != null && coordinate.getLon() != null) {
+            Optional<Coordinate> existing = coordinateRepository.findByLatAndLon(
+                    coordinate.getLat(),
+                    coordinate.getLon()
+            );
+
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+
+        try {
+            return coordinateRepository.save(coordinate);
+        } catch (Exception e) {
+            if (coordinate.getAddress() != null) {
+                Optional<Coordinate> byAddress = coordinateRepository.findByAddress(coordinate.getAddress());
+                if (byAddress.isPresent()) {
+                    return byAddress.get();
+                }
+            }
+
+            if (coordinate.getLat() != null && coordinate.getLon() != null) {
+                Optional<Coordinate> byLatLon = coordinateRepository.findByLatAndLon(
+                        coordinate.getLat(),
+                        coordinate.getLon()
+                );
+                if (byLatLon.isPresent()) {
+                    return byLatLon.get();
+                }
+            }
+            throw new RuntimeException("Failed to save coordinate: " + e.getMessage());
+        }
     }
 }

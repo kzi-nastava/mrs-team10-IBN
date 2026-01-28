@@ -6,35 +6,39 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.ListFragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideHistoryListBinding;
+import com.example.ubercorp.dto.GetRideDTO;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.interfaces.onRideClickListener;
-import com.example.ubercorp.model.Ride;
+import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.adapters.RideHistoryListAdapter;
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class RideHistoryListFragment extends ListFragment implements onRideClickListener {
 
     private RideHistoryListAdapter adapter;
-    private static final String ARG_PARAM = "param";
-    private ArrayList<Ride> mRides;
     private FragmentRideHistoryListBinding binding;
-
+    private ArrayList<RideDTO> mRides = new ArrayList<>();
+    private RideManager rideManager;
+    private int currentPage = 0;
+    private boolean isLastPage = false;
+    private String startFrom;
+    private String startTo;
 
     public RideHistoryListFragment() {
-    }
-
-    @SuppressWarnings("unused")
-    public static RideHistoryListFragment newInstance(ArrayList<Ride> rides) {
-        RideHistoryListFragment fragment = new RideHistoryListFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(ARG_PARAM, rides);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -42,17 +46,72 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mRides = getArguments().getParcelableArrayList(ARG_PARAM);
-            adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
-            setListAdapter(adapter);
+            startFrom = getArguments().getString("startDate");
+            startTo = getArguments().getString("endDate");
         }
+
+        adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
+        setListAdapter(adapter);
+        rideManager = new RideManager(requireContext());
+        loadNextPage();
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+                if (!isLastPage && totalItemCount > 0 &&
+                        (firstVisibleItem + visibleItemCount >= totalItemCount)) {
+                    loadNextPage();
+                }
+            }
+        });
+    }
+
+
+    private void loadNextPage() {
+        if (isLastPage) return;
+
+        Log.d("RideHistoryList", "Loading page: " + currentPage +
+                ", From: " + startFrom + ", To: " + startTo);
+
+        rideManager.loadDriverRides(currentPage, 2, startFrom, startTo, new Callback<>() {
+            @Override
+            public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
+                Log.d("RideHistoryList", "Response code: " + response.code());
+                if (response.isSuccessful() && response.body() != null) {
+                    GetRideDTO dto = response.body();
+                    Log.d("RideHistoryList", "Rides count: " + dto.getContent().size());
+                    for (RideDTO r : dto.getContent()) {
+                        mRides.add(r);
+                    }
+                    adapter.notifyDataSetChanged();
+
+                    currentPage++;
+                    isLastPage = currentPage >= dto.getTotalPages();
+                } else {
+                    Log.e("RideHistoryList", "Response not successful");
+                }
+            }
+            @Override
+            public void onFailure(Call<GetRideDTO> call, Throwable t) {
+                Log.e("RideHistoryList", "Error: " + t.getMessage());
+            }
+        });
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-
         binding = FragmentRideHistoryListBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -64,7 +123,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     }
 
     @Override
-    public void onRideClick(Ride ride) {
+    public void onRideClick(RideDTO ride) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("ride",ride);
 

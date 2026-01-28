@@ -17,5 +17,11 @@ public class Route {
     private Long id;
 
     @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "route_stations",
+            joinColumns = @JoinColumn(name = "route_id"),
+            inverseJoinColumns = @JoinColumn(name = "stations_id", unique = false)
+    )
+    @OrderColumn(name = "station_index")
     private List<Coordinate> stations;
 }

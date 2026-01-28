@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +41,8 @@ public class DriverService {
     private static final int MAX_UPTIME_MINUTES = 480;
     private static final int UPTIME_TOLERANCE_MINUTES = 10;
     private static final int MAX_SCHEDULE_HOURS = 5;
-    private static final double MAX_DISTANCE_KM = 15.0;
+    private static final double MAX_DISTANCE_KM = 5.0;
+    private static final long MAX_PICKUP_TIME_MINUTES = 10;
 
     private final Map<String, CachedTravelTime> travelTimeCache = new ConcurrentHashMap<>();
     private static final long TRAVEL_TIME_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -152,6 +154,62 @@ public class DriverService {
         );
     }
 
+    private Coordinate saveOrGetCoordinate(Coordinate coordinate) {
+        if (coordinate == null) {
+            return null;
+        }
+
+        if (coordinate.getId() != null) {
+            return coordinate;
+        }
+
+        if (coordinate.getAddress() != null && !coordinate.getAddress().trim().isEmpty()) {
+            String address = coordinate.getAddress();
+            if (!address.toLowerCase().contains("novi sad")) {
+                address = address + ", Novi Sad, Serbia";
+                coordinate.setAddress(address);
+            }
+
+            Optional<Coordinate> existingByAddress = coordinateRepository.findByAddress(address);
+            if (existingByAddress.isPresent()) {
+                return existingByAddress.get();
+            }
+        }
+
+        if (coordinate.getLat() != null && coordinate.getLon() != null) {
+            Optional<Coordinate> existing = coordinateRepository.findByLatAndLon(
+                    coordinate.getLat(),
+                    coordinate.getLon()
+            );
+
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+
+        try {
+            return coordinateRepository.save(coordinate);
+        } catch (Exception e) {
+            if (coordinate.getAddress() != null) {
+                Optional<Coordinate> byAddress = coordinateRepository.findByAddress(coordinate.getAddress());
+                if (byAddress.isPresent()) {
+                    return byAddress.get();
+                }
+            }
+
+            if (coordinate.getLat() != null && coordinate.getLon() != null) {
+                Optional<Coordinate> byLatLon = coordinateRepository.findByLatAndLon(
+                        coordinate.getLat(),
+                        coordinate.getLon()
+                );
+                if (byLatLon.isPresent()) {
+                    return byLatLon.get();
+                }
+            }
+            throw new RuntimeException("Failed to save coordinate: " + e.getMessage());
+        }
+    }
+
     @Transactional
     public void submitDriverChangeRequest(Long driverId, UpdateDriverDTO changeRequest) {
         Driver driver = driverRepository.findById(driverId)
@@ -205,7 +263,6 @@ public class DriverService {
 
                 if (distance <= MAX_DISTANCE_KM) {
                     candidateDrivers.add(new DriverWithLocation(driver, location, DriverStatus.ONLINE));
-                } else {
                 }
             }
         }
@@ -268,6 +325,13 @@ public class DriverService {
                 locationAddress
         );
 
+        if (scheduledTime != null)
+            return new AvailableDriverDTO(
+                    driverDTO,
+                    0L,
+                    vehicleLocationDTO
+            );
+        if (bestDriverInfo.estimatedPickupMinutes > MAX_PICKUP_TIME_MINUTES) return null;
         return new AvailableDriverDTO(
                 driverDTO,
                 bestDriverInfo.estimatedPickupMinutes,
@@ -290,6 +354,10 @@ public class DriverService {
             Long timeToPickup = preCalculatedTimes.get(key);
 
             if (timeToPickup == null || timeToPickup < 0) {
+                continue;
+            }
+
+            if (timeToPickup > MAX_PICKUP_TIME_MINUTES && scheduledTime == null) {
                 continue;
             }
 
@@ -408,9 +476,12 @@ public class DriverService {
 
         Optional<Ride> currentRide = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(
                 driver, RideStatus.Ongoing);
+        Optional<Ride> pendingRide = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(
+                driver, RideStatus.Pending);
 
         if (currentRide.isEmpty()) {
-            return null;
+            if (pendingRide.isEmpty()) return null;
+            currentRide = pendingRide;
         }
 
         LocalDateTime estimatedTimeArrival = currentRide.get().getEstimatedTimeArrival();
@@ -443,6 +514,9 @@ public class DriverService {
 
         long totalTimeToPickup = minutesUntilCurrentRideEnds + timeFromDropoffToPickup;
 
+        if (totalTimeToPickup > MAX_PICKUP_TIME_MINUTES && scheduledTime == null) {
+            return null;
+        }
         if (!checkUptime(driver, totalTimeToPickup, rideDuration)) {
             return null;
         }
@@ -779,6 +853,26 @@ public class DriverService {
     }
 
     private Coordinate getDriverLocation(Driver driver) {
+        if (driver.getStatus() == DriverStatus.DRIVING) {
+            Optional<Ride> currentRide = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(
+                    driver, RideStatus.Ongoing);
+            if (currentRide.isPresent()) {
+                List<Coordinate> stations = currentRide.get().getRoute().getStations();
+                if (!stations.isEmpty()) {
+                    return stations.get(stations.size() - 1);
+                }
+            } else {
+                currentRide = rideRepository.findFirstByDriverAndStatusOrderByStartDesc(
+                        driver, RideStatus.Pending);
+                if (currentRide.isPresent()) {
+                    List<Coordinate> stations = currentRide.get().getRoute().getStations();
+                    if (!stations.isEmpty()) {
+                        return stations.get(0);
+                    }
+                }
+            }
+        }
+
         Coordinate location = driver.getVehicle() != null ? driver.getVehicle().getLocation() : null;
         if (location == null) {
             location = geocodeAddressWithCache(driver.getHomeAddress());
@@ -786,15 +880,12 @@ public class DriverService {
         return location;
     }
 
-    private Coordinate geocodeAddressWithCache(String address) {
-        LocalDateTime cacheExpiry = LocalDateTime.now().minusHours(24);
-
+    public Coordinate geocodeAddressWithCache(String address) {
         Optional<Coordinate> cached = coordinateRepository
-                .findByAddressAndCachedAtAfter(address, cacheExpiry);
+                .findByAddress(address);
 
         if (cached.isPresent()) {
-            Coordinate cache = cached.get();
-            return new Coordinate(cache.getLat(), cache.getLon(), cache.getAddress());
+            return cached.get();
         }
 
         Coordinate coord = callMapboxGeocoding(address);
@@ -804,8 +895,7 @@ public class DriverService {
             newCache.setAddress(address);
             newCache.setLat(coord.getLat());
             newCache.setLon(coord.getLon());
-            newCache.setCachedAt(LocalDateTime.now());
-            coordinateRepository.save(newCache);
+            coord = saveOrGetCoordinate(newCache);
         }
 
         return coord;
@@ -831,7 +921,13 @@ public class DriverService {
                 List<Map<String, Object>> features = (List<Map<String, Object>>) response.get("features");
                 if (!features.isEmpty()) {
                     List<Double> coordinates = (List<Double>) features.get(0).get("center");
-                    return new Coordinate(coordinates.get(1), coordinates.get(0), fullAddress);
+                    Coordinate newCoord = new Coordinate(
+                            coordinates.get(1),
+                            coordinates.get(0),
+                            fullAddress
+                    );
+
+                    return saveOrGetCoordinate(newCoord);
                 }
             }
         } catch (Exception e) {
@@ -871,7 +967,7 @@ public class DriverService {
                     }
                     from.setLat(geocoded.getLat());
                     from.setLon(geocoded.getLon());
-                    fromCoord = coordinateRepository.save(from);
+                    fromCoord = saveOrGetCoordinate(from);
                 } else {
                     System.err.println("'From' coordinate has no lat/lon and no address to geocode");
                     return -1;
@@ -887,14 +983,13 @@ public class DriverService {
                     }
                     to.setLat(geocoded.getLat());
                     to.setLon(geocoded.getLon());
-                    toCoord = coordinateRepository.save(to);
+                    toCoord = saveOrGetCoordinate(to);
                 } else {
                     System.err.println("'To' coordinate has no lat/lon and no address to geocode");
                     return -1;
                 }
             }
 
-            // Now proceed with the API call
             String url = String.format(Locale.US,
                     "https://api.mapbox.com/directions/v5/mapbox/driving/%f,%f;%f,%f?access_token=%s",
                     fromCoord.getLon(), fromCoord.getLat(),
@@ -908,7 +1003,8 @@ public class DriverService {
             if (response != null && response.containsKey("routes")) {
                 List<Map<String, Object>> routes = (List<Map<String, Object>>) response.get("routes");
                 if (!routes.isEmpty()) {
-                    Double duration = (Double) routes.get(0).get("duration");
+                    Number durationNum = (Number) routes.get(0).get("duration");
+                    double duration = durationNum.doubleValue();
                     return Math.round(duration / 60.0);
                 }
             }
@@ -927,31 +1023,34 @@ public class DriverService {
         }
 
         Map<String, Long> results = new HashMap<>();
+        List<Coordinate> uncachedDestinations = new ArrayList<>();
 
-        // Check cache first
         for (Coordinate dest : destinations) {
             String key = formatCoordinateKey(source, dest);
             CachedTravelTime cached = travelTimeCache.get(key);
+
             if (cached != null && !cached.isExpired()) {
                 results.put(key, cached.travelTime);
+            } else {
+                uncachedDestinations.add(dest);
             }
         }
 
-        // If all are cached, return
-        if (results.size() == destinations.size()) {
+        if (uncachedDestinations.isEmpty()) {
             return results;
         }
 
         List<List<Coordinate>> batches = new ArrayList<>();
-        for (int i = 0; i < destinations.size(); i += 24) {
-            batches.add(destinations.subList(i, Math.min(i + 24, destinations.size())));
+        for (int i = 0; i < uncachedDestinations.size(); i += 24) {
+            batches.add(uncachedDestinations.subList(
+                    i, Math.min(i + 24, uncachedDestinations.size())
+            ));
         }
 
         for (List<Coordinate> batch : batches) {
             Map<String, Long> batchResults = callMapboxMatrix(source, batch);
             results.putAll(batchResults);
 
-            // Cache results
             for (Map.Entry<String, Long> entry : batchResults.entrySet()) {
                 travelTimeCache.put(entry.getKey(), new CachedTravelTime(entry.getValue()));
             }
@@ -1026,15 +1125,26 @@ public class DriverService {
                 from.getLat(), from.getLon(), to.getLat(), to.getLon());
     }
 
+    public void updateAllDriverLocation() {
+        for (Driver driver : driverRepository.findAll()) {
+            if (driver.getVehicle().getLocation() == null) {
+                Coordinate coord = geocodeAddressWithCache(driver.getHomeAddress());
+                if (coord != null) {
+                    driver.getVehicle().setLocation(coord);
+                    vehicleRepository.save(driver.getVehicle());
+                }
+            }
+        }
+    }
+
     public void updateDriverLocation(Long driverId, String address) {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
         Coordinate newLocation = geocodeAddressWithCache(address);
-        Optional<Coordinate> location = coordinateRepository.findByLatAndLon(newLocation.getLat(), newLocation.getLon());
-        if (location.isEmpty()) {
-            newLocation = coordinateRepository.save(newLocation);
-        } else newLocation = location.get();
+        if (newLocation == null) {
+            throw new RuntimeException("Failed to geocode address");
+        }
 
         Vehicle vehicle = driver.getVehicle();
         vehicle.setLocation(newLocation);
@@ -1053,5 +1163,10 @@ public class DriverService {
         boolean isExpired() {
             return System.currentTimeMillis() - timestamp > TRAVEL_TIME_CACHE_TTL_MS;
         }
+    }
+
+    @Scheduled(fixedRate = 600000)
+    public void cleanExpiredCache() {
+        travelTimeCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
 }

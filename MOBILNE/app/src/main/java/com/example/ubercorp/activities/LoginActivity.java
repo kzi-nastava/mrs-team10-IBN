@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.api.ApiClient;
-import com.example.ubercorp.clients.AuthService;
+import com.example.ubercorp.api.AuthService;
 import com.example.ubercorp.model.AuthToken;
 import com.example.ubercorp.model.Credentials;
 
@@ -85,13 +85,13 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<AuthToken> call, Response<AuthToken> response){
                 if (response.isSuccessful()){
                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     SharedPreferences sharedPref = getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("auth_token", response.body().getAccessToken());
                     editor.putLong("expires_in", response.body().getExpiresIn());
                     editor.apply();
                     startActivity(intent);
-                    LoginActivity.this.finish();
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Incorrect credentials!", Toast.LENGTH_SHORT);
                     toast.show();

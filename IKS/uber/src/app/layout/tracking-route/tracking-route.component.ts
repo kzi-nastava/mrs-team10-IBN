@@ -118,9 +118,6 @@ export class TrackingRouteComponent implements OnInit{
       this.subtitleText =
         'Panic signal has been broadcast. Help is on the way. Please remain calm.';
       this.cdr.detectChanges();
-      if (eventData.location) {
-        this.changeState(eventData.location);
-      }
     }
   }
 
@@ -137,7 +134,7 @@ export class TrackingRouteComponent implements OnInit{
         .stopRide(this.rideId!, this.passed, now.toISOString(), location, this.distance)
         .subscribe({
           next: (res) => {
-            this.router.navigate(['/home']);
+            this.router.navigate(['/incoming-ride']);
           },
         });
     }

@@ -1,7 +1,12 @@
 <div class="dialog-container">
   <div class="top">
     <div class="map-container">
-      <app-map class="compact" [stations]="ride.route.stations" [interactive]="false"></app-map>
+      <app-map
+        class="compact"
+        [stations]="ride.route.stations"
+        [interactive]="false"
+        [rideHistory]="true"
+      ></app-map>
     </div>
 
     <div class="time-status">
@@ -42,7 +47,7 @@
         </button>
       }
 
-      <span class="price">{{ ride.price }} RSD</span>
+      <span class="price">{{ ride.price | number: '1.2-2' }} RSD</span>
 
       @if (role === 'passenger') {
         <button class="order-btn">Order</button>
@@ -50,6 +55,9 @@
 
       @if (role == 'passenger') {
         <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
+        @if (canBeCancelled()){
+          <button class="cancel-btn" (click)="cancelRide()">Cancel Ride</button>
+        }
       }
     </div>
   </div>

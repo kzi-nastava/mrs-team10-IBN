@@ -42,6 +42,8 @@ public class AccountService implements UserDetailsService {
     private EmailUtils emailUtils;
     @Autowired
     private SetPasswordTokenRepository sptRepository;
+    @Autowired
+    private VehicleTypeRepository vehicleTypeRepository;
 
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(email);
@@ -208,6 +210,9 @@ public class AccountService implements UserDetailsService {
             if (newVehicle.getSeatNumber() != null) vehicle.setSeatNumber(newVehicle.getSeatNumber());
             if (newVehicle.getBabySeat() != null) vehicle.setBabySeat(newVehicle.getBabySeat());
             if (newVehicle.getPetFriendly() != null) vehicle.setPetFriendly(newVehicle.getPetFriendly());
+            if (newVehicle.getVehicleTypeDTO() != null && newVehicle.getVehicleTypeDTO().getName() != null) {
+                vehicle.setVehicleType(vehicleTypeRepository.findVehicleTypeByName(newVehicle.getVehicleTypeDTO().getName()));
+            }
         }
 
         driverRepository.save(driver);

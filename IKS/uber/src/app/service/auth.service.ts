@@ -55,8 +55,10 @@ export class AuthService {
 
   isLoggedIn() {
     const expiration = localStorage.getItem('expires_in');
+    console.log(expiration)
     if (expiration) {
-      const currentTime = Math.floor(Date.now() / 1000);
+      const currentTime = Date.now();
+      console.log(currentTime)
       const isValid = currentTime < Number(expiration);
       return isValid;
     } else {
@@ -65,7 +67,7 @@ export class AuthService {
   }
 
   save(token: AuthToken) {
-    const expirationTime = Math.floor(Date.now() / 1000) + Number(token.expiresIn);
+    const expirationTime = Date.now() + Number(token.expiresIn);
     localStorage.setItem('auth_token', token.accessToken);
     localStorage.setItem('expires_in', expirationTime.toString());
     this.updateRole();

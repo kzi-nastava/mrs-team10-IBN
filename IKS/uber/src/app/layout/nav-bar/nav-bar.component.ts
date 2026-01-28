@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -19,22 +19,23 @@ import { UpdateLocationComponent } from '../update-location/update-location.comp
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, RouterModule],
 })
 export class NavBarComponent {
+  authService: AuthService
   isDriver = false;
   loggedIn: boolean;
-  private authService = inject(AuthService);
-  private dialog = inject(MatDialog);
-  private router = inject(Router);
-
-  constructor() {
-    this.loggedIn = this.authService.isLoggedIn();
-    if (this.loggedIn) {
-      const role = this.authService.role();
-      this.isDriver = role === 'DRIVER' || role === 'driver';
-    }
+  role: string | null;
+  router: Router;
+  cdr: ChangeDetectorRef;
+  constructor(authService: AuthService, router: Router, cdr:ChangeDetectorRef) {
+    this.authService = authService;
+    this.loggedIn = authService.isLoggedIn();
+    this.role = authService.role();
+    this.router = router;
+    this.cdr = cdr;
   }
 
   logout() {
-    localStorage.clear();
-    this.router.navigate(['/home']);
+    this.authService.logout();
+    this.loggedIn = false;
+    this.router.navigate(['']);
   }
 }

@@ -1,22 +1,20 @@
 package com.example.UberComp.controller;
 
 import com.example.UberComp.dto.PageDTO;
-import com.example.UberComp.dto.driver.AvailableDriverDTO;
-import com.example.UberComp.dto.driver.DriverDTO;
-import com.example.UberComp.dto.driver.GetVehiclePositionDTO;
-import com.example.UberComp.dto.driver.RouteDTO;
+import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
+import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
+import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.enums.RideStatus;
-import com.example.UberComp.model.Account;
-import com.example.UberComp.model.Driver;
-import com.example.UberComp.model.PanicSignal;
-import com.example.UberComp.model.Ride;
+import com.example.UberComp.model.*;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.parser.Authorization;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,44 +34,65 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/api/rides")
 public class RideController {
-
+    @Autowired
     private final DriverService driverService;
+    @Autowired
     private RideService rideService;
 
     //    @PreAuthorize("hasRole('DRIVER')")
-    @GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
-
-        Account account = (Account) auth.getPrincipal();
-        Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
-
-        return ResponseEntity.ok(rides);
-    }
-
-
-    @GetMapping(value= "/passenger", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageDTO<GetRideDTO>> getRidesPassenger(Authentication auth, Pageable pageable) {
-        Account account = (Account) auth.getPrincipal();
-        Page<GetRideDTO> rides = rideService.getRidesPassenger(account.getUser().getId(), pageable);
-        return ResponseEntity.ok(new PageDTO<>(rides));
-    }
+    //@GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
+    //public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
+//
+    //    Account account = (Account) auth.getPrincipal();
+    //    Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
+//
+    //    return ResponseEntity.ok(rides);
+    //}
 
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<GetRideDetailsDTO>> getRideHistory(){
-        ArrayList<GetRideDetailsDTO> allRides = new ArrayList<>();
+    public ResponseEntity<PageDTO<GetRideDTO>> getRidesDriver(
+            Authentication auth,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String startFrom,
+            @RequestParam(required = false) String startTo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
 
-        GetRideDetailsDTO finishedRide = new GetRideDetailsDTO();
-        finishedRide.setId(1L);
-        finishedRide.setStatus(RideStatus.Finished);
+        Account account = (Account) auth.getPrincipal();
+        LocalDateTime startFromFormatted = null;
+        if(startFrom != null)
+            startFromFormatted = LocalDateTime.ofInstant(Instant.parse(startFrom), ZoneId.systemDefault());
+        LocalDateTime startToFormatted = null;
+        if(startTo != null)
+            startToFormatted = LocalDateTime.ofInstant(Instant.parse(startTo), ZoneId.systemDefault());
 
-        GetRideDetailsDTO panickedRide = new GetRideDetailsDTO();
-        panickedRide.setId(2L);
-        panickedRide.setStatus(RideStatus.Panic);
-
-        allRides.add(finishedRide);
-        allRides.add(panickedRide);
-
-        return new ResponseEntity<Collection<GetRideDetailsDTO>>(allRides, HttpStatus.OK);
+        Page<GetRideDTO> rides = null;
+        switch(account.getAccountType()){
+            case PASSENGER ->
+                    rides = rideService.getRidesPassenger(
+                            account.getUser().getId(),
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+            case DRIVER ->
+                    rides = rideService.getRidesDriver(
+                            account.getUser().getId(),
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+            case ADMINISTRATOR ->
+                    rides = rideService.getRidesAdmin(
+                            sort,
+                            startFromFormatted,
+                            startToFormatted,
+                            page,
+                            size);
+        }
+        return ResponseEntity.ok(new PageDTO<>(rides));
     }
 
     @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,6 +113,7 @@ public class RideController {
 
     @GetMapping(value = "/activeRides", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehiclePositionDTO>> activeRides(){
+        driverService.updateAllDriverLocation();
         Collection<GetVehiclePositionDTO> activeRides = rideService.getActiveRides();
         return ResponseEntity.ok(activeRides);
     }
@@ -150,6 +173,23 @@ public class RideController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
+
+        GetCoordinateDTO start = dto.getStartAddress();
+        if (start.getLon() == 0 || start.getLat() == 0) {
+            dto.setStartAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(start.getAddress())));
+        }
+
+        for (int i = 0; i < dto.getStops().size(); ++i) {
+            GetCoordinateDTO stop = dto.getStops().get(i);
+            if (stop.getLon() == 0 || stop.getLat() == 0) {
+                dto.getStops().set(i, new GetCoordinateDTO(driverService.geocodeAddressWithCache(stop.getAddress())));
+            }
+        }
+
+        GetCoordinateDTO end = dto.getDestinationAddress();
+        if (end.getLon() == 0 || end.getLat() == 0) {
+            dto.setDestinationAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(end.getAddress())));
+        }
 
         AvailableDriverDTO availableDriver = driverService.getAvailableDriver(dto);
 

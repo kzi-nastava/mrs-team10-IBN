@@ -1,7 +1,9 @@
 <app-nav-bar></app-nav-bar>
 <router-outlet></router-outlet>
 <div class="container">
-  @if (isUserLoggedIn() && !isDriver()) {
+  @if (isDriver()) {
+    <app-update-location></app-update-location>
+  } @else {
     <div class="left-panel">
       <app-ride-approx-form
         #rideForm
@@ -28,7 +30,5 @@
         (maxLocationsReached)="onMaxLocationsReached()"
       ></app-map>
     </div>
-  } @else {
-    <app-update-location></app-update-location>
   }
 </div>

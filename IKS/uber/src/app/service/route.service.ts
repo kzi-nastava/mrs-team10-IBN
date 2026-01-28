@@ -49,7 +49,7 @@ export class RouteService {
       lon: location.lon,
       address: location.address,
       distance: distance,
-      isotime: time,
+      finishTime: time,
     };
     return this.http.put(`${environment.apiHost}/rides/stop`, body);
   }
@@ -67,21 +67,6 @@ export class RouteService {
     console.log(body);
     return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
-
-  // route: Location[] = [
-  //   {
-  //     address: 'Bulevar oslobođenja 7',
-  //     type: 'pickup',
-  //   },
-  //   {
-  //     address: 'Bulevar Patrijarha Pavla 60',
-  //     type: 'stop',
-  //   },
-  //   {
-  //     address: 'Kornelija Stankovića 15',
-  //     type: 'destination',
-  //   },
-  // ];
 }
 
 export interface RidePayload {

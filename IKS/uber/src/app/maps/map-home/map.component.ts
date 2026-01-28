@@ -90,13 +90,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.GreenCarIcon = L.icon({
       iconUrl: 'green-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
     });
 
     this.RedCarIcon = L.icon({
       iconUrl: 'red-car.png',
       iconSize: [30, 30],
-      iconAnchor: [22, 94],
+      iconAnchor: [15, 15],
       className: 'car-icon',
     });
 

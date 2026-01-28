@@ -5,12 +5,20 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <!-- Map View -->
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/map"
         android:fillViewport="true">
 
-        <LinearLayout
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -24,7 +32,7 @@
                 android:textColor="@android:color/white"
                 android:fontFamily="@font/squada_one"
                 android:layout_marginBottom="16dp"
-                android:layout_marginTop="32dp"/>
+                android:layout_marginTop="16dp"/>
 
             <!-- Location Display Card -->
             <androidx.cardview.widget.CardView
@@ -51,7 +59,7 @@
                             android:id="@+id/locationText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Kopernikova 23 → Železnička stanica"
+                            android:text="Select pickup and destination"
                             android:textColor="#333"
                             android:textSize="14sp"
                             android:layout_marginBottom="6dp"/>
@@ -181,6 +189,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:visibility="gone"
                         android:layout_marginBottom="12dp">
 
                         <EditText
@@ -188,7 +197,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Date"
+                            android:hint="Date (YYYY-MM-DD)"
                             android:inputType="date"
                             android:padding="10dp"
                             android:background="@drawable/input_background"
@@ -199,7 +208,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Time"
+                            android:hint="Time (HH:MM)"
                             android:inputType="time"
                             android:padding="10dp"
                             android:background="@drawable/input_background"
@@ -435,23 +444,21 @@
                 android:id="@+id/totalPriceText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total Price: "
+                android:text="Total Price: 0.00 RSD"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="15dp"/>
-
-            <!-- Order Button -->
-            <Button
-                android:id="@+id/orderBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Order"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:backgroundTint="@color/btn_color_2"
-                android:padding="12dp"/>
+        <Button
+            android:id="@+id/orderRideButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Order"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@color/btn_color_2"
+            android:padding="12dp"/>
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

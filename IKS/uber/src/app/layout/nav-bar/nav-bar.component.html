@@ -24,7 +24,7 @@
   </div>
 </div>
 
-<mat-sidenav-container>
+<mat-sidenav-container [style.display]="loggedIn ? 'inline' : 'none'">
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
     <div class="item" [routerLink]="['/account']">
       <mat-icon>account_circle</mat-icon>
@@ -42,7 +42,7 @@
 
     <div class="item" [routerLink]="['/ride-history']">
       <mat-icon>map</mat-icon>
-      <span>History of rides</span>
+      <span>Ride history</span>
     </div>
 
     <div class="separator"></div>
@@ -54,6 +54,14 @@
 
     <div class="separator"></div>
 
+    @if (role == 'driver') {
+      <div class="item" [routerLink]="['/incoming-ride']">
+        <mat-icon>access_time</mat-icon>
+        <span>Incoming ride</span>
+      </div>
+
+      <div class="separator"></div>
+    }
     <button class="logout-btn" (click)="logout()">Log out</button>
   </mat-sidenav>
 
