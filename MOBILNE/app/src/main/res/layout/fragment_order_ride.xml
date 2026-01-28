@@ -24,6 +24,14 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -31,10 +39,23 @@
                 android:textSize="28sp"
                 android:textColor="@android:color/white"
                 android:fontFamily="@font/squada_one"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginEnd="115dp"/>
 
-            <!-- Location Display Card -->
+            <Button
+                android:id="@+id/btnFavorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favorites"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:backgroundTint="@color/btn_color_1"
+                android:padding="12dp"/>
+
+        </LinearLayout>
+
+
+        <!-- Location Display Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/locationDisplay"
                 android:layout_width="match_parent"

@@ -36,6 +36,7 @@ import com.example.ubercorp.dto.ChangePasswordDTO;
 import com.example.ubercorp.dto.CreateUserDTO;
 import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.DriverDTO;
+import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.UpdateDriverDTO;
 import com.example.ubercorp.dto.VehicleDTO;
 import com.example.ubercorp.dto.VehicleTypeDTO;
@@ -43,6 +44,7 @@ import com.example.ubercorp.managers.AdminManager;
 import com.example.ubercorp.managers.DriverManager;
 import com.example.ubercorp.managers.PassengerManager;
 import com.example.ubercorp.managers.ProfileManager;
+import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.utils.ImageHelper;
 import com.example.ubercorp.utils.JwtUtils;
 import com.example.ubercorp.utils.MenuConfigurator;
@@ -53,6 +55,12 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class AccountFragment extends Fragment implements
         ProfileManager.ProfileUpdateListener,
         DriverManager.DriverActionsListener {
@@ -60,6 +68,7 @@ public class AccountFragment extends Fragment implements
     // Managers
     private ProfileManager profileManager;
     private DriverManager driverManager;
+    private RideManager rideManager;
     private static final int MEDIA_IMAGES_PERMISSION = 100;
     private static final int SELECT_IMAGE = 200;
     private String ImagePermission;
@@ -114,6 +123,7 @@ public class AccountFragment extends Fragment implements
         // Initialize managers
         profileManager = new ProfileManager(getContext(), this);
         driverManager = new DriverManager(getContext(), this);
+        rideManager = new RideManager(getContext());
 
         loadUserRoleFromToken();
         initializeViews(view);
@@ -362,6 +372,7 @@ public class AccountFragment extends Fragment implements
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
         menuChangePassword.setOnClickListener(v -> showChangePassword());
         menuManageUsers.setOnClickListener(v -> navigateToManageUsers());
+        menuFavorites.setOnClickListener(v -> showFavoriteRoutesDialog());
     }
 
     private MenuConfigurator.MenuViews createMenuViews() {
@@ -741,5 +752,65 @@ public class AccountFragment extends Fragment implements
         for (View view : views) {
             if (view != null) view.setVisibility(View.GONE);
         }
+    }
+
+    private void showFavoriteRoutesDialog() {
+        FavoriteRoutesDialog dialog = FavoriteRoutesDialog.newInstance();
+
+        dialog.setLoading(true);
+        dialog.setEditMode(true);
+        dialog.show(getParentFragmentManager(), FavoriteRoutesDialog.TAG);
+
+        dialog.setOnRouteRemovedListener(route -> {
+            removeRouteFromFavorites(route, dialog);
+        });
+
+        loadFavoriteRoutes(dialog);
+    }
+
+    private void loadFavoriteRoutes(FavoriteRoutesDialog dialog) {
+        rideManager.getFavoriteRoutes(new Callback<List<FavoriteRouteDTO>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteRouteDTO>> call,
+                                   Response<List<FavoriteRouteDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    dialog.setLoading(false);
+                    dialog.setRoutes(response.body());
+                } else {
+                    dialog.setLoading(false);
+                    Toast.makeText(requireContext(),
+                            "Failed to load favorites", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteRouteDTO>> call, Throwable t) {
+                dialog.setLoading(false);
+                Toast.makeText(requireContext(),
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void removeRouteFromFavorites(FavoriteRouteDTO route, FavoriteRoutesDialog dialog) {
+        rideManager.removeFromFavoritesByRouteId(route.getRouteDTO().getId(), new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(requireContext(),
+                            "Route removed from favorites", Toast.LENGTH_SHORT).show();
+                    loadFavoriteRoutes(dialog);
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to remove route", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(requireContext(),
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

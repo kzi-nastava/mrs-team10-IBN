@@ -1,16 +1,21 @@
 package com.example.ubercorp.api;
 
 import com.example.ubercorp.dto.CreateRideDTO;
+import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -37,5 +42,22 @@ public interface RideService {
     Call<PriceDTO> calculatePrice(
             @Header("Authorization") String token,
             @Body CreateRideDTO rideDTO
+    );
+
+    @GET("api/rides/favorites")
+    Call<List<FavoriteRouteDTO>> getFavorites(
+            @Header("Authorization") String token
+    );
+
+    @PUT("api/rides/history/{id}/add-to-favorites")
+    Call<Void> addToFavorites(
+            @Header("Authorization") String token,
+            @Path("id") Long historyId
+    );
+
+    @DELETE("api/rides/history/by-route-id/{routeId}")
+    Call<Void> removeByRouteId(
+            @Header("Authorization") String token,
+            @Path("routeId") Long routeId
     );
 }

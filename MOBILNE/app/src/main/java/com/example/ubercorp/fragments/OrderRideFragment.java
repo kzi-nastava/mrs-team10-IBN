@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.CreateRideDTO;
+import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.GetCoordinateDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
@@ -121,9 +122,8 @@ public class OrderRideFragment extends Fragment {
     private double calculatedPrice = 0.0;
     private int estimatedDuration = 0;
     private double estimatedDistance = 0.0;
-
-    // Date/Time for scheduling
     private Calendar selectedDateTime;
+    private Button btnFavorites;
 
     @Nullable
     @Override
@@ -204,6 +204,7 @@ public class OrderRideFragment extends Fragment {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         dateInput.setText(dateFormat.format(selectedDateTime.getTime()));
         timeInput.setText(timeFormat.format(selectedDateTime.getTime()));
+        btnFavorites = view.findViewById(R.id.btnFavorites);
     }
 
     private void initializeManagers() {
@@ -285,6 +286,7 @@ public class OrderRideFragment extends Fragment {
         confirmShareBtn.setOnClickListener(v -> confirmShareRide());
 
         orderBtn.setOnClickListener(v -> placeOrder());
+        btnFavorites.setOnClickListener(v -> showFavoriteRoutesDialog());
     }
 
     private void showDatePicker() {
@@ -800,5 +802,77 @@ public class OrderRideFragment extends Fragment {
         if (mapView != null) {
             mapView.onPause();
         }
+    }
+
+    private void showFavoriteRoutesDialog() {
+        FavoriteRoutesDialog dialog = FavoriteRoutesDialog.newInstance();
+
+        dialog.setLoading(true);
+        dialog.show(getParentFragmentManager(), FavoriteRoutesDialog.TAG);
+
+        dialog.setOnRouteSelectedListener(this::loadRouteIntoForm);
+
+        loadFavoriteRoutes(dialog);
+    }
+
+    private void loadFavoriteRoutes(FavoriteRoutesDialog dialog) {
+        rideManager.getFavoriteRoutes(new Callback<List<FavoriteRouteDTO>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteRouteDTO>> call,
+                                   Response<List<FavoriteRouteDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    dialog.setLoading(false);
+                    dialog.setRoutes(response.body());
+                } else {
+                    dialog.setLoading(false);
+                    Toast.makeText(requireContext(),
+                            "Failed to load favorites", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteRouteDTO>> call, Throwable t) {
+                dialog.setLoading(false);
+                Toast.makeText(requireContext(),
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loadRouteIntoForm(FavoriteRouteDTO route) {
+        if (route.getRouteDTO() == null ||
+                route.getRouteDTO().getStations() == null ||
+                route.getRouteDTO().getStations().isEmpty()) {
+            Toast.makeText(requireContext(), "Invalid route data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<GetCoordinateDTO> stations = route.getRouteDTO().getStations();
+
+        stops.clear();
+        stopsContainer.removeAllViews();
+
+        fromLocation = stations.get(0).getAddress();
+        fromLocationInput.setText(fromLocation);
+
+        toLocation = stations.get(stations.size() - 1).getAddress();
+        toLocationInput.setText(toLocation);
+
+        for (int i = 1; i < stations.size() - 1; i++) {
+            String stopAddress = stations.get(i).getAddress();
+            stops.add(stopAddress);
+
+            addStop();
+
+            int lastIndex = stopsContainer.getChildCount() - 1;
+            if (lastIndex >= 0) {
+                View stopView = stopsContainer.getChildAt(lastIndex);
+                EditText stopInput = stopView.findViewById(R.id.stopInput);
+                stopInput.setText(stopAddress);
+            }
+        }
+
+        updateLocationDisplay();
+        fetchAndDrawRoute();
     }
 }
