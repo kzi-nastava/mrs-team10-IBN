@@ -164,7 +164,7 @@ public class RideService {
 
     @Transactional(readOnly = true)
     public GetVehiclePositionDTO getTrackingRide(Long id) {
-        Optional<Ride> ride = rideRepository.findFirstByPassengersIdOrderByStartAsc(id);
+        Optional<Ride> ride = rideRepository.findFirstByPassengersIdAndStatusOrderByStartAsc(id, RideStatus.Ongoing);
         if(ride.isPresent()) {
             if (ride.get().getEstimatedTimeArrival().isBefore(LocalDateTime.now()))
                 return new GetVehiclePositionDTO();
