@@ -22,5 +22,6 @@ public class Route {
             joinColumns = @JoinColumn(name = "route_id"),
             inverseJoinColumns = @JoinColumn(name = "stations_id", unique = false)
     )
+    @OrderColumn(name = "station_index")
     private List<Coordinate> stations;
 }

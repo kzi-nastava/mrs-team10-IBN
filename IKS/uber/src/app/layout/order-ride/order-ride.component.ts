@@ -363,9 +363,7 @@ export class OrderRideComponent implements OnInit {
       this.totalPrice = null;
       this.estimatedDistance = 0;
       this.estimatedDuration = null;
-
       this.updateMapLocations();
-
       this.cd.detectChanges();
     }
   }

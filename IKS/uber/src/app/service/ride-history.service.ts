@@ -85,8 +85,6 @@ export class RideService {
   hasMoreScheduled = true;
 
   constructor(private http: HttpClient) {
-    this.loadRides(window.location.search);
-    this.loadScheduledRides();
   }
 
   private _rides = signal<Ride[]>([]);
@@ -139,17 +137,17 @@ export class RideService {
   }
 
   resetRides() {
+    this._rides.set([]);
     this.ridesPage = 0;
     this.hasMoreRides = true;
     this.loadingRides = false;
-    this._rides.set([]);
   }
 
   resetScheduledRides() {
+    this._scheduled_rides.set([]);
     this.scheduledPage = 0;
     this.hasMoreScheduled = true;
     this.loadingScheduled = false;
-    this._scheduled_rides.set([]);
   }
 
   loadRideDetails(rideId: number): Observable<Ride> {

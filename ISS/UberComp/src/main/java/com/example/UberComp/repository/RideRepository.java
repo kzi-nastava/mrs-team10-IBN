@@ -159,6 +159,8 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
                                        Pageable pageable);
 
     Optional<Ride> findFirstByDriverAndStatusOrderByStartDesc(Driver driver, RideStatus status);
+    Optional<Ride> findFirstByDriverAndStatusOrderByStartAsc(Driver driver, RideStatus rideStatus);
+    Optional<Ride> findFirstByPassengersIdAndStatusOrderByStartAsc(Long id, RideStatus rideStatus);
 
     @Query("""
     SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END

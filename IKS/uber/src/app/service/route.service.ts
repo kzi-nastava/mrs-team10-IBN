@@ -67,21 +67,6 @@ export class RouteService {
     console.log(body);
     return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
-
-  // route: Location[] = [
-  //   {
-  //     address: 'Bulevar oslobođenja 7',
-  //     type: 'pickup',
-  //   },
-  //   {
-  //     address: 'Bulevar Patrijarha Pavla 60',
-  //     type: 'stop',
-  //   },
-  //   {
-  //     address: 'Kornelija Stankovića 15',
-  //     type: 'destination',
-  //   },
-  // ];
 }
 
 export interface RidePayload {

@@ -35,6 +35,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() locations: Location[] = [];
   @Input() stations: Station[] = [];
   @Input() interactive: boolean = true;
+  @Input() rideHistory: boolean = false;
   @Output() locationAdded = new EventEmitter<string>();
   @Output() locationRemoved = new EventEmitter<number>();
   @Output() allLocationsCleared = new EventEmitter<void>();
@@ -101,18 +102,20 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.updateLocationsFromInput();
       }
 
-      setTimeout(() => {
-        if (this.map) {
-          this.map.invalidateSize();
-
-          if (this.stations && this.stations.length > 0) {
-            console.log('Loading stations in ngAfterViewInit:', this.stations);
-            this.loadFromStations();
-          } else if (this.locations && this.locations.length > 0) {
-            this.updateLocationsFromInput();
+      if(this.rideHistory){
+        setTimeout(() => {
+          if (this.map) {
+            this.map.invalidateSize();
+  
+            if (this.stations && this.stations.length > 0) {
+              console.log('Loading stations in ngAfterViewInit:', this.stations);
+              this.loadFromStations();
+            } else if (this.locations && this.locations.length > 0) {
+              this.updateLocationsFromInput();
+            }
           }
-        }
-      }, 100);
+        }, 100);
+      }
     }, 0);
   }
 
@@ -146,13 +149,13 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       center: [45.242, 19.8227],
       zoom: 12.75,
       zoomSnap: 0.25,
-      dragging: this.interactive,
-      touchZoom: this.interactive,
-      scrollWheelZoom: this.interactive,
-      doubleClickZoom: this.interactive,
-      boxZoom: this.interactive,
-      keyboard: this.interactive,
-      zoomControl: this.interactive,
+      // dragging: this.interactive,
+      // touchZoom: this.interactive,
+      // scrollWheelZoom: this.interactive,
+      // doubleClickZoom: this.interactive,
+      // boxZoom: this.interactive,
+      // keyboard: this.interactive,
+      // zoomControl: this.interactive,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -188,6 +191,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private async addLocationFromAddress(location: Location): Promise<void> {
     try {
+      console.log('address added')
       const result = await this.searchStreet(location.address).toPromise();
 
       if (result && result.length > 0) {
@@ -341,6 +345,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private registerOnClick(): void {
+  
     this.map.on('click', (e: any) => {
       this.addPoint(e.latlng.lat, e.latlng.lng);
     });

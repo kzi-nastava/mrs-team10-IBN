@@ -70,6 +70,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
   constructor(private http: HttpClient) {}
 
   ngAfterViewInit(): void {
+    this.clearAll();
     this.initializeIcons();
     this.initMap();
     this.vehicleLayer = L.layerGroup().addTo(this.map);
@@ -140,6 +141,7 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
       maxZoom: 18,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.map);
+    this.passingOutput.emit(this.passedCount);
   }
 
   private async updateLocationsFromInput(): Promise<void> {
@@ -179,7 +181,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
       const lat = station.lat;
       const lon = station.lon;
 
-      // Get address from reverse geocoding
       let addressString = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
       try {
         const addressResult = await this.reverseSearch(lat, lon).toPromise();
@@ -191,7 +192,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
         console.warn('Could not get address from reverse geocoding:', err);
       }
 
-      // Determine icon based on position
       let icon = this.PinIcon;
       if (index === 0) {
         icon = this.PickupIcon;

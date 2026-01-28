@@ -880,7 +880,7 @@ public class DriverService {
         return location;
     }
 
-    private Coordinate geocodeAddressWithCache(String address) {
+    public Coordinate geocodeAddressWithCache(String address) {
         Optional<Coordinate> cached = coordinateRepository
                 .findByAddress(address);
 
@@ -1168,6 +1168,5 @@ public class DriverService {
     @Scheduled(fixedRate = 600000)
     public void cleanExpiredCache() {
         travelTimeCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
-        System.out.println("deleted");
     }
 }

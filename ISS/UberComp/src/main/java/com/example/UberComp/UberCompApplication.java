@@ -1,5 +1,8 @@
 package com.example.UberComp;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,5 +23,10 @@ public class UberCompApplication {
 				registry.addMapping("/**").allowedOrigins("http://localhost:4200");
 			}
 		};
+	}
+	@Bean
+	public Validator validator() {
+		ValidatorFactory validatorFactory = Validation.byDefaultProvider().configure().buildValidatorFactory();
+		return validatorFactory.getValidator();
 	}
 }
