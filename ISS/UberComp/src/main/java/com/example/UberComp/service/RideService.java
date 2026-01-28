@@ -460,15 +460,18 @@ public class RideService {
         Optional<Ride> rideOptional = rideRepository.findById(cancelled.getId());
         if(rideOptional.isEmpty()) return false;
         Ride cancelledRide = rideOptional.get();
+        if(!cancelled.isCancelledByDriver() &&
+                Duration.between(LocalDateTime.now(), cancelledRide.getStart()).toMinutes() < 10)
+            return false;
         Driver driver = cancelledRide.getDriver();
         driver.setStatus(DriverStatus.ONLINE);
         cancelledRide.setPrice(0.0);
         if(cancelled.isCancelledByDriver()){
             cancelledRide.setStatus(RideStatus.CancelledByDriver);
-            cancelledRide.setCancellationReason(cancelled.getCancellationReason());
         } else {
             cancelledRide.setStatus(RideStatus.CancelledByPassenger);
         }
+        cancelledRide.setCancellationReason(cancelled.getCancellationReason());
         driverRepository.save(driver);
         rideRepository.save(cancelledRide);
         return true;

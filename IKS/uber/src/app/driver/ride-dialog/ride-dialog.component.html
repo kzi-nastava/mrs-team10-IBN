@@ -55,6 +55,9 @@
 
       @if (role == 'passenger') {
         <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
+        @if (canBeCancelled()){
+          <button class="cancel-btn" (click)="cancelRide()">Cancel Ride</button>
+        }
       }
     </div>
   </div>

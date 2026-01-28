@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Ride } from '../../model/ride-history.model';
@@ -10,6 +10,7 @@ import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog
 import { AuthService } from '../../service/auth.service';
 import { RideService } from '../../service/ride-history.service';
 import { BehaviorSubject } from 'rxjs';
+import { RideCancellation, RouteService } from '../../service/route.service';
 
 @Component({
   selector: 'app-ride-dialog',
@@ -30,6 +31,8 @@ export class RideDialogComponent implements OnInit {
     private dialog: MatDialog,
     private authService: AuthService,
     private rideService: RideService,
+    private routeService: RouteService,
+    private cdr: ChangeDetectorRef
   ) {
     this.role = authService.role();
   }
@@ -82,6 +85,29 @@ export class RideDialogComponent implements OnInit {
         },
       });
     }
+  }
+
+  canBeCancelled(){
+    const TEN_MINUTES = 10 * 60 * 1000 
+    const now = Date.now();
+    console.log(this.ride.startTime)
+    return new Date(this.ride.startTime).getTime() - now > TEN_MINUTES && !this.ride.canceled
+  }
+
+  cancelRide(){
+    const cancelled: RideCancellation = {
+      id: this.ride.id,
+      cancellationReason: 'Cancelled by passenger',
+      cancelledByDriver: false
+    }
+    console.log(cancelled)
+    this.routeService.cancelRide(cancelled).subscribe({
+      next: (res) => {
+        this.ride.price = 0
+        this.ride.canceled = true;
+        this.cdr.detectChanges()
+      }
+    })
   }
 
   showMessage(message: string) {
