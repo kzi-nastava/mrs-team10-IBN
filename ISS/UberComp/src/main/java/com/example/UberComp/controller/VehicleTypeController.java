@@ -24,6 +24,7 @@ import java.util.List;
 public class VehicleTypeController {
     private VehicleTypeService vehicleTypeService;
 
+    @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehicleTypeDTO>> getVehicleTypes(){
         Collection<GetVehicleTypeDTO> vehicleTypes = vehicleTypeService.getVehicleTypes();

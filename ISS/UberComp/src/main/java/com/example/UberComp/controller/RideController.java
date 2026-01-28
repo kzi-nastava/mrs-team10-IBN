@@ -39,16 +39,6 @@ public class RideController {
     @Autowired
     private RideService rideService;
 
-    //    @PreAuthorize("hasAuthority('DRIVER')")
-    //@GetMapping(value = "/driver", produces = MediaType.APPLICATION_JSON_VALUE)
-    //public ResponseEntity<Page<GetRideDTO>> getRidesDriver(Authentication auth, Pageable pageable) {
-//
-    //    Account account = (Account) auth.getPrincipal();
-    //    Page<GetRideDTO> rides = rideService.getRidesDriver(account.getUser().getId(), pageable);
-//
-    //    return ResponseEntity.ok(rides);
-    //}
-
     @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageDTO<GetRideDTO>> getRideHistory(
@@ -145,11 +135,6 @@ public class RideController {
     public ResponseEntity<FinishedRideDTO> finishRide(@RequestBody RideMomentDTO finish, @PathVariable("id") Long id) {
          FinishedRideDTO finished = rideService.endRide(id, finish);
          return new ResponseEntity<>(finished, HttpStatus.OK);
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteRide(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PreAuthorize("hasAuthority('driver')")
@@ -249,7 +234,7 @@ public class RideController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @PreAuthorize("hasAuthority('driver')")
     @PutMapping("/{id}/start")
     public ResponseEntity<Void> startRide(@PathVariable Long id, @RequestBody RideMomentDTO start) {
         rideService.startRide(id, start);

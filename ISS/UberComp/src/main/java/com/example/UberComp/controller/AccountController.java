@@ -34,13 +34,6 @@ class AccountController {
     private AccountService accountService;
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
-        UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
-        return new ResponseEntity<UpdatedAccountDTO>(updated, HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable("id") Long id) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
