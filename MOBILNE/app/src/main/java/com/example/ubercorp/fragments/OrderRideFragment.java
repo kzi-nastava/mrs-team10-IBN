@@ -589,10 +589,6 @@ public class OrderRideFragment extends Fragment {
                             Toast.makeText(requireContext(), "Unable to fetch route", Toast.LENGTH_SHORT).show();
                         }
                     });
-                } else {
-                    requireActivity().runOnUiThread(() ->
-                            Toast.makeText(requireContext(), "Invalid address provided", Toast.LENGTH_SHORT).show()
-                    );
                 }
             } catch (Exception e) {
                 Log.e("OrderRideFragment", "Error: " + e.getMessage(), e);
@@ -851,16 +847,24 @@ public class OrderRideFragment extends Fragment {
 
         stops.clear();
         stopsContainer.removeAllViews();
+        stopPoints.clear();
 
-        fromLocation = stations.get(0).getAddress();
+        GetCoordinateDTO startStation = stations.get(0);
+        fromLocation = startStation.getAddress();
         fromLocationInput.setText(fromLocation);
+        startPoint = new GeoPoint(startStation.getLat(), startStation.getLon());
 
-        toLocation = stations.get(stations.size() - 1).getAddress();
+        GetCoordinateDTO endStation = stations.get(stations.size() - 1);
+        toLocation = endStation.getAddress();
         toLocationInput.setText(toLocation);
+        endPoint = new GeoPoint(endStation.getLat(), endStation.getLon());
 
         for (int i = 1; i < stations.size() - 1; i++) {
-            String stopAddress = stations.get(i).getAddress();
+            GetCoordinateDTO stopStation = stations.get(i);
+            String stopAddress = stopStation.getAddress();
+
             stops.add(stopAddress);
+            stopPoints.add(new GeoPoint(stopStation.getLat(), stopStation.getLon()));
 
             addStop();
 
@@ -873,6 +877,38 @@ public class OrderRideFragment extends Fragment {
         }
 
         updateLocationDisplay();
-        fetchAndDrawRoute();
+
+        drawRouteFromPoints();
+    }
+
+    private void drawRouteFromPoints() {
+        new Thread(() -> {
+            try {
+                List<GeoPoint> allPoints = new ArrayList<>();
+                allPoints.add(startPoint);
+                allPoints.addAll(stopPoints);
+                allPoints.add(endPoint);
+
+                routePoints = routeManager.getRoute(allPoints);
+
+                requireActivity().runOnUiThread(() -> {
+                    if (routePoints != null && !routePoints.isEmpty()) {
+                        routeManager.drawRoute(routePoints, allPoints);
+
+                        estimatedDistance = routeManager.getEstimatedDistance();
+                        estimatedDuration = routeManager.getEstimatedDuration();
+
+                        calculatePrice();
+                    } else {
+                        Toast.makeText(requireContext(), "Unable to draw route", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("OrderRideFragment", "Error drawing route: " + e.getMessage(), e);
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Error drawing route", Toast.LENGTH_SHORT).show()
+                );
+            }
+        }).start();
     }
 }

@@ -122,11 +122,6 @@ public class RouteFragment extends Fragment {
         String startAddress = startAddressInput.getText().toString().trim();
         String endAddress = endAddressInput.getText().toString().trim();
 
-        if (startAddress.isEmpty() || endAddress.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter start and end addresses first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         Bundle args = new Bundle();
         args.putString("fromLocation", startAddress);
         args.putString("toLocation", endAddress);
