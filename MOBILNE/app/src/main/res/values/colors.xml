@@ -10,4 +10,24 @@
     <color name="green">#729664</color>
     <color name="car_default">#e0e0e0</color>
     <color name="car_selected">#ffd700</color>
+
+    <color name="overlay_background">#80000000</color>
+    <color name="popup_background">#F4312E2E</color>
+
+    <color name="close_button_bg">#33FFFFFF</color>
+    <color name="close_button_bg_pressed">#4DFFFFFF</color>
+
+    <color name="route_text">#333333</color>
+    <color name="route_secondary">#666666</color>
+    <color name="route_arrow">#999999</color>
+
+    <color name="icon_default">#999999</color>
+    <color name="icon_hover">#333333</color>
+    <color name="remove_icon">#DC3545</color>
+    <color name="remove_icon_hover">#C82333</color>
+    <color name="remove_icon_bg">#1ADC3545</color>
+    <color name="remove_icon_bg_pressed">#33DC3545</color>
+
+    <color name="empty_text">#E6FFFFFF</color>
+    <color name="empty_hint">#99FFFFFF</color>
 </resources>

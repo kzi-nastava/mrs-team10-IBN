@@ -19,7 +19,7 @@ public class ReviewController {
 
     private ReviewService reviewService;
 
-//  @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAuthority('user')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreatedReviewDTO> createReview(Authentication auth, @RequestBody CreateReviewDTO createReviewDTO) {
         Account acc = (Account) auth.getPrincipal();

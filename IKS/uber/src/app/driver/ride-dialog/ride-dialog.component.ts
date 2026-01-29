@@ -32,7 +32,7 @@ export class RideDialogComponent implements OnInit {
     private authService: AuthService,
     private rideService: RideService,
     private routeService: RouteService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {
     this.role = authService.role();
   }
@@ -87,27 +87,27 @@ export class RideDialogComponent implements OnInit {
     }
   }
 
-  canBeCancelled(){
-    const TEN_MINUTES = 10 * 60 * 1000 
+  canBeCancelled() {
+    const TEN_MINUTES = 10 * 60 * 1000;
     const now = Date.now();
-    console.log(this.ride.startTime)
-    return new Date(this.ride.startTime).getTime() - now > TEN_MINUTES && !this.ride.canceled
+    console.log(this.ride.startTime);
+    return new Date(this.ride.startTime).getTime() - now > TEN_MINUTES && !this.ride.canceled;
   }
 
-  cancelRide(){
+  cancelRide() {
     const cancelled: RideCancellation = {
       id: this.ride.id,
       cancellationReason: 'Cancelled by passenger',
-      cancelledByDriver: false
-    }
-    console.log(cancelled)
+      cancelledByDriver: false,
+    };
+    console.log(cancelled);
     this.routeService.cancelRide(cancelled).subscribe({
       next: (res) => {
-        this.ride.price = 0
+        this.ride.price = 0;
         this.ride.canceled = true;
-        this.cdr.detectChanges()
-      }
-    })
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   showMessage(message: string) {

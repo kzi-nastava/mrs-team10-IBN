@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ import java.util.List;
 public class VehicleTypeController {
     private VehicleTypeService vehicleTypeService;
 
+    @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehicleTypeDTO>> getVehicleTypes(){
         Collection<GetVehicleTypeDTO> vehicleTypes = vehicleTypeService.getVehicleTypes();
@@ -30,7 +32,7 @@ public class VehicleTypeController {
     }
 
 
-
+    @PreAuthorize("hasAuthority('admin')")
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Collection<UpdateVehicleTypeDTO>> updateVehicleType(@RequestBody Collection<UpdateVehicleTypeDTO> toUpdate){
