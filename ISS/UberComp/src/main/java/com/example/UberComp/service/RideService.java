@@ -552,12 +552,20 @@ public class RideService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GetCurrentRideDTO> getCurrentRides(Pageable pageable) {
-        List<Ride> ongoingRides = rideRepository.findByStatusAndDriverStatus(
-                RideStatus.Ongoing,
-                DriverStatus.DRIVING
-        );
-
+    public Page<GetCurrentRideDTO> getCurrentRides(String search, Pageable pageable) {
+        List<Ride> ongoingRides;
+        if (search != null){
+            ongoingRides = rideRepository.findByStatusAndDriverStatus(
+                    RideStatus.Ongoing,
+                    DriverStatus.DRIVING,
+                    search
+            );
+        }else {
+            ongoingRides = rideRepository.findByStatusAndDriverStatus(
+                    RideStatus.Ongoing,
+                    DriverStatus.DRIVING
+            );
+        }
         List<GetCurrentRideDTO> dtos = ongoingRides.stream()
                 .map(ride -> new GetCurrentRideDTO(
                         new GetRideDTO(ride),

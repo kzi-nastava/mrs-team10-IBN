@@ -272,8 +272,11 @@ public class RideController {
 
     @PreAuthorize("hasAuthority('administrator')")
     @GetMapping(value="/adminView", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<GetCurrentRideDTO>> currentRides(Authentication auth, Pageable pageable){
-        Page<GetCurrentRideDTO> currentRides = rideService.getCurrentRides(pageable);
+    public ResponseEntity<Page<GetCurrentRideDTO>> currentRides(
+            Authentication auth,
+            Pageable pageable,
+            @RequestParam(required = false) String search){
+        Page<GetCurrentRideDTO> currentRides = rideService.getCurrentRides(search, pageable);
         return ResponseEntity.ok(currentRides);
     }
 

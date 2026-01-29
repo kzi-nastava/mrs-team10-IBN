@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { AdminService, DriversRides } from '../../service/admin-rides.service';
 import { MatTableModule } from '@angular/material/table';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-admin-home',
@@ -21,6 +22,7 @@ import { MatTableModule } from '@angular/material/table';
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
+    DatePipe,
   ],
 })
 export class AdminHomeComponent implements OnInit {
@@ -45,9 +47,19 @@ export class AdminHomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
   }
+  searchTerm = '';
+
+  onSearchChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+
+    this.searchTerm = value;
+    this.pageIndex = 0;
+
+    this.loadData();
+  }
 
   loadData(): void {
-    this.adminService.loadData(this.pageIndex, this.pageSize).subscribe({
+    this.adminService.loadData(this.pageIndex, this.pageSize, this.searchTerm).subscribe({
       next: (res) => {
         this.rides = res.content;
         this.totalData = res.totalElements;

@@ -26,13 +26,21 @@ export class AdminService {
   private _currentRides = signal<DriversRides[]>([]);
   currentRides = this._currentRides.asReadonly();
 
-  loadData(pageIndex: number, pageSize: number): Observable<PageResponse<DriversRides>> {
+  loadData(
+    pageIndex: number,
+    pageSize: number,
+    search?: String,
+  ): Observable<PageResponse<DriversRides>> {
     const url = `${environment.apiHost}/rides/adminView`;
-    return this.http.get<PageResponse<DriversRides>>(url, {
-      params: {
-        page: pageIndex.toString(),
-        size: pageSize.toString(),
-      },
-    });
+    const params: any = {
+      page: pageIndex.toString(),
+      size: pageSize.toString(),
+    };
+
+    if (search && search.trim() !== '') {
+      params.search = search;
+    }
+
+    return this.http.get<PageResponse<DriversRides>>(url, { params });
   }
 }

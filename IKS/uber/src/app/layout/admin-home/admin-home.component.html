@@ -2,7 +2,7 @@
 <div class="center-container">
   <mat-form-field>
     <mat-label>Search by name</mat-label>
-    <input matInput />
+    <input matInput (input)="onSearchChange($event)" placeholder="Enter name" />
   </mat-form-field>
 </div>
 
@@ -32,12 +32,12 @@
 
         <ng-container matColumnDef="startTime">
           <th mat-header-cell *matHeaderCellDef>Start time</th>
-          <td mat-cell *matCellDef="let data">{{ data.startTime }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="endTime">
           <th mat-header-cell *matHeaderCellDef>End time</th>
-          <td mat-cell *matCellDef="let data">{{ data.endTime }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.endTime | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

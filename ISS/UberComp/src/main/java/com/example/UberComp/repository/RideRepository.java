@@ -172,6 +172,22 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     boolean existsByPassengerIdAndStatus(@Param("userId") Long userId, @Param("status") RideStatus status);
 
     List<Ride> findByStatusAndDriverStatus(RideStatus rideStatus, DriverStatus driverStatus);
+
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+JOIN FETCH r.route rt
+JOIN FETCH rt.stations
+LEFT JOIN FETCH r.passengers
+WHERE r.driver.status = :driverStatus
+AND r.status  = :rideStatus
+AND LOWER(r.driver.name) LIKE LOWER(CONCAT('%', :name, '%'))
+""")
+    List<Ride> findByStatusAndDriverStatus(
+            @Param("rideStatus") RideStatus status,
+            @Param("driverStatus") DriverStatus driverStatus,
+            @Param("name") String search
+    );
+
 }
 
 
