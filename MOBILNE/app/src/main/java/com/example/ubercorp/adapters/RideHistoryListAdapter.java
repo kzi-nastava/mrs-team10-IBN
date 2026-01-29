@@ -26,6 +26,7 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class RideHistoryListAdapter extends ArrayAdapter<RideDTO> {
 
@@ -79,7 +80,7 @@ public class RideHistoryListAdapter extends ArrayAdapter<RideDTO> {
             start.setText(ride.getStartTime().substring(11,16));
 
             end.setText(ride.getEndTime().substring(11,16));
-            price.setText(ride.getPrice().toString() + " RSD");
+            price.setText(String.format(Locale.US, "%.2f RSD", ride.getPrice()));
             date.setText(ride.getStartTime().substring(0,10));
 
 

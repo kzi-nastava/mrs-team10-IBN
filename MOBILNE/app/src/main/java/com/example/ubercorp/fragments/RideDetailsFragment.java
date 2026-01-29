@@ -12,10 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.ubercorp.R;
 import com.example.ubercorp.activities.enums.RideStatus;
+import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.managers.RouteManager;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
 import com.example.ubercorp.dto.CoordinateDTO;
@@ -45,6 +47,8 @@ public class RideDetailsFragment extends Fragment {
     private RideManager rideManager;
     private FragmentRideDetailsBinding binding;
     private RouteManager routeManager;
+    private GetRideDetailsDTO rideDetails;
+    private boolean isFavorite = false;
 
     public RideDetailsFragment() {}
 
@@ -56,8 +60,6 @@ public class RideDetailsFragment extends Fragment {
             ride = (RideDTO) getArguments().getParcelable("ride");
         }
         rideManager = new RideManager(requireContext());
-
-
     }
 
     @Override
@@ -81,10 +83,13 @@ public class RideDetailsFragment extends Fragment {
                     return;
                 }
 
-                GetRideDetailsDTO dto = response.body();
+                rideDetails = response.body();
+
+                checkIfFavorite();
+
                 RouteManager routeManager = new RouteManager(binding.map, requireContext());
                 List<GeoPoint> stations = new ArrayList<>();
-                for (CoordinateDTO station : dto.getRoute().getStations()) {
+                for (CoordinateDTO station : rideDetails.getRoute().getStations()) {
                     stations.add(new GeoPoint(station.getLat(), station.getLon()));
                 }
 
@@ -93,11 +98,13 @@ public class RideDetailsFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> routeManager.drawRoute(routePoints, stations));
                 }).start();
             }
-                @Override
+
+            @Override
             public void onFailure(Call<GetRideDetailsDTO> call, Throwable t) {
             }
         });
 
+        binding.favorites.setOnClickListener(v -> toggleFavorite());
 
         if (ride != null) {
             binding.startTimeDetail.setText(ride.getStartTime().substring(11,16));
@@ -110,7 +117,6 @@ public class RideDetailsFragment extends Fragment {
             if (ride.getStatus() == RideStatus.Panic)
                 binding.panic.setChecked(true);
 
-            // passengers
             GridLayout passengersLayout = binding.passengers;
             passengersLayout.removeAllViews();
 
@@ -145,9 +151,93 @@ public class RideDetailsFragment extends Fragment {
                 }
                 passengersLayout.addView(view);
             }
+        }
+    }
 
+    private void checkIfFavorite() {
+        if (rideDetails == null) return;
+
+        Long routeId = rideDetails.getRoute().getId();
+
+        rideManager.getFavoriteRoutes(new Callback<List<FavoriteRouteDTO>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteRouteDTO>> call, Response<List<FavoriteRouteDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FavoriteRouteDTO> favoriteRoutes = response.body();
+
+                    isFavorite = false;
+                    for (FavoriteRouteDTO favorite : favoriteRoutes) {
+                        if (favorite.getRouteDTO().getId().equals(routeId)) {
+                            isFavorite = true;
+                            break;
+                        }
+                    }
+
+                    updateFavoriteButton();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteRouteDTO>> call, Throwable t) {
+                isFavorite = false;
+                updateFavoriteButton();
+            }
+        });
+    }
+
+    private void toggleFavorite() {
+        if (rideDetails == null) {
+            Toast.makeText(requireContext(), "Route details not loaded", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        Long routeId = rideDetails.getRoute().getId();
+
+        if (isFavorite) {
+            rideManager.removeFromFavoritesByRouteId(routeId, new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        isFavorite = false;
+                        updateFavoriteButton();
+                        Toast.makeText(requireContext(), "Removed from favorites", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to remove from favorites", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            rideManager.addToFavorites(routeId, new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        isFavorite = true;
+                        updateFavoriteButton();
+                        Toast.makeText(requireContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to add to favorites", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(requireContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void updateFavoriteButton() {
+        if (isFavorite) {
+            binding.favorites.setText("❤️");
+        } else {
+            binding.favorites.setText("🤍");
+        }
     }
 
     @Override
@@ -155,5 +245,4 @@ public class RideDetailsFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
-
 }

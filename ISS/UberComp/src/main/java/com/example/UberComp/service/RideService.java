@@ -394,17 +394,35 @@ public class RideService {
     public List<FavoriteRouteDTO> getFavoriteRoutes(Account account) {
         List<FavoriteRoute> favs = favoriteRouteRepository.findFavoriteRouteByAccount(account);
 
-        return favs.stream()
-                .map(fav -> {
-                    fav.getRoute().getStations().size();
-                    return new FavoriteRouteDTO(
-                            fav.getId(),
-                            null,
-                            new GetRouteDTO(fav.getRoute())
-                    );
-                })
+        Map<String, FavoriteRoute> uniqueRoutes = new LinkedHashMap<>();
+
+        for (FavoriteRoute fav : favs) {
+            fav.getRoute().getStations().size();
+
+            String routeKey = createRouteKey(fav.getRoute());
+
+            uniqueRoutes.putIfAbsent(routeKey, fav);
+        }
+
+        return uniqueRoutes.values().stream()
+                .map(fav -> new FavoriteRouteDTO(
+                        fav.getId(),
+                        null,
+                        new GetRouteDTO(fav.getRoute())
+                ))
                 .toList();
     }
+
+    private String createRouteKey(Route route) {
+        List<Coordinate> stations = route.getStations();
+
+        return stations.stream()
+                .map(station -> String.format(Locale.US, "%.6f,%.6f",
+                        station.getLat(),
+                        station.getLon()))
+                .collect(Collectors.joining("|"));
+    }
+
 
     @Transactional
     public FavoriteRouteDTO addRouteToFavorites(Long routeId, Account account) {
