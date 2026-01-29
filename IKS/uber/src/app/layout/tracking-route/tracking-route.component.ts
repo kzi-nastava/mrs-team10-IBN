@@ -15,7 +15,7 @@ import { Station } from '../../model/ride-history.model';
 import { HttpClient } from '@angular/common/http';
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
-import { AppNotification } from '../../service/notification.service';
+import { AppNotification, AppNotificationDTO } from '../../service/notification.service';
 
 @Component({
   selector: 'app-tracking-route',
@@ -159,8 +159,7 @@ export class TrackingRouteComponent implements OnInit{
       .panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
       .subscribe({
         next: (res) => {
-          const notif: AppNotification = {
-            id:100,
+          const notif: AppNotificationDTO = {
             title:"PANIC",
             content: `Emergency in ${this.currentLocation?.address}`
           }

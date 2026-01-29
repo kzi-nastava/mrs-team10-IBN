@@ -28,6 +28,11 @@ export class NotificationService {
   }
 }
 
+export interface AppNotificationDTO{
+  title: string,
+  content: string
+}
+
 export interface AppNotification{
   id: number,
   title: string,

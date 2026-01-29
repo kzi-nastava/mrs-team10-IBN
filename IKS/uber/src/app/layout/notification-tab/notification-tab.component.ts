@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, signal,  } from '@angular/core';
-import { NotificationService, AppNotification } from '../../service/notification.service';
+import { NotificationService, AppNotification, AppNotificationDTO } from '../../service/notification.service';
 import { NavBarComponent } from "../nav-bar/nav-bar.component";
 import { MatIconModule } from '@angular/material/icon';
 import SockJS from 'sockjs-client';
@@ -38,8 +38,7 @@ export class NotificationTabComponent implements OnInit{
   }
 
   send(){
-    const notif: AppNotification = {
-      id:100,
+    const notif: AppNotificationDTO = {
       title:"Title 100",
       content: "Content 100"
     }

@@ -1,11 +1,14 @@
 package com.example.UberComp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,4 +22,17 @@ public class Notification {
 
     @Column
     private String content;
+
+    @Column
+    private LocalDateTime time;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> notifiedUsers;
+
+    public Notification(String title, String content, LocalDateTime time){
+        this.title = title;
+        this.content = content;
+        this.time = time;
+    }
 }
