@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyAuthority;
+
 @RestController
 @RequestMapping("/api/account")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -30,17 +33,13 @@ class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UpdatedAccountDTO> updateAccount(@RequestBody UpdateAccountDTO account, @PathVariable("id") Long id) throws Exception{
-        UpdatedAccountDTO updated = new UpdatedAccountDTO(id, account.getPassword(), account.getAccountStatus(), account.getBlockingReason());
-        return new ResponseEntity<UpdatedAccountDTO>(updated, HttpStatus.OK);
-    }
-
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deleteAccount(@PathVariable("id") Long id) {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @PutMapping("/me/change-password")
     public ResponseEntity<?> changePassword(Authentication auth, @RequestBody ChangePasswordDTO dto) {
         Account account = (Account) auth.getPrincipal();
@@ -50,6 +49,7 @@ class AccountController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping("/me")
     public ResponseEntity<GetProfileDTO> getProfile(Authentication auth) throws Exception {
         String email = auth.getName();
@@ -62,12 +62,14 @@ class AccountController {
         return ResponseEntity.ok(profile);
     }
 
+    @PreAuthorize("hasAuthority('administrator')")
     @GetMapping("/change-requests")
     public ResponseEntity<List<DriverChangeRequestDTO>> getChangeRequests() {
         List<DriverChangeRequestDTO> requests = accountService.getAllPendingRequests();
         return ResponseEntity.ok(requests);
     }
 
+    @PreAuthorize("hasAuthority('administrator')")
     @PostMapping("/approve-change/{id}")
     public ResponseEntity<String> approveChange(@PathVariable Long id) {
         try {
@@ -79,6 +81,7 @@ class AccountController {
         }
     }
 
+    @PreAuthorize("hasAuthority('administrator')")
     @PostMapping("/reject-change/{id}")
     public ResponseEntity<String> rejectDriverChange(@PathVariable Long id) {
         try {
@@ -90,6 +93,7 @@ class AccountController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @PutMapping("/me/profile")
     public ResponseEntity<GetProfileDTO> updateProfile(
             Authentication auth,

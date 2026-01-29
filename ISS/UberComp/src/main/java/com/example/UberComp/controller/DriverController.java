@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class DriverController {
         return ResponseEntity.ok(vehiclePositions);
     }
 
+    @PreAuthorize("hasAuthority('administrator')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> register(@RequestBody CreateDriverDTO dto) {
         try {
@@ -51,12 +53,14 @@ public class DriverController {
         }
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UpdatedStatusDriverDTO> updateDriverStatus(@RequestBody DriverStatusDTO status, @PathVariable("id") Long id) {
         UpdatedStatusDriverDTO updatedDriver = new UpdatedStatusDriverDTO(id, status.getStatus());
         return ResponseEntity.ok(updatedDriver);
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @GetMapping("/me")
     public ResponseEntity<DriverDTO> getDriverProfile(Authentication auth) {
         try {
@@ -75,6 +79,7 @@ public class DriverController {
         }
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @PostMapping("/me/change-request")
     public ResponseEntity<Void> submitDriverChangeRequest(
             Authentication auth,
@@ -91,6 +96,7 @@ public class DriverController {
         }
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @PutMapping("/me/update-location")
     public ResponseEntity<Void> updateLocation(
             Authentication auth,
