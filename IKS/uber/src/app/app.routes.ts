@@ -119,12 +119,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: ['driver'] },
   },
-  {
-    path: 'admin-home',
-    component: AdminHomeComponent,
-    //canActivate: [AuthGuard],
-    //data: { role: ['administrator'] },
-  },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },

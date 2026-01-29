@@ -1,5 +1,6 @@
 package com.example.UberComp.repository;
 
+import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
@@ -169,6 +170,8 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     WHERE p.id = :userId AND r.status = :status
 """)
     boolean existsByPassengerIdAndStatus(@Param("userId") Long userId, @Param("status") RideStatus status);
+
+    List<Ride> findByStatusAndDriverStatus(RideStatus rideStatus, DriverStatus driverStatus);
 }
 
 

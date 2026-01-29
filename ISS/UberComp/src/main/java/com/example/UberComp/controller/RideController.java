@@ -39,7 +39,7 @@ public class RideController {
     @Autowired
     private RideService rideService;
 
-    @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('user','driver', 'administartor')")
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageDTO<GetRideDTO>> getRideHistory(
             Authentication auth,
@@ -86,6 +86,7 @@ public class RideController {
         return ResponseEntity.ok(new PageDTO<>(rides));
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @GetMapping(value = "/incoming", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<IncomingRideDTO> getIncomingRide(Authentication auth){
         Account account = (Account) auth.getPrincipal();
@@ -95,6 +96,7 @@ public class RideController {
         return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable("id") Long id)
     {
@@ -102,6 +104,7 @@ public class RideController {
         return new ResponseEntity<GetRideDetailsDTO>(ride, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping(value = "/activeRides", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehiclePositionDTO>> activeRides(){
         driverService.updateAllDriverLocation();
@@ -109,6 +112,7 @@ public class RideController {
         return ResponseEntity.ok(activeRides);
     }
 
+    @PreAuthorize("hasAuthority('passenger')")
     @GetMapping(value = "/trackingRidePassenger", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetVehiclePositionDTO> trackingRidePassenger(Authentication auth){
         Account acc = (Account) auth.getPrincipal();
@@ -116,6 +120,7 @@ public class RideController {
         return ResponseEntity.ok(trackingRide);
     }
 
+    @PreAuthorize("hasAuthority('driver')")
     @GetMapping(value="/scheduledRides", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<GetRideDTO>> scheduledRides(Authentication auth, Pageable pageable){
         Account acc = (Account) auth.getPrincipal();
@@ -264,4 +269,12 @@ public class RideController {
         }
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
+
+    @PreAuthorize("hasAuthority('administrator')")
+    @GetMapping(value="/adminView", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<GetCurrentRideDTO>> currentRides(Authentication auth, Pageable pageable){
+        Page<GetCurrentRideDTO> currentRides = rideService.getCurrentRides(pageable);
+        return ResponseEntity.ok(currentRides);
+    }
+
 }

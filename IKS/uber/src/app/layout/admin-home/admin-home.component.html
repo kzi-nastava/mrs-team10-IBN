@@ -10,39 +10,34 @@
   <mat-tab-group mat-stretch-tabs>
     <mat-tab label="Drivers">
       <table mat-table [dataSource]="dataSource">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>No.</th>
-          <td mat-cell *matCellDef="let element">{{ element.position }}</td>
-        </ng-container>
-
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.name }}</td>
         </ng-container>
 
         <ng-container matColumnDef="lastname">
           <th mat-header-cell *matHeaderCellDef>Lastname</th>
-          <td mat-cell *matCellDef="let element">{{ element.lastname }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.lastname }}</td>
         </ng-container>
 
         <ng-container matColumnDef="startLocation">
           <th mat-header-cell *matHeaderCellDef>Start location</th>
-          <td mat-cell *matCellDef="let element">{{ element.startLocation }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.startLocation }}</td>
         </ng-container>
 
         <ng-container matColumnDef="endLocation">
           <th mat-header-cell *matHeaderCellDef>End location</th>
-          <td mat-cell *matCellDef="let element">{{ element.endLocation }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.endLocation }}</td>
         </ng-container>
 
         <ng-container matColumnDef="startTime">
           <th mat-header-cell *matHeaderCellDef>Start time</th>
-          <td mat-cell *matCellDef="let element">{{ element.startTime }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.startTime }}</td>
         </ng-container>
 
         <ng-container matColumnDef="endTime">
           <th mat-header-cell *matHeaderCellDef>End time</th>
-          <td mat-cell *matCellDef="let element">{{ element.endTime }}</td>
+          <td mat-cell *matCellDef="let data">{{ data.endTime }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -50,8 +45,11 @@
       </table>
 
       <mat-paginator
+        [length]="totalData"
         [pageSizeOptions]="[5]"
+        [pageIndex]="pageIndex"
         showFirstLastButtons
+        (page)="onPageChange($event)"
         aria-label="Select page of periodic elements"
       >
       </mat-paginator>
