@@ -18,6 +18,7 @@ import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.compo
 import { AuthGuard } from './auth/auth-guard';
 import { ScheduledRidesComponent } from './driver/scheduled-rides/scheduled-rides.component';
 import { VerifyAccountComponent } from './layout/verify-account/verify-account.component';
+import { NotificationTabComponent } from './layout/notification-tab/notification-tab.component';
 
 
 export const routes: Routes = [
@@ -40,6 +41,12 @@ export const routes: Routes = [
   {
     path: 'set-password/:id',
     component: VerifyFormComponent
+  },
+  {
+    path: 'notifications',
+    component: NotificationTabComponent,
+    // canActivate: [AuthGuard],
+    // data: { role: ['administrator', 'passenger', 'driver'] },
   },
   {
     path: 'account',

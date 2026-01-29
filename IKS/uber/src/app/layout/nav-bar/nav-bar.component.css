@@ -93,6 +93,7 @@ mat-sidenav-container {
 
 .notification {
   color: yellow;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

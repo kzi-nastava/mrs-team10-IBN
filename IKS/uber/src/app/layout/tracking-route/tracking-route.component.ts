@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TrackingMapComponent } from '../../maps/tracking-map/tracking-map.component';
@@ -13,7 +13,9 @@ import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/compl
 import { RouteService } from '../../service/route.service';
 import { Station } from '../../model/ride-history.model';
 import { HttpClient } from '@angular/common/http';
-import { R } from '@angular/cdk/keycodes';
+import * as Stomp from 'stompjs';
+import SockJS from 'sockjs-client';
+import { AppNotification, AppNotificationDTO } from '../../service/notification.service';
 
 @Component({
   selector: 'app-tracking-route',
@@ -21,12 +23,13 @@ import { R } from '@angular/cdk/keycodes';
   templateUrl: './tracking-route.component.html',
   styleUrl: './tracking-route.component.css',
 })
-export class TrackingRouteComponent {
+export class TrackingRouteComponent implements OnInit{
   router: Router = inject(Router);
   urlRoute: ActivatedRoute = inject(ActivatedRoute);
   routeService: RouteService = inject(RouteService);
   userService: AuthService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  stompClient: Stomp.Client | undefined;
   rideId?: number;
   route: Station[] = [];
   passed: number = 0;
@@ -46,6 +49,14 @@ export class TrackingRouteComponent {
   ) {
     this.role = authService.role();
     this.loadRoute();
+  }
+
+  ngOnInit(){
+    let ws = new SockJS(`http://localhost:8090/socket`);
+    this.stompClient = Stomp.over(ws);
+    this.stompClient.connect({}, function () {
+      console.log("client connected!")
+    });
   }
 
   private loadRoute(): void {
@@ -148,6 +159,11 @@ export class TrackingRouteComponent {
       .panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
       .subscribe({
         next: (res) => {
+          const notif: AppNotificationDTO = {
+            title:"PANIC",
+            content: `Emergency in ${this.currentLocation?.address}`
+          }
+          this.stompClient?.send("/ws/panic", {}, JSON.stringify(notif))
           this.subtitleText =
             'Panic signal has been broadcast. Help is on the way. Please remain calm.';
           this.cdr.detectChanges();
