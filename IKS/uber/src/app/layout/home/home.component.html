@@ -1,34 +1,38 @@
-<app-nav-bar></app-nav-bar>
 <router-outlet></router-outlet>
-<div class="container">
-  @if (isDriver()) {
-    <app-update-location></app-update-location>
-  } @else {
-    <div class="left-panel">
-      <app-ride-approx-form
-        #rideForm
-        (routeOutput)="routeOutputEvent($event)"
-      ></app-ride-approx-form>
-      <p class="estimated-time">Estimated time: {{ estimatedTimeOutput }}</p>
-      @if (isUserLoggedIn()) {
-        <button class="order-btn" (click)="goToOrder()">
-          <span class="order-icon">🚗</span>
-          Order Ride
-        </button>
-      }
-    </div>
+@if (isAdmin()) {
+  <app-admin-home></app-admin-home>
+} @else {
+  <app-nav-bar></app-nav-bar>
+  <div class="container">
+    @if (isDriver()) {
+      <app-update-location></app-update-location>
+    } @else {
+      <div class="left-panel">
+        <app-ride-approx-form
+          #rideForm
+          (routeOutput)="routeOutputEvent($event)"
+        ></app-ride-approx-form>
+        <p class="estimated-time">Estimated time: {{ estimatedTimeOutput }}</p>
+        @if (isUserLoggedIn()) {
+          <button class="order-btn" (click)="goToOrder()">
+            <span class="order-icon">🚗</span>
+            Order Ride
+          </button>
+        }
+      </div>
 
-    <div class="page">
-      <app-map
-        [showRemoveButton]="false"
-        [locations]="routeOutput"
-        [isUserLoggedIn]="isUserLoggedIn()"
-        (estimatedTime)="timeEstimationEvent($event)"
-        (locationAdded)="onLocationAdded($event)"
-        (locationRemoved)="onLocationRemoved($event)"
-        (allLocationsCleared)="onAllLocationsCleared()"
-        (maxLocationsReached)="onMaxLocationsReached()"
-      ></app-map>
-    </div>
-  }
-</div>
+      <div class="page">
+        <app-map
+          [showRemoveButton]="false"
+          [locations]="routeOutput"
+          [isUserLoggedIn]="isUserLoggedIn()"
+          (estimatedTime)="timeEstimationEvent($event)"
+          (locationAdded)="onLocationAdded($event)"
+          (locationRemoved)="onLocationRemoved($event)"
+          (allLocationsCleared)="onAllLocationsCleared()"
+          (maxLocationsReached)="onMaxLocationsReached()"
+        ></app-map>
+      </div>
+    }
+  </div>
+}
