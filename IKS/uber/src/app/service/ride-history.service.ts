@@ -183,4 +183,24 @@ export class RideService {
   hasOngoingRide(): Observable<boolean> {
     return this.http.get<boolean>(`${environment.apiHost}/rides/ongoing`);
   }
+
+  getReviews(id: number): Observable<Review[]>{
+    return this.http.get<Review[]>(`${environment.apiHost}/reviews/${id}`)
+  }
+
+  getComplaints(id: number): Observable<Complaint[]>{
+    return this.http.get<Complaint[]>(`${environment.apiHost}/reports/${id}`)
+  }
+}
+
+export interface Review{
+  username: string;
+  comment: string;
+  driverRating: number;
+  vehicleRating: number;
+}
+
+export interface Complaint{
+  username: string;
+  content: string; 
 }

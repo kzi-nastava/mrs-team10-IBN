@@ -48,16 +48,28 @@
       }
 
       <span class="price">{{ ride.price | number: '1.2-2' }} RSD</span>
-
+      
+      @if(role != "passenger"){
+        <button class="view-btn" (click)="viewReviews()">View Reviews</button>
+        <button class="view-btn" (click)="viewComplaints()">View Complaints</button>
+      }
+        
+      
+      
+      
       @if (role === 'passenger') {
         <button class="order-btn">Order</button>
       }
-
+      
       @if (role == 'passenger') {
         <button class="rate-btn" (click)="openRateDialog()">Rate Ride</button>
         @if (canBeCancelled()){
           <button class="cancel-btn" (click)="cancelRide()">Cancel Ride</button>
         }
+        <div class="details-footer">
+          <button class="footer-view-btn" (click)="viewReviews()">View Reviews</button>
+          <button class="footer-view-btn" (click)="viewComplaints()">View Complaints</button>
+        </div>
       }
     </div>
   </div>

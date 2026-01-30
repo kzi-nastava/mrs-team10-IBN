@@ -3,6 +3,8 @@ package com.example.UberComp.repository;
 import com.example.UberComp.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+import java.util.List;
 
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    List<Review> findAllByRideId(Long rideID);
 }
