@@ -39,7 +39,7 @@ public class RideController {
     @Autowired
     private RideService rideService;
 
-    @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('passenger','driver', 'administrator')")
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageDTO<GetRideDTO>> getRideHistory(
             Authentication auth,

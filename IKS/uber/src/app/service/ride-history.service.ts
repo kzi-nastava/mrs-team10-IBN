@@ -184,23 +184,25 @@ export class RideService {
     return this.http.get<boolean>(`${environment.apiHost}/rides/ongoing`);
   }
 
-  getReviews(id: number): Observable<Review[]>{
-    return this.http.get<Review[]>(`${environment.apiHost}/reviews/${id}`)
+  getReviews(id: number): Observable<ReviewDisplay[]>{
+    return this.http.get<ReviewDisplay[]>(`${environment.apiHost}/reviews/${id}`)
   }
 
-  getComplaints(id: number): Observable<Complaint[]>{
-    return this.http.get<Complaint[]>(`${environment.apiHost}/reports/${id}`)
+  getComplaints(id: number): Observable<ComplaintDisplay[]>{
+    return this.http.get<ComplaintDisplay[]>(`${environment.apiHost}/reports/${id}`)
   }
 }
 
-export interface Review{
+export interface ReviewDisplay{
+  id: number;
   username: string;
   comment: string;
   driverRating: number;
   vehicleRating: number;
 }
 
-export interface Complaint{
+export interface ComplaintDisplay{
+  id: number;
   username: string;
   content: string; 
 }

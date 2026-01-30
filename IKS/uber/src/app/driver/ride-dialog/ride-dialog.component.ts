@@ -11,6 +11,8 @@ import { AuthService } from '../../service/auth.service';
 import { RideService } from '../../service/ride-history.service';
 import { BehaviorSubject } from 'rxjs';
 import { RideCancellation, RouteService } from '../../service/route.service';
+import { ReviewsComponent } from '../reviews/reviews.component';
+import { ComplaintsComponent } from '../complaints/complaints.component';
 
 @Component({
   selector: 'app-ride-dialog',
@@ -138,7 +140,24 @@ export class RideDialogComponent implements OnInit {
     });
   }
 
-  viewReviews(){}
+  viewReviews(){
+    this.rideService.getReviews(this.ride.id).subscribe({
+      next:(res) => {
+        this.dialog.open(ReviewsComponent, {
+          width: '70vw',
+          data: { reviews: res }
+        })
+      }
+    })
+  }
 
-  viewComplaints(){}
+  viewComplaints(){
+    this.rideService.getComplaints(this.ride.id).subscribe({
+      next:(res) => {
+        this.dialog.open(ComplaintsComponent, {
+          width: '70vw',
+          data: { reviews: res }
+        })
+      }
+    })}
 }
