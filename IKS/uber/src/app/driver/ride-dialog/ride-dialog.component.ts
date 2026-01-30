@@ -154,9 +154,10 @@ export class RideDialogComponent implements OnInit {
   viewComplaints(){
     this.rideService.getComplaints(this.ride.id).subscribe({
       next:(res) => {
+        console.log(res)
         this.dialog.open(ComplaintsComponent, {
           width: '70vw',
-          data: { reviews: res }
+          data: { complaints: res }
         })
       }
     })}

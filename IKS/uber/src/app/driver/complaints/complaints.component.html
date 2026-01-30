@@ -1,9 +1,14 @@
 <div id="container">
     <h2>User Complaints</h2>
     @if(data.complaints.length === 0){
-        <p>No available complaints 🚕</p>
+        <div class="complaint">
+            <p class="text">No available complaints 🚕</p>
+        </div>
     }
     @for(complaint of data.complaints; track complaint.id){
-        <p>diva</p>
+        <div class="complaint">
+            <p class="username">{{ complaint.username }}</p>
+            <p class="text">{{ complaint.content }}</p>
+        </div>
     }
 </div>

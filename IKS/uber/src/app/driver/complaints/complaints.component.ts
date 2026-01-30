@@ -1,13 +1,13 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ComplaintDisplay } from '../../service/ride-history.service';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-complaints',
-  imports: [],
+  imports: [MatDialogModule],
   templateUrl: './complaints.component.html',
   styleUrl: './complaints.component.css',
 })
 export class ComplaintsComponent {
-  @Inject(MAT_DIALOG_DATA) public data: {complaints: ComplaintDisplay[]} = {complaints:[]}
+  public data = inject<{complaints: ComplaintDisplay[]}>(MAT_DIALOG_DATA);
 }
