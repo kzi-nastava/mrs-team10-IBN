@@ -2,6 +2,7 @@ package com.example.UberComp.service;
 
 import com.example.UberComp.dto.review.CreateReviewDTO;
 import com.example.UberComp.dto.review.CreatedReviewDTO;
+import com.example.UberComp.dto.review.GetReviewDTO;
 import com.example.UberComp.model.Review;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.User;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
@@ -44,4 +47,10 @@ public class ReviewService {
         Review saved = reviewRepository.save(review);
 
         return new CreatedReviewDTO(saved);    }
+
+    public List<GetReviewDTO> getReviewsForRide(Long RideId){
+        List<Review> rawReviews = reviewRepository.findAllByRideId(RideId);
+        List<GetReviewDTO> reviews = rawReviews.stream().map(GetReviewDTO::new).toList();
+        return reviews;
+    }
 }

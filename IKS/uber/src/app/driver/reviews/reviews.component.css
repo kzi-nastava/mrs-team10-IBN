@@ -1,0 +1,35 @@
+#container{
+    padding: 20px;
+    max-height: 70vw;
+    margin-left:10px;
+    overflow:scroll;
+}
+
+h2{
+    margin: 0;
+    margin-left:20px;
+}
+
+.review{
+    background-color: #f5f5f5;
+    border-radius: 20px;
+    padding:10px;
+    margin:5px;
+    padding-left:20px;
+}
+
+.text, .username, .star-display{
+    margin: 0;
+    color: black;
+}
+
+.username {
+    font-weight: bolder;
+}
+
+.star-display{
+    font-family: 'Mandali';
+    display: flex;
+    align-items:center;
+    justify-content: left;
+}
