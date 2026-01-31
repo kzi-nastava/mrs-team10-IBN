@@ -1,11 +1,8 @@
 import { inject, Injectable, signal, Signal } from '@angular/core';
 import { Ride } from '../model/ride-history.model';
-import { User } from '../model/user.model';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';
-import { AuthGuard } from '../auth/auth-guard';
 import { AuthService } from './auth.service';
 import { PageResponse } from '../model/page-response.model';
 
@@ -84,8 +81,7 @@ export class RideService {
   loadingScheduled = false;
   hasMoreScheduled = true;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   private _rides = signal<Ride[]>([]);
   rides = this._rides.asReadonly();

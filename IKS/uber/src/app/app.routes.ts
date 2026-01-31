@@ -20,7 +20,6 @@ import { ScheduledRidesComponent } from './driver/scheduled-rides/scheduled-ride
 import { VerifyAccountComponent } from './layout/verify-account/verify-account.component';
 import { NotificationTabComponent } from './layout/notification-tab/notification-tab.component';
 
-
 export const routes: Routes = [
   {
     path: 'login',
@@ -32,15 +31,15 @@ export const routes: Routes = [
   },
   {
     path: 'verify/:id',
-    component: VerifyAccountComponent
+    component: VerifyAccountComponent,
   },
   {
     path: 'forgot-password',
-    component: ForgotPasswordComponent
+    component: ForgotPasswordComponent,
   },
   {
     path: 'set-password/:id',
-    component: VerifyFormComponent
+    component: VerifyFormComponent,
   },
   {
     path: 'notifications',
@@ -82,7 +81,7 @@ export const routes: Routes = [
     path: 'tracking-route',
     component: TrackingRouteComponent,
     canActivate: [AuthGuard],
-    data: { role: ['passenger', 'driver']}
+    data: { role: ['passenger', 'driver'] },
   },
   {
     path: 'complaint',
@@ -124,7 +123,7 @@ export const routes: Routes = [
     path: 'scheduled-rides',
     component: ScheduledRidesComponent,
     canActivate: [AuthGuard],
-    data: { role: ['driver']},
+    data: { role: ['driver'] },
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

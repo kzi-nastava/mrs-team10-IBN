@@ -8,7 +8,7 @@ import { AuthService } from '../../service/auth.service';
 import { CoordinateDTO, RideService } from '../../service/ride-history.service';
 import { firstValueFrom } from 'rxjs';
 import { UpdateLocationComponent } from '../update-location/update-location.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { AdminHomeComponent } from '../admin-home/admin-home.component';
 
 @Component({
   selector: 'app-home',
@@ -18,6 +18,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     NavBarComponent,
     RideApproxFormComponent,
     UpdateLocationComponent,
+    AdminHomeComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -29,6 +30,12 @@ export class HomeComponent {
   private rideService = inject(RideService);
   routeOutput: Location[] = [];
   estimatedTimeOutput: String = '';
+
+  isAdmin(): boolean {
+    return (
+      this.authService.role() == 'administrator' || this.authService.role() === 'ADMINISTRATOR'
+    );
+  }
 
   isUserLoggedIn(): boolean {
     return this.authService.isLoggedIn();

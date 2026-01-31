@@ -550,4 +550,33 @@ public class RideService {
             throw new RuntimeException("Failed to save coordinate: " + e.getMessage());
         }
     }
+
+    @Transactional(readOnly = true)
+    public Page<GetCurrentRideDTO> getCurrentRides(String search, Pageable pageable) {
+        List<Ride> ongoingRides;
+        if (search != null){
+            ongoingRides = rideRepository.findByStatusAndDriverStatus(
+                    RideStatus.Ongoing,
+                    DriverStatus.DRIVING,
+                    search
+            );
+        }else {
+            ongoingRides = rideRepository.findByStatusAndDriverStatus(
+                    RideStatus.Ongoing,
+                    DriverStatus.DRIVING
+            );
+        }
+        List<GetCurrentRideDTO> dtos = ongoingRides.stream()
+                .map(ride -> new GetCurrentRideDTO(
+                        new GetRideDTO(ride),
+                        ride.getDriver().getName(),
+                        ride.getDriver().getLastName()
+                ))
+                .toList();
+
+        int start = pageable.getPageNumber() * pageable.getPageSize();
+        int end = Math.min(start + pageable.getPageSize(), dtos.size());
+
+        return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
+    }
 }

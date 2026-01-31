@@ -3,6 +3,8 @@ package com.example.UberComp.dto.ride;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.User;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 
 import java.time.LocalDateTime;
