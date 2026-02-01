@@ -81,6 +81,8 @@ public class RideDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Button cancelButton = view.findViewById(R.id.cancel_button);
+
         rideManager.loadRideDetails(ride.getId(), new Callback<GetRideDetailsDTO>() {
             @Override
             public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
@@ -90,6 +92,50 @@ public class RideDetailsFragment extends Fragment {
                 }
 
                 rideDetails = response.body();
+
+                binding.startTimeDetail.setText(rideDetails.getStartTime().substring(11,16));
+                binding.endTimeDetail.setText(rideDetails.getEndTime().substring(11,16));
+                binding.priceDetail.setText(rideDetails.getPrice()+" RSD");
+                binding.canceled.setEnabled(false);
+                binding.panic.setEnabled(false);
+                if (rideDetails.isCancelled())
+                    binding.canceled.setChecked(true);
+                if (ride.getStatus() == RideStatus.Panic)
+                    binding.panic.setChecked(true);
+
+                Context context = getContext();
+                LocalDateTime startTime = LocalDateTime.parse(ride.getStartTime());
+                if (startTime.minusMinutes(10L).isAfter(LocalDateTime.now()) && !rideDetails.isCancelled()){
+                    cancelButton.setVisibility(View.VISIBLE);
+                    cancelButton.setOnClickListener((v) -> rideManager.cancelRide(ride.getId(), "", false, new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if(response.isSuccessful()){
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                                        .setTitle("Ride Cancelled")
+                                        .setMessage("Ride cancelled successfully")
+                                        .setPositiveButton("OK", (dialog, which) -> {
+                                            dialog.dismiss();
+                                        });
+                                builder.show();
+                                binding.canceled.setChecked(true);
+                                binding.priceDetail.setText("0.0 RSD");
+                                cancelButton.setVisibility(View.GONE);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                                    .setTitle("Cancellation Failed!")
+                                    .setMessage("Cancellation failed! Check your Internet connection and try again...")
+                                    .setPositiveButton("OK", (dialog, which) -> {
+                                        dialog.dismiss();
+                                    });
+                            builder.show();
+                        }
+                    }));
+                }
 
                 checkIfFavorite();
 
@@ -113,55 +159,10 @@ public class RideDetailsFragment extends Fragment {
         binding.favorites.setOnClickListener(v -> toggleFavorite());
 
         if (ride != null) {
-            binding.startTimeDetail.setText(ride.getStartTime().substring(11,16));
-            binding.endTimeDetail.setText(ride.getEndTime().substring(11,16));
-            binding.priceDetail.setText(ride.getPrice()+" RSD");
-            binding.canceled.setEnabled(false);
-            binding.panic.setEnabled(false);
-            if (ride.getCancellationReason() != null)
-                binding.canceled.setChecked(true);
-            if (ride.getStatus() == RideStatus.Panic)
-                binding.panic.setChecked(true);
-
             GridLayout passengersLayout = binding.passengers;
             passengersLayout.removeAllViews();
 
             List<CreatedUserDTO> passengers = ride.getPassengers();
-
-            Context context = this.getContext();
-            LocalDateTime startTime = LocalDateTime.parse(ride.getStartTime());
-            if (startTime.minusMinutes(10L).isAfter(LocalDateTime.now()) && ride.getCancellationReason() == null){
-                Button cancelButton = view.findViewById(R.id.cancel_button);
-                cancelButton.setVisibility(View.VISIBLE);
-                cancelButton.setOnClickListener((v) -> rideManager.cancelRide(ride.getId(), "", false, new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(response.isSuccessful()){
-                            AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                                    .setTitle("Ride Cancelled")
-                                    .setMessage("Ride cancelled successfully")
-                                    .setPositiveButton("OK", (dialog, which) -> {
-                                        dialog.dismiss();
-                                    });
-                            builder.show();
-                            binding.canceled.setChecked(true);
-                            binding.priceDetail.setText("0.0 RSD");
-                            cancelButton.setVisibility(View.GONE);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context)
-                                .setTitle("Cancellation Failed!")
-                                .setMessage("Cancellation failed! Check your Internet connection and try again...")
-                                .setPositiveButton("OK", (dialog, which) -> {
-                                    dialog.dismiss();
-                                });
-                        builder.show();
-                    }
-                }));
-            }
 
             for (int i = 0; i < passengers.size(); i++) {
                 CreatedUserDTO user = passengers.get(i);
