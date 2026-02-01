@@ -1,9 +1,11 @@
 package com.example.ubercorp.api;
 
+import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
+import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
@@ -60,4 +62,10 @@ public interface RideService {
             @Header("Authorization") String token,
             @Path("routeId") Long routeId
     );
+
+    @GET("api/rides/incoming")
+    Call<IncomingRideDTO> getIncomingRide(@Header("Authorization") String token);
+
+    @PUT("api/rides/cancel")
+    Call<Void> cancelRide(@Header("Authorization") String token, @Body CancelRideDTO cancelledRide);
 }

@@ -1,5 +1,7 @@
 package com.example.ubercorp.dto;
 
+import org.osmdroid.util.GeoPoint;
+
 public class CoordinateDTO {
     private Long id;
     private Double lat;
@@ -32,6 +34,10 @@ public class CoordinateDTO {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public GeoPoint toGeoPoint(){
+        return new GeoPoint(lat, lon);
     }
 
 }

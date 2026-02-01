@@ -24,15 +24,20 @@
             android:icon="@drawable/ic_map"
             android:orderInCategory="400" />
 
+        <item android:id="@+id/incoming_ride"
+            android:title="@string/incoming_ride"
+            android:icon="@drawable/incoming"
+            android:orderInCategory="500" />
+
         <item android:id="@+id/tracking_ride"
             android:title="@string/tracking_ride"
             android:icon="@drawable/ic_car"
-            android:orderInCategory="500" />
+            android:orderInCategory="600" />
     </group>
     <group android:id="@+id/logout_group">
         <item android:id="@+id/logout"
             android:title="Logout"
             android:icon="@drawable/ic_logout"
-            android:orderInCategory="600" />
+            android:orderInCategory="700" />
     </group>
 </menu>

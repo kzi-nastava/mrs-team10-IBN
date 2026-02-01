@@ -8,6 +8,7 @@
     <color name="btn_color_2">#691D1D</color>
     <color name="btn_color_3">#893E3E</color>
     <color name="green">#729664</color>
+    <color name="red">#d32f2f</color>
     <color name="car_default">#e0e0e0</color>
     <color name="car_selected">#ffd700</color>
 
