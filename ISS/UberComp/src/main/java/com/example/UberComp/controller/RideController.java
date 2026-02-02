@@ -96,7 +96,7 @@ public class RideController {
         Driver driver = (Driver) account.getUser();
         IncomingRideDTO ride = rideService.getIncomingRide(driver);
         if(ride == null) return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.NOT_FOUND);
-        return new ResponseEntity<IncomingRideDTO>(ride, HttpStatus.OK);
+        return new ResponseEntity<>(ride, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
@@ -104,10 +104,9 @@ public class RideController {
     public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable("id") Long id)
     {
         GetRideDetailsDTO ride = rideService.getRide(id);
-        return new ResponseEntity<GetRideDetailsDTO>(ride, HttpStatus.OK);
+        return new ResponseEntity<>(ride, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping(value = "/activeRides", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehiclePositionDTO>> activeRides(){
         driverService.updateAllDriverLocation();

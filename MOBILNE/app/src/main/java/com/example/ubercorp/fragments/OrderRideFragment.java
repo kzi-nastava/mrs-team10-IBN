@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
@@ -32,27 +31,21 @@ import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.managers.RouteManager;
-import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,6 +54,8 @@ public class OrderRideFragment extends Fragment {
 
     // UI elements
     private MapView mapView;
+
+
     private CardView locationDisplay;
     private TextView locationText;
     private TextView timeText;
@@ -139,6 +134,7 @@ public class OrderRideFragment extends Fragment {
         loadRouteFromArguments();
         updateLocationDisplay();
 
+
         return view;
     }
 
@@ -148,6 +144,8 @@ public class OrderRideFragment extends Fragment {
         mapView.setMultiTouchControls(true);
         mapView.getController().setZoom(12.75);
         mapView.getController().setCenter(new GeoPoint(45.242, 19.8227));
+
+
 
         // Location display
         locationDisplay = view.findViewById(R.id.locationDisplay);
@@ -911,4 +909,7 @@ public class OrderRideFragment extends Fragment {
             }
         }).start();
     }
+
+
+
 }
