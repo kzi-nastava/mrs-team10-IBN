@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,4 +14,5 @@ public class AvailableDriverDTO {
     private DriverDTO driver;
     private Long estimatedPickupMinutes;
     private VehicleLocationDTO vehicleLocation;
+    private LocalDateTime driverShouldLeaveAt;
 }

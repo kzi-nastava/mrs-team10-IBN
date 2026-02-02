@@ -16,21 +16,22 @@ import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog
   styleUrls: ['./vehicle-price.component.css'],
 })
 export class VehiclePriceComponent {
-
   public prices = signal<VehiclePriceData[]>([]);
 
-  constructor(private http: HttpClient, private dialog: MatDialog){
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog,
+  ) {
     this.loadVehiclePrices();
-
   }
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() savePrices = new EventEmitter<VehiclePriceData>();
 
-  loadVehiclePrices(){
-    this.http.get<VehiclePriceData[]>(`${environment.apiHost}/prices`).
-    subscribe(prices => this.prices.set(prices));
-    console.log(this.prices)
+  loadVehiclePrices() {
+    this.http
+      .get<VehiclePriceData[]>(`${environment.apiHost}/prices`)
+      .subscribe((prices) => this.prices.set(prices));
   }
 
   close() {
@@ -38,18 +39,17 @@ export class VehiclePriceComponent {
   }
 
   save() {
-    console.log(this.prices()[0])
     this.http.put(`${environment.apiHost}/prices`, this.prices()).subscribe({
-        next: () => {
-          this.dialog.open(SimpleMessageDialogComponent, {
+      next: () => {
+        this.dialog.open(SimpleMessageDialogComponent, {
           width: '300px',
-          data: { message: "Prices are saved." }
+          data: { message: 'Prices are saved.' },
         });
-        },
-        error: (err) => {
-          console.error('Error posting review', err);
-        }
-      });
+      },
+      error: (err) => {
+        console.error('Error posting review', err);
+      },
+    });
   }
 
   stopPropagation(event: Event) {

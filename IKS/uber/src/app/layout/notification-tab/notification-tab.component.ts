@@ -1,11 +1,9 @@
-import { Component, inject, OnDestroy, OnInit, signal,  } from '@angular/core';
-import { NotificationService, AppNotification, AppNotificationDTO } from '../../service/notification.service';
-import { NavBarComponent } from "../nav-bar/nav-bar.component";
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { NotificationService, AppNotification } from '../../service/notification.service';
+import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { MatIconModule } from '@angular/material/icon';
-import SockJS from 'sockjs-client';
-import * as Stomp from 'stompjs';
-import { environment } from '../../../environments/environment';
-import { AuthService } from '../../service/auth.service';
+import { WebSocketService } from '../../service/websocket.service';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-notification-tab',
@@ -13,31 +11,50 @@ import { AuthService } from '../../service/auth.service';
   templateUrl: './notification-tab.component.html',
   styleUrl: './notification-tab.component.css',
 })
-export class NotificationTabComponent implements OnInit{
-  notificationService: NotificationService = inject(NotificationService);
-  notifications = signal<AppNotification[]>([])
-  stompClient: Stomp.Client | undefined;
+export class NotificationTabComponent implements OnInit, OnDestroy {
+  notificationService = inject(NotificationService);
+  webSocketService = inject(WebSocketService);
 
-  ngOnInit(){
+  notifications = signal<AppNotification[]>([]);
+  private notificationSubscription?: Subscription;
+  private connectionSubscription?: Subscription;
+
+  ngOnInit() {
     this.notificationService.loadNotifications().subscribe({
-      next: (res) => this.notifications.set(res)
-    })
-    let ws = new SockJS(`${environment.socketHost}`);
-    this.stompClient = Stomp.over(ws);
-    let that = this;
+      next: (res) => {
+        const unique = res.filter((notif, i, arr) => arr.findIndex((n) => n.id === notif.id) === i);
+        const sorted = unique.sort((a, b) => b.id - a.id);
+        this.notifications.set(sorted);
+      },
+    });
 
-    this.stompClient.connect({}, function () {
-      that.stompClient!.subscribe("/notifications/admin", (message: Stomp.Message) => {
-        that.handleResult(message);
+    this.connectionSubscription = this.webSocketService.connectionStatus$
+      .pipe(filter((connected) => connected === true))
+      .subscribe(() => {
+        this.setupNotificationSubscription();
       });
+
+    if (this.webSocketService.isConnected()) {
+      this.setupNotificationSubscription();
+    }
+  }
+
+  private setupNotificationSubscription() {
+    this.notificationSubscription = this.webSocketService.newNotification$.subscribe({
+      next: (notification) => {
+        this.notifications.update((current) => {
+          const updated = [notification, ...current];
+          return updated;
+        });
+      },
+      error: (err) => {
+        console.error('Subscription error:', err);
+      },
     });
   }
 
-  handleResult(message: Stomp.Message){
-    const notification: AppNotification = JSON.parse(message.body)
-    this.notifications.update((current) => [...current, notification])
+  ngOnDestroy() {
+    this.notificationSubscription?.unsubscribe();
+    this.connectionSubscription?.unsubscribe();
   }
-
-  
 }
-

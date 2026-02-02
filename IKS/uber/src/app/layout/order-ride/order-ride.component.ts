@@ -256,22 +256,7 @@ export class OrderRideComponent implements OnInit {
       next: (response: RideOrderResponseDTO) => {
         this.isOrdering = false;
         if (response !== null) {
-          const pickupInfo =
-            response.estimatedPickupMinutes != -1
-              ? `Arrives in: ${response.estimatedPickupMinutes} min (${response.estimatedPickupTime})`
-              : `Scheduled for: ${response.estimatedPickupTime}`;
-
-          const successMsg = `
-🚗 Ride Ordered Successfully!
-
-💰 Price: ${response.price} RSD
-👤 Driver: ${response.driverName}
-📞 Phone: ${response.driverPhone}
-🚙 Vehicle: ${response.vehicleModel}
-⏱️ ${pickupInfo}
-`.trim();
-
-          this.showSuccess(successMsg);
+          this.showSuccess('Ride ordered! Check notifications for details.');
         } else {
           this.showError('No available drivers.');
         }

@@ -242,7 +242,6 @@ export class TrackingMapComponent implements AfterViewInit, OnChanges, OnDestroy
 
     return new Promise((resolve) => {
       this.routeControl?.on('routesfound', (e) => {
-        console.log('Routes found:', e.routes);
         const routes = e.routes;
         if (routes.length > 0) {
           const summary = routes[0].summary;

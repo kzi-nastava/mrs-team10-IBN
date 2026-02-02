@@ -80,6 +80,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers("/account/**").authenticated()
                     .requestMatchers("/drivers/**").authenticated()
+                    .requestMatchers("/socket/**").permitAll()
                     .anyRequest().permitAll();
         });
 

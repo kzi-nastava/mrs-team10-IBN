@@ -64,7 +64,6 @@ export class RouteService {
       distance: 0,
       finishTime: time,
     };
-    console.log(body);
     return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
 }
