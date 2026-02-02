@@ -111,7 +111,7 @@ public class RideDetailsFragment extends Fragment {
 
                 binding.startTimeDetail.setText(rideDetails.getStartTime().substring(11,16));
                 binding.endTimeDetail.setText(rideDetails.getEndTime().substring(11,16));
-                binding.priceDetail.setText(rideDetails.getPrice()+" RSD");
+                binding.priceDetail.setText(String.format("%.2f RSD", rideDetails.getPrice()));
                 binding.canceled.setEnabled(false);
                 binding.panic.setEnabled(false);
                 if (rideDetails.isCancelled())

@@ -1,66 +1,89 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
+import android.content.Context;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.ListFragment;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.adapters.RideReviewsAdapter;
+import com.example.ubercorp.databinding.FragmentRideReviewsListBinding;
+import com.example.ubercorp.dto.GetReviewDTO;
+import com.example.ubercorp.managers.RideManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RideReviewsListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class RideReviewsListFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
-    public RideReviewsListFragment() {
-        // Required empty public constructor
-    }
+public class RideReviewsListFragment extends ListFragment {
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RideReviewsListFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RideReviewsListFragment newInstance(String param1, String param2) {
-        RideReviewsListFragment fragment = new RideReviewsListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    private RideReviewsAdapter adapter;
+    private FragmentRideReviewsListBinding binding;
+    private List<GetReviewDTO> reviews = new ArrayList<>();
+    private RideManager rideManager;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
+        rideManager = new RideManager(requireContext());
+    }
+
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = FragmentRideReviewsListBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ride_reviews_list, container, false);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        adapter = new RideReviewsAdapter(this.getContext(), reviews);
+        setListAdapter(adapter);
+        Context context = this.getContext();
+        rideManager = new RideManager(this.getContext());
+        Long rideID = getArguments().getLong("RideID");
+        TextView error = view.findViewById(R.id.errormsg);
+        ListView list = view.findViewById(android.R.id.list);
+        rideManager.getReviews(rideID, new Callback<List<GetReviewDTO>>() {
+            @Override
+            public void onResponse(Call<List<GetReviewDTO>> call, Response<List<GetReviewDTO>> response) {
+                if(response.isSuccessful() && !response.body().isEmpty()){
+                    adapter.addAll(response.body());
+                } else {
+                    error.setText("No available reviews");
+                    list.setVisibility(GONE);
+                    error.setVisibility(VISIBLE);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<GetReviewDTO>> call, Throwable t) {
+                error.setText("Check your Internet connection and try again!");
+                list.setVisibility(GONE);
+                error.setVisibility(VISIBLE);
+            }
+        });
+
     }
 }

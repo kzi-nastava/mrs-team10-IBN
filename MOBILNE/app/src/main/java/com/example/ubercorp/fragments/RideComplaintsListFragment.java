@@ -1,5 +1,8 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.Context;
 import android.os.Bundle;
 
@@ -12,6 +15,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ubercorp.R;
@@ -40,8 +45,6 @@ public class RideComplaintsListFragment extends ListFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        adapter = new RideComplaintsAdapter(this.getContext(), complaints);
-        setListAdapter(adapter);
         rideManager = new RideManager(requireContext());
     }
 
@@ -56,27 +59,32 @@ public class RideComplaintsListFragment extends ListFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
+        super.onViewCreated(view, savedInstanceState);
+        adapter = new RideComplaintsAdapter(this.getContext(), complaints);
+        setListAdapter(adapter);
         Context context = this.getContext();
         rideManager = new RideManager(this.getContext());
         Long rideID = getArguments().getLong("RideID");
+        TextView error = view.findViewById(R.id.errormsg);
+        ListView list = view.findViewById(android.R.id.list);
         rideManager.getComplaints(rideID, new Callback<List<GetComplaintDTO>>() {
             @Override
             public void onResponse(Call<List<GetComplaintDTO>> call, Response<List<GetComplaintDTO>> response) {
                 if(response.isSuccessful() && !response.body().isEmpty()){
-                    for(GetComplaintDTO complaint: response.body()) complaints.add(complaint);
-                    adapter.notifyDataSetChanged();
+                    adapter.addAll(response.body());
                 } else {
-                    Toast toast = Toast.makeText(context, "No available complaints", Toast.LENGTH_SHORT);
-                    toast.show();
+                    error.setText("No available complaints");
+                    list.setVisibility(GONE);
+                    error.setVisibility(VISIBLE);
                 }
 
             }
 
             @Override
             public void onFailure(Call<List<GetComplaintDTO>> call, Throwable t) {
-                Toast toast = Toast.makeText(context, "Check your Internet connection and try again!", Toast.LENGTH_SHORT);
-                toast.show();
+                error.setText("Check your Internet connection and try again!");
+                list.setVisibility(GONE);
+                error.setVisibility(VISIBLE);
             }
         });
 

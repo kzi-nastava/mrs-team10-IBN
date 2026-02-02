@@ -18,18 +18,8 @@ import com.example.ubercorp.dto.RideDTO;
 import java.util.List;
 
 public class RideComplaintsAdapter extends ArrayAdapter<GetComplaintDTO> {
-
-    private List<GetComplaintDTO> complaints;
-
     public RideComplaintsAdapter(@NonNull Context context, @NonNull List<GetComplaintDTO> objects) {
         super(context, R.layout.ride_complaint_item, objects);
-        this.complaints = objects;
-    }
-
-    @Nullable
-    @Override
-    public GetComplaintDTO getItem(int position) {
-        return complaints.get(position);
     }
 
     @NonNull

@@ -18,7 +18,7 @@ public class RideReviewsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if(getArguments() != null) rideID = getArguments().getLong("RideID");
-        Fragment rideReviewsListFragment = new RideComplaintsListFragment();
+        Fragment rideReviewsListFragment = new RideReviewsListFragment();
         rideReviewsListFragment.setArguments(getArguments());
         FragmentTransition.to(
                 rideReviewsListFragment,

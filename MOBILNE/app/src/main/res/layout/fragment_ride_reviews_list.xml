@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_marginTop="16dp">
 
     <ListView
         android:id="@android:id/list"
@@ -13,6 +15,15 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="16dp"
         tools:listitem="@layout/ride_review_item"
+        />
+
+    <TextView
+        android:id="@+id/errormsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="16dp"
+        android:visibility="gone"
         />
 
 </LinearLayout>

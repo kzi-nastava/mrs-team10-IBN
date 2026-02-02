@@ -36,7 +36,7 @@ public class RideReviewsAdapter extends ArrayAdapter<GetReviewDTO> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
         GetReviewDTO review = getItem(position);
         if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.ride_complaint_item,
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.ride_review_item,
                     parent, false);
         }
         TextView title = convertView.findViewById(R.id.title);
