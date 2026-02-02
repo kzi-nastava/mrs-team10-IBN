@@ -1,5 +1,6 @@
 package com.example.UberComp.repository;
 
+import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
 import com.example.UberComp.model.ScheduledRide;
@@ -51,5 +52,18 @@ public interface ScheduledRideRepository extends JpaRepository<ScheduledRide, Lo
             @Param("driverId") Long driverId,
             Pageable pageable
     );
+
+    @EntityGraph(attributePaths = {
+            "passengers",
+            "passengers.account"
+    })
+    @Query("""
+    SELECT sr FROM ScheduledRide sr
+    JOIN FETCH sr.driver
+    WHERE sr.status = com.example.UberComp.enums.RideStatus.Pending
+      AND sr.scheduled > :now
+    ORDER BY sr.scheduled ASC
+""")
+    List<ScheduledRide> findPendingScheduledRides(@Param("now") LocalDateTime nowPlus5);
 
 }

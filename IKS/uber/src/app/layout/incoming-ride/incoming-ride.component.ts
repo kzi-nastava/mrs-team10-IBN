@@ -27,7 +27,6 @@ export class IncomingRideComponent {
         if (!response) return;
         this.ride = response;
         this.route = [...response.route.stations];
-        console.log('Loaded ride:', this.route);
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching ride:', err),

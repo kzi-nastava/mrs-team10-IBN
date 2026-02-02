@@ -343,10 +343,6 @@ export class MapComponent implements AfterViewInit, OnChanges {
       const totalMinutes = Math.round(summary.totalTime / 60);
       const totalKm = summary.totalDistance / 1000;
 
-      console.log(
-        'Total distance is ' + totalKm + ' km and total time is ' + totalMinutes + ' minutes',
-      );
-
       this.estimatedTime.emit(totalMinutes + ' minutes');
 
       this.routeCalculated.emit({
@@ -419,7 +415,6 @@ export class MapComponent implements AfterViewInit, OnChanges {
               const index = Math.min(coords.length - 1, Math.floor(progress * coords.length));
               const pos = coords[index];
 
-              console.log(ride);
               L.marker([pos.lat, pos.lng], {
                 icon: this.RedCarIcon,
               }).addTo(this.vehicleLayer);

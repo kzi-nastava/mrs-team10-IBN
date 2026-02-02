@@ -200,7 +200,8 @@ public class RideController {
                 dto,
                 account.getUser().getId(),
                 availableDriver.getDriver().getCreateUserDTO().getId(),
-                availableDriver.getEstimatedPickupMinutes()
+                availableDriver.getEstimatedPickupMinutes(),
+                availableDriver.getDriverShouldLeaveAt()
         );
         //StringBuilder sb = new StringBuilder("You have a new incoming ride: ");
         //for(Coordinate station : ride.getRoute().getStations()){

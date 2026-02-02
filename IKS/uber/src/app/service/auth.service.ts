@@ -55,10 +55,8 @@ export class AuthService {
 
   isLoggedIn() {
     const expiration = localStorage.getItem('expires_in');
-    console.log(expiration)
     if (expiration) {
       const currentTime = Date.now();
-      console.log(currentTime)
       const isValid = currentTime < Number(expiration);
       return isValid;
     } else {
