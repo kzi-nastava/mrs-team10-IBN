@@ -8,8 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +84,20 @@ public class RideDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Button cancelButton = view.findViewById(R.id.cancel_button);
+        Button viewReviewsButton = view.findViewById(R.id.view_reviews_button);
+        Button viewComplaintsButton = view.findViewById(R.id.view_complaints_button);
+
+        viewReviewsButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.action_details_to_reviews, bundle);
+        });
+
+        viewComplaintsButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.action_details_to_complaints, bundle);
+        });
 
         rideManager.loadRideDetails(ride.getId(), new Callback<GetRideDetailsDTO>() {
             @Override

@@ -8,6 +8,8 @@ import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.GetComplaintDTO;
+import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
@@ -111,6 +113,24 @@ public class RideManager {
         CancelRideDTO cancelRide = new CancelRideDTO(rideID, reason, cancelledByDriver);
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<Void> call = api.cancelRide("Bearer " + token, cancelRide);
+        call.enqueue(callback);
+    }
+
+    public void getReviews(Long rideID, Callback<List<GetReviewDTO>> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<GetReviewDTO>> call = api.getReviews("Bearer " + token, rideID);
+        call.enqueue(callback);
+    }
+
+    public void getComplaints(Long rideID, Callback<List<GetComplaintDTO>> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<GetComplaintDTO>> call = api.getComplaints("Bearer " + token, rideID);
         call.enqueue(callback);
     }
 }

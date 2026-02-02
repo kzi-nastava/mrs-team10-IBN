@@ -17,6 +17,8 @@
     <string name="cancel">Cancel</string>
     <string name="canceled">Canceled</string>
     <string name="panic">Panic</string>
+    <string name="view_reviews">View Reviews</string>
+    <string name="view_complaints">View Complaints</string>
     <string name="start_location">Start location</string>
     <string name="destination">Destination</string>
     <string name="describe_your_problem">Describe your problem</string>
