@@ -1,31 +1,26 @@
 package com.example.ubercorp.fragments;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import androidx.core.util.TypedValueCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.ubercorp.R;
-
+import com.example.ubercorp.dto.CoordinateDTO;
+import com.example.ubercorp.dto.RideDTO;
+import com.example.ubercorp.managers.RideManager;
+import com.example.ubercorp.managers.RouteManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,22 +28,26 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RouteFragment extends Fragment {
 
@@ -68,6 +67,11 @@ public class RouteFragment extends Fragment {
     private TextView locationText;
     private TextView timeText;
 
+    private FolderOverlay vehicleLayer;
+    private final Map<Long, Marker> vehicleMarkers = new HashMap<>();
+    private RideManager rideManager;
+    private RouteManager routeManager;
+
     private double estimatedDistance = 0.0;
     private int estimatedDuration = 0;
 
@@ -75,12 +79,16 @@ public class RouteFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route, container, false);
-
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+        rideManager = new RideManager(requireContext());
         mapView = view.findViewById(R.id.map);
         mapView.setMultiTouchControls(true);
         mapView.getController().setZoom(12.75);
         mapView.getController().setCenter(new GeoPoint(45.242, 19.8227));
+        vehicleLayer = new FolderOverlay();
+        mapView.getOverlays().add(vehicleLayer);
+        mapView.invalidate();
+        routeManager = new RouteManager(mapView, requireContext());
 
         startAddressInput = view.findViewById(R.id.startAddress);
         endAddressInput = view.findViewById(R.id.endAddress);
@@ -94,6 +102,9 @@ public class RouteFragment extends Fragment {
         locationText = view.findViewById(R.id.locationText);
         timeText = view.findViewById(R.id.timeText);
         orderRideButton = view.findViewById(R.id.orderRide);
+
+        setVehiclesOnMapPeriodic();
+
 
         drawRouteButton.setOnClickListener(v -> {
             String startAddress = startAddressInput.getText().toString().trim();
@@ -382,6 +393,105 @@ public class RouteFragment extends Fragment {
             mapController.setCenter(routePoints.get(0));
         }
     }
+
+    private volatile boolean keepUpdatingVehicles = true;
+
+    private void setVehiclesOnMapPeriodic() {
+        new Thread(() -> {
+            while (keepUpdatingVehicles) {
+                rideManager.getActiveRides(new Callback<>() {
+                    @Override
+                    public void onResponse(Call<List<RideDTO>> call, Response<List<RideDTO>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            requireActivity().runOnUiThread(() -> {
+                                updateVehiclesLocation(response.body());
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<RideDTO>> call, Throwable t) {
+                        Log.e("Map", "Failed to load vehicles", t);
+                    }
+                });
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }).start();
+    }
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private void updateVehiclesLocation(List<RideDTO> rides) {
+
+        executor.execute(() -> {
+
+            Map<Long, GeoPoint> calculatedPositions = new HashMap<>();
+
+            for (RideDTO ride : rides) {
+                if (ride.isBusy()) {
+                    GeoPoint pos = calculateProgressPosition(ride);
+                    calculatedPositions.put(ride.getId(), pos);
+                }
+            }
+
+            requireActivity().runOnUiThread(() -> {
+
+                for (RideDTO ride : rides) {
+
+                    Marker marker = vehicleMarkers.get(ride.getId());
+
+                    if (marker == null) {
+                        marker = new Marker(mapView);
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                        vehicleMarkers.put(ride.getId(), marker);
+                        vehicleLayer.add(marker);
+                    }
+
+                    if (ride.isBusy()) {
+                        marker.setIcon(getResources().getDrawable(R.drawable.red_car));
+                        marker.setPosition(calculatedPositions.get(ride.getId()));
+                    } else {
+                        marker.setIcon(getResources().getDrawable(R.drawable.green_car));
+                        marker.setPosition(
+                                new GeoPoint(
+                                        ride.getVehicleLocation().getLatitude(),
+                                        ride.getVehicleLocation().getLongitude()
+                                )
+                        );
+                    }
+                }
+
+                mapView.invalidate();
+            });
+        });
+    }
+
+    private GeoPoint calculateProgressPosition(RideDTO ride) {
+        long now = System.currentTimeMillis();
+
+        LocalDateTime startLdt = LocalDateTime.parse(ride.getStartTime());
+        LocalDateTime endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
+
+        long start = startLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long end = endLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+        float progress = (float)(now - start) / (end - start);
+        progress = Math.max(0f, Math.min(1f, progress));
+
+        List<GeoPoint> points = new ArrayList<>();
+        for (CoordinateDTO c : ride.getRoute().getStations())
+            points.add(new GeoPoint(c.getLat(), c.getLon()));
+
+        List<GeoPoint> routePoints = routeManager.getRoute(points);
+        int index = (int)(progress * (routePoints.size() - 1));
+        return routePoints.get(index);
+    }
+
 
     private void showToast(String message) {
         requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show());

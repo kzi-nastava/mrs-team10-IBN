@@ -13,32 +13,24 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class RideDTO implements Parcelable{
-
         private Long id;
-
         private RouteDTO route;
-
         private ArrayList<CreatedUserDTO> passengers;
-
         private DriverDTO driver;
-
         private Boolean babies;
-
         private Boolean pets;
-
         private Double price;
-
         private String startTime;
-
         private String endTime;
-
         private LocalDateTime finish;
-
         private RideStatus status;
-
         private String cancellationReason;
         private String startLocation;
         private String endLocation;
+        private boolean isBusy;
+        private String estimatedTimeArrival;
+
+        private VehicleLocationDTO vehicleLocation;
 
         public static final Creator<RideDTO> CREATOR = new Creator<RideDTO>() {
             @Override
@@ -54,7 +46,8 @@ public class RideDTO implements Parcelable{
 
         public RideDTO(){}
 
-        public RideDTO(Long id, String startLocation, String destination, String start, String end, Double price, ArrayList<CreatedUserDTO> passengers){
+        public RideDTO(Long id, String startLocation, String destination, String start, String end, Double price, ArrayList<CreatedUserDTO> passengers,
+                       boolean isBusy, VehicleLocationDTO vehicleLocation, String estimatedTimeArrival){
             this.id = id;
             this.startLocation = startLocation;
             this.endLocation = destination;
@@ -62,6 +55,9 @@ public class RideDTO implements Parcelable{
             this.endTime = end;
             this.price = price;
             this.passengers = passengers;
+            this.isBusy = isBusy;
+            this.vehicleLocation = vehicleLocation;
+            this.estimatedTimeArrival = estimatedTimeArrival;
         }
 
         protected RideDTO(Parcel in){
@@ -71,6 +67,8 @@ public class RideDTO implements Parcelable{
             startTime = in.readString();
             endTime = in.readString();
             price = in.readDouble();
+            isBusy = in.readBoolean();
+
         }
 
 
@@ -202,5 +200,29 @@ public class RideDTO implements Parcelable{
 
     public void setDestination(String destination) {
         this.endLocation = destination;
+    }
+
+    public boolean isBusy() {
+        return isBusy;
+    }
+
+    public void setBusy(boolean busy) {
+        isBusy = busy;
+    }
+
+    public VehicleLocationDTO getVehicleLocation() {
+        return vehicleLocation;
+    }
+
+    public void setVehicleLocation(VehicleLocationDTO vehicleLocation) {
+        this.vehicleLocation = vehicleLocation;
+    }
+
+    public String getEstimatedTimeArrival() {
+        return estimatedTimeArrival;
+    }
+
+    public void setEstimatedTimeArrival(String estimatedTimeArrival) {
+        this.estimatedTimeArrival = estimatedTimeArrival;
     }
 }
