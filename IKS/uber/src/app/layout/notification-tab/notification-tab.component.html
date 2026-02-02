@@ -1,6 +1,6 @@
 <app-nav-bar></app-nav-bar>
 <div id="container">
-    <h1 (click)="send()">Notification Tab</h1>
+    <h1>Notification Tab</h1>
     @for(notification of notifications(); track notification.id){
         <div class="notifs">
             <h2 class="notif-title">{{ notification.title }}</h2>

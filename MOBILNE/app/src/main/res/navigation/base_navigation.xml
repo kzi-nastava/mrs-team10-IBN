@@ -76,4 +76,13 @@
         android:id="@+id/action_routeFragment_to_orderRideFragment"
         app:destination="@id/orderRideFragment"/>
     </fragment>
+    <fragment
+        android:id="@+id/incomingRideFragment"
+        android:name="com.example.ubercorp.fragments.IncomingRideFragment"
+        tools:layout="@layout/fragment_incoming_ride">
+        <action
+            android:id="@+id/action_incomingRideFragment_to_routeFragment"
+            app:destination="@id/routeFragment"/>
+    </fragment>
+
 </navigation>

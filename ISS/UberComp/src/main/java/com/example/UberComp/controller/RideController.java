@@ -18,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
@@ -38,6 +39,8 @@ public class RideController {
     private final DriverService driverService;
     @Autowired
     private RideService rideService;
+    //@Autowired
+    //private SimpMessagingTemplate simpMessagingTemplate;
 
     @PreAuthorize("hasAnyAuthority('passenger','driver', 'administrator')")
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -199,6 +202,13 @@ public class RideController {
                 availableDriver.getDriver().getCreateUserDTO().getId(),
                 availableDriver.getEstimatedPickupMinutes()
         );
+        //StringBuilder sb = new StringBuilder("You have a new incoming ride: ");
+        //for(Coordinate station : ride.getRoute().getStations()){
+        //    sb.append(station.getAddress() + " → ");
+        //}
+        //Notification notif = new Notification("Incoming Ride", sb.delete(sb.length() - 3, sb.length()).toString(), LocalDateTime.now());
+//
+        //simpMessagingTemplate.convertAndSend("/notifications/" + availableDriver.getDriver().getCreateUserDTO(), notif);
 
         RideOrderResponseDTO response = rideService.buildRideOrderResponse(ride.getId(), availableDriver);
 

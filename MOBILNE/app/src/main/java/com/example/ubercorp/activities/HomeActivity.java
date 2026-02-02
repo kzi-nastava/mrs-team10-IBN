@@ -21,6 +21,7 @@ import android.view.MenuItem;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.ActivityHomeBinding;
+import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.HashSet;
@@ -63,7 +64,7 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -92,6 +93,27 @@ public class HomeActivity extends AppCompatActivity {
         if (logoutItem != null) {
             logoutItem.setVisible(isLoggedIn);
         }
+        if (isUserLoggedIn()){
+            updateMenuBasedOnRole(menu);
+        }
+    }
+
+    private void updateMenuBasedOnRole(Menu menu){
+        SharedPreferences sharedPref = getSharedPreferences("uber_corp", MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+        String role = JwtUtils.getRoleFromToken(token);
+        switch(role){
+            case "passenger":
+                MenuItem incoming = menu.findItem(R.id.incoming_ride);
+                incoming.setVisible(false);
+                break;
+            case "driver":
+                MenuItem chat_support = menu.findItem(R.id.rating);
+                chat_support.setVisible(false);
+                break;
+            case "administrator":
+                break;
+        }
     }
 
     private void setupNavigation() {
@@ -109,6 +131,8 @@ public class HomeActivity extends AppCompatActivity {
                 navController.navigate(R.id.rating);
             } else if (id == R.id.ride_history) {
                 navController.navigate(R.id.ride_history);
+            } else if (id == R.id.incoming_ride) {
+                navController.navigate(R.id.incomingRideFragment);
             } else if (id == R.id.tracking_ride) {
                 navController.navigate(R.id.tracking_ride);
             }

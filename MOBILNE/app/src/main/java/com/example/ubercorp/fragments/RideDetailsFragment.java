@@ -1,15 +1,19 @@
 package com.example.ubercorp.fragments;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +21,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.ubercorp.R;
 import com.example.ubercorp.activities.enums.RideStatus;
+import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.managers.RouteManager;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
@@ -33,6 +38,7 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,6 +81,8 @@ public class RideDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Button cancelButton = view.findViewById(R.id.cancel_button);
+
         rideManager.loadRideDetails(ride.getId(), new Callback<GetRideDetailsDTO>() {
             @Override
             public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
@@ -84,6 +92,50 @@ public class RideDetailsFragment extends Fragment {
                 }
 
                 rideDetails = response.body();
+
+                binding.startTimeDetail.setText(rideDetails.getStartTime().substring(11,16));
+                binding.endTimeDetail.setText(rideDetails.getEndTime().substring(11,16));
+                binding.priceDetail.setText(rideDetails.getPrice()+" RSD");
+                binding.canceled.setEnabled(false);
+                binding.panic.setEnabled(false);
+                if (rideDetails.isCancelled())
+                    binding.canceled.setChecked(true);
+                if (ride.getStatus() == RideStatus.Panic)
+                    binding.panic.setChecked(true);
+
+                Context context = getContext();
+                LocalDateTime startTime = LocalDateTime.parse(ride.getStartTime());
+                if (startTime.minusMinutes(10L).isAfter(LocalDateTime.now()) && !rideDetails.isCancelled()){
+                    cancelButton.setVisibility(View.VISIBLE);
+                    cancelButton.setOnClickListener((v) -> rideManager.cancelRide(ride.getId(), "", false, new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if(response.isSuccessful()){
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                                        .setTitle("Ride Cancelled")
+                                        .setMessage("Ride cancelled successfully")
+                                        .setPositiveButton("OK", (dialog, which) -> {
+                                            dialog.dismiss();
+                                        });
+                                builder.show();
+                                binding.canceled.setChecked(true);
+                                binding.priceDetail.setText("0.0 RSD");
+                                cancelButton.setVisibility(View.GONE);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                                    .setTitle("Cancellation Failed!")
+                                    .setMessage("Cancellation failed! Check your Internet connection and try again...")
+                                    .setPositiveButton("OK", (dialog, which) -> {
+                                        dialog.dismiss();
+                                    });
+                            builder.show();
+                        }
+                    }));
+                }
 
                 checkIfFavorite();
 
@@ -107,16 +159,6 @@ public class RideDetailsFragment extends Fragment {
         binding.favorites.setOnClickListener(v -> toggleFavorite());
 
         if (ride != null) {
-            binding.startTimeDetail.setText(ride.getStartTime().substring(11,16));
-            binding.endTimeDetail.setText(ride.getEndTime().substring(11,16));
-            binding.priceDetail.setText(ride.getPrice()+" RSD");
-            binding.canceled.setEnabled(false);
-            binding.panic.setEnabled(false);
-            if (ride.getCancellationReason() != null)
-                binding.canceled.setChecked(true);
-            if (ride.getStatus() == RideStatus.Panic)
-                binding.panic.setChecked(true);
-
             GridLayout passengersLayout = binding.passengers;
             passengersLayout.removeAllViews();
 

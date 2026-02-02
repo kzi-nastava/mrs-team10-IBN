@@ -115,6 +115,17 @@
             app:layout_constraintEnd_toEndOf="parent"
            />
 
+        <Button
+            android:id="@+id/cancel_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/cancel"
+            app:layout_constraintTop_toBottomOf="@id/priceDetail"
+            android:backgroundTint="@color/red"
+            android:visibility="gone"
+            />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

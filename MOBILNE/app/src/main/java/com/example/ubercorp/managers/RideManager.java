@@ -5,10 +5,12 @@ import android.content.SharedPreferences;
 
 import com.example.ubercorp.api.ApiClient;
 import com.example.ubercorp.api.RideService;
+import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
+import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
@@ -90,6 +92,25 @@ public class RideManager {
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<Void> call = api.removeByRouteId("Bearer " + token, routeId);
+        call.enqueue(callback);
+    }
+
+    public void getIncomingRide(Callback<IncomingRideDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<IncomingRideDTO> call = api.getIncomingRide("Bearer " + token);
+        call.enqueue(callback);
+    }
+
+    public void cancelRide(Long rideID, String reason, boolean cancelledByDriver, Callback<Void> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        CancelRideDTO cancelRide = new CancelRideDTO(rideID, reason, cancelledByDriver);
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<Void> call = api.cancelRide("Bearer " + token, cancelRide);
         call.enqueue(callback);
     }
 }

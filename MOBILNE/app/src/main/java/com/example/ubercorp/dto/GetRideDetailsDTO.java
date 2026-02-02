@@ -87,4 +87,8 @@ public class GetRideDetailsDTO {
     public void setPanic(Boolean panic) {
         this.panic = panic;
     }
+
+    public boolean isCancelled(){
+        return this.getStatus() == RideStatus.CancelledByDriver || this.getStatus() == RideStatus.CancelledByPassenger;
+    }
 }

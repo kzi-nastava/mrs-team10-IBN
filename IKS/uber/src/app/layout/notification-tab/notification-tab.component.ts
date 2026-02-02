@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-notification-tab',
@@ -37,12 +38,6 @@ export class NotificationTabComponent implements OnInit{
     this.notifications.update((current) => [...current, notification])
   }
 
-  send(){
-    const notif: AppNotificationDTO = {
-      title:"Title 100",
-      content: "Content 100"
-    }
-    this.stompClient?.send("/ws/panic", {}, JSON.stringify(notif))
-  }
+  
 }
 
