@@ -2,6 +2,10 @@ package com.example.ubercorp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -33,11 +37,17 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class RideHistoryFragment extends Fragment {
+public class RideHistoryFragment extends Fragment implements SensorEventListener {
     private FragmentRideHistoryBinding binding;
     private SimpleDateFormat dateFormat;
     private RideManager rideManager;
     private FragmentManager manager;
+    private SensorManager sensorManager;
+    private long lastUpdateTime;
+    private float last_x;
+    private float last_y;
+    private float last_z;
+    private static final int SHAKE_THRESHOLD = 400;
 
     public RideHistoryFragment() {}
 
@@ -49,6 +59,8 @@ public class RideHistoryFragment extends Fragment {
 
         dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 
+        sensorManager = (SensorManager) requireActivity().getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 
         SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
         String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
@@ -68,10 +80,7 @@ public class RideHistoryFragment extends Fragment {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     Bundle args = new Bundle();
-                    RideHistoryListFragment fragment = new RideHistoryListFragment();
                     args.putString("sort", ((SpinnerItem) parent.getItemAtPosition(position)).getValue());
-                    fragment.setArguments(args);
-
                     manager.setFragmentResult("query", args);
                 }
 
@@ -130,11 +139,9 @@ public class RideHistoryFragment extends Fragment {
             String startDate = (String) binding.editTextStartDate.getTag();
             String endDate = (String) binding.editTextEndDate.getTag();
 
-            RideHistoryListFragment fragment = new RideHistoryListFragment();
             Bundle args = new Bundle();
             if(isStartDate) args.putString("startDate", startDate + "T00:00:00Z");
             else args.putString("endDate", endDate + "T23:59:59Z");
-            fragment.setArguments(args);
 
             manager.setFragmentResult("query", args);
         });
@@ -149,4 +156,40 @@ public class RideHistoryFragment extends Fragment {
     }
 
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            long currentTime = System.currentTimeMillis();
+            if(currentTime - lastUpdateTime > 1000){
+                long diffTime = (currentTime - lastUpdateTime);
+                lastUpdateTime = currentTime;
+
+                float[] values = event.values;
+                float x = values[0];
+                float y = values[1];
+                float z = values[2];
+
+                float speed = Math.abs(x+y+z - last_x - last_y - last_z) / diffTime * 10000;
+                Log.i("shake speed", Float.toString(speed));
+                if (speed > SHAKE_THRESHOLD){
+                    if(binding.sortSpinner.getSelectedItemPosition() == 0){
+                        binding.sortSpinner.setSelection(1);
+                        Bundle args = new Bundle();
+                        args.putString("sort", "start-asc");
+                        manager.setFragmentResult("query", args);
+                    } else {
+                        binding.sortSpinner.setSelection(0);
+                        Bundle args = new Bundle();
+                        args.putString("sort", "start-desc");
+                        manager.setFragmentResult("query", args);
+                    }
+                }
+            }
+        }
+    }
 }
