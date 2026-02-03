@@ -15,8 +15,11 @@ import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideDTO;
+import com.example.ubercorp.dto.RideMomentDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import retrofit2.Call;
@@ -119,6 +122,16 @@ public class RideManager {
         CancelRideDTO cancelRide = new CancelRideDTO(rideID, reason, cancelledByDriver);
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<Void> call = api.cancelRide("Bearer " + token, cancelRide);
+        call.enqueue(callback);
+    }
+
+    public void startRide(Long rideID, Callback<Void> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideMomentDTO start = new RideMomentDTO(Instant.now().toString());
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<Void> call = api.startRide("Bearer " + token, rideID, start);
         call.enqueue(callback);
     }
 

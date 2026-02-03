@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ubercorp.R;
 import com.example.ubercorp.api.ApiClient;
@@ -70,9 +71,30 @@ public class IncomingRideFragment extends Fragment {
         context = this.getContext();
 
         startButton.setOnClickListener((v) -> {
-            Bundle bundle = new Bundle();
-            bundle.putLong("RideId", rideID);
-            Navigation.findNavController(requireView()).navigate(R.id.action_incomingRideFragment_to_trackingRouteFragment, bundle);
+            rideManager.startRide(rideID, new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Bundle bundle = new Bundle();
+                        bundle.putLong("RideId", rideID);
+                        Navigation.findNavController(requireView()).navigate(
+                                R.id.action_incomingRideFragment_to_trackingRouteFragment,
+                                bundle
+                        );
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Error",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(requireContext(),
+                            "Error: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         declineButton.setOnClickListener((v) -> {
