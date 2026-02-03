@@ -8,9 +8,11 @@ import com.example.UberComp.dto.account.LogAccountDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.enums.AccountStatus;
+import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
+import com.example.UberComp.service.DriverAvailabilityService;
 import com.example.UberComp.utils.EmailUtils;
 import com.example.UberComp.utils.TokenUtils;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +39,9 @@ public class AuthController {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private DriverAvailabilityService driverAvailabilityService;
+
     @PostMapping("/login")
     public ResponseEntity<AuthTokenDTO> createAuthenticationToken(
             @Valid @RequestBody LogAccountDTO authRequest, HttpServletResponse response) {
@@ -46,6 +51,8 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Account user = (Account) authentication.getPrincipal();
+        if (user.getAccountType().equals(AccountType.DRIVER))
+            driverAvailabilityService.setDriverStatus(user.getId(), true);
         String jwt = tokenUtils.generateToken(user);
         Long expiresIn = tokenUtils.getExpiredIn();
 

@@ -76,6 +76,12 @@ public class DriverService {
         return java.util.List.of();
     }
 
+    public DriverStatus getStatus(Long id) {
+        Optional<Driver> driver = driverRepository.findById(id);
+        if (driver.isEmpty()) return null;
+        return driver.get().getStatus();
+    }
+
     @Transactional
     public DriverDTO register(CreateDriverDTO dto, User user) {
         if (vehicleRepository.findByPlate(dto.getVehicleDTO().getPlate()) != null) {
