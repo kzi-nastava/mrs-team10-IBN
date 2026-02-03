@@ -8,8 +8,9 @@
 
 <div class="mat-elevation-z8">
   <mat-tab-group mat-stretch-tabs>
+    <!-- ═══════════════ ONGOING RIDES ═══════════════ -->
     <mat-tab label="Ongoing rides overview">
-      <table mat-table [dataSource]="dataSource">
+      <table mat-table [dataSource]="ridesDataSource">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let data">{{ data.name }}</td>
@@ -45,18 +46,22 @@
       </table>
 
       <mat-paginator
+        #ridesPaginator
         [length]="totalData"
         [pageSizeOptions]="[5]"
+        [pageSize]="5"
         [pageIndex]="pageIndex"
         showFirstLastButtons
         (page)="onPageChange($event)"
-        aria-label="Select page of periodic elements"
+        aria-label="Select page of rides"
       >
       </mat-paginator>
     </mat-tab>
 
+    <!-- ═══════════════ USERS ═══════════════ -->
     <mat-tab label="Users">
       <mat-tab-group>
+        <!-- ─── DRIVERS ─── -->
         <mat-tab label="Drivers">
           <div class="tab-content">
             <table mat-table [dataSource]="driversDataSource">
@@ -80,11 +85,33 @@
                 <td mat-cell *matCellDef="let driver">{{ driver.phoneNumber }}</td>
               </ng-container>
 
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let driver">
+                  <span [style.color]="driver.accountStatus === 'BLOCKED' ? 'red' : 'green'">
+                    {{ driver.accountStatus }}
+                  </span>
+                </td>
+              </ng-container>
+
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let driver">
-                  <button mat-raised-button color="warn" (click)="blockDriver(driver)">
+                  <button
+                    *ngIf="driver.accountStatus !== 'BLOCKED'"
+                    mat-raised-button
+                    class="custom-red"
+                    (click)="blockDriver(driver)"
+                  >
                     Block
+                  </button>
+                  <button
+                    *ngIf="driver.accountStatus === 'BLOCKED'"
+                    mat-raised-button
+                    class="custom-green"
+                    (click)="unblockDriver(driver)"
+                  >
+                    Unblock
                   </button>
                 </td>
               </ng-container>
@@ -94,8 +121,10 @@
             </table>
 
             <mat-paginator
+              #driversPaginator
               [length]="totalDrivers"
               [pageSizeOptions]="[5]"
+              [pageSize]="5"
               [pageIndex]="driversPageIndex"
               showFirstLastButtons
               (page)="onDriversPageChange($event)"
@@ -105,6 +134,7 @@
           </div>
         </mat-tab>
 
+        <!-- ─── PASSENGERS ─── -->
         <mat-tab label="Passengers">
           <div class="tab-content">
             <table mat-table [dataSource]="passengersDataSource">
@@ -128,11 +158,33 @@
                 <td mat-cell *matCellDef="let passenger">{{ passenger.phoneNumber }}</td>
               </ng-container>
 
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let passenger">
+                  <span [style.color]="passenger.accountStatus === 'BLOCKED' ? 'red' : 'green'">
+                    {{ passenger.accountStatus }}
+                  </span>
+                </td>
+              </ng-container>
+
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let passenger">
-                  <button mat-raised-button color="warn" (click)="blockPassenger(passenger)">
+                  <button
+                    *ngIf="passenger.accountStatus !== 'BLOCKED'"
+                    mat-raised-button
+                    class="custom-red"
+                    (click)="blockPassenger(passenger)"
+                  >
                     Block
+                  </button>
+                  <button
+                    *ngIf="passenger.accountStatus === 'BLOCKED'"
+                    mat-raised-button
+                    class="custom-green"
+                    (click)="unblockPassenger(passenger)"
+                  >
+                    Unblock
                   </button>
                 </td>
               </ng-container>
@@ -142,8 +194,10 @@
             </table>
 
             <mat-paginator
+              #passengersPaginator
               [length]="totalPassengers"
               [pageSizeOptions]="[5]"
+              [pageSize]="5"
               [pageIndex]="passengersPageIndex"
               showFirstLastButtons
               (page)="onPassengersPageChange($event)"

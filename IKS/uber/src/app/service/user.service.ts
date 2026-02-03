@@ -21,11 +21,11 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/passengers`, { params });
   }
 
-  blockUser(email: string, reason: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/block`, { email, reason });
+  blockUser(mail: string, reason: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/block`, { mail, reason }, { responseType: 'text' });
   }
 
-  unblockUser(email: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/unblock`, { email });
+  unblockUser(mail: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/unblock`, { mail }, { responseType: 'text' });
   }
 }

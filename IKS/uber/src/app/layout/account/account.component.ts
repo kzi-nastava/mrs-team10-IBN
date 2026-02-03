@@ -47,6 +47,8 @@ export class AccountComponent implements OnInit {
   hoursWorkedToday = 0;
   maxHoursPerDay = 8;
   isDriverActive = false;
+  isDriverBlocked = false;
+  reason = '';
   showVehicleModal = false;
   showVehiclePriceModal = false;
   showChangePassword = false;
@@ -174,6 +176,8 @@ export class AccountComponent implements OnInit {
   processDriverDetails(response: DriverDetails) {
     this.hoursWorkedToday = response.uptime || 0;
     this.isDriverActive = true;
+    this.isDriverBlocked = response.blocked;
+    this.reason = response.reason;
 
     if (response.vehicleDTO) {
       this.vehicleData = {
@@ -411,11 +415,6 @@ export class AccountComponent implements OnInit {
         icon: '🔑',
         label: 'Change password',
         route: '/change-password',
-      },
-      {
-        icon: '🗑️',
-        label: 'Delete account',
-        route: '/delete-account',
       },
     ];
 

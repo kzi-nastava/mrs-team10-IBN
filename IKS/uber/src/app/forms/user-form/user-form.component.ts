@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -50,6 +58,8 @@ export class UserFormComponent implements OnChanges {
 
   @Input() isDriver: boolean = false;
   @Input() isDriverActive: boolean = false;
+  @Input() isDriverBlocked: boolean = false;
+  @Input() reason: string = '';
   @Input() onToggleStatus?: () => void;
 
   @Output() formSubmit = new EventEmitter<UserFormData>();

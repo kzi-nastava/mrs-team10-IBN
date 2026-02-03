@@ -53,6 +53,8 @@ export interface DriverDTO {
     petFriendly: boolean;
   };
   uptime: number;
+  blocked: boolean;
+  reason: string;
 }
 
 @Injectable({

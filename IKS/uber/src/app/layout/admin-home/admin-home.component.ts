@@ -9,18 +9,19 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { AdminService, DriversRides } from '../../service/admin-rides.service';
 import { UserService } from '../../service/user.service';
 import { MatTableModule } from '@angular/material/table';
-import { DatePipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BlockUserDialogComponent } from '../../forms/block-user-dialog/block-user-dialog.component';
+import { UnblockUserDialogComponent } from '../../forms/block-user-dialog/unblock-user-dialog.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RouterModule } from '@angular/router';
 
 export interface UserData {
   name: string;
   lastname: string;
   email: string;
   phoneNumber: string;
-  accountType: string;
   accountStatus: string;
   blockingReason?: string;
 }
@@ -40,12 +41,11 @@ export interface UserData {
     MatButtonModule,
     MatDialogModule,
     MatSnackBarModule,
-    DatePipe,
     CommonModule,
+    RouterModule,
   ],
 })
-export class AdminHomeComponent implements OnInit {
-  rides: DriversRides[] = [];
+export class AdminHomeComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'name',
     'lastname',
@@ -54,23 +54,41 @@ export class AdminHomeComponent implements OnInit {
     'startTime',
     'endTime',
   ];
+  ridesDataSource = new MatTableDataSource<DriversRides>([]);
   totalData = 0;
   pageSize = 5;
   pageIndex = 0;
-  dataSource = new MatTableDataSource<DriversRides>();
   searchTerm = '';
 
-  driversDataSource: UserData[] = [];
-  driversDisplayedColumns: string[] = ['name', 'lastname', 'email', 'phoneNumber', 'actions'];
-  totalDrivers: number = 0;
-  driversPageIndex: number = 0;
+  @ViewChild('ridesPaginator') ridesPaginator!: MatPaginator;
 
-  passengersDataSource: UserData[] = [];
-  passengersDisplayedColumns: string[] = ['name', 'lastname', 'email', 'phoneNumber', 'actions'];
-  totalPassengers: number = 0;
-  passengersPageIndex: number = 0;
+  driversDisplayedColumns: string[] = [
+    'name',
+    'lastname',
+    'email',
+    'phoneNumber',
+    'status',
+    'actions',
+  ];
+  driversDataSource = new MatTableDataSource<UserData>([]);
+  totalDrivers = 0;
+  driversPageIndex = 0;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('driversPaginator') driversPaginator!: MatPaginator;
+
+  passengersDisplayedColumns: string[] = [
+    'name',
+    'lastname',
+    'email',
+    'phoneNumber',
+    'status',
+    'actions',
+  ];
+  passengersDataSource = new MatTableDataSource<UserData>([]);
+  totalPassengers = 0;
+  passengersPageIndex = 0;
+
+  @ViewChild('passengersPaginator') passengersPaginator!: MatPaginator;
 
   constructor(
     private adminService: AdminService,
@@ -85,6 +103,8 @@ export class AdminHomeComponent implements OnInit {
     this.loadPassengers();
   }
 
+  ngAfterViewInit(): void {}
+
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm = value;
@@ -95,36 +115,29 @@ export class AdminHomeComponent implements OnInit {
   loadData(): void {
     this.adminService.loadData(this.pageIndex, this.pageSize, this.searchTerm).subscribe({
       next: (res) => {
-        this.rides = res.content;
+        this.ridesDataSource.data = res.content;
         this.totalData = res.totalElements;
-        this.dataSource.data = this.rides;
       },
-      error: (err) => console.error('Error fetching rides:', err),
+      error: (err) => {
+        console.error('Error fetching rides:', err);
+      },
     });
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData();
   }
 
   loadDrivers(): void {
     this.userService.getDrivers(this.driversPageIndex, 5).subscribe({
       next: (response) => {
-        this.driversDataSource = response.content;
+        this.driversDataSource.data = response.content;
         this.totalDrivers = response.totalElements;
       },
       error: (error) => {
         console.error('Error loading drivers:', error);
-        this.snackBar.open('Error loading drivers', 'Close', { duration: 3000 });
-      },
-    });
-  }
-
-  loadPassengers(): void {
-    this.userService.getPassengers(this.passengersPageIndex, 5).subscribe({
-      next: (response) => {
-        this.passengersDataSource = response.content;
-        this.totalPassengers = response.totalElements;
-      },
-      error: (error) => {
-        console.error('Error loading passengers:', error);
-        this.snackBar.open('Error loading passengers', 'Close', { duration: 3000 });
       },
     });
   }
@@ -143,15 +156,55 @@ export class AdminHomeComponent implements OnInit {
       if (reason) {
         this.userService.blockUser(driver.email, reason).subscribe({
           next: () => {
-            this.snackBar.open('Driver blocked successfully', 'Close', { duration: 3000 });
             this.loadDrivers();
           },
           error: (error) => {
             console.error('Error blocking driver:', error);
-            this.snackBar.open('Error blocking driver', 'Close', { duration: 3000 });
           },
         });
       }
+    });
+  }
+
+  unblockDriver(driver: UserData): void {
+    const dialogRef = this.dialog.open(UnblockUserDialogComponent, {
+      width: '500px',
+      data: {
+        name: driver.name,
+        lastname: driver.lastname,
+        userType: 'Driver',
+        blockingReason: driver.blockingReason,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.userService.unblockUser(driver.email).subscribe({
+          next: () => {
+            this.loadDrivers();
+          },
+          error: (error) => {
+            console.error('Error unblocking driver:', error);
+          },
+        });
+      }
+    });
+  }
+
+  onDriversPageChange(event: PageEvent): void {
+    this.driversPageIndex = event.pageIndex;
+    this.loadDrivers();
+  }
+
+  loadPassengers(): void {
+    this.userService.getPassengers(this.passengersPageIndex, 5).subscribe({
+      next: (response) => {
+        this.passengersDataSource.data = response.content;
+        this.totalPassengers = response.totalElements;
+      },
+      error: (error) => {
+        console.error('Error loading passengers:', error);
+      },
     });
   }
 
@@ -169,27 +222,39 @@ export class AdminHomeComponent implements OnInit {
       if (reason) {
         this.userService.blockUser(passenger.email, reason).subscribe({
           next: () => {
-            this.snackBar.open('Passenger blocked successfully', 'Close', { duration: 3000 });
             this.loadPassengers();
           },
           error: (error) => {
             console.error('Error blocking passenger:', error);
-            this.snackBar.open('Error blocking passenger', 'Close', { duration: 3000 });
           },
         });
       }
     });
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.loadData();
-  }
+  unblockPassenger(passenger: UserData): void {
+    const dialogRef = this.dialog.open(UnblockUserDialogComponent, {
+      width: '500px',
+      data: {
+        name: passenger.name,
+        lastname: passenger.lastname,
+        userType: 'Passenger',
+        blockingReason: passenger.blockingReason,
+      },
+    });
 
-  onDriversPageChange(event: PageEvent): void {
-    this.driversPageIndex = event.pageIndex;
-    this.loadDrivers();
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.userService.unblockUser(passenger.email).subscribe({
+          next: () => {
+            this.loadPassengers();
+          },
+          error: (error) => {
+            console.error('Error unblocking passenger:', error);
+          },
+        });
+      }
+    });
   }
 
   onPassengersPageChange(event: PageEvent): void {

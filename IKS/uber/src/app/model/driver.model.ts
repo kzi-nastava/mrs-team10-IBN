@@ -12,6 +12,8 @@ export interface DriverDetails {
   };
   vehicleDTO: VehicleDetails;
   uptime: number;
+  blocked: boolean;
+  reason: string;
 }
 
 export interface VehicleDetails {

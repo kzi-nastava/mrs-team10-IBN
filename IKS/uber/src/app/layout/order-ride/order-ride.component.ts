@@ -264,13 +264,19 @@ export class OrderRideComponent implements OnInit {
       error: (error) => {
         console.error('Error ordering ride:', error);
         this.isOrdering = false;
-
         let errorMsg = 'Failed to order ride. ';
 
-        if (error.status === 204) {
-          errorMsg = 'No available drivers at the moment. Please try again later.';
-        } else if (error.error?.message) {
-          errorMsg += error.error.message;
+        if (error.status === 403) {
+          const blockingReason = error.error?.status;
+          if (blockingReason) {
+            errorMsg = `You are blocked: ${blockingReason}`;
+          } else {
+            errorMsg = 'You are blocked and cannot order a ride.';
+          }
+        } else if (error.status === 204) {
+          errorMsg = 'No available drivers at the moment.';
+        } else if (error.error) {
+          errorMsg += error.error;
         } else {
           errorMsg += 'Please try again.';
         }

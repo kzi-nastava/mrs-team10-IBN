@@ -46,9 +46,7 @@
   font-size: 0.9rem;
   color: #000000;
   padding: 12px 16px !important;
-  opacity: 0.85;
   transition: opacity 0.2s ease;
-  opacity: 40%;
 }
 
 ::ng-deep tbody tr:hover {
@@ -128,4 +126,16 @@
 
 .tab-content {
   padding: 20px;
+}
+.custom-red {
+  background-color: #f44336 !important;
+  color: white !important;
+  font-weight: 800 !important;
+  border-radius: 10px;
+}
+.custom-green {
+  background-color: #1b7e15 !important;
+  color: white !important;
+  font-weight: 800 !important;
+  border-radius: 10px;
 }
