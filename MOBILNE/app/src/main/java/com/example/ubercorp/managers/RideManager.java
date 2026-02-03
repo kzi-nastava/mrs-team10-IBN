@@ -12,6 +12,7 @@ import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
 import java.util.List;
@@ -37,6 +38,12 @@ public class RideManager {
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<GetRideDTO> call = api.getRidesDriver("Bearer " + token, page, size, startFrom, startTo);
+        call.enqueue(callback);
+    }
+
+    public void getActiveRides(Callback<List<RideDTO>> callback){
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<RideDTO>> call = api.getActiveRides();
         call.enqueue(callback);
     }
 

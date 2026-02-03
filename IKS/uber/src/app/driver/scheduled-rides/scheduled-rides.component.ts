@@ -43,8 +43,6 @@ export class ScheduledRidesComponent implements OnInit {
 
     const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 500;
 
-    console.log('atBottom:', atBottom);
-
     if (atBottom) {
       this.rideService.loadScheduledRides();
     }

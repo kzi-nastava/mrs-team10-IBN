@@ -102,13 +102,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.updateLocationsFromInput();
       }
 
-      if(this.rideHistory){
+      if (this.rideHistory) {
         setTimeout(() => {
           if (this.map) {
             this.map.invalidateSize();
-  
+
             if (this.stations && this.stations.length > 0) {
-              console.log('Loading stations in ngAfterViewInit:', this.stations);
               this.loadFromStations();
             } else if (this.locations && this.locations.length > 0) {
               this.updateLocationsFromInput();
@@ -191,7 +190,6 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private async addLocationFromAddress(location: Location): Promise<void> {
     try {
-      console.log('address added')
       const result = await this.searchStreet(location.address).toPromise();
 
       if (result && result.length > 0) {
@@ -242,7 +240,6 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   private loadFromStations(): void {
     this.clearAll();
-    console.log(this.stations);
 
     this.stations.forEach((station, index) => {
       const isLast = index === this.stations.length - 1;
@@ -332,20 +329,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.routeControl.on('routesfound', (e) => {
         var routes = e.routes;
         var summary = routes[0].summary;
-        console.log(
-          'Total distance is ' +
-            summary.totalDistance / 1000 +
-            ' km and total time is ' +
-            Math.round((summary.totalTime % 3600) / 60) +
-            ' minutes',
-        );
         this.estimatedTime.emit(Math.round((summary.totalTime % 3600) / 60) + ' minutes');
       });
     }
   }
 
   private registerOnClick(): void {
-  
     this.map.on('click', (e: any) => {
       this.addPoint(e.latlng.lat, e.latlng.lng);
     });

@@ -329,13 +329,15 @@ public class DriverService {
             return new AvailableDriverDTO(
                     driverDTO,
                     0L,
-                    vehicleLocationDTO
+                    vehicleLocationDTO,
+                    scheduledTime.minusMinutes(bestDriverInfo.estimatedPickupMinutes)
             );
         if (bestDriverInfo.estimatedPickupMinutes > MAX_PICKUP_TIME_MINUTES) return null;
         return new AvailableDriverDTO(
                 driverDTO,
                 bestDriverInfo.estimatedPickupMinutes,
-                vehicleLocationDTO
+                vehicleLocationDTO,
+                null
         );
     }
 
@@ -551,6 +553,7 @@ public class DriverService {
             LocalDateTime scheduledTime,
             long rideDuration) {
 
+        scheduledRides = new ArrayList<>(scheduledRides);
         scheduledRides.sort(Comparator.comparing(ScheduledRide::getScheduled));
 
         if (scheduledTime == null) {
@@ -628,7 +631,7 @@ public class DriverService {
         Coordinate currentLocation = startLocation;
         LocalDateTime currentTime = LocalDateTime.now();
 
-        // Try before first scheduled
+        // Try before first scheduled ride
         if (!scheduledRides.isEmpty()) {
             DriverAvailability beforeFirst = tryInsertBeforeFirstScheduled(
                     currentLocation,
@@ -639,7 +642,6 @@ public class DriverService {
                     scheduledTime,
                     rideDuration
             );
-
             if (beforeFirst != null) {
                 return beforeFirst;
             }
@@ -659,23 +661,9 @@ public class DriverService {
                 return null;
             }
 
-            long timeToCurrentPickup = calculateTravelTimeWithCache(currentLocation, currentPickup);
-            if (timeToCurrentPickup < 0) {
-                return null;
-            }
-
-            currentTime = currentTime.plusMinutes(timeToCurrentPickup);
-
-            if (currentTime.isAfter(currentScheduled.getScheduled().plusMinutes(2))) {
-                return null;
-            }
-
-            long currentRideDuration = calculateTravelTimeWithCache(currentPickup, currentDropoff);
-            if (currentRideDuration < 0) {
-                return null;
-            }
-
-            currentTime = currentTime.plusMinutes(currentRideDuration);
+            if (currentScheduled.getFinish() == null)
+                currentTime = currentScheduled.getEstimatedTimeArrival().isAfter(currentTime) ? currentScheduled.getEstimatedTimeArrival() : currentTime;
+            else currentTime = currentScheduled.getFinish().isAfter(currentTime) ? currentScheduled.getFinish() : currentTime;
             currentLocation = currentDropoff;
 
             if (i < scheduledRides.size() - 1) {
@@ -697,17 +685,13 @@ public class DriverService {
             }
         }
 
-        // Try after all scheduled
+        // Try after all scheduled rides
         long timeToNewPickup = calculateTravelTimeWithCache(currentLocation, pickupLocation);
-        if (timeToNewPickup < 0) {
-            return null;
-        }
+        if (timeToNewPickup < 0) return null;
 
         currentTime = currentTime.plusMinutes(timeToNewPickup);
 
-        if (currentTime.isAfter(scheduledTime.plusMinutes(2))) {
-            return null;
-        }
+        if (currentTime.isAfter(scheduledTime.plusMinutes(2))) return null;
 
         long totalTimeToPickup = Duration.between(LocalDateTime.now(), currentTime).toMinutes();
         return new DriverAvailability(true, totalTimeToPickup);
@@ -722,40 +706,18 @@ public class DriverService {
             LocalDateTime scheduledTime,
             long rideDuration) {
 
-        long timeToNewPickup = calculateTravelTimeWithCache(currentLocation, pickupLocation);
-        if (timeToNewPickup < 0) {
+        long timeToPickup = calculateTravelTimeWithCache(currentLocation, pickupLocation);
+        if (timeToPickup < 0) return null;
+
+        LocalDateTime arrivalAtPickup = currentTime.plusMinutes(timeToPickup);
+        LocalDateTime newDropoffTime = arrivalAtPickup.plusMinutes(rideDuration);
+
+        LocalDateTime firstRideStart = firstScheduled.getScheduled();
+        if (newDropoffTime.isAfter(firstRideStart.minusMinutes(2))) {
             return null;
         }
 
-        LocalDateTime arrivalAtNewPickup = currentTime.plusMinutes(timeToNewPickup);
-
-        if (arrivalAtNewPickup.isAfter(scheduledTime.plusMinutes(2))) {
-            return null;
-        }
-
-        LocalDateTime newDropoffTime = arrivalAtNewPickup.plusMinutes(rideDuration);
-
-        List<Coordinate> firstStations = firstScheduled.getRoute().getStations();
-        if (firstStations == null || firstStations.isEmpty()) {
-            return null;
-        }
-        Coordinate firstScheduledPickup = firstStations.get(0);
-        if (firstScheduledPickup == null) {
-            return null;
-        }
-
-        long timeToFirstScheduled = calculateTravelTimeWithCache(dropoffLocation, firstScheduledPickup);
-        if (timeToFirstScheduled < 0) {
-            return null;
-        }
-
-        LocalDateTime arrivalAtFirstScheduled = newDropoffTime.plusMinutes(timeToFirstScheduled);
-
-        if (arrivalAtFirstScheduled.isAfter(firstScheduled.getScheduled().plusMinutes(2))) {
-            return null;
-        }
-
-        long totalTimeToPickup = Duration.between(LocalDateTime.now(), arrivalAtNewPickup).toMinutes();
+        long totalTimeToPickup = Duration.between(LocalDateTime.now(), arrivalAtPickup).toMinutes();
         return new DriverAvailability(true, totalTimeToPickup);
     }
 
@@ -768,42 +730,21 @@ public class DriverService {
             LocalDateTime scheduledTime,
             long rideDuration) {
 
-        long timeToNewPickup = calculateTravelTimeWithCache(currentLocation, pickupLocation);
-        if (timeToNewPickup < 0) {
+        long timeToPickup = calculateTravelTimeWithCache(currentLocation, pickupLocation);
+        if (timeToPickup < 0) return null;
+
+        LocalDateTime arrivalAtPickup = currentTime.plusMinutes(timeToPickup);
+        LocalDateTime newDropoffTime = arrivalAtPickup.plusMinutes(rideDuration);
+
+        LocalDateTime nextRideStart = nextScheduled.getScheduled();
+        if (newDropoffTime.isAfter(nextRideStart.minusMinutes(2))) {
             return null;
         }
 
-        LocalDateTime arrivalAtNewPickup = currentTime.plusMinutes(timeToNewPickup);
-
-        if (arrivalAtNewPickup.isAfter(scheduledTime.plusMinutes(2))) {
-            return null;
-        }
-
-        LocalDateTime newDropoffTime = arrivalAtNewPickup.plusMinutes(rideDuration);
-
-        List<Coordinate> nexlist = nextScheduled.getRoute().getStations();
-        Coordinate nextPickup = null;
-        if (!nexlist.isEmpty()) {
-            nextPickup = nexlist.get(0);
-        }
-        if (nextPickup == null) {
-            return null;
-        }
-
-        long timeToNextScheduled = calculateTravelTimeWithCache(dropoffLocation, nextPickup);
-        if (timeToNextScheduled < 0) {
-            return null;
-        }
-
-        LocalDateTime arrivalAtNextScheduled = newDropoffTime.plusMinutes(timeToNextScheduled);
-
-        if (arrivalAtNextScheduled.isAfter(nextScheduled.getScheduled().plusMinutes(2))) {
-            return null;
-        }
-
-        long totalTimeToPickup = Duration.between(LocalDateTime.now(), arrivalAtNewPickup).toMinutes();
+        long totalTimeToPickup = Duration.between(LocalDateTime.now(), arrivalAtPickup).toMinutes();
         return new DriverAvailability(true, totalTimeToPickup);
     }
+
 
     private boolean checkUptime(Driver driver, long timeToPickup, long rideDuration) {
         int currentUptime = driver.getUptime();
@@ -822,10 +763,16 @@ public class DriverService {
         LocalDateTime endTime = fromTime.plusHours(MAX_SCHEDULE_HOURS);
 
         return scheduledRideRepository.findByDriverAndScheduledBetweenOrderByScheduledAsc(
-                driver,
-                fromTime.minusMinutes(30),
-                endTime
-        );
+                        driver,
+                        fromTime.minusMinutes(30),
+                        endTime
+                ).stream()
+                .filter(sr ->
+                        sr.getFinish() == null
+                                ? sr.getEstimatedTimeArrival().isAfter(LocalDateTime.now())
+                                : sr.getFinish().isAfter(LocalDateTime.now())
+                ).toList();
+
     }
 
     private List<Driver> findByStatus(DriverStatus status, String vehicleType, Boolean needsBaby, Boolean needsPet) {

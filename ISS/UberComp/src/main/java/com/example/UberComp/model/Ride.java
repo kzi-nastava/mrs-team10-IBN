@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +25,20 @@ public class Ride {
     private Route route;
 
     @ManyToMany
-    private Set<User> passengers;
+    @JoinTable(
+            name = "ride_passengers",
+            joinColumns = @JoinColumn(name = "ride_id"),
+            inverseJoinColumns = @JoinColumn(name = "passengers_id")
+    )
+    private Set<User> passengers = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(
+            name = "ride_guests",
+            joinColumns = @JoinColumn(name = "ride_id")
+    )
+    @Column(name = "email")
+    private Set<String> guestEmails = new HashSet<>();
 
     @ManyToOne
     private Driver driver;
@@ -53,5 +67,8 @@ public class Ride {
 
     @Column
     private String cancellationReason;
+
+    @Column
+    private Double distance;
 
 }

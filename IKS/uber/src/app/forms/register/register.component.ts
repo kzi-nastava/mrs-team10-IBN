@@ -87,8 +87,6 @@ export class RegisterComponent {
       image: this.userProfileImage || '',
     };
 
-    console.log(registrationData.image);
-
     this.authService.register(registrationData).subscribe({
       next: (res) => this.router.navigate(['/login']),
       error: (err) => {

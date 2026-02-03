@@ -150,7 +150,6 @@ export class RideApproxFormComponent {
       });
     }
 
-    console.log(route);
     this.routeOutput.emit(route);
     return route;
   }
