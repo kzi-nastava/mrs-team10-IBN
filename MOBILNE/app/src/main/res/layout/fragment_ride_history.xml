@@ -37,6 +37,14 @@
             android:textColor="@color/form_text_gray"/>
     </LinearLayout>
 
+    <Spinner
+        android:id="@+id/sort_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:text="Sort By"
+        android:tooltipText="Sort By"/>
+
     <FrameLayout
         android:id="@+id/scroll_rides_list"
         android:layout_width="match_parent"

@@ -1,7 +1,10 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,6 +35,7 @@ import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
+import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import org.osmdroid.util.BoundingBox;
@@ -87,6 +91,11 @@ public class RideDetailsFragment extends Fragment {
         Button viewReviewsButton = view.findViewById(R.id.view_reviews_button);
         Button viewComplaintsButton = view.findViewById(R.id.view_complaints_button);
 
+        SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
+        GridLayout passengersGrid = view.findViewById(R.id.passengers);
+        if (role.equals("passenger")) passengersGrid.setVisibility(GONE);
+
         viewReviewsButton.setOnClickListener((v) -> {
             Bundle bundle = new Bundle();
             bundle.putLong("RideID", ride.getId());
@@ -136,7 +145,7 @@ public class RideDetailsFragment extends Fragment {
                                 builder.show();
                                 binding.canceled.setChecked(true);
                                 binding.priceDetail.setText("0.0 RSD");
-                                cancelButton.setVisibility(View.GONE);
+                                cancelButton.setVisibility(GONE);
                             }
                         }
 

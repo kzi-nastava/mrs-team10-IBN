@@ -3,6 +3,7 @@ package com.example.ubercorp.fragments;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.ListFragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -37,6 +38,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     private boolean isLastPage = false;
     private String startFrom;
     private String startTo;
+    private String sort;
 
     public RideHistoryListFragment() {
     }
@@ -48,7 +50,21 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
         if (getArguments() != null) {
             startFrom = getArguments().getString("startDate");
             startTo = getArguments().getString("endDate");
+            sort = getArguments().getString("sort");
         }
+
+        getParentFragmentManager().setFragmentResultListener("query", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                if (bundle.getString("startDate") != null) startFrom = bundle.getString("startDate");
+                if (bundle.getString("endDate") != null) startTo = bundle.getString("endDate");
+                if (bundle.getString("sort") != null) sort = bundle.getString("sort");
+                mRides.clear();
+                currentPage = 0;
+                isLastPage = false;
+                loadNextPage();
+            }
+        });
 
         adapter = new RideHistoryListAdapter(getActivity(), mRides, this);
         setListAdapter(adapter);
@@ -82,7 +98,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
         Log.d("RideHistoryList", "Loading page: " + currentPage +
                 ", From: " + startFrom + ", To: " + startTo);
 
-        rideManager.loadDriverRides(currentPage, 2, startFrom, startTo, new Callback<>() {
+        rideManager.loadRideHistory(currentPage, 2, startFrom, startTo, sort, new Callback<>() {
             @Override
             public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
                 Log.d("RideHistoryList", "Response code: " + response.code());
