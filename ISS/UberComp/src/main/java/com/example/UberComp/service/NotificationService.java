@@ -143,13 +143,12 @@ public class NotificationService {
                         "Driver: %s\n" +
                         "Phone: %s\n" +
                         "Vehicle: %s\n" +
-                        "Arrives in: %d min (around %s)\n" +
+                        "Arrives in: %d min\n" +
                         "Price: %.2f RSD",
                 ride.getDriver().getName(),
                 ride.getDriver().getPhone(),
                 ride.getDriver().getVehicle().getModel(),
                 estimatedPickupMinutes,
-                estimatedArrival,
                 ride.getPrice()
         );
 

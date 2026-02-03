@@ -1,5 +1,6 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.dto.PageDTO;
 import com.example.UberComp.dto.account.*;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.user.CreateUserDTO;
@@ -13,14 +14,15 @@ import com.example.UberComp.utils.EmailUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -419,5 +421,56 @@ public class AccountService implements UserDetailsService {
 
         accountRepository.save(account.get());
         return "";
+    }
+
+
+    public PageDTO<UserDTO> getDrivers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Account> accountPage = accountRepository.findByAccountType(AccountType.DRIVER, pageable);
+
+        Page<UserDTO> driverDTOPage = accountPage.map(this::convertToUserDTO);
+
+        return new PageDTO<>(driverDTOPage);
+    }
+
+    public PageDTO<UserDTO> getPassengers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Account> accountPage = accountRepository.findByAccountType(AccountType.PASSENGER, pageable);
+
+        Page<UserDTO> passengerDTOPage = accountPage.map(this::convertToUserDTO);
+
+        return new PageDTO<>(passengerDTOPage);
+    }
+
+    public void blockUser(String mail, String reason) {
+        Account account = accountRepository.findByEmail(mail);
+        if (account == null) {
+            return;
+        }
+        account.setAccountStatus(AccountStatus.BLOCKED);
+        account.setBlockingReason(reason);
+        accountRepository.save(account);
+    }
+
+    public void unblockUser(String mail) {
+        Account account = accountRepository.findByEmail(mail);
+        if (account == null) {
+            return;
+        }
+        account.setAccountStatus(AccountStatus.VERIFIED);
+        account.setBlockingReason(null);
+        accountRepository.save(account);
+    }
+
+    private UserDTO convertToUserDTO(Account account) {
+        User user = account.getUser();
+        return new UserDTO(
+                user != null ? user.getName() : "",
+                user != null ? user.getLastName() : "",
+                account.getEmail(),
+                user != null ? user.getPhone() : "",
+                account.getAccountStatus(),
+                account.getBlockingReason()
+        );
     }
 }

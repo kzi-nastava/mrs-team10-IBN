@@ -47,6 +47,8 @@ export class AccountComponent implements OnInit {
   hoursWorkedToday = 0;
   maxHoursPerDay = 8;
   isDriverActive = false;
+  isDriverBlocked = false;
+  reason = '';
   showVehicleModal = false;
   showVehiclePriceModal = false;
   showChangePassword = false;
@@ -174,6 +176,8 @@ export class AccountComponent implements OnInit {
   processDriverDetails(response: DriverDetails) {
     this.hoursWorkedToday = response.uptime || 0;
     this.isDriverActive = true;
+    this.isDriverBlocked = response.blocked;
+    this.reason = response.reason;
 
     if (response.vehicleDTO) {
       this.vehicleData = {
@@ -412,11 +416,6 @@ export class AccountComponent implements OnInit {
         label: 'Change password',
         route: '/change-password',
       },
-      {
-        icon: '🗑️',
-        label: 'Delete account',
-        route: '/delete-account',
-      },
     ];
 
     type RoleType = 'passenger' | 'driver' | 'administrator';
@@ -436,7 +435,7 @@ export class AccountComponent implements OnInit {
       administrator: [
         { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
         { icon: '📥', label: 'Requests', route: '/requests' },
-        { icon: '👥', label: 'Manage users', route: '/manage-users' },
+        { icon: '🚗', label: 'Register driver', route: '/register-driver' },
         { icon: '💵', label: 'Vehicle price', route: '/vehicle-price' },
       ],
     };

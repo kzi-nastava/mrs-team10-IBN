@@ -2,7 +2,38 @@
   @if (!showButton) {
     <h3>👤 Driver Information</h3>
   }
-
+  @if (isDriverBlocked) {
+    <h3
+      style="
+        color: red;
+        font-weight: 700;
+        padding: 5px;
+        margin: 0;
+        text-shadow:
+          -0.5px -0.5px 0 #fff,
+          0.5px -0.5px 0 #fff,
+          -0.5px 0.5px 0 #fff,
+          0.5px 0.5px 0 #fff;
+      "
+    >
+      ACCOUNT BLOCKED
+    </h3>
+    <p
+      style="
+        color: red;
+        font-weight: 700;
+        padding: 5px;
+        margin: 0;
+        text-shadow:
+          -0.5px -0.5px 0 #fff,
+          0.5px -0.5px 0 #fff,
+          -0.5px 0.5px 0 #fff,
+          0.5px 0.5px 0 #fff;
+      "
+    >
+      {{ reason }}
+    </p>
+  }
   <form (ngSubmit)="onSubmit()">
     @if (formData) {
       <input

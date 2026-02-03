@@ -5,6 +5,7 @@ import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.CreateRideDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
@@ -120,7 +121,9 @@ public class DriverService {
                 new AccountDTO(driver.getAccount().getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
-                driver.getUptime()
+                driver.getUptime(),
+                false,
+                null
         );
     }
 
@@ -131,11 +134,15 @@ public class DriverService {
         Account account = driver.getAccount();
         Vehicle vehicle = driver.getVehicle();
 
+        boolean blocked = account.getAccountStatus().equals(AccountStatus.BLOCKED);
+
         return new DriverDTO(
                 new AccountDTO(account.getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
-                driver.getUptime()
+                driver.getUptime(),
+                blocked,
+                account.getBlockingReason()
         );
     }
 
@@ -144,13 +151,17 @@ public class DriverService {
                 .orElseThrow(() -> new RuntimeException("Driver not found with user id: " + userId));
         Driver driver = (Driver) account.getUser();
 
+        boolean blocked = account.getAccountStatus().equals(AccountStatus.BLOCKED);
+
         Vehicle vehicle = driver.getVehicle();
 
         return new DriverDTO(
                 new AccountDTO(account.getEmail()),
                 new CreatedUserDTO(driver),
                 new VehicleDTO(vehicle),
-                driver.getUptime()
+                driver.getUptime(),
+                blocked,
+                account.getBlockingReason()
         );
     }
 
@@ -256,6 +267,7 @@ public class DriverService {
         List<DriverWithLocation> candidateDrivers = new ArrayList<>();
 
         for (Driver driver : onlineDrivers) {
+            if (driver.getAccount().getAccountStatus().equals(AccountStatus.BLOCKED)) continue;
             Coordinate location = getDriverLocation(driver);
 
             if (location != null) {
@@ -268,6 +280,7 @@ public class DriverService {
         }
 
         for (Driver driver : drivingDrivers) {
+            if (driver.getAccount().getAccountStatus().equals(AccountStatus.BLOCKED)) continue;
             Coordinate location = getDriverLocation(driver);
             if (location != null) {
                 double distance = calculateHaversineDistance(location, pickupLocation);
@@ -313,7 +326,9 @@ public class DriverService {
                 new AccountDTO(account.getEmail()),
                 new CreatedUserDTO(bestDriver),
                 new VehicleDTO(vehicle),
-                bestDriver.getUptime()
+                bestDriver.getUptime(),
+                false,
+                null
         );
 
         Coordinate vehicleLocation = bestDriverInfo.location;

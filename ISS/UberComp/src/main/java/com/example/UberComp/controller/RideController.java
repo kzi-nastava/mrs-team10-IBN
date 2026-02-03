@@ -3,31 +3,23 @@ package com.example.UberComp.controller;
 import com.example.UberComp.dto.PageDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
-import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
-import com.example.UberComp.enums.AccountType;
-import com.example.UberComp.enums.RideStatus;
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
-
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,8 +31,6 @@ public class RideController {
     private final DriverService driverService;
     @Autowired
     private RideService rideService;
-    //@Autowired
-    //private SimpMessagingTemplate simpMessagingTemplate;
 
     @PreAuthorize("hasAnyAuthority('passenger','driver', 'administrator')")
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -101,7 +91,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable("id") Long id)
+    public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable Long id)
     {
         GetRideDetailsDTO ride = rideService.getRide(id);
         return new ResponseEntity<>(ride, HttpStatus.OK);
@@ -132,7 +122,7 @@ public class RideController {
 
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/start/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable("id") Long id) {
+    public ResponseEntity<StartedRideDTO> startRide(@RequestBody RideMomentDTO start, @PathVariable Long id) {
         StartedRideDTO started = rideService.startRide(id, start);
         return new ResponseEntity<>(started, HttpStatus.OK);
     }
@@ -171,6 +161,9 @@ public class RideController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
+        if (account.getAccountStatus().equals(AccountStatus.BLOCKED))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    new RideOrderResponseDTO(0L,0.0, account.getBlockingReason(), null, null, null, null, null, 0L, null));
 
         GetCoordinateDTO start = dto.getStartAddress();
         if (start.getLon() == 0 || start.getLat() == 0) {
@@ -202,13 +195,6 @@ public class RideController {
                 availableDriver.getEstimatedPickupMinutes(),
                 availableDriver.getDriverShouldLeaveAt()
         );
-        //StringBuilder sb = new StringBuilder("You have a new incoming ride: ");
-        //for(Coordinate station : ride.getRoute().getStations()){
-        //    sb.append(station.getAddress() + " → ");
-        //}
-        //Notification notif = new Notification("Incoming Ride", sb.delete(sb.length() - 3, sb.length()).toString(), LocalDateTime.now());
-//
-        //simpMessagingTemplate.convertAndSend("/notifications/" + availableDriver.getDriver().getCreateUserDTO(), notif);
 
         RideOrderResponseDTO response = rideService.buildRideOrderResponse(ride.getId(), availableDriver);
 
@@ -219,8 +205,8 @@ public class RideController {
     @GetMapping("/favorites")
     public ResponseEntity<List<FavoriteRouteDTO>> getFavorites(Authentication auth) {
         Account account = (Account) auth.getPrincipal();
-        List<FavoriteRouteDTO> favs = rideService.getFavoriteRoutes(account);
-        return ResponseEntity.ok(favs);
+        List<FavoriteRouteDTO> favorites = rideService.getFavoriteRoutes(account);
+        return ResponseEntity.ok(favorites);
     }
 
     @PreAuthorize("hasAuthority('passenger')")
