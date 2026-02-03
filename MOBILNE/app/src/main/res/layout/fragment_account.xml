@@ -208,6 +208,10 @@
 
                     <include
                         layout="@layout/menu_item"
+                        android:id="@+id/vehiclePrices"/>
+
+                    <include
+                        layout="@layout/menu_item"
                         android:id="@+id/menuChangePassword"/>
 
                     <include
