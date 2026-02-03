@@ -20,7 +20,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 public class RideManager {
-
     private final Context context;
 
     public RideManager(Context context) {

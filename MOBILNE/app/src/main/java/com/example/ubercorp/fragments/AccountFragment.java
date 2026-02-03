@@ -24,32 +24,26 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.AccountDTO;
 import com.example.ubercorp.dto.ChangePasswordDTO;
 import com.example.ubercorp.dto.CreateUserDTO;
-import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.DriverDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.UpdateDriverDTO;
 import com.example.ubercorp.dto.VehicleDTO;
 import com.example.ubercorp.dto.VehicleTypeDTO;
-import com.example.ubercorp.managers.AdminManager;
 import com.example.ubercorp.managers.DriverManager;
-import com.example.ubercorp.managers.PassengerManager;
 import com.example.ubercorp.managers.ProfileManager;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.utils.ImageHelper;
 import com.example.ubercorp.utils.JwtUtils;
 import com.example.ubercorp.utils.MenuConfigurator;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -108,7 +102,7 @@ public class AccountFragment extends Fragment implements
     // Menu Items
     private LinearLayout menuPlatformStats, menuRequests, menuManageUsers,
             menuChangePassword, menuDeleteAccount, menuFavorites,
-            menuUserStat, menuDriverStat, menuVehicle;
+            menuUserStat, menuDriverStat, menuVehicle, vehiclePrices;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -343,6 +337,7 @@ public class AccountFragment extends Fragment implements
         menuUserStat = view.findViewById(R.id.menuMyStatistics);
         menuDriverStat = view.findViewById(R.id.menuDriverStatistics);
         menuVehicle = view.findViewById(R.id.menuVehicle);
+        vehiclePrices = view.findViewById(R.id.vehiclePrices);
     }
 
     private void setupListeners() {
@@ -368,6 +363,8 @@ public class AccountFragment extends Fragment implements
         btnCancelVehicle.setOnClickListener(v -> hideEditVehicle());
         btnSaveVehicle.setOnClickListener(v -> saveVehicleChanges());
 
+        vehiclePrices.setOnClickListener(v -> navigateToVehiclePrices());
+
         // Navigate to Change Requests
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
         menuChangePassword.setOnClickListener(v -> showChangePassword());
@@ -386,6 +383,7 @@ public class AccountFragment extends Fragment implements
         menuViews.menuUserStat = menuUserStat;
         menuViews.menuDriverStat = menuDriverStat;
         menuViews.menuVehicle = menuVehicle;
+        menuViews.menuvehiclePrices = vehiclePrices;
         menuViews.drivingHoursSection = drivingHoursSection;
         menuViews.tvUserEmail = tvUserEmail;
         menuViews.changePassword = changePassword;
@@ -456,6 +454,8 @@ public class AccountFragment extends Fragment implements
                 "Driver Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
                 "My Vehicle", "Manage your vehicle", true);
+        setupMenuItem(view.findViewById(R.id.vehiclePrices), "💸",
+                "Vehicle Prices", "Edit prices", true);
     }
 
     private void setupMenuItem(View menuItem, String emoji, String title, String subtitle, boolean showDivider) {
@@ -477,7 +477,12 @@ public class AccountFragment extends Fragment implements
 
     private void navigateToManageUsers() {
         Navigation.findNavController(requireView())
-                .navigate(R.id.action_account_to_manageUsers);
+                .navigate(R.id.vehiclePriceFragment);
+    }
+
+    private void navigateToVehiclePrices(){
+        Navigation.findNavController(requireView())
+                .navigate(R.id.vehiclePriceFragment);
     }
 
     // Edit Profile

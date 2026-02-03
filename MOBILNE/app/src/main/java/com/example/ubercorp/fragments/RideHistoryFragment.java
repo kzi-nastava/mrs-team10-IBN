@@ -3,18 +3,11 @@ package com.example.ubercorp.fragments;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.example.ubercorp.R;
 import com.example.ubercorp.databinding.FragmentRideHistoryBinding;
-import com.example.ubercorp.dto.GetRideDTO;
-import com.example.ubercorp.dto.RideDTO;
-import com.example.ubercorp.managers.RideManager;
-
-import java.util.ArrayList;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import android.widget.EditText;
 import java.text.SimpleDateFormat;
@@ -24,7 +17,6 @@ import java.util.Locale;
 public class RideHistoryFragment extends Fragment {
     private FragmentRideHistoryBinding binding;
     private SimpleDateFormat dateFormat;
-    private RideManager rideManager;
 
     public RideHistoryFragment() {}
 

@@ -24,7 +24,7 @@ import java.util.List;
 public class VehicleTypeController {
     private VehicleTypeService vehicleTypeService;
 
-    @PreAuthorize("hasAnyAuthority('user','driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('user','driver', 'administrator')")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<GetVehicleTypeDTO>> getVehicleTypes(){
         Collection<GetVehicleTypeDTO> vehicleTypes = vehicleTypeService.getVehicleTypes();
@@ -32,9 +32,8 @@ public class VehicleTypeController {
     }
 
 
-    @PreAuthorize("hasAuthority('admin')")
+    @PreAuthorize("hasAuthority('administrator')")
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin(origins = "http://localhost:4200")
     public ResponseEntity<Collection<UpdateVehicleTypeDTO>> updateVehicleType(@RequestBody Collection<UpdateVehicleTypeDTO> toUpdate){
         vehicleTypeService.saveVehicleTypes(toUpdate);
         return ResponseEntity.ok(toUpdate);
