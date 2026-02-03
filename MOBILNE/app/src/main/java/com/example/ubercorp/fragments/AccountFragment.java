@@ -477,7 +477,7 @@ public class AccountFragment extends Fragment implements
 
     private void navigateToManageUsers() {
         Navigation.findNavController(requireView())
-                .navigate(R.id.vehiclePriceFragment);
+                .navigate(R.id.manageUsersFragment);
     }
 
     private void navigateToVehiclePrices(){
