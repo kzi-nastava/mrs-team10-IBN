@@ -53,28 +53,23 @@ public class RideReviewsAdapter extends ArrayAdapter<GetReviewDTO> {
     }
 
     private void displayStarRating(LinearLayout container, double rating) {
-        // Clear any existing stars (in case of view recycling)
-        // Keep only the first child (the TextView label)
         int childCount = container.getChildCount();
         if (childCount > 1) {
             container.removeViews(1, childCount - 1);
         }
 
-        // Add stars based on rating
         for (int i = 1; i <= 5; i++) {
             ImageView star = new ImageView(getContext());
 
-            // Set the appropriate drawable
             if (i <= rating) {
                 star.setImageResource(R.drawable.ic_star_filled);
             } else {
                 star.setImageResource(R.drawable.ic_star_border);
             }
 
-            // Set size for the star
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    dpToPx(24), // width
-                    dpToPx(24)  // height
+                    dpToPx(24),
+                    dpToPx(24)
             );
             params.setMargins(dpToPx(2), 0, dpToPx(2), 0);
             star.setLayoutParams(params);
@@ -83,7 +78,6 @@ public class RideReviewsAdapter extends ArrayAdapter<GetReviewDTO> {
         }
     }
 
-    // Helper method to convert dp to pixels
     private int dpToPx(int dp) {
         float density = getContext().getResources().getDisplayMetrics().density;
         return Math.round(dp * density);

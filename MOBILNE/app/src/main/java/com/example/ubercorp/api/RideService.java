@@ -25,11 +25,12 @@ import retrofit2.http.Query;
 
 public interface RideService {
     @GET("api/rides/history")
-    Call<GetRideDTO> getRidesDriver(@Header("Authorization") String authToken,
+    Call<GetRideDTO> getRideHistory(@Header("Authorization") String authToken,
                                     @Query("page") int page,
                                     @Query("size") int size,
                                     @Query("startFrom") String startFrom,
-                                    @Query("startTo") String startTo);
+                                    @Query("startTo") String startTo,
+                                    @Query("sort") String sort);
 
 
     @GET("api/rides/{id}")
