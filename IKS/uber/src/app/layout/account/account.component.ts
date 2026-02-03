@@ -436,7 +436,7 @@ export class AccountComponent implements OnInit {
       administrator: [
         { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
         { icon: '📥', label: 'Requests', route: '/requests' },
-        { icon: '👥', label: 'Manage users', route: '/manage-users' },
+        { icon: '🚗', label: 'Register driver', route: '/register-driver' },
         { icon: '💵', label: 'Vehicle price', route: '/vehicle-price' },
       ],
     };

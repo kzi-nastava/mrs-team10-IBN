@@ -1,6 +1,7 @@
 package com.example.UberComp.controller;
 
 
+import com.example.UberComp.dto.PageDTO;
 import com.example.UberComp.dto.driver.DriverChangeRequestDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
@@ -107,6 +108,52 @@ class AccountController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PreAuthorize("hasAuthority('administrator')")
+    @GetMapping("/drivers")
+    public ResponseEntity<PageDTO<UserDTO>> getDrivers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        PageDTO<UserDTO> drivers = accountService.getDrivers(page, size);
+        return ResponseEntity.ok(drivers);
+    }
+
+    @PreAuthorize("hasAuthority('administrator')")
+    @GetMapping("/passengers")
+    public ResponseEntity<PageDTO<UserDTO>> getPassengers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        PageDTO<UserDTO> passengers = accountService.getPassengers(page, size);
+        return ResponseEntity.ok(passengers);
+    }
+
+    @PreAuthorize("hasAuthority('administrator')")
+    @PutMapping("/block")
+    public ResponseEntity<String> blockUser(
+            @RequestBody Map<String, String> body) {
+        try {
+            String reason = body.get("reason");
+            String mail = body.get("mail");
+            accountService.blockUser(mail, reason);
+            return ResponseEntity.ok("User blocked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found");
+        }
+    }
+
+    @PreAuthorize("hasAuthority('administrator')")
+    @PutMapping("/unblock")
+    public ResponseEntity<String> unblockUser(@RequestBody Map<String, String> body) {
+        try {
+            String mail = body.get("mail");
+            accountService.unblockUser(mail);
+            return ResponseEntity.ok("User unblocked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found");
         }
     }
 }

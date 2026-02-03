@@ -12,7 +12,6 @@ import { ForgotPasswordComponent } from './forms/forgot-password/forgot-password
 import { ComplaintDialogComponent } from './passenger/complaint-dialog/complaint-dialog.component';
 import { RateDriverVehicleComponent } from './passenger/rate-driver-vehicle/rate-driver-vehicle.component';
 import { OrderRideComponent } from './layout/order-ride/order-ride.component';
-import { ManageUsersComponent } from './layout/manage-users/manage-users.component';
 import { RegisterDriverComponent } from './layout/register-driver/register-driver.component';
 import { VehiclePriceComponent } from './forms/vehicle-price/vehicle-price.component';
 import { AuthGuard } from './auth/auth-guard';
@@ -100,12 +99,6 @@ export const routes: Routes = [
     component: OrderRideComponent,
     canActivate: [AuthGuard],
     data: { role: ['passenger'] },
-  },
-  {
-    path: 'manage-users',
-    component: ManageUsersComponent,
-    canActivate: [AuthGuard],
-    data: { role: ['administrator'] },
   },
   {
     path: 'vehicle-price',

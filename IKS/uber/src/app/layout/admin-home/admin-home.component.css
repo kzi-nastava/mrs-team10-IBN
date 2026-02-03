@@ -125,3 +125,7 @@
   align-items: center;
   color: whitesmoke;
 }
+
+.tab-content {
+  padding: 20px;
+}
