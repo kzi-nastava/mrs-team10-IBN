@@ -59,6 +59,11 @@
         tools:layout="@layout/fragment_change_requests"/>
 
     <fragment
+        android:id="@+id/vehiclePriceFragment"
+        android:name="com.example.ubercorp.fragments.VehiclePrices"
+        tools:layout="@layout/fragment_vehicle_prices"/>
+
+    <fragment
         android:id="@+id/registerDriverFragment"
         android:name="com.example.ubercorp.fragments.RegisterDriverFragment"
         tools:layout="@layout/fragment_register_driver"/>

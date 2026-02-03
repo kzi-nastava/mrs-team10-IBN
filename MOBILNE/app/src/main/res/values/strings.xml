@@ -30,4 +30,8 @@
     <string name="driver">Driver:</string>
     <string name="vehicle">Vehicle:</string>
     <string name="home">Home</string>
+    <string name="save">Save</string>
+    <string name="vehicle_prices">Vehicle prices</string>
+    <string name="vehicle_type">Vehicle type</string>
+    <string name="price">Price</string>
 </resources>

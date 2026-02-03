@@ -14,6 +14,7 @@ import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
 import java.util.List;
@@ -22,7 +23,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 
 public class RideManager {
-
     private final Context context;
 
     public RideManager(Context context) {
@@ -40,6 +40,12 @@ public class RideManager {
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<GetRideDTO> call = api.getRideHistory("Bearer " + token, page, size, startFrom, startTo, sort);
+        call.enqueue(callback);
+    }
+
+    public void getActiveRides(Callback<List<RideDTO>> callback){
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<RideDTO>> call = api.getActiveRides();
         call.enqueue(callback);
     }
 

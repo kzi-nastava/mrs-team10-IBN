@@ -34,6 +34,16 @@ export class FavoritesPopupComponent implements OnInit {
     this.loadFavoriteRoutes();
   }
 
+  private cleanAddress(address: string): string {
+    if (!address) return '';
+
+    return address
+      .replace(/,\s*Novi Sad,\s*Serbia/i, '')
+      .replace(/,\s*Serbia/i, '')
+      .replace(/Novi Sad,\s*/i, '')
+      .trim();
+  }
+
   loadFavoriteRoutes() {
     this.loading = true;
     this.rs.getFavoriteRoutes().subscribe({
@@ -65,12 +75,19 @@ export class FavoritesPopupComponent implements OnInit {
     const route = dto.routeDTO;
     const stations = route.stations || [];
 
-    const from = stations.length > 0 ? stations[0].address || 'Unknown' : 'Unknown';
-    const to = stations.length > 0 ? stations[stations.length - 1].address || 'Unknown' : 'Unknown';
+    const from =
+      stations.length > 0 ? this.cleanAddress(stations[0].address || 'Unknown') : 'Unknown';
+
+    const to =
+      stations.length > 0
+        ? this.cleanAddress(stations[stations.length - 1].address || 'Unknown')
+        : 'Unknown';
 
     const stops =
       stations.length > 2
-        ? stations.slice(1, -1).map((station: any) => station.address || 'Unknown')
+        ? stations
+            .slice(1, -1)
+            .map((station: any) => this.cleanAddress(station.address || 'Unknown'))
         : [];
 
     const mapped = {

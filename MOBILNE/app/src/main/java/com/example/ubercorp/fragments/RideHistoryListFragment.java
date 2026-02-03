@@ -40,6 +40,9 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
     private String startTo;
     private String sort;
 
+    private boolean isLoading = false;
+
+
     public RideHistoryListFragment() {
     }
 
@@ -93,7 +96,9 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
 
 
     private void loadNextPage() {
-        if (isLastPage) return;
+        if (isLastPage || isLoading) return;
+
+        isLoading = true;
 
         Log.d("RideHistoryList", "Loading page: " + currentPage +
                 ", From: " + startFrom + ", To: " + startTo);
@@ -101,6 +106,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
         rideManager.loadRideHistory(currentPage, 2, startFrom, startTo, sort, new Callback<>() {
             @Override
             public void onResponse(Call<GetRideDTO> call, Response<GetRideDTO> response) {
+                isLoading = false;
                 Log.d("RideHistoryList", "Response code: " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
                     GetRideDTO dto = response.body();
@@ -118,6 +124,7 @@ public class RideHistoryListFragment extends ListFragment implements onRideClick
             }
             @Override
             public void onFailure(Call<GetRideDTO> call, Throwable t) {
+                isLoading = false;
                 Log.e("RideHistoryList", "Error: " + t.getMessage());
             }
         });

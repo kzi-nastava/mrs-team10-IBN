@@ -16,19 +16,18 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./complaint-dialog.component.css'],
 })
 export class ComplaintDialogComponent {
-    public complaint: Complaint = {
-      id: 0,
-      rideId: 0,
-      content: ''
-    };
+  public complaint: Complaint = {
+    id: 0,
+    rideId: 0,
+    content: '',
+  };
 
   constructor(
     private dialogRef: MatDialogRef<ComplaintDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {rideId: number},
+    @Inject(MAT_DIALOG_DATA) public data: { rideId: number },
     private dialog: MatDialog,
-    private complaintService: ComplaintService
+    private complaintService: ComplaintService,
   ) {
-    console.log(data.rideId)
     this.complaint.rideId = data.rideId;
   }
 
@@ -40,18 +39,17 @@ export class ComplaintDialogComponent {
     this.dialogRef.close(true);
   }
 
-  postComplaint(){
+  postComplaint() {
     this.complaintService.postComplaint(this.complaint).subscribe({
-    next: () => {
-      this.dialog.open(SimpleMessageDialogComponent, {
-      width: '300px',
-      data: { message: "Your review is submitted." }
+      next: () => {
+        this.dialog.open(SimpleMessageDialogComponent, {
+          width: '300px',
+          data: { message: 'Your review is submitted.' },
+        });
+      },
+      error: (err) => {
+        console.error('Error posting review', err);
+      },
     });
-    },
-    error: (err) => {
-      console.error('Error posting review', err);
-    }
-  });
   }
-
 }

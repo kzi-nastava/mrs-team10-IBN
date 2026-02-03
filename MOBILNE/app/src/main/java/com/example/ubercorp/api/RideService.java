@@ -9,6 +9,7 @@ import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
 import com.example.ubercorp.dto.PriceDTO;
+import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
 
 import java.util.List;
@@ -77,4 +78,7 @@ public interface RideService {
 
     @GET("api/reports/{id}")
     Call<List<GetComplaintDTO>> getComplaints(@Header("Authorization") String token, @Path("id") Long id);
+
+    @GET("api/rides/activeRides")
+    Call<List<RideDTO>> getActiveRides();
 }

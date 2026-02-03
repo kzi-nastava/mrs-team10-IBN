@@ -27,14 +27,14 @@ public class MenuConfigurator {
         hideViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
                 views.menuChangePassword, views.menuDeleteAccount, views.menuFavorites,
                 views.menuUserStat, views.menuVehicle, views.menuDriverStat,
-                views.drivingHoursSection);
+                views.drivingHoursSection, views.menuvehiclePrices);
         views.btnSendChanges.setVisibility(View.GONE);
         views.changePassword.setVisibility(View.GONE);
     }
 
     private static void showAdminMenu(MenuViews views) {
         showViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
-                views.menuChangePassword, views.menuDeleteAccount);
+                views.menuChangePassword, views.menuDeleteAccount, views.menuvehiclePrices);
     }
 
     private static void showDriverMenu(MenuViews views) {
@@ -74,6 +74,7 @@ public class MenuConfigurator {
         public LinearLayout menuDriverStat;
         public LinearLayout menuVehicle;
         public LinearLayout drivingHoursSection;
+        public LinearLayout menuvehiclePrices;
         public TextView tvUserEmail;
         public View changePassword;
         public MaterialButton btnSaveChanges;

@@ -53,14 +53,14 @@ public class RideService {
     @Autowired
     private EmailUtils emailUtils;
     @Autowired
+    private NotificationService notificationService;
+    @Autowired
     private VehicleRepository vehicleRepository;
 
     @Transactional
     public IncomingRideDTO getIncomingRide(Driver driver){
         Optional<Ride> rideOptional = rideRepository.findFirstByDriverAndStatusOrderByStartAsc(driver, RideStatus.Pending);
-        if(rideOptional.isEmpty()) return null;
-        IncomingRideDTO newRide = new IncomingRideDTO(rideOptional.get());
-        return newRide;
+        return rideOptional.map(IncomingRideDTO::new).orElse(null);
     }
 
     public Page<GetRideDTO> getRidesDriver(Long driverId, String sortParam,
@@ -303,7 +303,7 @@ public class RideService {
     }
 
     @Transactional
-    public Ride createRide(CreateRideDTO dto, Long passengerId, Long driverId, Long estimatedPickupMinutes) {
+    public Ride createRide(CreateRideDTO dto, Long passengerId, Long driverId, Long estimatedPickupMinutes, LocalDateTime driverShouldLeaveAt) {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found with id: " + driverId));
 
@@ -334,10 +334,18 @@ public class RideService {
         Set<User> passengers = new HashSet<>();
         passengers.add(passenger);
 
+        Set<String> guestEmails = new HashSet<>();
+
         if (dto.getPassengerEmails() != null && !dto.getPassengerEmails().isEmpty()) {
             for (String email : dto.getPassengerEmails()) {
                 if (email != null && !email.trim().isEmpty()) {
-                    // send notification ??
+                    User existingUser = userRepository.findByAccountEmail(email).orElse(null);
+
+                    if (existingUser != null) {
+                        passengers.add(existingUser);
+                    } else {
+                        guestEmails.add(email);
+                    }
                 }
             }
         }
@@ -351,6 +359,7 @@ public class RideService {
             scheduledRide.setRoute(route);
             scheduledRide.setDriver(driver);
             scheduledRide.setPassengers(passengers);
+            scheduledRide.setGuestEmails(guestEmails);
             scheduledRide.setBabies(dto.getBabySeat() != null ? dto.getBabySeat() : false);
             scheduledRide.setPets(dto.getPetFriendly() != null ? dto.getPetFriendly() : false);
             scheduledRide.setPrice(dto.getPrice());
@@ -359,8 +368,12 @@ public class RideService {
             scheduledRide.setEstimatedTimeArrival(dto.getScheduled().plusMinutes(dto.getEstimatedDuration()));
             scheduledRide.setFinish(null);
             scheduledRide.setCancellationReason(null);
+            scheduledRide.setDistance(dto.getDistance());
+            scheduledRide.setDriverShouldLeaveAt(driverShouldLeaveAt);
 
             ride = rideRepository.save(scheduledRide);
+
+            notificationService.sendScheduledRideNotifications(scheduledRide, passenger);
 
         } else {
             ride = new Ride();
@@ -372,6 +385,8 @@ public class RideService {
             ride.setPrice(dto.getPrice());
             ride.setStart(now);
             ride.setStatus(RideStatus.Pending);
+            ride.setGuestEmails(guestEmails);
+            ride.setDistance(dto.getDistance());
 
             if (estimatedPickupMinutes == 0)
                 estimatedPickupMinutes = 1L;
@@ -385,6 +400,8 @@ public class RideService {
 
             driver.setStatus(DriverStatus.DRIVING);
             driverRepository.save(driver);
+
+            notificationService.sendImmediateRideNotifications(ride, passenger, estimatedPickupMinutes);
         }
 
         return ride;
@@ -486,8 +503,10 @@ public class RideService {
         cancelledRide.setPrice(0.0);
         if(cancelled.isCancelledByDriver()){
             cancelledRide.setStatus(RideStatus.CancelledByDriver);
+            cancelledRide.setFinish(LocalDateTime.now());
         } else {
             cancelledRide.setStatus(RideStatus.CancelledByPassenger);
+            cancelledRide.setFinish(LocalDateTime.now());
         }
         cancelledRide.setCancellationReason(cancelled.getCancellationReason());
         driverRepository.save(driver);
