@@ -139,4 +139,13 @@ public class RideManager {
         Call<List<GetComplaintDTO>> call = api.getComplaints("Bearer " + token, rideID);
         call.enqueue(callback);
     }
+
+    public void getRide(Long rideID, Callback<GetRideDetailsDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<GetRideDetailsDTO> call = api.getRide("Bearer " + token, rideID);
+        call.enqueue(callback);
+    }
 }

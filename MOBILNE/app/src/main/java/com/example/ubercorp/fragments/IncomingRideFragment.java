@@ -69,6 +69,12 @@ public class IncomingRideFragment extends Fragment {
 
         context = this.getContext();
 
+        startButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideId", rideID);
+            Navigation.findNavController(requireView()).navigate(R.id.action_incomingRideFragment_to_trackingRouteFragment, bundle);
+        });
+
         declineButton.setOnClickListener((v) -> {
             final EditText input = new EditText(this.getContext());
             input.setInputType(InputType.TYPE_CLASS_TEXT);

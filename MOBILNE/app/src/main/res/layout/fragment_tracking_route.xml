@@ -11,6 +11,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/orderRide"
         android:fillViewport="true">
 
         <LinearLayout
@@ -28,16 +29,16 @@
                 android:textSize="40dp"
                 android:gravity="center_horizontal"
                 android:textColor="@color/white"
-                android:text="Incoming Ride"
-                android:layout_marginBottom="20dp"/>
+                android:text="Tracking Route"/>
 
-            <LinearLayout
-                android:id="@+id/stopsContainer"
+            <TextView
+                android:id="@+id/estimated_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_gravity="center"
-                android:minHeight="100dp"/>
+                android:textSize="20dp"
+                android:gravity="center_horizontal"
+                android:text="Estimated time arrival in: "
+                android:textColor="@color/white" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -56,24 +57,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <Button
-                    android:id="@+id/startButton"
+                    android:id="@+id/finishButton"
                     android:layout_margin="10dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:backgroundTint="@color/btn_color_1"
-                    android:text="Start"
+                    android:text="Finish"
                     android:textAllCaps="false"/>
 
                 <Button
-                    android:id="@+id/declineButton"
+                    android:id="@+id/panicButton"
                     android:layout_margin="10dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:backgroundTint="@color/btn_color_2"
-                    android:text="Decline"
-                    android:textAllCaps="false"/>
+                    android:text="Panic"/>
 
 
             </LinearLayout>
