@@ -8,6 +8,8 @@ import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.GetComplaintDTO;
+import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
@@ -32,12 +34,12 @@ public class RideManager {
         return sharedPref.getString("auth_token", null);
     }
 
-    public void loadDriverRides(int page, int size, String startFrom, String startTo, Callback<GetRideDTO> callback) {
+    public void loadRideHistory(int page, int size, String startFrom, String startTo, String sort, Callback<GetRideDTO> callback) {
         String token = getToken();
         if (token == null) return;
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
-        Call<GetRideDTO> call = api.getRidesDriver("Bearer " + token, page, size, startFrom, startTo);
+        Call<GetRideDTO> call = api.getRideHistory("Bearer " + token, page, size, startFrom, startTo, sort);
         call.enqueue(callback);
     }
 
@@ -117,6 +119,24 @@ public class RideManager {
         CancelRideDTO cancelRide = new CancelRideDTO(rideID, reason, cancelledByDriver);
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<Void> call = api.cancelRide("Bearer " + token, cancelRide);
+        call.enqueue(callback);
+    }
+
+    public void getReviews(Long rideID, Callback<List<GetReviewDTO>> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<GetReviewDTO>> call = api.getReviews("Bearer " + token, rideID);
+        call.enqueue(callback);
+    }
+
+    public void getComplaints(Long rideID, Callback<List<GetComplaintDTO>> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<List<GetComplaintDTO>> call = api.getComplaints("Bearer " + token, rideID);
         call.enqueue(callback);
     }
 }

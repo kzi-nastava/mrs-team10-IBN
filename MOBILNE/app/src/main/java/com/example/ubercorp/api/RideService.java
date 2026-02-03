@@ -3,6 +3,8 @@ package com.example.ubercorp.api;
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.GetComplaintDTO;
+import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
@@ -24,11 +26,12 @@ import retrofit2.http.Query;
 
 public interface RideService {
     @GET("api/rides/history")
-    Call<GetRideDTO> getRidesDriver(@Header("Authorization") String authToken,
+    Call<GetRideDTO> getRideHistory(@Header("Authorization") String authToken,
                                     @Query("page") int page,
                                     @Query("size") int size,
                                     @Query("startFrom") String startFrom,
-                                    @Query("startTo") String startTo);
+                                    @Query("startTo") String startTo,
+                                    @Query("sort") String sort);
 
 
     @GET("api/rides/{id}")
@@ -69,6 +72,12 @@ public interface RideService {
 
     @PUT("api/rides/cancel")
     Call<Void> cancelRide(@Header("Authorization") String token, @Body CancelRideDTO cancelledRide);
+
+    @GET("api/reviews/{id}")
+    Call<List<GetReviewDTO>> getReviews(@Header("Authorization") String token, @Path("id") Long id);
+
+    @GET("api/reports/{id}")
+    Call<List<GetComplaintDTO>> getComplaints(@Header("Authorization") String token, @Path("id") Long id);
 
     @GET("api/rides/activeRides")
     Call<List<RideDTO>> getActiveRides();

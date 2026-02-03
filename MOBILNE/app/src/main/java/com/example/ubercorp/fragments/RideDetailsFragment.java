@@ -1,15 +1,20 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +35,7 @@ import com.example.ubercorp.dto.CreatedUserDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
+import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import org.osmdroid.util.BoundingBox;
@@ -82,6 +88,25 @@ public class RideDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Button cancelButton = view.findViewById(R.id.cancel_button);
+        Button viewReviewsButton = view.findViewById(R.id.view_reviews_button);
+        Button viewComplaintsButton = view.findViewById(R.id.view_complaints_button);
+
+        SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
+        GridLayout passengersGrid = view.findViewById(R.id.passengers);
+        if (role.equals("passenger")) passengersGrid.setVisibility(GONE);
+
+        viewReviewsButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.action_details_to_reviews, bundle);
+        });
+
+        viewComplaintsButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.action_details_to_complaints, bundle);
+        });
 
         rideManager.loadRideDetails(ride.getId(), new Callback<GetRideDetailsDTO>() {
             @Override
@@ -95,7 +120,7 @@ public class RideDetailsFragment extends Fragment {
 
                 binding.startTimeDetail.setText(rideDetails.getStartTime().substring(11,16));
                 binding.endTimeDetail.setText(rideDetails.getEndTime().substring(11,16));
-                binding.priceDetail.setText(rideDetails.getPrice()+" RSD");
+                binding.priceDetail.setText(String.format("%.2f RSD", rideDetails.getPrice()));
                 binding.canceled.setEnabled(false);
                 binding.panic.setEnabled(false);
                 if (rideDetails.isCancelled())
@@ -120,7 +145,7 @@ public class RideDetailsFragment extends Fragment {
                                 builder.show();
                                 binding.canceled.setChecked(true);
                                 binding.priceDetail.setText("0.0 RSD");
-                                cancelButton.setVisibility(View.GONE);
+                                cancelButton.setVisibility(GONE);
                             }
                         }
 
