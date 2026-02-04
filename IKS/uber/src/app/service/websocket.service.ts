@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Subject } from 'rxjs'; // ← dodajte BehaviorSubject
+import { BehaviorSubject, Subject } from 'rxjs';
 import { AppNotification, AppNotificationDTO } from './notification.service';
 
 @Injectable({
@@ -45,7 +45,6 @@ export class WebSocketService {
             this.zone.run(() => {
               try {
                 const notification: AppNotification = JSON.parse(message.body);
-
                 this.newNotification$.next(notification);
               } catch (err) {
                 console.error('Error parsing notification:', err);

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    public Notification broadcastToAdmins(NotificationDTO rawNotif){
+    public Notification broadcastToAdmins(NotificationDTO rawNotif) {
         Notification notification = new Notification(rawNotif.getTitle(), rawNotif.getContent(), LocalDateTime.now());
         List<User> admins = userRepository.findAllByRole(AccountType.ADMINISTRATOR);
         notification.setNotifiedUsers(admins);
@@ -158,17 +159,17 @@ public class NotificationService {
 
         sendToUser(mainPassenger.getAccount().getEmail(), passengerNotif);
 
+        sendToLinkedPassengers(ride, mainPassenger, estimatedPickupMinutes);
+
         String driverTitle = "🚗 New Ride Request";
         String driverContent = String.format(
                 "You have a new ride!\n" +
                         "Passenger: %s\n" +
-                        "Phone: %s\n" +
                         "Pickup: %s\n" +
                         "Destination: %s\n" +
                         "Estimated arrival: %s\n" +
                         "Price: %.2f RSD",
                 mainPassenger.getName(),
-                mainPassenger.getPhone(),
                 ride.getRoute().getStations().get(0).getAddress(),
                 ride.getRoute().getStations().get(ride.getRoute().getStations().size() - 1).getAddress(),
                 estimatedArrival,
@@ -181,5 +182,34 @@ public class NotificationService {
 
         sendToUser(ride.getDriver().getAccount().getEmail(), driverNotif);
         sendSignalToFrontend(ride.getDriver());
+    }
+
+    public void sendToLinkedPassengers(Ride ride, User mainPassenger, Long estimatedPickupMinutes) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String passengerTitle = "Added to a ride";
+        String passengerContent = String.format(
+                "You are added to a ride!\n" +
+                        "Driver: %s\n" +
+                        "Vehicle: %s\n" +
+                        "Arrives in: %d min\n" +
+                        "Price: %.2f RSD",
+                ride.getDriver().getName(),
+                ride.getDriver().getVehicle().getModel(),
+                estimatedPickupMinutes,
+                ride.getPrice()
+        );
+
+        Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
+        List<User> notifiedUsers = new ArrayList<>();
+        for (User user: ride.getPassengers()) {
+            if (user.getAccount().getEmail() != mainPassenger.getAccount().getEmail()) {
+                notifiedUsers.add(user);
+                sendToUser(user.getAccount().getEmail(), passengerNotif);
+            }
+        }
+        passengerNotif.setNotifiedUsers(notifiedUsers);
+        notificationRepository.save(passengerNotif);
+
     }
 }

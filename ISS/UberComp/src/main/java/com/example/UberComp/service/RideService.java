@@ -396,12 +396,13 @@ public class RideService {
             ride.setFinish(null);
             ride.setCancellationReason(null);
 
-            ride = rideRepository.save(ride);
+            ride = rideRepository.saveAndFlush(ride);
 
             driver.setStatus(DriverStatus.DRIVING);
             driverRepository.save(driver);
 
-            notificationService.sendImmediateRideNotifications(ride, passenger, estimatedPickupMinutes);
+            if (ride.getId() != null)
+                notificationService.sendImmediateRideNotifications(ride, passenger, estimatedPickupMinutes);
         }
 
         return ride;

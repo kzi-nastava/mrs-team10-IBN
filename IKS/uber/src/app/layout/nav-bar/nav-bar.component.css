@@ -123,3 +123,58 @@ mat-sidenav-container {
     width: 25vw;
   }
 }
+
+.message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  z-index: 100001;
+  animation: slideInFade 0.3s ease;
+}
+
+.message.success-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  z-index: 100001;
+  animation: slideInFade 0.3s ease;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+}
+
+@keyframes slideInFade {
+  0% {
+    opacity: 0;
+    transform: translateX(50px) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.error-message {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+}

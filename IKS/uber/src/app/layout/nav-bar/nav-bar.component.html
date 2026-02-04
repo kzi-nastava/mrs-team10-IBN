@@ -83,3 +83,10 @@
 -->
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<div *ngIf="successMessage()" class="message success-message">
+  {{ successMessage() }}
+</div>
+<div *ngIf="errorMessage()" class="message error-message">
+  {{ errorMessage() }}
+</div>
