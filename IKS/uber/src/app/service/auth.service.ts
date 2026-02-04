@@ -48,6 +48,25 @@ export class AuthService {
   }
 
   logout() {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    this.http
+      .put(`${environment.apiHost}/drivers/me/toggle-status?active=false`, null, { headers })
+      .subscribe({
+        next: () => {
+          this.performLogout();
+        },
+        error: (err) => {
+          console.error('Error deactivating driver:', err);
+          this.performLogout();
+        },
+      });
+  }
+
+  private performLogout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('expires_in');
     this.role.set(null);

@@ -4,6 +4,9 @@ import com.example.UberComp.enums.DriverStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -19,6 +22,15 @@ public class Driver extends User {
 
     @OneToOne(mappedBy = "driver")
     private Vehicle vehicle;
+
+    @Column(name = "daily_work_start")
+    private LocalDateTime dailyWorkStart;
+
+    @Column(name = "total_work_minutes_today")
+    private Integer totalWorkMinutesToday = 0;
+
+    @Column(name = "last_activity_date")
+    private LocalDate lastActivityDate;
 }
 
 
