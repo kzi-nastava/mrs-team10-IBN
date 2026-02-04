@@ -4,11 +4,15 @@ import com.example.UberComp.dto.PageDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.AccountStatus;
+import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
+import com.example.UberComp.repository.RideRepository;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -105,7 +110,6 @@ public class RideController {
         return ResponseEntity.ok(activeRides);
     }
 
-    @PreAuthorize("hasAuthority('passenger')")
     @GetMapping(value = "/trackingRidePassenger", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetVehiclePositionDTO> trackingRidePassenger(Authentication auth){
         Account acc = (Account) auth.getPrincipal();
@@ -243,13 +247,25 @@ public class RideController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @GetMapping("/ongoing")
     public ResponseEntity<Boolean> getOngoing(Authentication auth) {
         Account account = (Account) auth.getPrincipal();
         boolean hasRide = rideService.hasOngoingRide(account.getUser().getId());
         return ResponseEntity.ok(hasRide);
     }
+
+    @GetMapping("/tracking/{token}")
+    public ResponseEntity<GetRideDetailsDTO> getRideByToken(@PathVariable String token) {
+        Optional<Ride> ride = rideService.findByTrackingToken(token);
+        if (ride.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (ride.get().getStatus() != RideStatus.Ongoing) {
+            return ResponseEntity.status(HttpStatus.GONE).build();
+        }
+        return ResponseEntity.ok(new GetRideDetailsDTO(ride.get()));
+    }
+
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping(value = "/panic", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
