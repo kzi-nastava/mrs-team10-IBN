@@ -64,7 +64,7 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -134,7 +134,7 @@ public class HomeActivity extends AppCompatActivity {
             } else if (id == R.id.incoming_ride) {
                 navController.navigate(R.id.incomingRideFragment);
             } else if (id == R.id.tracking_ride) {
-                navController.navigate(R.id.tracking_ride);
+                navController.navigate(R.id.trackingRouteFragment);
             }
 
             drawer.closeDrawers();

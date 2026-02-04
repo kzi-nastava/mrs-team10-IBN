@@ -93,6 +93,7 @@ public class RideController {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GetRideDetailsDTO> getRide(@PathVariable Long id)
     {
+        if(id == -1L) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         GetRideDetailsDTO ride = rideService.getRide(id);
         return new ResponseEntity<>(ride, HttpStatus.OK);
     }
