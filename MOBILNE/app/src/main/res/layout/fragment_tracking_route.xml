@@ -17,8 +17,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:gravity="center"
+            android:orientation="vertical"
             tools:layout_editor_absoluteX="1dp"
             tools:layout_editor_absoluteY="1dp">
 
@@ -26,19 +26,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/squada_one"
-                android:textSize="40dp"
                 android:gravity="center_horizontal"
+                android:text="Tracking Route"
                 android:textColor="@color/white"
-                android:text="Tracking Route"/>
+                android:textSize="40dp" />
 
             <TextView
-                android:id="@+id/estimated_time"
+                android:id="@+id/info_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="20dp"
+                android:layout_marginBottom="5dp"
                 android:gravity="center_horizontal"
-                android:text="Estimated time arrival in: "
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:textSize="20dp" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -56,24 +56,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <Button
                     android:id="@+id/finishButton"
-                    android:layout_margin="10dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/btn_color_1"
                     android:text="Finish"
-                    android:textAllCaps="false"/>
+                    android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/panicButton"
-                    android:layout_margin="10dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/btn_color_2"
-                    android:text="Panic"/>
+                    android:text="Panic" />
 
 
             </LinearLayout>

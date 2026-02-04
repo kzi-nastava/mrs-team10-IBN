@@ -8,6 +8,7 @@ import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.FinishedRideDTO;
 import com.example.ubercorp.dto.GetComplaintDTO;
 import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
@@ -17,6 +18,7 @@ import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideMomentDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
+import com.example.ubercorp.dto.StopRideDTO;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -159,6 +161,33 @@ public class RideManager {
 
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<GetRideDetailsDTO> call = api.getRide("Bearer " + token, rideID);
+        call.enqueue(callback);
+    }
+
+    public void finishRide(Long rideID, RideMomentDTO finish, Callback<FinishedRideDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<FinishedRideDTO> call = api.finishRide("Bearer " + token, rideID, finish);
+        call.enqueue(callback);
+    }
+
+    public void stopRide(StopRideDTO ride, Callback<FinishedRideDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<FinishedRideDTO> call = api.stopRide("Bearer " + token, ride);
+        call.enqueue(callback);
+    }
+
+    public void panic(StopRideDTO ride, Callback<FinishedRideDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<FinishedRideDTO> call = api.panic("Bearer " + token, ride);
         call.enqueue(callback);
     }
 }

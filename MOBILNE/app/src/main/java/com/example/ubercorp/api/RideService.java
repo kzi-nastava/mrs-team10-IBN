@@ -3,6 +3,7 @@ package com.example.ubercorp.api;
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.FinishedRideDTO;
 import com.example.ubercorp.dto.GetComplaintDTO;
 import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
@@ -12,6 +13,7 @@ import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideMomentDTO;
 import com.example.ubercorp.dto.RideOrderResponseDTO;
+import com.example.ubercorp.dto.StopRideDTO;
 
 import java.util.List;
 
@@ -85,4 +87,13 @@ public interface RideService {
 
     @GET("api/rides/activeRides")
     Call<List<RideDTO>> getActiveRides();
+
+    @PUT("api/rides/finish/{id}")
+    Call<FinishedRideDTO> finishRide(@Header("Authorization") String token, @Path("id") Long id, @Body RideMomentDTO finish);
+
+    @PUT("api/rides/stop")
+    Call<FinishedRideDTO> stopRide(@Header("Authorization") String token, @Body StopRideDTO ride);
+
+    @PUT("api/rides/panic")
+    Call<FinishedRideDTO> panic(@Header("Authorization") String token, @Body StopRideDTO ride);
 }
