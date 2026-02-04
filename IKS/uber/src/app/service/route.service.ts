@@ -16,8 +16,8 @@ export class RouteService {
     return this.http.get<RidePayload>(`${environment.apiHost}/rides/incoming`);
   }
 
-  getOngoingRide(id: string) {
-    return this.http.get<RidePayload>(`${environment.apiHost}/rides/${id}`);
+  getOngoingRide(token: string) {
+    return this.http.get<RidePayload>(`${environment.apiHost}/rides/tracking/${token}`);
   }
 
   getTrackingRide() {

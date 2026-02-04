@@ -71,10 +71,8 @@ export const routes: Routes = [
     data: { role: ['driver'] },
   },
   {
-    path: 'tracking-route/:rideId',
+    path: 'tracking-route/:token',
     component: TrackingRouteComponent,
-    canActivate: [AuthGuard],
-    data: { role: ['passenger', 'driver'] },
   },
   {
     path: 'tracking-route',

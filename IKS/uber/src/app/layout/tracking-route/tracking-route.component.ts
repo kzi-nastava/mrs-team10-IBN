@@ -68,9 +68,9 @@ export class TrackingRouteComponent {
         },
       });
     } else {
-      const rideIdParam = this.urlRoute.snapshot.paramMap.get('rideId');
-      if (rideIdParam) {
-        this.routeService.getOngoingRide(rideIdParam).subscribe({
+      const token = this.urlRoute.snapshot.paramMap.get('token');
+      if (token) {
+        this.routeService.getOngoingRide(token).subscribe({
           next: (response) => {
             this.route = response.route?.stations || [];
             this.rideId = response.id;

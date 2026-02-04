@@ -233,4 +233,61 @@ public class EmailUtils {
             System.out.println(e.getMessage());
         }
     }
+
+    public void sendEmailWhenPassengerIsAddedToRide(String email, String token){
+        String trackingLink = "http://localhost:4200/tracking-route/"+token;
+        String body = "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Ride Finished</title>\n" +
+                "</head>\n" +
+                "<body style=\"margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;\">\n" +
+                "    <table role=\"presentation\" style=\"width: 100%; border-collapse: collapse;\">\n" +
+                "        <tr>\n" +
+                "            <td align=\"center\" style=\"padding: 40px 0;\">\n" +
+                "                <table role=\"presentation\" style=\"width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\">\n" +
+                "                    <tr>\n" +
+                "                        <td style=\"padding: 40px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center;\">\n" +
+                "                            <h1 style=\"margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;\">You are added to a ride 🚗</h1>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                    <tr>\n" +
+                "                        <td style=\"padding: 40px 30px;\">\n" +
+                "                            <p style=\"margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;\">Hello!</p>\n" +
+                "                            <p style=\"margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;\">\n" +
+                "                                You can track your ride by clicking on a button below!\n" +
+                "                            <table role=\"presentation\" style=\"margin: 0 auto;\">\n" +
+                "                                <tr>\n" +
+                "                                    <td style=\"border-radius: 6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\">\n" +
+                "                                        <a href=\"" + trackingLink + "\" style=\"display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 6px;\">\n" +
+                "                                            Track your ride ⭐\n" +
+                "                                        </a>\n" +
+                "                                    </td>\n" +
+                "                                </tr>\n" +
+                "                            </table>\n" +
+                "                            <p style=\"margin: 30px 0 0; color: #666666; font-size: 14px; line-height: 1.6;\">\n" +
+                "                                If the button doesn't work, copy and paste this link into your browser:\n" +
+                "                            </p>\n" +
+                "                            <p style=\"margin: 10px 0 0; color: #667eea; font-size: 14px; word-break: break-all;\">\n" +
+                "                                " + trackingLink + "\n" +
+                "                            </p>\n" +
+                "                        </td>\n" +
+                "                    </tr>\n" +
+                "                </table>\n" +
+                "            </td>\n" +
+                "        </tr>\n" +
+                "    </table>\n" +
+                "</body>\n" +
+                "</html>";
+
+        String subject = "We have a new ride for you 🚗⭐";
+
+        try {
+            sendMail(email, subject, body);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

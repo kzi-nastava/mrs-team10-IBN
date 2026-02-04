@@ -165,11 +165,13 @@ public class NotificationService {
         String driverContent = String.format(
                 "You have a new ride!\n" +
                         "Passenger: %s\n" +
+                        "Phone: %s\n" +
                         "Pickup: %s\n" +
                         "Destination: %s\n" +
                         "Estimated arrival: %s\n" +
                         "Price: %.2f RSD",
                 mainPassenger.getName(),
+                mainPassenger.getPhone(),
                 ride.getRoute().getStations().get(0).getAddress(),
                 ride.getRoute().getStations().get(ride.getRoute().getStations().size() - 1).getAddress(),
                 estimatedArrival,
