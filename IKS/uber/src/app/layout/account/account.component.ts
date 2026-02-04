@@ -44,7 +44,7 @@ export class AccountComponent implements OnInit {
   originalUserFormData!: UserFormData;
   originalVehicleData!: VehicleFormData;
 
-  hoursWorkedToday = 0;
+  hoursWorkedToday = 0.0;
   maxHoursPerDay = 8;
   isDriverActive = false;
   isDriverBlocked = false;
@@ -67,6 +67,12 @@ export class AccountComponent implements OnInit {
   ngOnInit() {
     this.initParticles();
     this.loadUserData();
+
+    if (this.isDriver()) {
+      setInterval(() => {
+        this.loadWorkTime();
+      }, 60000);
+    }
   }
 
   private getAuthHeaders() {
@@ -76,6 +82,22 @@ export class AccountComponent implements OnInit {
         Authorization: `Bearer ${token}`,
       }),
     };
+  }
+
+  loadWorkTime() {
+    if (!this.isDriver()) return;
+
+    this.http
+      .get<any>(`${environment.apiHost}/drivers/me/uptime`, this.getAuthHeaders())
+      .subscribe({
+        next: (data) => {
+          this.hoursWorkedToday = parseFloat((data.workedMinutes / 60).toFixed(1));
+          this.cd.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading work time:', err);
+        },
+      });
   }
 
   isDriver() {
@@ -174,7 +196,7 @@ export class AccountComponent implements OnInit {
   }
 
   processDriverDetails(response: DriverDetails) {
-    this.hoursWorkedToday = response.uptime || 0;
+    this.loadWorkTime();
     this.isDriverActive = true;
     this.isDriverBlocked = response.blocked;
     this.reason = response.reason;

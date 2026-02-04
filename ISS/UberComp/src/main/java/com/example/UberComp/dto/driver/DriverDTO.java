@@ -6,8 +6,10 @@ import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.model.Driver;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class DriverDTO {
     private AccountDTO accountDTO;

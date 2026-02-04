@@ -1,4 +1,11 @@
-import { Component, inject, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectorRef,
+  OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MapComponent } from '../../maps/map-basic/map.component';
@@ -11,7 +18,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './update-location.component.html',
   styleUrls: ['./update-location.component.css'],
 })
-export class UpdateLocationComponent implements AfterViewInit {
+export class UpdateLocationComponent implements AfterViewInit, OnInit {
   @ViewChild(MapComponent) mapComponent!: MapComponent;
 
   address: string = '';
@@ -21,6 +28,10 @@ export class UpdateLocationComponent implements AfterViewInit {
   successMessage: string | null = '';
   errorMessage: string | null = '';
   private cd = inject(ChangeDetectorRef);
+
+  ngOnInit() {
+    this.loadDriverStatus();
+  }
 
   ngAfterViewInit() {
     setTimeout(() => {
@@ -46,6 +57,20 @@ export class UpdateLocationComponent implements AfterViewInit {
     };
   }
 
+  loadDriverStatus() {
+    this.http
+      .get<{ isActive: boolean }>(`${environment.apiHost}/drivers/me/status`, this.getAuthHeaders())
+      .subscribe({
+        next: (response) => {
+          this.isDriverActive = response.isActive;
+          this.cd.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to load driver status', err);
+        },
+      });
+  }
+
   updateLocation() {
     if (!this.address) return;
 
@@ -61,6 +86,7 @@ export class UpdateLocationComponent implements AfterViewInit {
         error: (err) => {
           console.error('Failed to update location', err);
           this.isLoading = false;
+          this.showError('Failed to update location');
           this.mapComponent.clearAll();
         },
       });
@@ -75,7 +101,30 @@ export class UpdateLocationComponent implements AfterViewInit {
   }
 
   goOnline() {
-    this.isDriverActive = !this.isDriverActive;
+    const newStatus = !this.isDriverActive;
+
+    this.http
+      .put(
+        `${environment.apiHost}/drivers/me/toggle-status?active=${newStatus}`,
+        null,
+        this.getAuthHeaders(),
+      )
+      .subscribe({
+        next: () => {
+          this.isDriverActive = newStatus;
+          this.showSuccess(
+            newStatus ? 'You are now ONLINE and available for rides' : 'You are now OFFLINE',
+          );
+        },
+        error: (err) => {
+          console.error('Failed to toggle status', err);
+          if (err.error?.error) {
+            this.showError(err.error.error);
+          } else {
+            this.showError('Failed to update status');
+          }
+        },
+      });
   }
 
   showSuccess(message: string) {
