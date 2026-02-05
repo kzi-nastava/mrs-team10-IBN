@@ -101,7 +101,7 @@ public class NotificationService {
                 fcmService.sendNotification(
                         driver.getFcmToken(),
                         "🚗 New Ride Request",
-                        "You have a new ride request!"
+                        "Check incoming rides!"
                 );
             }
 
