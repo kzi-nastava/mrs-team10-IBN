@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -21,15 +22,16 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST')}\""
+
+        buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST', 'http://ip:8090/')}\""
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        debug {
+            buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST', 'http://ip:8090/')}\""
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -42,12 +44,14 @@ android {
 }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:34.8.0')
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.legacy.support.v4
     implementation libs.recyclerview
+    implementation libs.lifecycle.process
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
@@ -57,12 +61,19 @@ dependencies {
     implementation libs.osmdroid.geopackage
     implementation libs.okhttp
     implementation libs.gson
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.auth0.android:jwtdecode:2.0.2'
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-
+    implementation libs.gson.v286
+    implementation libs.retrofit.v230
+    implementation libs.converter.gson.v230
+    implementation libs.jwtdecode
+    implementation libs.circleimageview
+    implementation libs.glide
+    annotationProcessor libs.compiler
+    implementation libs.java.websocket
+    implementation libs.okhttp.v4110
+    implementation libs.stompprotocolandroid
+    implementation libs.rxjava
+    implementation libs.rxandroid
+    implementation libs.gson.v2132
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.messaging
 }
