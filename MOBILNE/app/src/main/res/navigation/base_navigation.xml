@@ -92,6 +92,12 @@
         />
 
     <fragment
+        android:id="@+id/trackingRouteFragment"
+        android:name="com.example.ubercorp.fragments.TrackingRouteFragment"
+        tools:layout="@layout/fragment_tracking_route"
+        />
+
+    <fragment
         android:id="@+id/routeFragment"
         android:name="com.example.ubercorp.fragments.RouteFragment"
         tools:layout="@layout/fragment_route">
@@ -106,6 +112,9 @@
         <action
             android:id="@+id/action_incomingRideFragment_to_routeFragment"
             app:destination="@id/routeFragment"/>
+        <action
+            android:id="@+id/action_incomingRideFragment_to_trackingRouteFragment"
+            app:destination="@id/trackingRouteFragment"/>
     </fragment>
     <fragment
         android:id="@+id/notification"

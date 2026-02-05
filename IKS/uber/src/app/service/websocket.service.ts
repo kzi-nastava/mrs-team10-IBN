@@ -45,7 +45,6 @@ export class WebSocketService {
             this.zone.run(() => {
               try {
                 const notification: AppNotification = JSON.parse(message.body);
-
                 this.newNotification$.next(notification);
               } catch (err) {
                 console.error('Error parsing notification:', err);

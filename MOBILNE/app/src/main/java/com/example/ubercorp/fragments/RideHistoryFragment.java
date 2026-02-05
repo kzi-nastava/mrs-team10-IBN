@@ -152,6 +152,7 @@ public class RideHistoryFragment extends Fragment implements SensorEventListener
     @Override
     public void onDestroyView(){
         super.onDestroyView();
+        sensorManager.unregisterListener(this);
         binding = null;
     }
 

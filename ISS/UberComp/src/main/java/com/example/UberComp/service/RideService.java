@@ -173,6 +173,11 @@ public class RideService {
         return new GetVehiclePositionDTO();
     }
 
+    public Optional<Ride>   findByTrackingToken(String token) {
+        return rideRepository.findByTrackingToken(token);
+    }
+
+
     public Page<GetRideDTO> getScheduledRidesForDriver(Long id, Pageable pageable){
         Page<ScheduledRide> scheduledRides = scheduledRideRepository.getScheduledRidesForDriver(id, pageable);
         return new PageImpl<>(scheduledRides.stream().map(GetRideDTO::new).toList(), pageable, scheduledRides.getTotalElements());
@@ -396,15 +401,23 @@ public class RideService {
             ride.setFinish(null);
             ride.setCancellationReason(null);
 
-            ride = rideRepository.save(ride);
+            ride = rideRepository.saveAndFlush(ride);
 
             driver.setStatus(DriverStatus.DRIVING);
             driverRepository.save(driver);
 
-            notificationService.sendImmediateRideNotifications(ride, passenger, estimatedPickupMinutes);
+            if (ride.getId() != null) {
+                notificationService.sendImmediateRideNotifications(ride, passenger, estimatedPickupMinutes);
+                sendEmailToLinkedPassengers(ride.getGuestEmails(), ride.getTrackingToken());
+            }
         }
 
         return ride;
+    }
+
+    public void sendEmailToLinkedPassengers(Set<String> guestEmails, String token){
+        for(String email: guestEmails)
+            emailUtils.sendEmailWhenPassengerIsAddedToRide(email, token);
     }
 
     @Transactional(readOnly = true)

@@ -71,4 +71,14 @@ public class Ride {
     @Column
     private Double distance;
 
+    @Column(unique = true)
+    private String trackingToken;
+
+    @PrePersist
+    public void generateToken() {
+        if (this.trackingToken == null) {
+            this.trackingToken = java.util.UUID.randomUUID().toString();
+        }
+    }
+
 }

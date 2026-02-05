@@ -256,7 +256,7 @@ export class OrderRideComponent implements OnInit {
       next: (response: RideOrderResponseDTO) => {
         this.isOrdering = false;
         if (response !== null) {
-          this.showSuccess('Ride ordered! Check notifications for details.');
+          //this.showSuccess('Ride ordered! Check notifications for details.');
         } else {
           this.showError('No available drivers.');
         }

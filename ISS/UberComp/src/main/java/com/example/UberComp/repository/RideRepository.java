@@ -188,6 +188,17 @@ AND LOWER(r.driver.name) LIKE LOWER(CONCAT('%', :name, '%'))
             @Param("name") String search
     );
 
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+JOIN FETCH r.route rt
+JOIN FETCH rt.stations
+LEFT JOIN FETCH r.passengers
+WHERE r.trackingToken = :token
+""")
+    Optional<Ride> findByTrackingToken(@Param("token")String trackingToken);
+
+
+
 }
 
 

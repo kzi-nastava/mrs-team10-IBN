@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -179,6 +180,8 @@ public class NotificationService {
 
         sendToUser(mainPassenger.getAccount().getEmail(), passengerNotif);
 
+        sendToLinkedPassengers(ride, mainPassenger, estimatedPickupMinutes);
+
         String driverTitle = "🚗 New Ride Request";
         String driverContent = String.format(
                 "You have a new ride!\n" +
@@ -202,5 +205,34 @@ public class NotificationService {
 
         sendToUser(ride.getDriver().getAccount().getEmail(), driverNotif);
         sendSignalToFrontend(ride.getDriver());
+    }
+
+    public void sendToLinkedPassengers(Ride ride, User mainPassenger, Long estimatedPickupMinutes) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String passengerTitle = "Added to a ride";
+        String passengerContent = String.format(
+                "You are added to a ride!\n" +
+                        "Driver: %s\n" +
+                        "Vehicle: %s\n" +
+                        "Arrives in: %d min\n" +
+                        "Price: %.2f RSD",
+                ride.getDriver().getName(),
+                ride.getDriver().getVehicle().getModel(),
+                estimatedPickupMinutes,
+                ride.getPrice()
+        );
+
+        Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
+        List<User> notifiedUsers = new ArrayList<>();
+        for (User user: ride.getPassengers()) {
+            if (user.getAccount().getEmail() != mainPassenger.getAccount().getEmail()) {
+                notifiedUsers.add(user);
+                sendToUser(user.getAccount().getEmail(), passengerNotif);
+            }
+        }
+        passengerNotif.setNotifiedUsers(notifiedUsers);
+        notificationRepository.save(passengerNotif);
+
     }
 }
