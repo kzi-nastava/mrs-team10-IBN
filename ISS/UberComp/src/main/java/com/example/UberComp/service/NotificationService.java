@@ -27,11 +27,17 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private FcmService fcmService;
+
     public Notification broadcastToAdmins(NotificationDTO rawNotif){
         Notification notification = new Notification(rawNotif.getTitle(), rawNotif.getContent(), LocalDateTime.now());
         List<User> admins = userRepository.findAllByRole(AccountType.ADMINISTRATOR);
         notification.setNotifiedUsers(admins);
         notificationRepository.save(notification);
+
+        sendToAllAdmins(notification);
+
         return notification;
     }
 
@@ -49,8 +55,13 @@ public class NotificationService {
                     "/queue/notifications",
                     notification
             );
+
+            User user = userRepository.findByAccountEmail(userEmail).orElse(null);
+            if (user != null && user.getFcmToken() != null) {
+                fcmService.sendNotification(user.getFcmToken(), notification.getTitle(), notification.getContent());
+            }
         } catch (Exception e) {
-            System.err.println("Failed to send WebSocket to " + userEmail + ": " + e.getMessage());
+            System.err.println("Failed to send notification to " + userEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -71,6 +82,7 @@ public class NotificationService {
 
             notificationRepository.save(notification);
             notificationRepository.flush();
+
             sendToUser(passenger.getAccount().getEmail(), notification);
         }
     }
@@ -79,10 +91,19 @@ public class NotificationService {
     public void sendSignalToFrontend(Driver driver) {
         try {
             String email = driver.getAccount().getEmail();
+
             messagingTemplate.convertAndSend(
                     "/topic/ride/" + email,
                     Map.of("type", "INCOMING_RIDE")
             );
+
+            if (driver.getFcmToken() != null) {
+                fcmService.sendNotification(
+                        driver.getFcmToken(),
+                        "🚗 New Ride Request",
+                        "You have a new ride request!"
+                );
+            }
 
         } catch (Exception e) {
             System.err.println("FAILED TO SEND RIDE SIGNAL: " + e.getMessage());

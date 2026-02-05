@@ -711,6 +711,10 @@ public class OrderRideFragment extends Fragment {
 
     private void placeOrder() {
         if (startPoint == null || endPoint == null) {
+            try {
+                startPoint = getCoordinatesFromAddress(fromLocationInput.getText().toString());
+                endPoint = getCoordinatesFromAddress(toLocationInput.getText().toString());
+            } catch (Exception ignored) {}
             Toast.makeText(requireContext(), "Please confirm your route first", Toast.LENGTH_SHORT).show();
             return;
         }

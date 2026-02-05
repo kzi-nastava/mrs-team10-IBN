@@ -107,5 +107,10 @@
             android:id="@+id/action_incomingRideFragment_to_routeFragment"
             app:destination="@id/routeFragment"/>
     </fragment>
+    <fragment
+        android:id="@+id/notification"
+        android:name="com.example.ubercorp.fragments.NotificationFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notification" />
 
 </navigation>

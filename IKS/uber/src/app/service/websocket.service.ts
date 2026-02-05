@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Subject } from 'rxjs'; // ← dodajte BehaviorSubject
+import { BehaviorSubject, Subject } from 'rxjs';
 import { AppNotification, AppNotificationDTO } from './notification.service';
 
 @Injectable({

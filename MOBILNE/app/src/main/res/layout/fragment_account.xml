@@ -213,10 +213,6 @@
                     <include
                         layout="@layout/menu_item"
                         android:id="@+id/menuChangePassword"/>
-
-                    <include
-                        layout="@layout/menu_item"
-                        android:id="@+id/menuDeleteAccount"/>
                 </LinearLayout>
 
             </LinearLayout>

@@ -25,7 +25,7 @@ public class MenuConfigurator {
 
     private static void hideAllMenuItems(MenuViews views) {
         hideViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
-                views.menuChangePassword, views.menuDeleteAccount, views.menuFavorites,
+                views.menuChangePassword, views.menuFavorites,
                 views.menuUserStat, views.menuVehicle, views.menuDriverStat,
                 views.drivingHoursSection, views.menuvehiclePrices);
         views.btnSendChanges.setVisibility(View.GONE);
@@ -34,12 +34,11 @@ public class MenuConfigurator {
 
     private static void showAdminMenu(MenuViews views) {
         showViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
-                views.menuChangePassword, views.menuDeleteAccount, views.menuvehiclePrices);
+                views.menuChangePassword, views.menuvehiclePrices);
     }
 
     private static void showDriverMenu(MenuViews views) {
-        showViews(views.menuVehicle, views.menuDriverStat, views.menuChangePassword,
-                views.menuDeleteAccount);
+        showViews(views.menuVehicle, views.menuDriverStat, views.menuChangePassword);
         views.tvUserEmail.setVisibility(View.GONE);
         views.drivingHoursSection.setVisibility(View.VISIBLE);
         views.btnSaveChanges.setVisibility(View.GONE);
@@ -47,8 +46,7 @@ public class MenuConfigurator {
     }
 
     private static void showPassengerMenu(MenuViews views) {
-        showViews(views.menuFavorites, views.menuUserStat, views.menuChangePassword,
-                views.menuDeleteAccount);
+        showViews(views.menuFavorites, views.menuUserStat, views.menuChangePassword);
     }
 
     private static void showViews(View... views) {
@@ -68,7 +66,6 @@ public class MenuConfigurator {
         public LinearLayout menuRequests;
         public LinearLayout menuManageUsers;
         public LinearLayout menuChangePassword;
-        public LinearLayout menuDeleteAccount;
         public LinearLayout menuFavorites;
         public LinearLayout menuUserStat;
         public LinearLayout menuDriverStat;
