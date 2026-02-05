@@ -23,7 +23,6 @@ public class ApiClient {
 
         retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.API_HOST)
-                .addConverterFactory(GsonConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
                 .build();

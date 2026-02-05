@@ -48,10 +48,11 @@ public class RideManager {
         call.enqueue(callback);
     }
 
-    public void getActiveRides(Callback<List<RideDTO>> callback){
+    public Call<List<RideDTO>> getActiveRides(Callback<List<RideDTO>> callback){
         RideService api = ApiClient.getInstance().createService(RideService.class);
         Call<List<RideDTO>> call = api.getActiveRides();
         call.enqueue(callback);
+        return call;
     }
 
     public void loadRideDetails(Long id, Callback<GetRideDetailsDTO> callback) {

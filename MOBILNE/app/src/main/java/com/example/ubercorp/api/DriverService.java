@@ -9,6 +9,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface DriverService {
 
@@ -20,4 +21,10 @@ public interface DriverService {
 
     @POST("api/drivers/me/change-request")
     Call<Void> submitDriverChangeRequest(@Header("Authorization") String authToken, @Body UpdateDriverDTO changeRequest);
+
+    @PUT("api/drivers/me/toggle-status")
+    Call<Void> toggleDriverStatus(
+            @Header("Authorization") String token,
+            @retrofit2.http.Query("active") boolean active
+    );
 }

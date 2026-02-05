@@ -36,6 +36,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/socket")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+        registry.addEndpoint("/socket")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override
@@ -72,7 +74,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                         );
                                 accessor.setUser(authentication);
                             } else {
-                                System.out.println("Token validation failed");
+                                System.out.println("Token validation failed for: " + username);
                             }
                         } catch (Exception e) {
                             System.out.println("WebSocket authentication error: " + e.getMessage());

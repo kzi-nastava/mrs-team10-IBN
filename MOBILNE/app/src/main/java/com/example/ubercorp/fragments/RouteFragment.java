@@ -1,5 +1,6 @@
 package com.example.ubercorp.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,6 +8,8 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +19,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.CoordinateDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.managers.RouteManager;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +36,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,51 +51,85 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RouteFragment extends Fragment {
 
+    private static final String TAG = "RouteFragment";
+    private static final int UPDATE_INTERVAL = 3000; // ms
+
+    // UI Components
     private MapView mapView;
     private EditText startAddressInput, endAddressInput;
-    private List<EditText> stationInputList = new ArrayList<EditText>();
-    private List<Marker> markers = new ArrayList<>();
     private Button drawRouteButton;
     private Button confirmButton;
     private Button addStopBtn;
     private Button removeStopBtn;
     private Button orderRideButton;
-    private boolean isDropdownOpen = false;
     private CardView locationDisplay;
     private CardView dropdownContent;
     private LinearLayout stopsContainer;
     private TextView locationText;
     private TextView timeText;
 
+    // Data
+    private List<EditText> stationInputList = new ArrayList<>();
+    private List<Marker> markers = new ArrayList<>();
     private FolderOverlay vehicleLayer;
-    private final Map<Long, Marker> vehicleMarkers = new HashMap<>();
+    private Map<Long, Marker> vehicleMarkers = new HashMap<>();
+
+    // Managers
     private RideManager rideManager;
     private RouteManager routeManager;
 
+    // State
+    private boolean isDropdownOpen = false;
     private double estimatedDistance = 0.0;
     private int estimatedDuration = 0;
+
+    // Threading
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private ExecutorService executor;
+
+    private Call<List<RideDTO>> activeRidesCall;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_route, container, false);
+
+        executor = Executors.newSingleThreadExecutor();
+
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+
         rideManager = new RideManager(requireContext());
+
+        initializeMap(view);
+        initializeViews(view);
+        setupListeners();
+        setVehiclesOnMapPeriodic();
+
+        return view;
+    }
+
+    private void initializeMap(View view) {
         mapView = view.findViewById(R.id.map);
         mapView.setMultiTouchControls(true);
         mapView.getController().setZoom(12.75);
         mapView.getController().setCenter(new GeoPoint(45.242, 19.8227));
+
         vehicleLayer = new FolderOverlay();
         mapView.getOverlays().add(vehicleLayer);
         mapView.invalidate();
-        routeManager = new RouteManager(mapView, requireContext());
 
+        routeManager = new RouteManager(mapView, requireContext());
+    }
+
+    private void initializeViews(View view) {
         startAddressInput = view.findViewById(R.id.startAddress);
         endAddressInput = view.findViewById(R.id.endAddress);
         drawRouteButton = view.findViewById(R.id.drawRoute);
@@ -102,21 +142,10 @@ public class RouteFragment extends Fragment {
         locationText = view.findViewById(R.id.locationText);
         timeText = view.findViewById(R.id.timeText);
         orderRideButton = view.findViewById(R.id.orderRide);
+    }
 
-        setVehiclesOnMapPeriodic();
-
-
-        drawRouteButton.setOnClickListener(v -> {
-            String startAddress = startAddressInput.getText().toString().trim();
-            String endAddress = endAddressInput.getText().toString().trim();
-
-            if (!startAddress.isEmpty() && !endAddress.isEmpty()) {
-                fetchRoute(startAddress, endAddress);
-            } else {
-                Toast.makeText(requireContext(), "Please enter both addresses", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+    private void setupListeners() {
+        drawRouteButton.setOnClickListener(v -> handleDrawRoute());
         locationDisplay.setOnClickListener(v -> toggleDropdown());
         confirmButton.setOnClickListener(v -> {
             toggleDropdown();
@@ -125,13 +154,28 @@ public class RouteFragment extends Fragment {
         addStopBtn.setOnClickListener(v -> addStop());
         removeStopBtn.setOnClickListener(v -> removeStop());
         orderRideButton.setOnClickListener(v -> navigateToOrderRide());
+    }
 
-        return view;
+    private void handleDrawRoute() {
+        String startAddress = startAddressInput.getText().toString().trim();
+        String endAddress = endAddressInput.getText().toString().trim();
+
+        if (startAddress.isEmpty() || endAddress.isEmpty()) {
+            showToast("Please enter both addresses");
+            return;
+        }
+
+        fetchRoute(startAddress, endAddress);
     }
 
     private void navigateToOrderRide() {
         String startAddress = startAddressInput.getText().toString().trim();
         String endAddress = endAddressInput.getText().toString().trim();
+
+        if (startAddress.isEmpty() || endAddress.isEmpty()) {
+            showToast("Please draw a route first");
+            return;
+        }
 
         Bundle args = new Bundle();
         args.putString("fromLocation", startAddress);
@@ -145,23 +189,24 @@ public class RouteFragment extends Fragment {
             }
         }
         args.putStringArrayList("stops", stopsList);
-
         args.putDouble("estimatedDistance", estimatedDistance);
         args.putInt("estimatedDuration", estimatedDuration);
 
-        Navigation.findNavController(requireView()).navigate(R.id.action_routeFragment_to_orderRideFragment, args);
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_routeFragment_to_orderRideFragment, args);
     }
 
     private void addStop() {
         EditText stationInput = new EditText(getContext());
         stationInput.setHint("Enter stop location");
-        stationInput.setPadding(10, 10, 10, 10);
         stationInput.setBackgroundResource(R.drawable.input_background);
-        stationInput.setHint("Enter Station");
+
         int paddingPx = (int) (10 * getResources().getDisplayMetrics().density);
         int marginBottomPx = (int) (12 * getResources().getDisplayMetrics().density);
+
         stationInput.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
         stationInput.setTextSize(14);
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -173,14 +218,13 @@ public class RouteFragment extends Fragment {
         stopsContainer.addView(stationInput);
     }
 
-    private void removeStop(){
-        if (stationInputList.isEmpty()){
+    private void removeStop() {
+        if (stationInputList.isEmpty()) {
             return;
         }
         EditText removed = stationInputList.remove(stationInputList.size() - 1);
         stopsContainer.removeView(removed);
     }
-
 
     private void toggleDropdown() {
         isDropdownOpen = !isDropdownOpen;
@@ -193,61 +237,86 @@ public class RouteFragment extends Fragment {
         }
     }
 
-    private void displayRouteAsText(){
+    private void displayRouteAsText() {
         String startAddress = startAddressInput.getText().toString().trim();
         String endAddress = endAddressInput.getText().toString().trim();
-        if(!startAddress.isBlank() && !endAddress.isBlank()){
-            StringBuilder sb = new StringBuilder(startAddress);
-            for(EditText stationInput : stationInputList){
-                String stationText = stationInput.getText().toString().trim();
-                sb.append(" → ");
-                sb.append(stationText);
-            }
-            sb.append(" → ");
-            sb.append(endAddress);
-            locationText.setText(sb.toString());
+
+        if (startAddress.isEmpty() || endAddress.isEmpty()) {
+            return;
         }
+
+        StringBuilder sb = new StringBuilder(startAddress);
+        for (EditText stationInput : stationInputList) {
+            String stationText = stationInput.getText().toString().trim();
+            if (!stationText.isEmpty()) {
+                sb.append(" → ").append(stationText);
+            }
+        }
+        sb.append(" → ").append(endAddress);
+        locationText.setText(sb.toString());
     }
 
     private void fetchRoute(String startAddress, String endAddress) {
-        new Thread(() -> {
+        if (executor == null || executor.isShutdown()) {
+            Log.w(TAG, "Executor is not available");
+            return;
+        }
+
+        executor.execute(() -> {
             try {
                 GeoPoint startPoint = getCoordinatesFromAddress(startAddress);
                 GeoPoint endPoint = getCoordinatesFromAddress(endAddress);
 
-                if (startPoint != null && endPoint != null) {
-                    List<GeoPoint> stations = new ArrayList<>();
-                    stations.add(startPoint);
-                    for(EditText stationInput : stationInputList){
-                        String stationText = stationInput.getText().toString().trim();
-                        GeoPoint station = getCoordinatesFromAddress(stationText);
-                        stations.add(station);
-                    }
-                    stations.add(endPoint);
-                    if (!stations.contains(null)) {
-                        List<GeoPoint> routePoints = getRoute(stations);
-                        requireActivity().runOnUiThread(() -> drawRoute(routePoints, stations));
-                    } else {
-                        showToast("Unable to fetch route");
-                    }
-                } else {
+                if (startPoint == null || endPoint == null) {
                     showToast("Invalid address provided");
+                    return;
                 }
+
+                List<GeoPoint> stations = new ArrayList<>();
+                stations.add(startPoint);
+
+                for (EditText stationInput : stationInputList) {
+                    String stationText = stationInput.getText().toString().trim();
+                    if (!stationText.isEmpty()) {
+                        GeoPoint station = getCoordinatesFromAddress(stationText);
+                        if (station != null) {
+                            stations.add(station);
+                        }
+                    }
+                }
+
+                stations.add(endPoint);
+
+                List<GeoPoint> routePoints = getRoute(stations);
+
+                if (routePoints == null || routePoints.isEmpty()) {
+                    showToast("Unable to fetch route");
+                    return;
+                }
+
+                Activity activity = getActivity();
+                if (activity == null || !isAdded()) return;
+
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) return;
+                    drawRoute(routePoints, stations);
+                });
+
             } catch (Exception e) {
-                Log.e("Exception", e.getMessage());
-                showToast("Error fetching route");
+                Log.e(TAG, "Error fetching route", e);
+                showToast("Error fetching route: " + e.getMessage());
             }
-        }).start();
+        });
     }
 
-    private GeoPoint getCoordinatesFromAddress(String address) throws IOException, JSONException, InterruptedException {
+    private GeoPoint getCoordinatesFromAddress(String address) {
         try {
             Thread.sleep(1000);
 
             String encodedAddress = URLEncoder.encode(address + ", Novi Sad, Serbia", "UTF-8");
             String urlString = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
 
-            Log.i("RouteFragment", "Requesting: " + urlString);
+            Log.d(TAG, "Geocoding: " + address);
 
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -258,7 +327,6 @@ public class RouteFragment extends Fragment {
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.i("RouteFragment", "Response code: " + responseCode);
 
             if (responseCode == 200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -269,56 +337,48 @@ public class RouteFragment extends Fragment {
                 }
                 reader.close();
 
-                String responseBody = result.toString();
-                Log.i("RouteFragment", "Response: " + responseBody);
-
-                JSONArray results = new JSONArray(responseBody);
+                JSONArray results = new JSONArray(result.toString());
                 if (results.length() > 0) {
                     JSONObject resultObj = results.getJSONObject(0);
                     double lat = resultObj.getDouble("lat");
                     double lon = resultObj.getDouble("lon");
+
+                    Log.d(TAG, "Found coordinates: " + lat + ", " + lon);
                     return new GeoPoint(lat, lon);
                 }
             }
 
             conn.disconnect();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.e(TAG, "Geocoding interrupted", e);
         } catch (Exception e) {
-            Log.e("RouteFragment", "Error: " + e.getMessage(), e);
+            Log.e(TAG, "Geocoding error", e);
         }
+
         return null;
     }
 
-    private String buildQueryString(List<GeoPoint> stations){
+    private String buildQueryString(List<GeoPoint> stations) {
         StringBuilder sb = new StringBuilder("https://router.project-osrm.org/route/v1/driving/");
-        for(GeoPoint station : stations){
-            sb.append(station.getLongitude());
-            sb.append(",");
-            sb.append(station.getLatitude());
-            if(station != stations.get(stations.size() - 1)) sb.append(";");
+
+        for (int i = 0; i < stations.size(); i++) {
+            GeoPoint station = stations.get(i);
+            sb.append(station.getLongitude()).append(",").append(station.getLatitude());
+            if (i < stations.size() - 1) {
+                sb.append(";");
+            }
         }
+
         sb.append("?overview=full&geometries=geojson");
         return sb.toString();
     }
 
-    private void markStations(List<GeoPoint> stations) {
-        for (Marker marker : markers){
-            marker.remove(mapView);
-        }
-        for (GeoPoint station : stations){
-            Marker marker = new Marker(mapView);
-            marker.setPosition(station);
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            marker.setIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_location));
-            marker.setVisible(true);
-            markers.add(marker);
-            mapView.getOverlays().add(marker);
-        }
-    }
-
-    public List<GeoPoint> getRoute(List<GeoPoint> stations) throws IOException, JSONException {
+    private List<GeoPoint> getRoute(List<GeoPoint> stations) {
         try {
             String urlString = buildQueryString(stations);
-            Log.i("RouteFragment", "Requesting route: " + urlString);
+            Log.d(TAG, "Fetching route from OSRM");
 
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -328,7 +388,6 @@ public class RouteFragment extends Fragment {
             conn.connect();
 
             int responseCode = conn.getResponseCode();
-            Log.i("RouteFragment", "Route response code: " + responseCode);
 
             if (responseCode == 200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -339,23 +398,25 @@ public class RouteFragment extends Fragment {
                 }
                 reader.close();
 
-                String responseBody = result.toString();
-                JSONObject json = new JSONObject(responseBody);
-                JSONArray coordinates = json.getJSONArray("routes")
-                        .getJSONObject(0)
-                        .getJSONObject("geometry")
-                        .getJSONArray("coordinates");
+                JSONObject json = new JSONObject(result.toString());
+                JSONObject route = json.getJSONArray("routes").getJSONObject(0);
 
-                double durationSeconds = json.getJSONArray("routes")
-                        .getJSONObject(0).getDouble("duration");
+                JSONArray coordinates = route.getJSONObject("geometry").getJSONArray("coordinates");
+                double durationSeconds = route.getDouble("duration");
+                double distanceMeters = route.getDouble("distance");
+
                 estimatedDuration = (int) (durationSeconds / 60);
+                estimatedDistance = distanceMeters / 1000.0;
 
-                estimatedDistance = json.getJSONArray("routes")
-                        .getJSONObject(0).getDouble("distance") / 1000.0;
-
-                requireActivity().runOnUiThread(() ->
-                        timeText.setText("Estimated time: " + estimatedDuration + " minutes")
-                );
+                Activity activity = getActivity();
+                if (activity != null && isAdded()) {
+                    activity.runOnUiThread(() -> {
+                        if (isAdded()) {
+                            timeText.setText(String.format("Estimated time: %d minutes (%.2f km)",
+                                    estimatedDuration, estimatedDistance));
+                        }
+                    });
+                }
 
                 List<GeoPoint> routePoints = new ArrayList<>();
                 for (int i = 0; i < coordinates.length(); i++) {
@@ -366,103 +427,165 @@ public class RouteFragment extends Fragment {
                 }
 
                 conn.disconnect();
+                Log.d(TAG, "Route fetched successfully: " + routePoints.size() + " points");
                 return routePoints;
             }
 
             conn.disconnect();
-        } catch (Exception e) {
-            Log.e("RouteFragment", "Route error: " + e.getMessage(), e);
+
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Route fetch error", e);
         }
+
         return null;
     }
 
-    public void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {
+    private void drawRoute(List<GeoPoint> routePoints, List<GeoPoint> stations) {
+        mapView.getOverlays().clear();
+        mapView.getOverlays().add(vehicleLayer);
+
         Polyline routeLine = new Polyline();
         routeLine.setPoints(routePoints);
         routeLine.setColor(0xFF0000FF);
         routeLine.setWidth(10.0f);
-
-        mapView.getOverlays().clear();
         mapView.getOverlays().add(routeLine);
+
         markStations(stations);
-        mapView.invalidate();
 
         if (!routePoints.isEmpty()) {
             IMapController mapController = mapView.getController();
-            mapController.setZoom(15.0);
-            mapController.setCenter(routePoints.get(0));
+            mapController.setZoom(14.0);
+            mapController.setCenter(routePoints.get(routePoints.size() / 2));
+        }
+
+        mapView.invalidate();
+        Log.d(TAG, "Route drawn on map");
+    }
+
+    private void markStations(List<GeoPoint> stations) {
+        for (Marker marker : markers) {
+            mapView.getOverlays().remove(marker);
+        }
+        markers.clear();
+
+        for (int i = 0; i < stations.size(); i++) {
+            GeoPoint station = stations.get(i);
+            Marker marker = new Marker(mapView);
+            marker.setPosition(station);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+            if (i == 0) {
+                marker.setTitle("Start");
+            } else if (i == stations.size() - 1) {
+                marker.setTitle("End");
+            } else {
+                marker.setTitle("Stop " + i);
+            }
+
+            marker.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.ic_location));
+            markers.add(marker);
+            mapView.getOverlays().add(marker);
         }
     }
 
-    private volatile boolean keepUpdatingVehicles = true;
-
     private void setVehiclesOnMapPeriodic() {
-        new Thread(() -> {
-            while (keepUpdatingVehicles) {
-                rideManager.getActiveRides(new Callback<>() {
-                    @Override
-                    public void onResponse(Call<List<RideDTO>> call, Response<List<RideDTO>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            requireActivity().runOnUiThread(() -> {
-                                updateVehiclesLocation(response.body());
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<RideDTO>> call, Throwable t) {
-                        Log.e("Map", "Failed to load vehicles", t);
-                    }
-                });
-
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
-        }).start();
+        handler.post(updateVehiclesRunnable);
     }
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Runnable updateVehiclesRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!isAdded()) {
+                Log.d(TAG, "Fragment not added, skipping vehicle update");
+                return;
+            }
+
+            if (activeRidesCall != null && !activeRidesCall.isCanceled()) {
+                activeRidesCall.cancel();
+            }
+
+            activeRidesCall = rideManager.getActiveRides(new Callback<List<RideDTO>>() {
+                @Override
+                public void onResponse(Call<List<RideDTO>> call, Response<List<RideDTO>> response) {
+                    if (!isAdded()) return;
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        updateVehiclesLocation(response.body());
+                    } else {
+                        Log.e(TAG, "Failed to fetch rides: " + response.code());
+                    }
+
+                    if (isAdded()) {
+                        handler.postDelayed(updateVehiclesRunnable, UPDATE_INTERVAL);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<RideDTO>> call, Throwable t) {
+                    if (!isAdded()) return;
+
+                    if (!call.isCanceled()) {
+                        Log.e(TAG, "Failed to load vehicles", t);
+                    }
+
+                    if (isAdded()) {
+                        handler.postDelayed(updateVehiclesRunnable, UPDATE_INTERVAL);
+                    }
+                }
+            });
+        }
+    };
 
     private void updateVehiclesLocation(List<RideDTO> rides) {
+        if (executor == null || executor.isShutdown()) {
+            Log.w(TAG, "Executor not available, skipping vehicle update");
+            return;
+        }
+
+        if (!isAdded()) {
+            Log.w(TAG, "Fragment not added, skipping vehicle update");
+            return;
+        }
 
         executor.execute(() -> {
-
             Map<Long, GeoPoint> calculatedPositions = new HashMap<>();
 
             for (RideDTO ride : rides) {
                 if (ride.isBusy()) {
                     GeoPoint pos = calculateProgressPosition(ride);
-                    calculatedPositions.put(ride.getId(), pos);
+                    if (pos != null) {
+                        calculatedPositions.put(ride.getId(), pos);
+                    }
                 }
             }
 
-            requireActivity().runOnUiThread(() -> {
+            Activity activity = getActivity();
+            if (activity == null || !isAdded()) return;
+
+            activity.runOnUiThread(() -> {
+                if (!isAdded()) return;
 
                 for (RideDTO ride : rides) {
-
                     Marker marker = vehicleMarkers.get(ride.getId());
 
                     if (marker == null) {
                         marker = new Marker(mapView);
-                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
                         vehicleMarkers.put(ride.getId(), marker);
                         vehicleLayer.add(marker);
                     }
 
-                    if (ride.isBusy()) {
-                        marker.setIcon(getResources().getDrawable(R.drawable.red_car));
+                    if (ride.isBusy() && calculatedPositions.containsKey(ride.getId())) {
+                        marker.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.red_car));
                         marker.setPosition(calculatedPositions.get(ride.getId()));
                     } else {
-                        marker.setIcon(getResources().getDrawable(R.drawable.green_car));
-                        marker.setPosition(
-                                new GeoPoint(
-                                        ride.getVehicleLocation().getLatitude(),
-                                        ride.getVehicleLocation().getLongitude()
-                                )
-                        );
+                        marker.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.green_car));
+                        if (ride.getVehicleLocation() != null) {
+                            marker.setPosition(new GeoPoint(
+                                    ride.getVehicleLocation().getLatitude(),
+                                    ride.getVehicleLocation().getLongitude()
+                            ));
+                        }
                     }
                 }
 
@@ -472,29 +595,45 @@ public class RouteFragment extends Fragment {
     }
 
     private GeoPoint calculateProgressPosition(RideDTO ride) {
-        long now = System.currentTimeMillis();
+        try {
+            long now = System.currentTimeMillis();
 
-        LocalDateTime startLdt = LocalDateTime.parse(ride.getStartTime());
-        LocalDateTime endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
+            LocalDateTime startLdt = LocalDateTime.parse(ride.getStartTime());
+            LocalDateTime endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
 
-        long start = startLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long end = endLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long start = startLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long end = endLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        float progress = (float)(now - start) / (end - start);
-        progress = Math.max(0f, Math.min(1f, progress));
+            float progress = (float) (now - start) / (end - start);
+            progress = Math.max(0f, Math.min(1f, progress));
 
-        List<GeoPoint> points = new ArrayList<>();
-        for (CoordinateDTO c : ride.getRoute().getStations())
-            points.add(new GeoPoint(c.getLat(), c.getLon()));
+            List<GeoPoint> points = new ArrayList<>();
+            for (CoordinateDTO c : ride.getRoute().getStations()) {
+                points.add(new GeoPoint(c.getLat(), c.getLon()));
+            }
 
-        List<GeoPoint> routePoints = routeManager.getRoute(points);
-        int index = (int)(progress * (routePoints.size() - 1));
-        return routePoints.get(index);
+            if (routeManager == null) return null;
+
+            List<GeoPoint> routePoints = routeManager.getRoute(points);
+            if (routePoints == null || routePoints.isEmpty()) return null;
+
+            int index = (int) (progress * (routePoints.size() - 1));
+            return routePoints.get(index);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error calculating vehicle position", e);
+            return null;
+        }
     }
 
-
     private void showToast(String message) {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show());
+        Activity activity = getActivity();
+        if (activity == null || !isAdded()) return;
+
+        activity.runOnUiThread(() -> {
+            if (!isAdded() || getContext() == null) return;
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override
@@ -510,6 +649,38 @@ public class RouteFragment extends Fragment {
         super.onPause();
         if (mapView != null) {
             mapView.onPause();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        Log.d(TAG, "onDestroyView - cleaning up");
+
+        handler.removeCallbacks(updateVehiclesRunnable);
+
+        if (activeRidesCall != null && !activeRidesCall.isCanceled()) {
+            activeRidesCall.cancel();
+            Log.d(TAG, "Cancelled active rides call");
+        }
+
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                    Log.w(TAG, "Executor forcefully shut down");
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+            Log.d(TAG, "Executor shut down");
+        }
+
+        if (mapView != null) {
+            mapView.onDetach();
         }
     }
 }

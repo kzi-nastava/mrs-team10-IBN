@@ -101,7 +101,7 @@ public class AccountFragment extends Fragment implements
 
     // Menu Items
     private LinearLayout menuPlatformStats, menuRequests, menuManageUsers,
-            menuChangePassword, menuDeleteAccount, menuFavorites,
+            menuChangePassword, menuFavorites,
             menuUserStat, menuDriverStat, menuVehicle, vehiclePrices;
 
     @Override
@@ -332,7 +332,6 @@ public class AccountFragment extends Fragment implements
         menuRequests = view.findViewById(R.id.menuRequests);
         menuManageUsers = view.findViewById(R.id.menuManageUsers);
         menuChangePassword = view.findViewById(R.id.menuChangePassword);
-        menuDeleteAccount = view.findViewById(R.id.menuDeleteAccount);
         menuFavorites = view.findViewById(R.id.menuFavorites);
         menuUserStat = view.findViewById(R.id.menuMyStatistics);
         menuDriverStat = view.findViewById(R.id.menuDriverStatistics);
@@ -378,7 +377,6 @@ public class AccountFragment extends Fragment implements
         menuViews.menuRequests = menuRequests;
         menuViews.menuManageUsers = menuManageUsers;
         menuViews.menuChangePassword = menuChangePassword;
-        menuViews.menuDeleteAccount = menuDeleteAccount;
         menuViews.menuFavorites = menuFavorites;
         menuViews.menuUserStat = menuUserStat;
         menuViews.menuDriverStat = menuDriverStat;
@@ -443,9 +441,7 @@ public class AccountFragment extends Fragment implements
         setupMenuItem(view.findViewById(R.id.menuManageUsers), "👥",
                 "Manage Users", "Add or remove users", true);
         setupMenuItem(view.findViewById(R.id.menuChangePassword), "🔑",
-                "Change Password", "Update your password", true);
-        setupMenuItem(view.findViewById(R.id.menuDeleteAccount), "🗑️",
-                "Delete Account", "Permanently delete your account", false);
+                "Change Password", "Update your password", false);
         setupMenuItem(view.findViewById(R.id.menuFavorites), "❤️",
                 "Favorites", "Manage favorite routes", true);
         setupMenuItem(view.findViewById(R.id.menuMyStatistics), "📊",

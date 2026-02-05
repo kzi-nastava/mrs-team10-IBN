@@ -36,4 +36,7 @@ public class User {
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
 }
