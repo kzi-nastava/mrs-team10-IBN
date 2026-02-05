@@ -153,6 +153,7 @@ public class HomeActivity extends AppCompatActivity
 
         MenuItem accountItem = menu.findItem(R.id.accountFragment);
         MenuItem logoutItem = menu.findItem(R.id.logout);
+        MenuItem notificationItem = menu.findItem(R.id.notification);
 
         if (accountItem != null) {
             accountItem.setVisible(isLoggedIn);
@@ -160,7 +161,11 @@ public class HomeActivity extends AppCompatActivity
         if (logoutItem != null) {
             logoutItem.setVisible(isLoggedIn);
         }
-        if (isUserLoggedIn()){
+        if (notificationItem != null) {
+            notificationItem.setVisible(isLoggedIn);
+        }
+
+        if (isLoggedIn) {
             updateMenuBasedOnRole(menu);
         }
     }

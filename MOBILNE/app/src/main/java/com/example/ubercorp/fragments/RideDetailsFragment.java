@@ -96,6 +96,10 @@ public class RideDetailsFragment extends Fragment {
         GridLayout passengersGrid = view.findViewById(R.id.passengers);
         if (role.equals("passenger")) passengersGrid.setVisibility(GONE);
 
+        if (!"passenger".equalsIgnoreCase(role)) {
+            binding.favorites.setVisibility(View.GONE);
+        }
+
         viewReviewsButton.setOnClickListener((v) -> {
             Bundle bundle = new Bundle();
             bundle.putLong("RideID", ride.getId());
