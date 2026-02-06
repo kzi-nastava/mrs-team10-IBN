@@ -129,7 +129,8 @@ public class RideDetailsFragment extends Fragment {
                 binding.panic.setEnabled(false);
                 if (rideDetails.isCancelled())
                     binding.canceled.setChecked(true);
-                if (ride.getStatus() == RideStatus.Panic)
+                Log.d("Ride status", rideDetails.getStatus().toString());
+                if (rideDetails.getStatus() == RideStatus.Panic)
                     binding.panic.setChecked(true);
 
                 Context context = getContext();
