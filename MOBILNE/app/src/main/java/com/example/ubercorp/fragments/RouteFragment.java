@@ -27,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.api.ApiClient;
+import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.CoordinateDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
@@ -195,7 +197,7 @@ public class RouteFragment extends Fragment {
         });
         addStopBtn.setOnClickListener(v -> addStop());
         removeStopBtn.setOnClickListener(v -> removeStop());
-        orderRideButton.setOnClickListener(v -> navigateToOrderRide());
+        orderRideButton.setOnClickListener(v -> checkOngoingRideAndNavigate());
     }
 
     private void handleDrawRoute() {
@@ -209,6 +211,43 @@ public class RouteFragment extends Fragment {
 
         fetchRoute(startAddress, endAddress);
     }
+
+    private String getToken() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        return sharedPref.getString("auth_token", null);
+    }
+
+    private void checkOngoingRideAndNavigate() {
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        api.getOngoingRide("Bearer " + getToken()).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    boolean hasOngoingRide = response.body();
+
+                    if (hasOngoingRide) {
+                        Toast.makeText(requireContext(),
+                                "You already have an ongoing ride!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        navigateToOrderRide();
+                    }
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to check ongoing ride",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Toast.makeText(requireContext(),
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     private void navigateToOrderRide() {
         String startAddress = startAddressInput.getText().toString().trim();

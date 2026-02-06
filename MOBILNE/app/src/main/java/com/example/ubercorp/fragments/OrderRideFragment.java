@@ -120,6 +120,9 @@ public class OrderRideFragment extends Fragment {
     private Calendar selectedDateTime;
     private Button btnFavorites;
 
+    private boolean isRouteConfirmed = false;
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -239,7 +242,10 @@ public class OrderRideFragment extends Fragment {
             }
 
             if (!fromLocation.isEmpty() && !toLocation.isEmpty()) {
-                fetchAndDrawRoute();
+                fetchAndDrawRoute(() -> {
+                    isRouteConfirmed = true;
+                    orderBtn.setEnabled(true);
+                });
             }
         }
     }
@@ -433,7 +439,6 @@ public class OrderRideFragment extends Fragment {
                 return;
             }
 
-            // Validate scheduled date/time
             if (!validateScheduledDateTime()) {
                 return;
             }
@@ -444,7 +449,10 @@ public class OrderRideFragment extends Fragment {
 
         updateLocationDisplay();
         toggleDropdown();
-        fetchAndDrawRoute();
+        fetchAndDrawRoute(() -> {
+            isRouteConfirmed = true;
+            orderBtn.setEnabled(true);
+        });
     }
 
     private void updateLocationDisplay() {
@@ -551,7 +559,7 @@ public class OrderRideFragment extends Fragment {
         toggleShareRide();
     }
 
-    private void fetchAndDrawRoute() {
+    private void fetchAndDrawRoute(Runnable onComplete) {
         new Thread(() -> {
             try {
                 startPoint = getCoordinatesFromAddress(fromLocation);
@@ -561,9 +569,7 @@ public class OrderRideFragment extends Fragment {
                 for (String stop : stops) {
                     if (!stop.isEmpty()) {
                         GeoPoint stopPoint = getCoordinatesFromAddress(stop);
-                        if (stopPoint != null) {
-                            stopPoints.add(stopPoint);
-                        }
+                        if (stopPoint != null) stopPoints.add(stopPoint);
                     }
                 }
 
@@ -586,13 +592,17 @@ public class OrderRideFragment extends Fragment {
                         } else {
                             Toast.makeText(requireContext(), "Unable to fetch route", Toast.LENGTH_SHORT).show();
                         }
+                        if (onComplete != null) onComplete.run();
                     });
+                } else {
+                    if (onComplete != null) requireActivity().runOnUiThread(onComplete);
                 }
             } catch (Exception e) {
                 Log.e("OrderRideFragment", "Error: " + e.getMessage(), e);
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Error fetching route", Toast.LENGTH_SHORT).show()
-                );
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Error fetching route", Toast.LENGTH_SHORT).show();
+                    if (onComplete != null) onComplete.run();
+                });
             }
         }).start();
     }
@@ -710,11 +720,7 @@ public class OrderRideFragment extends Fragment {
     }
 
     private void placeOrder() {
-        if (startPoint == null || endPoint == null) {
-            try {
-                startPoint = getCoordinatesFromAddress(fromLocationInput.getText().toString());
-                endPoint = getCoordinatesFromAddress(toLocationInput.getText().toString());
-            } catch (Exception ignored) {}
+        if (!isRouteConfirmed) {
             Toast.makeText(requireContext(), "Please confirm your route first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -724,10 +730,8 @@ public class OrderRideFragment extends Fragment {
             return;
         }
 
-        if (timeOption.equals("schedule")) {
-            if (!validateScheduledDateTime()) {
-                return;
-            }
+        if (timeOption.equals("schedule") && !validateScheduledDateTime()) {
+            return;
         }
 
         CreateRideDTO rideDTO = buildRideDTO();
@@ -739,15 +743,16 @@ public class OrderRideFragment extends Fragment {
         rideManager.createRide(rideDTO, new Callback<RideOrderResponseDTO>() {
             @Override
             public void onResponse(Call<RideOrderResponseDTO> call, Response<RideOrderResponseDTO> response) {
-                orderBtn.setEnabled(true);
-                orderBtn.setText("Order Ride");
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
 
                 if (response.code() == 201 && response.body() != null) {
-                    RideOrderResponseDTO orderResponse = response.body();
-                    showOrderConfirmation(orderResponse);
+                    showOrderConfirmation(response.body());
                 } else if (response.code() == 204) {
                     Toast.makeText(requireContext(),
-                            "No available drivers at the moment. Please try again later.",
+                            "No available drivers at the moment.",
                             Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(requireContext(),
@@ -758,13 +763,14 @@ public class OrderRideFragment extends Fragment {
 
             @Override
             public void onFailure(Call<RideOrderResponseDTO> call, Throwable t) {
-                orderBtn.setEnabled(true);
-                orderBtn.setText("Order Ride");
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
                 Log.e("OrderRideFragment", "Order failed: " + t.getMessage());
                 Toast.makeText(requireContext(), "Error creating ride: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
     }
 
     private void showOrderConfirmation(RideOrderResponseDTO response) {
@@ -901,6 +907,9 @@ public class OrderRideFragment extends Fragment {
                         estimatedDuration = routeManager.getEstimatedDuration();
 
                         calculatePrice();
+
+                        isRouteConfirmed = true;
+                        orderBtn.setEnabled(true);
                     } else {
                         Toast.makeText(requireContext(), "Unable to draw route", Toast.LENGTH_SHORT).show();
                     }

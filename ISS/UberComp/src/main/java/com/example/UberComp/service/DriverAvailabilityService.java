@@ -23,7 +23,7 @@ public class DriverAvailabilityService {
         resetIfNewDay(driver);
 
         if (active && driver.getTotalWorkMinutesToday() >= MAX_WORK_MINUTES_PER_DAY) {
-            throw new RuntimeException("Your job for today is finished.");
+            return;
         }
 
         if (active && driver.getStatus().equals(DriverStatus.OFFLINE)) {

@@ -85,7 +85,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_car)
+                .setSmallIcon(R.drawable.standard)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

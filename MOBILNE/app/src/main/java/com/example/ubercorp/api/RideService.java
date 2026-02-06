@@ -96,4 +96,7 @@ public interface RideService {
 
     @PUT("api/rides/panic")
     Call<FinishedRideDTO> panic(@Header("Authorization") String token, @Body StopRideDTO ride);
+
+    @GET("api/rides/ongoing")
+    Call<Boolean> getOngoingRide(@Header("Authorization") String token);
 }
