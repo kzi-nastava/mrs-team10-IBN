@@ -16,6 +16,8 @@ import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,11 +27,9 @@ import android.widget.Toast;
 
 import com.example.ubercorp.BuildConfig;
 import com.example.ubercorp.R;
-import com.example.ubercorp.api.ApiClient;
 import com.example.ubercorp.databinding.ActivityHomeBinding;
 import com.example.ubercorp.dto.AppNotificationDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
-import com.example.ubercorp.managers.MyNotificationManager;
 import com.example.ubercorp.managers.MyNotificationManager;
 import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.navigation.NavigationView;
@@ -44,6 +44,7 @@ public class HomeActivity extends AppCompatActivity
 
     private static final String TAG = "HomeActivity";
     private static final String CHANNEL_ID = "uber_notifications";
+    private static final String PANIC_ID = "uber_notifications_panic";
     private ActivityHomeBinding binding;
     private AppBarConfiguration mAppBarConfiguration;
     private DrawerLayout drawer;
@@ -107,6 +108,7 @@ public class HomeActivity extends AppCompatActivity
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Uber Notifications",
@@ -116,8 +118,29 @@ public class HomeActivity extends AppCompatActivity
             channel.enableVibration(true);
             channel.setShowBadge(true);
 
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/raw/youve-been-informed-345.mp3");
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+
+            channel.setSound(sound, audioAttributes);
+
+            NotificationChannel panic = new NotificationChannel(
+                    PANIC_ID,
+                    "Uber Panic Notifications",
+                    android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            panic.setDescription("Notifications for emergencies");
+            panic.enableVibration(true);
+            panic.setShowBadge(true);
+
+            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/raw/attention-required-127.mp3");
+            panic.setSound(panicSound, audioAttributes);
+
             systemNotificationManager = getSystemService(android.app.NotificationManager.class);
             systemNotificationManager.createNotificationChannel(channel);
+            systemNotificationManager.createNotificationChannel(panic);
         } else {
             systemNotificationManager = (android.app.NotificationManager)
                     getSystemService(NOTIFICATION_SERVICE);
@@ -205,7 +228,7 @@ public class HomeActivity extends AppCompatActivity
             } else if (id == R.id.incoming_ride) {
                 navController.navigate(R.id.incomingRideFragment);
             } else if (id == R.id.tracking_ride) {
-                navController.navigate(R.id.tracking_ride);
+                navController.navigate(R.id.trackingRouteFragment);
             } else if (id == R.id.notification) {
                 navController.navigate(R.id.notification);
             }
@@ -284,7 +307,9 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void showSystemNotification(String title, String content, boolean isHighPriority) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        String channelId = CHANNEL_ID;
+        if (title.equals("PANIC")) channelId = PANIC_ID;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(content)
@@ -295,7 +320,7 @@ public class HomeActivity extends AppCompatActivity
                 .setVibrate(new long[]{0, 500, 250, 500});
 
         if (isHighPriority) {
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+            //builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
             builder.setCategory(NotificationCompat.CATEGORY_CALL);
         }
 

@@ -39,7 +39,7 @@ export class IncomingRideComponent {
     const currentTime = new Date().toISOString();
     this.routeService.startRide(this.ride.id, currentTime).subscribe({
       next: () => {
-        this.router.navigate([`/tracking-route/${this.ride.id}`]);
+        this.router.navigate([`/tracking-route/${this.ride.token}`]);
       },
       error: (err) => console.error('Error starting ride:', err),
     });

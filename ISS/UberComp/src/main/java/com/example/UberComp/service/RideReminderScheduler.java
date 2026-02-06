@@ -33,13 +33,13 @@ public class RideReminderScheduler {
             LocalDateTime scheduled = ride.getScheduled();
             long secondsUntilRide = ChronoUnit.SECONDS.between(now, scheduled);
 
-            checkAndSend(ride, secondsUntilRide, 15 * 60, 20, ride.isReminder15Sent(), 15L);
-            checkAndSend(ride, secondsUntilRide, 10 * 60, 20, ride.isReminder10Sent(), 10L);
-            checkAndSend(ride, secondsUntilRide, 5 * 60, 20, ride.isReminder5Sent(), 5L);
+            checkAndSend(ride, secondsUntilRide, 15 * 60, 20, ride.getReminder15Sent(), 15L);
+            checkAndSend(ride, secondsUntilRide, 10 * 60, 20, ride.getReminder10Sent(), 10L);
+            checkAndSend(ride, secondsUntilRide, 5 * 60, 20, ride.getReminder5Sent(), 5L);
 
             long seconds = ChronoUnit.SECONDS.between(now, ride.getDriverShouldLeaveAt());
 
-            if (!ride.isDriverNotified() && Math.abs(seconds) <= 30) {
+            if (!ride.getDriverNotified() && Math.abs(seconds) <= 30) {
                 updateDriverNotificationStatus(ride);
                 notificationService.sendSignalToFrontend(ride.getDriver());
             }

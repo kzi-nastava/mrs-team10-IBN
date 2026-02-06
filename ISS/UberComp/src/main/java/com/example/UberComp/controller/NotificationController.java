@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
@@ -28,11 +29,5 @@ public class NotificationController {
         Account account = (Account) auth.getPrincipal();
         List<Notification> notifs = notificationService.getNotifsForUser(account.getUser());
         return ResponseEntity.ok(notifs);
-    }
-
-    @MessageMapping("/panic") // activates on /ws/panic
-    public void broadcastPanicNotification(NotificationDTO rawNotif) {
-        Notification notification = notificationService.broadcastToAdmins(rawNotif);
-        notificationService.sendToAllAdmins(notification);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.dto.NotificationDTO;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.dto.ride.*;
@@ -215,13 +216,16 @@ public class RideService {
         newStations.add(savedCoord);
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
-        Instant instant = Instant.parse(stopRideDTO.getFinishTime());
-        ride.setFinish(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
+        LocalDateTime finish = LocalDateTime.parse(stopRideDTO.getFinishTime());
+        ride.setFinish(finish);
         Driver driver = ride.getDriver();
         if(panic) {
             PanicSignal panicSignal = new PanicSignal();
             panicSignal.setRide(ride);
             panicSignalRepository.save(panicSignal);
+            String panicContent = String.format("Emergency in %s", stopRideDTO.getAddress());
+            NotificationDTO notif = new NotificationDTO("PANIC", panicContent);
+            notificationService.broadcastToAdmins(notif);
             ride.setStatus(RideStatus.Panic);
             ride.setPrice(0.0);
             driver.setStatus(DriverStatus.PANIC);
@@ -244,8 +248,11 @@ public class RideService {
     public StartedRideDTO startRide(Long id, RideMomentDTO start) {
         Ride started = rideRepository.findById(id).orElseThrow();
         started.setStatus(RideStatus.Ongoing);
-        Instant instant = Instant.parse(start.getIsotime());
-        started.setStart(LocalDateTime.ofInstant(instant, ZoneId.systemDefault()));
+        LocalDateTime now = LocalDateTime.ofInstant(Instant.parse(start.getIsotime()), ZoneId.systemDefault());
+        Duration startDelta = Duration.between(started.getStart(), now);
+        LocalDateTime eta = started.getEstimatedTimeArrival().plus(startDelta);
+        started.setEstimatedTimeArrival(eta);
+        started.setStart(now);
         rideRepository.save(started);
         return new StartedRideDTO(started.getId(), started.getStart());
     }

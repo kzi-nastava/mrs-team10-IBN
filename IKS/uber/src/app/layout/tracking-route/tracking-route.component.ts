@@ -108,11 +108,6 @@ export class TrackingRouteComponent {
     if (eventData.status == 'Finished') {
       this.router.navigate(['/home']);
     } else if (eventData.status == 'Panic') {
-      const notif: AppNotificationDTO = {
-        title: 'PANIC',
-        content: `Emergency in ${this.currentLocation?.address}`,
-      };
-      this.webSocketService.sendPanic(notif);
       this.subtitleText =
         'Panic signal has been broadcast. Help is on the way. Please remain calm.';
       this.cdr.detectChanges();
@@ -156,10 +151,6 @@ export class TrackingRouteComponent {
       .panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
       .subscribe({
         next: (res) => {
-          const notif: AppNotificationDTO = {
-            title: 'PANIC',
-            content: `Emergency in ${this.currentLocation?.address}`,
-          };
           this.subtitleText =
             'Panic signal has been broadcast. Help is on the way. Please remain calm.';
           this.cdr.detectChanges();

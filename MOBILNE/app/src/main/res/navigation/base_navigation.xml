@@ -94,8 +94,12 @@
     <fragment
         android:id="@+id/trackingRouteFragment"
         android:name="com.example.ubercorp.fragments.TrackingRouteFragment"
-        tools:layout="@layout/fragment_tracking_route"
-        />
+        tools:layout="@layout/fragment_tracking_route">
+        <!-- promeniti kada dodamo home screen za vozače -->
+        <action
+            android:id="@+id/action_trackingRouteFragment_to_routeFragment"
+            app:destination="@id/routeFragment"/>
+    </fragment>
 
     <fragment
         android:id="@+id/routeFragment"
