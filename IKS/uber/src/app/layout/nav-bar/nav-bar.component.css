@@ -178,3 +178,8 @@ mat-sidenav-container {
   background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
   color: white;
 }
+
+.panic-message{
+  background: linear-gradient(135deg, #9e0b00 0%, #ff0000 100%);
+  color: white;
+}

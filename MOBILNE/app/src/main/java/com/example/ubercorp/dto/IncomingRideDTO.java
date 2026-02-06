@@ -3,6 +3,7 @@ package com.example.ubercorp.dto;
 public class IncomingRideDTO {
     private Long id;
     private RouteDTO route;
+    private String token;
 
     public Long getId() {
         return id;
@@ -18,5 +19,13 @@ public class IncomingRideDTO {
 
     public void setRoute(RouteDTO route) {
         this.route = route;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

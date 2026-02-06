@@ -104,7 +104,7 @@ public class EmailUtils {
                 "</html>";
         String subject = "UberComp Account Verification";
         try {
-            sendMail(account.getEmail(), subject, body);
+            sendMail("cvorovicniksa@gmail.com", subject, body);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -164,7 +164,7 @@ public class EmailUtils {
 
         String subject = "UberComp Account Set Password";
         try {
-            sendMail(token.getAccount().getEmail(), subject, body);
+            sendMail("cvorovicniksa@gmail.com", subject, body);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

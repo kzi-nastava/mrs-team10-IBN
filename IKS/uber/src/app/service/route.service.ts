@@ -73,6 +73,7 @@ export interface RidePayload {
   route: Route;
   startTime?: Date;
   endTime?: Date;
+  token: string;
 }
 
 export interface RideCancellation {

@@ -1,5 +1,7 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.VISIBLE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
@@ -66,6 +68,7 @@ public class RideHistoryFragment extends Fragment implements SensorEventListener
         String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
         if(role.equals("administrator")){
             Spinner spinner = binding.sortSpinner;
+            spinner.setVisibility(VISIBLE);
             ArrayList<SpinnerItem> spinnerOptions = new ArrayList<>();
             spinnerOptions.add(new SpinnerItem("Start (descending)", "start-desc"));
             spinnerOptions.add(new SpinnerItem("Start (ascending)", "start-asc"));

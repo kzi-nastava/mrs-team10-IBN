@@ -16,6 +16,8 @@ import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +33,6 @@ import com.example.ubercorp.api.FcmService;
 import com.example.ubercorp.databinding.ActivityHomeBinding;
 import com.example.ubercorp.dto.AppNotificationDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
-import com.example.ubercorp.managers.MyNotificationManager;
 import com.example.ubercorp.managers.MyNotificationManager;
 import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.navigation.NavigationView;
@@ -50,6 +51,7 @@ public class HomeActivity extends AppCompatActivity
 
     private static final String TAG = "HomeActivity";
     private static final String CHANNEL_ID = "uber_notifications";
+    private static final String PANIC_ID = "uber_notifications_panic";
     private ActivityHomeBinding binding;
     private AppBarConfiguration mAppBarConfiguration;
     private DrawerLayout drawer;
@@ -140,6 +142,7 @@ public class HomeActivity extends AppCompatActivity
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Uber Notifications",
@@ -149,8 +152,29 @@ public class HomeActivity extends AppCompatActivity
             channel.enableVibration(true);
             channel.setShowBadge(true);
 
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.youve_been_informed_345);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+
+            channel.setSound(sound, audioAttributes);
+
+            NotificationChannel panic = new NotificationChannel(
+                    PANIC_ID,
+                    "Uber Panic Notifications",
+                    android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            panic.setDescription("Notifications for emergencies");
+            panic.enableVibration(true);
+            panic.setShowBadge(true);
+
+            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.attention_required_127);
+            panic.setSound(panicSound, audioAttributes);
+
             systemNotificationManager = getSystemService(android.app.NotificationManager.class);
             systemNotificationManager.createNotificationChannel(channel);
+            systemNotificationManager.createNotificationChannel(panic);
         } else {
             systemNotificationManager = (android.app.NotificationManager)
                     getSystemService(NOTIFICATION_SERVICE);
@@ -368,6 +392,10 @@ public class HomeActivity extends AppCompatActivity
 
     private void showSystemNotification(String title, String content, boolean isHighPriority, Bundle bundle, Long notificationId) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+    private void showSystemNotification(String title, String content, boolean isHighPriority) {
+        String channelId = CHANNEL_ID;
+        if (title.equals("PANIC")) channelId = PANIC_ID;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(content)
@@ -380,7 +408,7 @@ public class HomeActivity extends AppCompatActivity
                 .setNumber(1);
 
         if (isHighPriority) {
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+            //builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
             builder.setCategory(NotificationCompat.CATEGORY_CALL);
         }
 

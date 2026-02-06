@@ -26,7 +26,6 @@ import ua.naiksoftware.stomp.dto.StompHeader;
 public class MyNotificationManager {
     private static final String TAG = "NotificationManager";
     private static MyNotificationManager instance;
-
     private final Context context;
     private StompClient stompClient;
     private Gson gson;

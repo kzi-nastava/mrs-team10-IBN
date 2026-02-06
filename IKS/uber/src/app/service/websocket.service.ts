@@ -88,8 +88,4 @@ export class WebSocketService {
     const connected = this.stompClient?.connected || false;
     return connected;
   }
-
-  sendPanic(notif: AppNotificationDTO) {
-    this.stompClient?.send('/ws/panic', {}, JSON.stringify(notif));
-  }
 }

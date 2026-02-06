@@ -4,6 +4,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -18,6 +20,7 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "uber_fcm_notifications";
+    private static final String PANIC_ID = "Uber_fcm_notifications_panic";
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -86,13 +89,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.standard)
+        String channelId = CHANNEL_ID;
+        if(title.equals("PANIC")) channelId = PANIC_ID;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, PANIC_ID)
+                .setSmallIcon(R.drawable.ic_car)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setVibrate(new long[]{0, 500, 250, 500})
-                .setDefaults(NotificationCompat.DEFAULT_SOUND);
+                .setVibrate(new long[]{0, 500, 250, 500});
+                //.setDefaults(NotificationCompat.DEFAULT_SOUND);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -115,9 +122,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             channel.enableLights(true);
             channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.youve_been_informed_345);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+
+            channel.setSound(sound, audioAttributes);
+
+            NotificationChannel panic = new NotificationChannel(
+                    PANIC_ID,
+                    "Uber FCM Panic Notifications",
+                    android.app.NotificationManager.IMPORTANCE_HIGH
+            );
+            panic.setDescription("Notifications for emergencies");
+            panic.enableVibration(true);
+            panic.setShowBadge(true);
+            channel.enableLights(true);
+            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.attention_required_127);
+            panic.setSound(panicSound, audioAttributes);
+
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
+                manager.createNotificationChannel(panic);
             }
         }
     }

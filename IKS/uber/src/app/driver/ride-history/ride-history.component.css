@@ -17,7 +17,7 @@ div.date-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 5vh;
+  height: 15vh;
   gap: 5%;
   z-index: 1;
   padding: 1rem 0;
