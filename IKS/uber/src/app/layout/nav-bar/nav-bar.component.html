@@ -3,21 +3,11 @@
     <mat-icon style="color: antiquewhite">menu</mat-icon>
   </button>
   <img class="nav-logo" src="logo.svg" [routerLink]="['/home']" />
-  @if(!loggedIn){
-    <button
-      class="form-button-one"
-      [routerLink]="['/login']"
-    >
-      Login
-    </button>
-    <button
-      class="form-button-two"
-      [routerLink]="['/register']"
-    >
-      Register
-    </button>
+  @if (!loggedIn) {
+    <button class="form-button-one" [routerLink]="['/login']">Login</button>
+    <button class="form-button-two" [routerLink]="['/register']">Register</button>
+  } @else {
     <span class="example-spacer"></span>
-  
     <div class="notification">
       <mat-icon [routerLink]="['/notifications']">notifications</mat-icon>
     </div>

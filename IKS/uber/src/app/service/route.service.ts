@@ -62,7 +62,7 @@ export class RouteService {
       lon: location.lon,
       address: location.address,
       distance: 0,
-      finishTime: time.replace('z', ''),
+      finishTime: time.replace('Z', ''),
     };
     return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
