@@ -86,6 +86,7 @@ public class AccountFragment extends Fragment implements
     private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
     private TextInputEditText etCurrentPassword, etNewPassword, etConfirmPassword;
     private TextView tvReq1, tvReq2, tvReq3;
+    private String existingImage;
 
     // Vehicle Edit
     private TextView tvVehicleModel, tvVehiclePlate;
@@ -206,8 +207,11 @@ public class AccountFragment extends Fragment implements
             displayVehicleInfo(driver.getVehicleDTO());
         }
         if (driver.getUptime() != null) {
-            updateDriverHours(driver.getUptime() / 60.0f);
+            float hours = driver.getUptime() / 60f;
+            float roundedHours = Math.round(hours * 10f) / 10f;
+            updateDriverHours(roundedHours);
         }
+
     }
 
     @Override
@@ -231,8 +235,10 @@ public class AccountFragment extends Fragment implements
             if (etPhone != null) etPhone.setText(user.getPhone());
             if (etAddress != null) etAddress.setText(user.getHomeAddress());
             if (user.getImage() != null && !user.getImage().isEmpty()) {
+                existingImage = user.getImage();
                 ImageHelper.setProfileImage(user.getImage(), ivProfilePic);
             }
+
         }
 
         if (account != null && account.getEmail() != null) {
@@ -438,8 +444,8 @@ public class AccountFragment extends Fragment implements
                 "Platform Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuRequests), "📥",
                 "Requests", "Manage change requests", true);
-        setupMenuItem(view.findViewById(R.id.menuManageUsers), "👥",
-                "Manage Users", "Add or remove users", true);
+        setupMenuItem(view.findViewById(R.id.menuManageUsers), "🚗",
+                "Register driver", "Add new drivers", true);
         setupMenuItem(view.findViewById(R.id.menuChangePassword), "🔑",
                 "Change Password", "Update your password", false);
         setupMenuItem(view.findViewById(R.id.menuFavorites), "❤️",
@@ -473,7 +479,7 @@ public class AccountFragment extends Fragment implements
 
     private void navigateToManageUsers() {
         Navigation.findNavController(requireView())
-                .navigate(R.id.manageUsersFragment);
+                .navigate(R.id.action_account_to_driver_registration);
     }
 
     private void navigateToVehiclePrices(){
@@ -564,7 +570,9 @@ public class AccountFragment extends Fragment implements
             return;
         }
 
-        String imageToSend = currentBase64Image.isEmpty() ? "" : currentBase64Image;
+        String imageToSend = currentBase64Image.isEmpty()
+                ? existingImage
+                : currentBase64Image;
 
         CreateUserDTO updateDTO = new CreateUserDTO(
                 firstName,
@@ -669,11 +677,19 @@ public class AccountFragment extends Fragment implements
         currentVehicle = updatedVehicle;
     }
 
+    private static final float MAX_HOURS_PER_DAY = 8f;
+
     private void updateDriverHours(float hoursWorked) {
-        driverProgress.setMax(8);
-        driverProgress.setProgress((int) hoursWorked);
-        tvDrivingHoursProgress.setText(String.format("%.1f / 8 hours", hoursWorked));
+        driverProgress.setMax(100);
+
+        float progressPercent = (hoursWorked / MAX_HOURS_PER_DAY) * 100f;
+        driverProgress.setProgress((int) progressPercent);
+
+        tvDrivingHoursProgress.setText(
+                String.format("%.1f / %.0f hours", hoursWorked, MAX_HOURS_PER_DAY)
+        );
     }
+
 
     private void startFlyingTaxiAnimation() {
         for (int i = 0; i < 10; i++) {

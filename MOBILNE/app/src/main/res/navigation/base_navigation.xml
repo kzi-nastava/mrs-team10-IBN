@@ -39,17 +39,7 @@
             android:id="@+id/action_account_to_changeRequests"
             app:destination="@id/changeRequestsFragment"/>
         <action
-            android:id="@+id/action_account_to_manageUsers"
-            app:destination="@id/manageUsersFragment"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/manageUsersFragment"
-        android:name="com.example.ubercorp.fragments.ManageUsersFragment"
-        tools:layout="@layout/fragment_manage_users">
-
-        <action
-            android:id="@+id/action_manageUsers_to_driverRegistration"
+            android:id="@+id/action_account_to_driver_registration"
             app:destination="@id/registerDriverFragment"/>
     </fragment>
 

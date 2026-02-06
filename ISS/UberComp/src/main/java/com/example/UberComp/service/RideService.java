@@ -215,8 +215,8 @@ public class RideService {
         newStations.add(savedCoord);
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
-        Instant instant = Instant.parse(stopRideDTO.getFinishTime());
-        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());
+        LocalDateTime now = LocalDateTime.parse(stopRideDTO.getFinishTime());
+        ride.setFinish(now);
         Driver driver = ride.getDriver();
         if(panic) {
             PanicSignal panicSignal = new PanicSignal();
