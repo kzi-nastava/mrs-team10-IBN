@@ -8,9 +8,11 @@ import lombok.Data;
 public class IncomingRideDTO {
     private Long id;
     private Route route;
+    private String token;
 
     public IncomingRideDTO(Ride ride){
         this.id = ride.getId();
         this.route = ride.getRoute();
+        this.token = ride.getTrackingToken();
     }
 }

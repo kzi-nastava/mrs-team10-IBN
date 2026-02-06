@@ -17,18 +17,18 @@ public class ScheduledRide extends Ride {
     private LocalDateTime scheduled;
 
     @Column
-    private boolean reminder15Sent = false;
+    private Boolean reminder15Sent = false;
 
     @Column
-    private boolean reminder10Sent = false;
+    private Boolean reminder10Sent = false;
 
     @Column
-    private boolean reminder5Sent = false;
+    private Boolean reminder5Sent = false;
 
     @Column
     private LocalDateTime driverShouldLeaveAt;
 
     @Column
-    private boolean driverNotified = false;
+    private Boolean driverNotified = false;
 }
 

@@ -1137,4 +1137,13 @@ public class DriverService {
     public void cleanExpiredCache() {
         travelTimeCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void resetPanicStatus(){
+        List<Driver> panickedDrivers = driverRepository.findByStatus(DriverStatus.PANIC);
+        for(Driver d : panickedDrivers){
+            d.setStatus(DriverStatus.OFFLINE);
+            driverRepository.save(d);
+        }
+    }
 }

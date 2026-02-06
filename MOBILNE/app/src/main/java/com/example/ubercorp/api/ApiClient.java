@@ -1,8 +1,11 @@
 package com.example.ubercorp.api;
 
 import com.example.ubercorp.BuildConfig;
+import com.example.ubercorp.utils.LocalDateTimeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.time.LocalDateTime;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -18,6 +21,7 @@ public class ApiClient {
                 .build();
 
         Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
                 .create();
 

@@ -43,7 +43,8 @@
         android:layout_height="wrap_content"
         android:padding="12dp"
         android:text="Sort By"
-        android:tooltipText="Sort By"/>
+        android:tooltipText="Sort By"
+        android:visibility="gone"/>
 
     <FrameLayout
         android:id="@+id/scroll_rides_list"
