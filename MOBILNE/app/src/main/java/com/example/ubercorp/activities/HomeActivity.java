@@ -118,7 +118,7 @@ public class HomeActivity extends AppCompatActivity
             channel.enableVibration(true);
             channel.setShowBadge(true);
 
-            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/raw/youve-been-informed-345.mp3");
+            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.youve_been_informed_345);
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -135,7 +135,7 @@ public class HomeActivity extends AppCompatActivity
             panic.enableVibration(true);
             panic.setShowBadge(true);
 
-            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/raw/attention-required-127.mp3");
+            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.attention_required_127);
             panic.setSound(panicSound, audioAttributes);
 
             systemNotificationManager = getSystemService(android.app.NotificationManager.class);

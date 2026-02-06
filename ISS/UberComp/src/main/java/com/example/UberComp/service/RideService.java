@@ -211,13 +211,12 @@ public class RideService {
         newCoordinate.setLon(stopRideDTO.getLon());
         newCoordinate.setAddress(stopRideDTO.getAddress());
         Coordinate savedCoord = saveOrGetCoordinate(newCoordinate);
-
         List<Coordinate> newStations = ride.getRoute().getStations().subList(0, stopRideDTO.getPassed());
         newStations.add(savedCoord);
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
-        LocalDateTime finish = LocalDateTime.parse(stopRideDTO.getFinishTime());
-        ride.setFinish(finish);
+        Instant instant = Instant.parse(stopRideDTO.getFinishTime());
+        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());
         Driver driver = ride.getDriver();
         if(panic) {
             PanicSignal panicSignal = new PanicSignal();
