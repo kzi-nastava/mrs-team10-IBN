@@ -50,8 +50,8 @@ public class HomeActivity extends AppCompatActivity
         implements MyNotificationManager.NotificationListener {
 
     private static final String TAG = "HomeActivity";
-    private static final String CHANNEL_ID = "uber_notifications";
-    private static final String PANIC_ID = "uber_notifications_panic";
+    private static final String CHANNEL_ID = "uber_fcm_notifications";
+    private static final String PANIC_ID = "uber_fcm_notifications_panic";
     private ActivityHomeBinding binding;
     private AppBarConfiguration mAppBarConfiguration;
     private DrawerLayout drawer;
@@ -391,10 +391,12 @@ public class HomeActivity extends AppCompatActivity
     }
 
     private void showSystemNotification(String title, String content, boolean isHighPriority, Bundle bundle, Long notificationId) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-    private void showSystemNotification(String title, String content, boolean isHighPriority) {
         String channelId = CHANNEL_ID;
-        if (title.equals("PANIC")) channelId = PANIC_ID;
+
+        if (title != null && title.equals("PANIC")) {
+            channelId = PANIC_ID;
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
@@ -408,7 +410,6 @@ public class HomeActivity extends AppCompatActivity
                 .setNumber(1);
 
         if (isHighPriority) {
-            //builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
             builder.setCategory(NotificationCompat.CATEGORY_CALL);
         }
 
@@ -432,7 +433,6 @@ public class HomeActivity extends AppCompatActivity
             systemNotificationManager.notify(notificationId.intValue(), builder.build());
         }
     }
-
 
     private void showLogoutDialog() {
         drawer.closeDrawers();

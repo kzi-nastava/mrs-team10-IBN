@@ -17,16 +17,18 @@ import com.example.ubercorp.activities.HomeActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Map;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "uber_fcm_notifications";
-    private static final String PANIC_ID = "Uber_fcm_notifications_panic";
+    private static final String PANIC_ID = "uber_fcm_notifications_panic";
 
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(TAG, "New FCM token: " + token);
-
         sendTokenToServer(token);
     }
 
@@ -34,48 +36,46 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        if (remoteMessage.getNotification() != null) {
+        createNotificationChannels();
 
-            String title = remoteMessage.getNotification().getTitle();
-            String body = remoteMessage.getNotification().getBody();
+        if (!remoteMessage.getData().isEmpty()) {
+            Map<String, String> data = remoteMessage.getData();
 
-            showNotification(title, body);
-        }
+            String type = data.get("type");
+            String title = data.get("title");
+            String body = data.get("body");
 
-        if (remoteMessage.getData().size() > 0) {
-
-            String type = remoteMessage.getData().get("type");
-
-            if ("ride".equals(type)) {
-                handleRideNotification(remoteMessage.getData());
+            if ("panic".equalsIgnoreCase(type)) {
+                showNotification(title, body, true);
+            } else if ("ride".equals(type)) {
+                handleRideNotification(data);
             } else {
-                if (remoteMessage.getNotification() == null) {
-                    String title = remoteMessage.getData().get("title");
-                    String content = remoteMessage.getData().get("content");
-                    showNotification(title, content);
-                }
+                showNotification(title, body, false);
             }
         }
+        else if (remoteMessage.getNotification() != null) {
+            showNotification(
+                    remoteMessage.getNotification().getTitle(),
+                    remoteMessage.getNotification().getBody(),
+                    false
+            );
+        }
+
+        Log.d(TAG, "=== End FCM Message ===");
     }
 
-    private void handleRideNotification(java.util.Map<String, String> data) {
-        String title = data.get("title");
-        String body = data.get("body");
-        String pickupLocation = data.get("pickupLocation");
+    private void handleRideNotification(Map<String, String> data) {
+        String title = data.getOrDefault("title", "New Ride Request");
+        String body = data.getOrDefault("body", "You have a new ride");
 
-        showNotification(title != null ? title : "New Ride Request",
-                body != null ? body : "Pickup: " + pickupLocation);
+        showNotification(title, body, false);
     }
 
-    private void handleRegularNotification(java.util.Map<String, String> data) {
-        String title = data.get("title");
-        String content = data.get("content");
-
-        showNotification(title, content);
-    }
-
-    private void showNotification(String title, String message) {
-        createNotificationChannel();
+    private void showNotification(String title, String message, boolean isPanic) {
+        Log.d(TAG, "showNotification called:");
+        Log.d(TAG, "  Title: " + title);
+        Log.d(TAG, "  Message: " + message);
+        Log.d(TAG, "  isPanic: " + isPanic);
 
         Intent intent = new Intent(this, HomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -87,19 +87,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_IMMUTABLE
         );
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        String channelId = isPanic ? PANIC_ID : CHANNEL_ID;
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.standard)
-        String channelId = CHANNEL_ID;
-        if(title.equals("PANIC")) channelId = PANIC_ID;
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, PANIC_ID)
-                .setSmallIcon(R.drawable.ic_car)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setVibrate(new long[]{0, 500, 250, 500});
-                //.setDefaults(NotificationCompat.DEFAULT_SOUND);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -109,79 +106,91 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Uber FCM Notifications",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setDescription("Push notifications for rides and updates");
-            channel.enableVibration(true);
-            channel.setShowBadge(true);
-            channel.enableLights(true);
-            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+    private void createNotificationChannels() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
 
-            Uri sound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.youve_been_informed_345);
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build();
 
-            channel.setSound(sound, audioAttributes);
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build();
 
-            NotificationChannel panic = new NotificationChannel(
-                    PANIC_ID,
-                    "Uber FCM Panic Notifications",
-                    android.app.NotificationManager.IMPORTANCE_HIGH
-            );
-            panic.setDescription("Notifications for emergencies");
-            panic.enableVibration(true);
-            panic.setShowBadge(true);
-            channel.enableLights(true);
-            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        Uri normalSound = Uri.parse(
+                "android.resource://" + getPackageName() + "/" + R.raw.youve_been_informed_345
+        );
 
-            Uri panicSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.attention_required_127);
-            panic.setSound(panicSound, audioAttributes);
 
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-                manager.createNotificationChannel(panic);
-            }
+        NotificationChannel normalChannel = new NotificationChannel(
+                CHANNEL_ID,
+                "Uber Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        normalChannel.setDescription("Regular notifications");
+        normalChannel.enableVibration(true);
+        normalChannel.enableLights(true);
+        normalChannel.setShowBadge(true);
+        normalChannel.setSound(normalSound, audioAttributes);
+        normalChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+        Uri panicSound = Uri.parse(
+                "android.resource://" + getPackageName() + "/" + R.raw.attention_required_127
+        );
+
+        NotificationChannel panicChannel = new NotificationChannel(
+                PANIC_ID,
+                "Uber Panic Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        panicChannel.setDescription("Emergency notifications");
+        panicChannel.enableVibration(true);
+        panicChannel.enableLights(true);
+        panicChannel.setShowBadge(true);
+        panicChannel.setSound(panicSound, audioAttributes);
+        panicChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager != null) {
+            manager.createNotificationChannel(normalChannel);
+            manager.createNotificationChannel(panicChannel);
         }
     }
 
     private void sendTokenToServer(String token) {
         android.content.SharedPreferences sharedPref =
                 getSharedPreferences("uber_corp", MODE_PRIVATE);
+
         String authToken = sharedPref.getString("auth_token", null);
+        if (authToken == null) return;
 
-        if (authToken != null) {
-            com.example.ubercorp.api.ApiClient apiClient =
-                    com.example.ubercorp.api.ApiClient.getInstance();
-            com.example.ubercorp.api.FcmService fcmService =
-                    apiClient.createService(com.example.ubercorp.api.FcmService.class);
+        com.example.ubercorp.api.ApiClient apiClient =
+                com.example.ubercorp.api.ApiClient.getInstance();
 
-            com.example.ubercorp.dto.FcmTokenDTO dto =
-                    new com.example.ubercorp.dto.FcmTokenDTO(token);
+        com.example.ubercorp.api.FcmService fcmService =
+                apiClient.createService(com.example.ubercorp.api.FcmService.class);
 
-            retrofit2.Call<Void> call = fcmService.updateFcmToken("Bearer " + authToken, dto);
-            call.enqueue(new retrofit2.Callback<Void>() {
-                @Override
-                public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
-                    if (response.isSuccessful()) {
-                        Log.d(TAG, "FCM token sent to server successfully");
-                    } else {
-                        Log.e(TAG, "Failed to send FCM token: " + response.code());
-                    }
+        com.example.ubercorp.dto.FcmTokenDTO dto =
+                new com.example.ubercorp.dto.FcmTokenDTO(token);
+
+        retrofit2.Call<Void> call =
+                fcmService.updateFcmToken("Bearer " + authToken, dto);
+
+        call.enqueue(new retrofit2.Callback<Void>() {
+            @Override
+            public void onResponse(retrofit2.Call<Void> call,
+                                   retrofit2.Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "FCM token sent successfully");
+                } else {
+                    Log.e(TAG, "Failed to send FCM token: " + response.code());
                 }
+            }
 
-                @Override
-                public void onFailure(retrofit2.Call<Void> call, Throwable t) {
-                    Log.e(TAG, "Error sending FCM token", t);
-                }
-            });
-        }
+            @Override
+            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                Log.e(TAG, "Error sending FCM token", t);
+            }
+        });
     }
 }

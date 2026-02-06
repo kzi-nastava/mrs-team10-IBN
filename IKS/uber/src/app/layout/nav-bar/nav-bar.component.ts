@@ -54,7 +54,7 @@ export class NavBarComponent implements OnInit {
   ngOnInit(): void {
     this.webSocketService.newNotification$.subscribe((notif: AppNotification) => {
       console.log(notif);
-      if(notif.title === "PANIC") this.showPanic(notif.content);
+      if (notif.title.toLocaleUpperCase() === 'PANIC') this.showPanic(notif.content);
       else this.showSuccess(notif.content);
     });
   }
@@ -66,15 +66,15 @@ export class NavBarComponent implements OnInit {
   }
 
   showSuccess(message: string) {
-    var audio = new Audio("youve-been-informed-345.mp3")
+    var audio = new Audio('youve-been-informed-345.mp3');
     audio.play();
     this.successMessage.set(message);
     this.errorMessage.set(null);
     setTimeout(() => this.successMessage.set(null), 10000);
   }
 
-  showPanic(message: string){
-    var audio = new Audio("attention-required-127.mp3")
+  showPanic(message: string) {
+    var audio = new Audio('attention-required-127.mp3');
     audio.play();
     this.panicMessage.set(message);
     setTimeout(() => this.panicMessage.set(null), 10000);
