@@ -1,3 +1,5 @@
+import { User } from './user.model';
+
 export interface ChatMessage {
   content: string;
   chatRoom: number;
@@ -9,4 +11,9 @@ export interface ChatRoom {
   currentUserEmail: string;
   receiver: number;
   messages: ChatMessage[];
+}
+
+export interface ChatInbox {
+  chatRoom: number;
+  user: User;
 }

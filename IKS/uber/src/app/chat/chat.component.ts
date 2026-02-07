@@ -7,6 +7,7 @@ import { ChatRoom } from '../model/chat-message.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../service/auth.service';
+import { NavBarComponent } from '../layout/nav-bar/nav-bar.component';
 
 @Component({
   selector: 'app-chat',

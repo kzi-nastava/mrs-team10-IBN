@@ -33,11 +33,18 @@
 
     <div class="separator"></div>
 
-    <div class="item" [routerLink]="['/chat']">
-      <mat-icon>chat_bubble</mat-icon>
-      <span>Chat support</span>
-    </div>
-
+    @if (role == 'administrator') {
+      <div class="item" [routerLink]="['/admin-chat']">
+        <mat-icon>chat_bubble</mat-icon>
+        <span>Chat support</span>
+      </div>
+    }
+    @if (role == 'driver' || role == 'passenger') {
+      <div class="item" [routerLink]="['/chat']">
+        <mat-icon>chat_bubble</mat-icon>
+        <span>Chat support</span>
+      </div>
+    }
     <div class="separator"></div>
 
     <div class="item" [routerLink]="['/ride-history']">

@@ -12,8 +12,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -62,8 +60,6 @@ public class ChatService {
                 sender.getAccount().getEmail(),
                 sender.getId()
         );
-
-        List<User> admins = userRepository.findAllByRole(AccountType.ADMINISTRATOR);
 
         if (account.getAccountType() == AccountType.ADMINISTRATOR) {
             sendToUser(room.getUser().getAccount().getEmail(), wsMessage);

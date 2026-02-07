@@ -8,6 +8,7 @@
 
 .chat-background {
   position: absolute;
+  overflow: hidden;
   inset: 0;
   background-image: url('../../../public/chat.png');
   background-size: cover;
@@ -58,7 +59,7 @@
   display: flex;
   padding: 12px;
   gap: 10px;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .chat-input input {
@@ -71,13 +72,13 @@
 }
 
 .chat-input button {
-  padding: 10px 18px;
   border-radius: 20px;
   border: none;
   cursor: pointer;
   background-color: #4caf50;
   color: white;
   font-weight: bold;
+  text-align: center;
 }
 
 .chat-input button:hover {
