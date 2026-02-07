@@ -1,7 +1,9 @@
 package com.example.UberComp.service;
 
-import com.example.UberComp.dto.ChatMessageDTO;
-import com.example.UberComp.dto.ChatRoomDTO;
+import com.example.UberComp.dto.account.UserDTO;
+import com.example.UberComp.dto.chat.ChatInboxDTO;
+import com.example.UberComp.dto.chat.ChatMessageDTO;
+import com.example.UberComp.dto.chat.ChatRoomDTO;
 import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.ChatRepository;
@@ -11,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,6 +46,29 @@ public class ChatService {
         return new ChatRoomDTO(room.getId(), room.getUser().getAccount().getEmail(), room.getUser().getId(), messages);
     }
 
+    public ChatRoomDTO getChatRoomAdmin(Long id){
+        ChatRoom room = roomRepository.findChatRoomById(id);
+        List<ChatMessageDTO> messages = chatRepository.findChatMessagesByChatRoom_Id(room.getId())
+                .stream()
+                .map(m -> new ChatMessageDTO(
+                        m.getContent(),
+                        room.getId(),
+                        m.getSender().getAccount().getEmail(),
+                        m.getSender().getId()
+                ))
+                .toList();
+
+        return new ChatRoomDTO(room.getId(), room.getUser().getAccount().getEmail(), room.getUser().getId(), messages);
+    }
+
+    public List<ChatInboxDTO> getAllChatRooms(){
+        List<ChatRoom> rooms = roomRepository.findAll();
+        List<ChatInboxDTO> inbox = new ArrayList<>();
+        for (ChatRoom room: rooms)
+            inbox.add(new ChatInboxDTO(room.getId(), new UserDTO(room.getUser())));
+        return inbox;
+    }
+
     public void saveAndSend(ChatMessageDTO messageDTO, Account account) {
         ChatMessage chatMessage = new ChatMessage();
         User sender = userRepository.findById(account.getUser().getId()).orElseThrow();
@@ -53,7 +79,6 @@ public class ChatService {
         chatMessage.setChatRoom(room);
         chatRepository.save(chatMessage);
 
-        // Prepare DTO for WebSocket
         ChatMessageDTO wsMessage = new ChatMessageDTO(
                 chatMessage.getContent(),
                 room.getId(),

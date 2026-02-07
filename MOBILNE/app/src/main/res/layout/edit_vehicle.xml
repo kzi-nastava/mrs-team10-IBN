@@ -3,8 +3,8 @@
     android:id="@+id/editVehicleCard"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginStart="20dp"
-    android:layout_marginEnd="20dp"
+    android:layout_marginStart="18dp"
+    android:layout_marginEnd="18dp"
     android:layout_marginTop="180dp"
     app:cardCornerRadius="20dp"
     app:cardElevation="8dp"
@@ -30,16 +30,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginBottom="5dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="My Vehicle Information"
-                android:layout_marginLeft="10dp"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"/>
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -81,33 +71,25 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Vehicle Type -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vehicle type"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"/>
-
         <RadioGroup
             android:id="@+id/rgVehicleType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="12dp">
+            android:padding="1dp">
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/rbStandard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.3"
                 android:text="STANDARD"
                 android:textColor="#FFFFFF"
                 android:checked="true"
-                app:buttonTint="#FFFFFF"/>
+                app:buttonTint="#FFFFFF"
+                android:singleLine="true"
+                android:ellipsize="none"
+                android:layout_marginEnd="0dp"/>
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/rbLuxury"
@@ -116,7 +98,11 @@
                 android:layout_weight="1"
                 android:text="LUXURY"
                 android:textColor="#FFFFFF"
-                app:buttonTint="#FFFFFF"/>
+                app:buttonTint="#FFFFFF"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="none"
+                android:layout_marginStart="8dp"/>
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/rbVan"
@@ -125,7 +111,12 @@
                 android:layout_weight="1"
                 android:text="VAN"
                 android:textColor="#FFFFFF"
-                app:buttonTint="#FFFFFF"/>
+                app:buttonTint="#FFFFFF"
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="none"
+                android:layout_marginStart="8dp"/>
+
         </RadioGroup>
 
         <!-- Number of Seats -->

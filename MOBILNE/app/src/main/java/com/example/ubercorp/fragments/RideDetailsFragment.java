@@ -96,6 +96,10 @@ public class RideDetailsFragment extends Fragment {
         GridLayout passengersGrid = view.findViewById(R.id.passengers);
         if (role.equals("passenger")) passengersGrid.setVisibility(GONE);
 
+        if (!"passenger".equalsIgnoreCase(role)) {
+            binding.favorites.setVisibility(View.GONE);
+        }
+
         viewReviewsButton.setOnClickListener((v) -> {
             Bundle bundle = new Bundle();
             bundle.putLong("RideID", ride.getId());
@@ -125,7 +129,8 @@ public class RideDetailsFragment extends Fragment {
                 binding.panic.setEnabled(false);
                 if (rideDetails.isCancelled())
                     binding.canceled.setChecked(true);
-                if (ride.getStatus() == RideStatus.Panic)
+                Log.d("Ride status", rideDetails.getStatus().toString());
+                if (rideDetails.getStatus() == RideStatus.Panic)
                     binding.panic.setChecked(true);
 
                 Context context = getContext();

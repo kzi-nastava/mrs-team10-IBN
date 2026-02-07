@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, OnChanges } from '@angular/core';
 import { WebSocketService } from '../service/websocket.service';
 import { ChatMessage } from '../model/chat-message.model';
 import { HttpClient } from '@angular/common/http';
@@ -7,18 +7,21 @@ import { ChatRoom } from '../model/chat-message.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../service/auth.service';
-import { NavBarComponent } from '../layout/nav-bar/nav-bar.component';
+import { Input } from '@angular/core';
+import { SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-chat',
+  standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
-export class ChatComponent implements OnInit, OnDestroy {
+export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   chatRoom: ChatRoom = { id: 0, currentUserEmail: '', receiver: 0, messages: [] };
   messageContent: string = '';
   currentUserEmail: string = '';
+  @Input() chatRoomId!: number;
 
   constructor(
     private webSocketService: WebSocketService,
@@ -35,6 +38,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       console.log(msg);
       this.cdr.detectChanges();
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['chatRoomId'] && this.chatRoomId) {
+      this.loadChatRoom();
+    }
   }
 
   ngOnDestroy(): void {
@@ -56,12 +65,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   loadChatRoom() {
-    console.log(this.authService.role());
     if (this.authService.role() == 'administrator') {
-      this.http.get<ChatRoom>(`${environment.apiHost}/chat/admin`).subscribe({
+      this.http.get<ChatRoom>(`${environment.apiHost}/chat/room/${this.chatRoomId}`).subscribe({
         next: (res) => {
           this.chatRoom = res;
-          console.log(res);
           this.currentUserEmail = res.currentUserEmail;
           this.cdr.detectChanges();
         },
@@ -70,7 +77,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.http.get<ChatRoom>(`${environment.apiHost}/chat/other`).subscribe({
         next: (res) => {
           this.chatRoom = res;
-          console.log(res);
           this.currentUserEmail = res.currentUserEmail;
           this.cdr.detectChanges();
         },

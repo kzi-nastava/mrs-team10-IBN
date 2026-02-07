@@ -62,7 +62,7 @@ export class RouteService {
       lon: location.lon,
       address: location.address,
       distance: 0,
-      finishTime: time,
+      finishTime: time.replace('Z', ''),
     };
     return this.http.put(`${environment.apiHost}/rides/panic`, body);
   }
@@ -73,6 +73,7 @@ export interface RidePayload {
   route: Route;
   startTime?: Date;
   endTime?: Date;
+  token: string;
 }
 
 export interface RideCancellation {

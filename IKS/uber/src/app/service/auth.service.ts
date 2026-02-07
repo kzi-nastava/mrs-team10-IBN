@@ -52,18 +52,17 @@ export class AuthService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-
-    this.http
-      .put(`${environment.apiHost}/drivers/me/toggle-status?active=false`, null, { headers })
-      .subscribe({
-        next: () => {
-          this.performLogout();
-        },
-        error: (err) => {
-          console.error('Error deactivating driver:', err);
-          this.performLogout();
-        },
-      });
+    console.log(this.getRole())
+    if(this.getRole() === "driver"){
+      this.http
+        .put(`${environment.apiHost}/drivers/me/toggle-status?active=false`, null, { headers })
+        .subscribe({
+          error: (err) => {
+            console.error('Error deactivating driver:', err);
+          },
+        });
+    }
+    this.performLogout();
   }
 
   private performLogout() {

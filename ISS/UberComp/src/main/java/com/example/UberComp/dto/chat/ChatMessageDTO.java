@@ -1,4 +1,4 @@
-package com.example.UberComp.dto;
+package com.example.UberComp.dto.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

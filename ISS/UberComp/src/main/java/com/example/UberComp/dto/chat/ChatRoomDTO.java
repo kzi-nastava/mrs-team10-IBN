@@ -1,7 +1,5 @@
-package com.example.UberComp.dto;
+package com.example.UberComp.dto.chat;
 
-import com.example.UberComp.model.ChatMessage;
-import com.example.UberComp.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

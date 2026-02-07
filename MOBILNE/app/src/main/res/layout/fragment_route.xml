@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/squada_one"
-                android:textSize="40dp"
+                android:textSize="38dp"
                 android:textColor="@color/white"
                 android:text="Want to go somewhere in Novi Sad?"
                 android:layout_marginBottom="20dp"/>

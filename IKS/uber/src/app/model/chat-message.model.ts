@@ -15,5 +15,11 @@ export interface ChatRoom {
 
 export interface ChatInbox {
   chatRoom: number;
-  user: User;
+  user: UserDTO;
+}
+
+export interface UserDTO {
+  phoneNumber: number;
+  name: string;
+  lastName: string;
 }

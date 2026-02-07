@@ -14,7 +14,7 @@ public class GetRideDetailsDTO {
     private Double price;
     private RideStatus status;
     private Boolean canceled;
-    private Boolean panic = false;
+    private Boolean panic;
 
     public Long getId() {
         return id;

@@ -41,6 +41,10 @@ public interface RideService {
     Call<GetRideDetailsDTO> getRide(@Header("Authorization") String authToken,
                                     @Path("id") Long id);
 
+    @GET("api/rides/tracking/{token}")
+    Call<GetRideDetailsDTO> getRideByToken(@Header("Authorization") String authToken,
+                                           @Path("token") String rideToken);
+
     @POST("api/rides")
     Call<RideOrderResponseDTO> createRide(
             @Header("Authorization") String token,
@@ -96,4 +100,7 @@ public interface RideService {
 
     @PUT("api/rides/panic")
     Call<FinishedRideDTO> panic(@Header("Authorization") String token, @Body StopRideDTO ride);
+
+    @GET("api/rides/ongoing")
+    Call<Boolean> getOngoingRide(@Header("Authorization") String token);
 }

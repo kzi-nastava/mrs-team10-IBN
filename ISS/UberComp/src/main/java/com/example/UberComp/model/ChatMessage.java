@@ -1,6 +1,5 @@
 package com.example.UberComp.model;
 
-import com.example.UberComp.dto.ChatMessageDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -49,6 +49,7 @@ public class IncomingRideFragment extends Fragment {
     RideManager rideManager;
     RouteManager routeManager;
     Long rideID;
+    String rideToken;
     Context context;
 
     @Override
@@ -76,7 +77,7 @@ public class IncomingRideFragment extends Fragment {
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
                         Bundle bundle = new Bundle();
-                        bundle.putLong("RideId", rideID);
+                        bundle.putString("RideToken", rideToken);
                         Navigation.findNavController(requireView()).navigate(
                                 R.id.action_incomingRideFragment_to_trackingRouteFragment,
                                 bundle
@@ -143,6 +144,7 @@ public class IncomingRideFragment extends Fragment {
             public void onResponse(Call<IncomingRideDTO> call, Response<IncomingRideDTO> response) {
                 if(response.isSuccessful()){
                     rideID = response.body().getId();
+                    rideToken = response.body().getToken();
                     addStationText(response.body().getRoute().getStations());
                     List<GeoPoint> geopoints = new ArrayList<>();
                     for (CoordinateDTO point : response.body().getRoute().getStations()){

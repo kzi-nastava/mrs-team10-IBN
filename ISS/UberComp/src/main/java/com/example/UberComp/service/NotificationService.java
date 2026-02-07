@@ -131,6 +131,7 @@ public class NotificationService {
         Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
         passengerNotif.setNotifiedUsers(List.of(mainPassenger));
         notificationRepository.save(passengerNotif);
+        notificationRepository.flush();
 
         sendToUser(mainPassenger.getAccount().getEmail(), passengerNotif);
 
@@ -151,6 +152,7 @@ public class NotificationService {
         Notification driverNotif = new Notification(driverTitle, driverContent, LocalDateTime.now());
         driverNotif.setNotifiedUsers(List.of(ride.getDriver()));
         notificationRepository.save(driverNotif);
+        notificationRepository.flush();
 
         sendToUser(ride.getDriver().getAccount().getEmail(), driverNotif);
     }
@@ -177,6 +179,7 @@ public class NotificationService {
         Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
         passengerNotif.setNotifiedUsers(List.of(mainPassenger));
         notificationRepository.save(passengerNotif);
+        notificationRepository.flush();
 
         sendToUser(mainPassenger.getAccount().getEmail(), passengerNotif);
 
@@ -202,6 +205,7 @@ public class NotificationService {
         Notification driverNotif = new Notification(driverTitle, driverContent, LocalDateTime.now());
         driverNotif.setNotifiedUsers(List.of(ride.getDriver()));
         notificationRepository.save(driverNotif);
+        notificationRepository.flush();
 
         sendToUser(ride.getDriver().getAccount().getEmail(), driverNotif);
         sendSignalToFrontend(ride.getDriver());
@@ -223,16 +227,23 @@ public class NotificationService {
                 ride.getPrice()
         );
 
-        Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
         List<User> notifiedUsers = new ArrayList<>();
+
         for (User user: ride.getPassengers()) {
-            if (user.getAccount().getEmail() != mainPassenger.getAccount().getEmail()) {
+            if (!user.getAccount().getEmail().equals(mainPassenger.getAccount().getEmail())) {
                 notifiedUsers.add(user);
+            }
+        }
+
+        if (!notifiedUsers.isEmpty()) {
+            Notification passengerNotif = new Notification(passengerTitle, passengerContent, LocalDateTime.now());
+            passengerNotif.setNotifiedUsers(notifiedUsers);
+            notificationRepository.save(passengerNotif);
+            notificationRepository.flush();
+
+            for (User user : notifiedUsers) {
                 sendToUser(user.getAccount().getEmail(), passengerNotif);
             }
         }
-        passengerNotif.setNotifiedUsers(notifiedUsers);
-        notificationRepository.save(passengerNotif);
-
     }
 }

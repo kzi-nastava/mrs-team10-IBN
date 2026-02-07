@@ -17,18 +17,18 @@ android {
 
     defaultConfig {
         applicationId "com.example.ubercorp"
-        minSdk 30
+        minSdk 29
         targetSdk 36
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST', 'http://ip:8090/')}\""
+        buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST')}\""
     }
 
     buildTypes {
         debug {
-            buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST', 'http://ip:8090/')}\""
+            buildConfigField "String", "API_HOST", "\"${localProperties.getProperty('API_HOST')}\""
         }
     }
 

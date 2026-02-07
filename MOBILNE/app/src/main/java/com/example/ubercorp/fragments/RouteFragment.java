@@ -1,6 +1,12 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,10 +27,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ubercorp.R;
+import com.example.ubercorp.api.ApiClient;
+import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.CoordinateDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.managers.RouteManager;
+import com.example.ubercorp.utils.JwtUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -142,7 +151,42 @@ public class RouteFragment extends Fragment {
         locationText = view.findViewById(R.id.locationText);
         timeText = view.findViewById(R.id.timeText);
         orderRideButton = view.findViewById(R.id.orderRide);
+
+        if (!isUserLoggedIn() || !isUserPassenger()) {
+            orderRideButton.setVisibility(GONE);
+        } else {
+            orderRideButton.setVisibility(VISIBLE);
+        }
     }
+
+    private boolean isUserLoggedIn() {
+        Context context = getContext();
+        if (context == null) return false;
+
+        SharedPreferences sharedPref =
+                context.getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+
+        String token = sharedPref.getString("auth_token", null);
+        return token != null && !token.isEmpty();
+    }
+
+
+    private boolean isUserPassenger() {
+        Context context = getContext();
+        if (context == null) return false;
+
+        SharedPreferences sharedPref =
+                context.getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+
+        String token = sharedPref.getString("auth_token", null);
+        if (token == null || token.isEmpty()) return false;
+
+        String role = JwtUtils.getRoleFromToken(token);
+        if (role == null) return false;
+
+        return role.equalsIgnoreCase("passenger");
+    }
+
 
     private void setupListeners() {
         drawRouteButton.setOnClickListener(v -> handleDrawRoute());
@@ -153,7 +197,7 @@ public class RouteFragment extends Fragment {
         });
         addStopBtn.setOnClickListener(v -> addStop());
         removeStopBtn.setOnClickListener(v -> removeStop());
-        orderRideButton.setOnClickListener(v -> navigateToOrderRide());
+        orderRideButton.setOnClickListener(v -> checkOngoingRideAndNavigate());
     }
 
     private void handleDrawRoute() {
@@ -168,14 +212,46 @@ public class RouteFragment extends Fragment {
         fetchRoute(startAddress, endAddress);
     }
 
+    private String getToken() {
+        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        return sharedPref.getString("auth_token", null);
+    }
+
+    private void checkOngoingRideAndNavigate() {
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        api.getOngoingRide("Bearer " + getToken()).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    boolean hasOngoingRide = response.body();
+
+                    if (hasOngoingRide) {
+                        Toast.makeText(requireContext(),
+                                "You already have an ongoing ride!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        navigateToOrderRide();
+                    }
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to check ongoing ride",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Toast.makeText(requireContext(),
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
     private void navigateToOrderRide() {
         String startAddress = startAddressInput.getText().toString().trim();
         String endAddress = endAddressInput.getText().toString().trim();
-
-        if (startAddress.isEmpty() || endAddress.isEmpty()) {
-            showToast("Please draw a route first");
-            return;
-        }
 
         Bundle args = new Bundle();
         args.putString("fromLocation", startAddress);
@@ -229,11 +305,11 @@ public class RouteFragment extends Fragment {
     private void toggleDropdown() {
         isDropdownOpen = !isDropdownOpen;
         if (isDropdownOpen) {
-            locationDisplay.setVisibility(View.GONE);
-            dropdownContent.setVisibility(View.VISIBLE);
+            locationDisplay.setVisibility(GONE);
+            dropdownContent.setVisibility(VISIBLE);
         } else {
-            locationDisplay.setVisibility(View.VISIBLE);
-            dropdownContent.setVisibility(View.GONE);
+            locationDisplay.setVisibility(VISIBLE);
+            dropdownContent.setVisibility(GONE);
         }
     }
 
