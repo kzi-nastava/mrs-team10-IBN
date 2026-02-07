@@ -6,6 +6,7 @@ import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
 import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.model.Account;
+import com.example.UberComp.model.Coordinate;
 import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
 import com.example.UberComp.service.DriverAvailabilityService;
@@ -105,14 +106,14 @@ public class DriverController {
 
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping("/me/update-location")
-    public ResponseEntity<Void> updateLocation(
+    public ResponseEntity<Coordinate> updateLocation(
             Authentication auth,
             @RequestBody String address) {
         try {
             Account account = (Account) auth.getPrincipal();
             Long userId = account.getUser().getId();
-            driverService.updateDriverLocation(userId, address);
-            return ResponseEntity.ok().build();
+            Coordinate coordinate = driverService.updateDriverLocation(userId, address);
+            return ResponseEntity.ok(coordinate);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

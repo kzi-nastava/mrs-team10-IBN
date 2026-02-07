@@ -4,7 +4,7 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/routeFragment"
+        <item android:id="@+id/home"
             android:title="@string/home"
             android:icon="@drawable/ic_home"
             android:orderInCategory="100"/>

@@ -1105,7 +1105,7 @@ public class DriverService {
         }
     }
 
-    public void updateDriverLocation(Long driverId, String address) {
+    public Coordinate updateDriverLocation(Long driverId, String address) {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
@@ -1117,6 +1117,7 @@ public class DriverService {
         Vehicle vehicle = driver.getVehicle();
         vehicle.setLocation(newLocation);
         vehicleRepository.save(vehicle);
+        return vehicle.getLocation();
     }
 
     private static class CachedTravelTime {

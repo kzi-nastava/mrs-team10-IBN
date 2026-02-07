@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MapComponent } from '../../maps/map-basic/map.component';
 import { environment } from '../../../environments/environment';
+import { CoordinateDTO } from '../../service/ride-history.service';
 
 @Component({
   selector: 'app-update-location',
@@ -42,6 +43,7 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
   }
 
   onLocationSelected(address: string) {
+    this.mapComponent.clearAll();
     if (!address.toLowerCase().includes('novi sad')) {
       address = address + ', Novi Sad, Serbia';
     }
@@ -76,12 +78,13 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
 
     this.isLoading = true;
     this.http
-      .put(`${environment.apiHost}/drivers/me/update-location`, this.address, this.getAuthHeaders())
+      .put<CoordinateDTO>(`${environment.apiHost}/drivers/me/update-location`, this.address, this.getAuthHeaders())
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.isLoading = false;
           this.showSuccess('Location updated successfully!');
           this.mapComponent.clearAll();
+          this.mapComponent.addSinglePin(res.lat, res.lon, res.address)
         },
         error: (err) => {
           console.error('Failed to update location', err);

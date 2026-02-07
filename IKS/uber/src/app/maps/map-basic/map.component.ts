@@ -259,6 +259,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.updateRoute();
   }
 
+  public addSinglePin(lat: number, lng: number, title: string){
+    this.addPointWithIcon(lat, lng, this.PinIcon, title, false, false)
+  }
+
   private async addPoint(lat: number, lng: number): Promise<void> {
     try {
       const result = await this.reverseSearch(lat, lng).toPromise();

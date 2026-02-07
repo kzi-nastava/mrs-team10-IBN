@@ -116,4 +116,9 @@
         android:label="Notifications"
         tools:layout="@layout/fragment_notification" />
 
+    <fragment
+        android:id="@+id/driverHomeFragment"
+        android:name="com.example.ubercorp.fragments.DriverHomeFragment"
+        tools:layout="@layout/fragment_driver_home"/>
+
 </navigation>

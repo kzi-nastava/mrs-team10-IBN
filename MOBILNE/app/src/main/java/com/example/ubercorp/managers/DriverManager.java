@@ -82,4 +82,28 @@ public class DriverManager {
             }
         });
     }
+
+    public void toggleDriverStatus(boolean online, Callback<Void> callback){
+        String token = getToken();
+        if (token == null) {
+            listener.onActionFailed("No auth token");
+            return;
+        }
+
+        DriverService driverService = ApiClient.getInstance().createService(DriverService.class);
+        Call<Void> call = driverService.toggleDriverStatus("Bearer " + token, online);
+        call.enqueue(callback);
+    }
+
+    public void updateDriverLocation(String address, Callback<CoordinateDTO> callback){
+        String token = getToken();
+        if (token == null) {
+            listener.onActionFailed("No auth token");
+            return;
+        }
+
+        DriverService driverService = ApiClient.getInstance().createService(DriverService.class);
+        Call<CoordinateDTO> call = driverService.updateLocation("Bearer " + token, address);
+        call.enqueue(callback);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.ubercorp.api;
 
+import com.example.ubercorp.dto.CoordinateDTO;
 import com.example.ubercorp.dto.DriverDTO;
 import com.example.ubercorp.dto.UpdateDriverDTO;
 import com.example.ubercorp.dto.CreateDriverDTO;
@@ -26,5 +27,11 @@ public interface DriverService {
     Call<Void> toggleDriverStatus(
             @Header("Authorization") String token,
             @retrofit2.http.Query("active") boolean active
+    );
+
+    @PUT("api/drivers/me/update-location")
+    Call<CoordinateDTO> updateLocation(
+            @Header("Authorization") String token,
+            @Body String address
     );
 }
