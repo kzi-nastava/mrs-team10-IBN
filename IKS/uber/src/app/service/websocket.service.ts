@@ -5,6 +5,8 @@ import * as Stomp from 'stompjs';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AppNotification, AppNotificationDTO } from './notification.service';
+import { ChatMessage } from '../model/chat-message.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +16,14 @@ export class WebSocketService {
 
   public newNotification$ = new Subject<AppNotification>();
   public incomingRide$ = new Subject<any>();
+  public chatMessage$ = new Subject<ChatMessage>();
 
   public connectionStatus$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     private router: Router,
     private zone: NgZone,
+    private authService: AuthService,
   ) {}
 
   connect(userEmail: string) {
@@ -65,6 +69,24 @@ export class WebSocketService {
               }
             });
           });
+
+          let chatSubscription = '';
+          if (this.authService.role() == 'administrator') {
+            chatSubscription = '/topic/chat/admin';
+          } else {
+            chatSubscription = '/topic/chat/' + userEmail;
+            console.log(userEmail);
+          }
+          this.stompClient!.subscribe(chatSubscription, (message) => {
+            this.zone.run(() => {
+              try {
+                const payload = JSON.parse(message.body);
+                this.chatMessage$.next(payload);
+              } catch (err) {
+                console.error('Error parsing chat message: ', err);
+              }
+            });
+          });
         });
       },
       (error) => {
@@ -73,6 +95,16 @@ export class WebSocketService {
         });
       },
     );
+  }
+
+  sendMessage(message: ChatMessage) {
+    if (!this.stompClient?.connected) {
+      console.warn('WebSocket not connected yet. Retrying in 500ms...');
+      setTimeout(() => this.sendMessage(message), 500);
+      return;
+    }
+
+    this.stompClient.send('/ws/send-message', {}, JSON.stringify(message));
   }
 
   disconnect() {

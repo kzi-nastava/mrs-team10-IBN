@@ -18,6 +18,8 @@ import { AuthGuard } from './auth/auth-guard';
 import { ScheduledRidesComponent } from './driver/scheduled-rides/scheduled-rides.component';
 import { VerifyAccountComponent } from './layout/verify-account/verify-account.component';
 import { NotificationTabComponent } from './layout/notification-tab/notification-tab.component';
+import { ChatComponent } from './chat/chat.component';
+import { AdminChatComponent } from './chat/admin-chat/admin-chat/admin-chat.component';
 
 export const routes: Routes = [
   {
@@ -115,6 +117,18 @@ export const routes: Routes = [
     component: ScheduledRidesComponent,
     canActivate: [AuthGuard],
     data: { role: ['driver'] },
+  },
+  {
+    path: 'chat',
+    component: ChatComponent,
+    canActivate: [AuthGuard],
+    data: { role: ['driver', 'passenger', 'administrator'] },
+  },
+  {
+    path: 'admin-chat',
+    component: AdminChatComponent,
+    canActivate: [AuthGuard],
+    data: { role: 'administrator' },
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
