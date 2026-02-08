@@ -4,6 +4,7 @@ import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
+import com.example.UberComp.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -197,7 +198,72 @@ WHERE r.trackingToken = :token
 """)
     Optional<Ride> findByTrackingToken(@Param("token")String trackingToken);
 
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+LEFT JOIN FETCH r.passengers
+WHERE r.driver.id = :driverId
+AND r.start BETWEEN :startDate AND :endDate
+AND r.status = com.example.UberComp.enums.RideStatus.Finished
+ORDER BY r.start ASC
+""")
+    List<Ride> findFinishedRidesByDriverAndDateRange(
+            @Param("driverId") Long driverId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+LEFT JOIN FETCH r.passengers
+JOIN r.passengers p
+WHERE p.id = :userId
+AND r.start BETWEEN :startDate AND :endDate
+AND r.status = com.example.UberComp.enums.RideStatus.Finished
+ORDER BY r.start ASC
+""")
+    List<Ride> findFinishedRidesByPassengerAndDateRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+LEFT JOIN FETCH r.passengers
+WHERE r.start BETWEEN :startDate AND :endDate
+AND r.status = com.example.UberComp.enums.RideStatus.Finished
+ORDER BY r.start ASC
+""")
+    List<Ride> findFinishedRidesByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+LEFT JOIN FETCH r.passengers
+WHERE r.start BETWEEN :startDate AND :endDate
+AND r.status = com.example.UberComp.enums.RideStatus.Finished
+AND r.driver IS NOT NULL
+ORDER BY r.start ASC
+""")
+    List<Ride> findFinishedDriverRidesByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+SELECT DISTINCT r FROM Ride r
+LEFT JOIN FETCH r.passengers p
+WHERE r.start BETWEEN :startDate AND :endDate
+AND r.status = com.example.UberComp.enums.RideStatus.Finished
+AND SIZE(r.passengers) > 0
+ORDER BY r.start ASC
+""")
+    List<Ride> findFinishedPassengerRidesByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
 }
 

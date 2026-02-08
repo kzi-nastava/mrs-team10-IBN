@@ -433,6 +433,7 @@ export class AccountComponent implements OnInit {
 
   get menuItems() {
     const commonItems = [
+      { icon: '📊', label: 'Statistics', route: '/statistics' },
       {
         icon: '🔑',
         label: 'Change password',
@@ -443,19 +444,14 @@ export class AccountComponent implements OnInit {
     type RoleType = 'passenger' | 'driver' | 'administrator';
 
     const roleMenus: Record<RoleType, Array<{ icon: string; label: string; route: string }>> = {
-      passenger: [
-        { icon: '❤️', label: 'Favorites', route: '/favorites' },
-        { icon: '📊', label: 'My statistics', route: '/statistics/user' },
-      ],
+      passenger: [{ icon: '❤️', label: 'Favorites', route: '/favorites' }],
 
       driver: [
         { icon: '🚗', label: 'My vehicle', route: '/my-vehicle' },
-        { icon: '📊', label: 'My statistics', route: '/statistics/User' },
         { icon: '📅', label: 'Scheduled rides', route: '/scheduled-rides' },
       ],
 
       administrator: [
-        { icon: '📊', label: 'Platform statistics', route: '/statistics/admin' },
         { icon: '📥', label: 'Requests', route: '/requests' },
         { icon: '🚗', label: 'Register driver', route: '/register-driver' },
         { icon: '💵', label: 'Vehicle price', route: '/vehicle-price' },

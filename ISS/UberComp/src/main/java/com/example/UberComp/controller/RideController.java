@@ -247,6 +247,7 @@ public class RideController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @GetMapping("/ongoing")
     public ResponseEntity<Boolean> getOngoing(Authentication auth) {
         Account account = (Account) auth.getPrincipal();
