@@ -106,11 +106,12 @@ public class HomeActivity extends AppCompatActivity
 
         if (token != null) {
             String role = JwtUtils.getRoleFromToken(token);
-
+            
             NavOptions navOptions = new NavOptions.Builder()
                     .setPopUpTo(R.id.routeFragment, true)
                     .setLaunchSingleTop(true)
                     .build();
+
 
             switch(role){
                 case "driver":
@@ -122,7 +123,6 @@ public class HomeActivity extends AppCompatActivity
                     break;
                 default:
                     break;
-            }
         }
 
 

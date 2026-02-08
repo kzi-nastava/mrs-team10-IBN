@@ -146,7 +146,7 @@ public class DriverController {
             DriverStatus status = driverService.getStatus(account.getUser().getId());
 
             Map<String, Boolean> response = new HashMap<>();
-            response.put("isActive", status.equals(DriverStatus.ONLINE));
+            response.put("isActive", !status.equals(DriverStatus.OFFLINE) && !status.equals(DriverStatus.PANIC));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
