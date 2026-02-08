@@ -16,7 +16,12 @@ import java.io.ByteArrayOutputStream;
 public class ImageHelper {
 
     public static void setProfileImage(String imageString, ImageView imageView) {
-        if (imageString == null || imageView == null) return;
+        if (imageView == null) return;
+
+        if (imageString == null || imageString.isEmpty()) {
+            imageView.setImageResource(R.drawable.ic_account);
+            return;
+        }
 
         try {
             if (imageString.startsWith("data:image") || isBase64(imageString)) {
@@ -32,12 +37,14 @@ public class ImageHelper {
                 int resId = imageView.getContext().getResources()
                         .getIdentifier(imageString.replace(".png", ""), "drawable", imageView.getContext().getPackageName());
                 if (resId != 0) imageView.setImageResource(resId);
+                else imageView.setImageResource(R.drawable.ic_account);
             }
         } catch (Exception e) {
             e.printStackTrace();
             imageView.setImageResource(R.drawable.ic_account);
         }
     }
+
 
     private static boolean isBase64(String string) {
         try {

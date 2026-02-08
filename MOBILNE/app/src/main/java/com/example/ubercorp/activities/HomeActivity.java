@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -66,6 +68,7 @@ public class HomeActivity extends AppCompatActivity
     private android.app.NotificationManager systemNotificationManager;
 
     private Set<Long> shownNotificationIds = new HashSet<>();
+    private int HOME_FRAGMENT = R.id.routeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,16 +86,45 @@ public class HomeActivity extends AppCompatActivity
         actionBar = getSupportActionBar();
         topLevelDestinations.add(R.id.nav_settings);
 
-        navController = Navigation.findNavController(this, R.id.fragment_nav_content_main);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.fragment_nav_content_main);
+
+        navController = navHostFragment.getNavController();
 
         navController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
             Log.i("UberComp", "Destination Changed");
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment, R.id.driverHomeFragment)
                 .setOpenableLayout(drawer)
                 .build();
+
+        SharedPreferences sharedPref = getSharedPreferences("uber_corp", MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+
+        if (token != null) {
+            String role = JwtUtils.getRoleFromToken(token);
+
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setPopUpTo(R.id.routeFragment, true)
+                    .setLaunchSingleTop(true)
+                    .build();
+
+            switch(role){
+                case "driver":
+                    HOME_FRAGMENT = R.id.driverHomeFragment;
+                    navController.navigate(HOME_FRAGMENT, null, navOptions);
+                    break;
+                case "administrator":
+                    // dodati podešavanje kad se napravi administrator view
+                    break;
+                default:
+                    break;
+            }
+        }
+
 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
@@ -262,8 +294,8 @@ public class HomeActivity extends AppCompatActivity
             } else if (id == R.id.logout) {
                 showLogoutDialog();
                 return true;
-            } else if (id == R.id.routeFragment) {
-                navController.navigate(R.id.routeFragment);
+            } else if (id == R.id.home) {
+                navController.navigate(HOME_FRAGMENT);
             } else if (id == R.id.accountFragment) {
                 navController.navigate(R.id.accountFragment);
             } else if (id == R.id.rating) {
