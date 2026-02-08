@@ -24,6 +24,7 @@ import com.example.ubercorp.R;
 import com.example.ubercorp.api.ApiClient;
 import com.example.ubercorp.api.DriverService;
 import com.example.ubercorp.dto.CoordinateDTO;
+import com.example.ubercorp.dto.GetStatusDTO;
 import com.example.ubercorp.managers.DriverManager;
 import com.example.ubercorp.utils.JwtUtils;
 
@@ -70,7 +71,22 @@ public class DriverHomeFragment extends Fragment {
 
         SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", MODE_PRIVATE);
         String token = sharedPref.getString("auth_token", null);
-        isOnline = sharedPref.getBoolean("Status", true);
+        Call<GetStatusDTO> getStatus = ApiClient.getInstance().createService(DriverService.class).getStatus("Bearer " + token);
+        getStatus.enqueue(new Callback<GetStatusDTO>() {
+            @Override
+            public void onResponse(Call<GetStatusDTO> call, Response<GetStatusDTO> response) {
+                isOnline = response.body().isActive();
+                updateView();
+            }
+
+            @Override
+            public void onFailure(Call<GetStatusDTO> call, Throwable t) {
+                isOnline = false;
+                updateView();
+                Toast toast = Toast.makeText(DriverHomeFragment.this.getContext(), "Check your Internet connection and try again!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
         Log.d("Status", Boolean.toString(isOnline));
         updateView();
 
@@ -128,14 +144,14 @@ public class DriverHomeFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onPause(){
-        super.onPause();
-        SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("Status", isOnline);
-        editor.apply();
-    }
+    //@Override
+    //public void onPause(){
+    //    super.onPause();
+    //    SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+    //    SharedPreferences.Editor editor = sharedPref.edit();
+    //    editor.putBoolean("Status", isOnline);
+    //    editor.apply();
+    //}
 
     private void updateView(){
         if(isOnline){

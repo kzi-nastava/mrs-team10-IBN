@@ -105,6 +105,7 @@ public class HomeActivity extends AppCompatActivity
                 .setLaunchSingleTop(true)
                 .build();
 
+        if (role != null)
         switch(role){
             case "driver":
                 HOME_FRAGMENT = R.id.driverHomeFragment;

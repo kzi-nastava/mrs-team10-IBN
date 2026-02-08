@@ -191,7 +191,8 @@ public class RideService {
         Ride ride = rideRepository.findById(rideId).orElseThrow();
         ride.setStatus(RideStatus.Finished);
         Driver driver = ride.getDriver();
-        driver.setStatus(DriverStatus.ONLINE);
+        if(driver.getStatus() == DriverStatus.OFFLINE_AFTER_RIDE) driver.setStatus(DriverStatus.OFFLINE);
+        else driver.setStatus(DriverStatus.ONLINE);
         Instant instant = Instant.parse(finish.getIsotime());
         ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
         rideRepository.save(ride);
@@ -233,7 +234,8 @@ public class RideService {
             double newPrice = calculatePrice(stopRideDTO.getId(), stopRideDTO.getDistance()).getPrice();
             ride.setPrice(newPrice);
             ride.setStatus(RideStatus.Finished);
-            driver.setStatus(DriverStatus.ONLINE);
+            if(driver.getStatus() == DriverStatus.OFFLINE_AFTER_RIDE) driver.setStatus(DriverStatus.OFFLINE);
+            else driver.setStatus(DriverStatus.ONLINE);
             emailUtils.sendEmailWhenRideIsFinished("ignjaticivana70@gmail.com", stopRideDTO.getId());
         }
         Vehicle vehicle = driver.getVehicle();

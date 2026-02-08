@@ -4,6 +4,7 @@ import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
 import com.example.UberComp.model.Ride;
+import com.example.UberComp.service.RideService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -19,6 +20,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     Ride findFirstByDriver_IdOrderByStartDesc(Long driverId);
     Ride findFirstByPassengersIdOrderByStartDesc(Long passengersId);
+    Ride findByStatusAndDriverId(RideStatus status, Long driverId);
 
     @Query("""
     SELECT r FROM Ride r
