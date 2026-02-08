@@ -549,6 +549,7 @@ public class AccountFragment extends Fragment implements
     }
 
     private void hideEditProfile() {
+        ImageHelper.setProfileImage(originalBase64Image, ivProfilePic);
         hideViews(editFormCard);
         showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
         fabEditProfile.setVisibility(View.VISIBLE);
@@ -581,7 +582,9 @@ public class AccountFragment extends Fragment implements
                 imageToSend
         );
 
+
         profileManager.updateProfile(updateDTO);
+        tvUserName.setText(firstName + " " + lastName);
     }
 
     private void sendProfileChanges() {
