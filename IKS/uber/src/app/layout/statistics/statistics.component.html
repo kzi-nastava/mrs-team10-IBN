@@ -1,0 +1,139 @@
+<app-nav-bar></app-nav-bar>
+<div class="statistics-container">
+  <div class="filters-section">
+    <div class="date-range">
+      <label>
+        Start Date:
+        <input type="date" [(ngModel)]="dateRange.startDate" (change)="onDateRangeChange()" />
+      </label>
+
+      <label>
+        End Date:
+        <input type="date" [(ngModel)]="dateRange.endDate" (change)="onDateRangeChange()" />
+      </label>
+    </div>
+
+    @if (isAdmin()) {
+      <div class="admin-filters">
+        <div class="view-mode">
+          <label>
+            <input
+              type="radio"
+              name="viewMode"
+              value="all"
+              [(ngModel)]="viewMode"
+              (change)="onViewModeChange()"
+            />
+            All Users
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="viewMode"
+              value="single"
+              [(ngModel)]="viewMode"
+              (change)="onViewModeChange()"
+            />
+            Single User
+          </label>
+        </div>
+
+        <div class="user-type">
+          <label>
+            User Type:
+            <select [(ngModel)]="userType" (change)="onUserTypeChange()">
+              <option value="drivers">Drivers</option>
+              <option value="passengers">Passengers</option>
+            </select>
+          </label>
+        </div>
+
+        @if (viewMode === 'single') {
+          <div class="user-select">
+            <label>
+              Select User:
+              <select [(ngModel)]="selectedUserId" (change)="onUserChange()">
+                <option [value]="null">-- Select a user --</option>
+                @for (user of availableUsers; track user.id) {
+                  <option [value]="user.id">{{ user.name }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <p>Loading statistics...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (statistics && !loading) {
+    <div class="statistics-content">
+      <div class="summary-cards">
+        <div class="card">
+          <h3>Total Rides</h3>
+          <p class="value">{{ statistics.totalRides }}</p>
+          <p class="average">Avg: {{ statistics.averageRides | number: '1.1-1' }} per day</p>
+        </div>
+
+        <div class="card">
+          <h3>Total Distance</h3>
+          <p class="value">{{ statistics.totalDistance | number: '1.1-1' }} km</p>
+          <p class="average">Avg: {{ statistics.averageDistance | number: '1.1-1' }} km per day</p>
+        </div>
+
+        <div class="card">
+          <h3>Total {{ getMoneyLabel() }}</h3>
+          <p class="value">{{ statistics.totalMoney | currency: 'RSD' }}</p>
+          <p class="average">Avg: {{ statistics.averageMoney | currency: 'RSD' }} per day</p>
+        </div>
+      </div>
+
+      <div class="charts-section">
+        <div class="chart-container">
+          <h3>Rides per Day</h3>
+          <app-chart
+            [data]="statistics.dailyRides"
+            [label]="'Rides'"
+            [type]="'bar'"
+            [color]="'#2196F3'"
+            [yAxisLabel]="'Number of Rides'"
+          ></app-chart>
+        </div>
+
+        <div class="chart-container">
+          <h3>Distance per Day</h3>
+          <app-chart
+            [data]="statistics.dailyDistance"
+            [label]="'Distance (km)'"
+            [type]="'line'"
+            [color]="'#4CAF50'"
+            [yAxisLabel]="'Distance (km)'"
+          ></app-chart>
+        </div>
+
+        <div class="chart-container">
+          <h3>{{ getMoneyLabel() }} per Day</h3>
+          <app-chart
+            [data]="statistics.dailyMoney"
+            [label]="getMoneyLabel() + ' (RSD)'"
+            [type]="'line'"
+            [color]="'#FF9800'"
+            [yAxisLabel]="'Amount (RSD)'"
+          ></app-chart>
+        </div>
+      </div>
+    </div>
+  }
+</div>

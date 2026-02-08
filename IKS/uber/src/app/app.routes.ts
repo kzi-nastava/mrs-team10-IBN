@@ -20,6 +20,7 @@ import { VerifyAccountComponent } from './layout/verify-account/verify-account.c
 import { NotificationTabComponent } from './layout/notification-tab/notification-tab.component';
 import { ChatComponent } from './chat/chat.component';
 import { AdminChatComponent } from './chat/admin-chat/admin-chat/admin-chat.component';
+import { StatisticsComponent } from './layout/statistics/statistics.component';
 
 export const routes: Routes = [
   {
@@ -129,6 +130,12 @@ export const routes: Routes = [
     component: AdminChatComponent,
     canActivate: [AuthGuard],
     data: { role: 'administrator' },
+  },
+  {
+    path: 'statistics',
+    component: StatisticsComponent,
+    canActivate: [AuthGuard],
+    data: { role: ['administrator', 'passenger', 'driver'] },
   },
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
