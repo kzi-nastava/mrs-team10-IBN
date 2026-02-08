@@ -1,10 +1,39 @@
 <app-nav-bar></app-nav-bar>
 <div id="container">
-    <h1>Tracking Route</h1>
-    <p>Estimated {{ timeType }} time: {{ time }}</p>
-    <img src="map-example.png" alt="Map Example"/>
+  <h1>Tracking Route</h1>
+  <p class="subtitle">{{ subtitleText }}</p>
+  <app-tracking-map
+    [stations]="route"
+    [rideId]="rideId"
+    (estimatedTime)="setTimeEvent($event)"
+    (passingOutput)="passStationEvent($event)"
+    (currentLocation)="getLocationEvent($event)"
+    (stateChange)="stateChangeEvent($event)"
+    (distanceOutput)="getDistanceEvent($event)"
+  ></app-tracking-map>
+  <!-- <app-tracking-map
+  [stations]="route"
+  (estimatedTime)="setTimeEvent($event)">
+  </app-tracking-map> -->
+  @if (role == 'driver') {
     <div>
-        <button (click)="changeState()">{{ firstButtonText }}</button>
-        <button id="panic">PANIC</button>
+      <button (click)="changeState(currentLocation!)">Finish</button>
+      <button id="panic" (click)="showPanicWarning()" (dblclick)="panic()">PANIC</button>
+      <p class="errormsg" [style.display]="panicWarningDisplay ? 'block' : 'none'">
+        Double click to broadcast a panic signal!
+      </p>
     </div>
+  }
+  @if (role == 'passenger' && rideId != undefined) {
+    <div class="top-bar">
+      <button class="panic" (click)="showPanicWarning()" (dblclick)="panic()">PANIC</button>
+      <p class="errormsg" [style.display]="panicWarningDisplay ? 'block' : 'none'">
+        Double click to broadcast a panic signal!
+      </p>
+      <div class="right">
+        <label class="label">Something is wrong?</label>
+        <button class="report-button" (click)="openComplaintDialog()">Report here</button>
+      </div>
+    </div>
+  }
 </div>

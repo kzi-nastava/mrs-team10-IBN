@@ -1,0 +1,20 @@
+<div class="chat-wrapper">
+  <div class="chat-background"></div>
+
+  <div class="chat-container">
+    <div class="messages">
+      <div
+        *ngFor="let msg of chatRoom.messages"
+        class="message"
+        [ngClass]="msg.email === currentUserEmail ? 'right' : 'left'"
+      >
+        <span>{{ msg.content }}</span>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" placeholder="Write a message..." [(ngModel)]="messageContent" />
+      <button (click)="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>

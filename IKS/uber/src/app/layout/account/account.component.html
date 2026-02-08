@@ -1,158 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Account</title>
-    <link rel="stylesheet" href="account.component.css" />
-  </head>
-  <body>
-    <app-nav-bar></app-nav-bar>
+<app-nav-bar></app-nav-bar>
 
-    <canvas id="particles-canvas"></canvas>
+<canvas id="particles-canvas"></canvas>
 
-    <div class="container">
-      <h1>My Account</h1>
+<div class="container">
+  <h1>My Account</h1>
 
-      <div class="account-wrapper">
-        <div class="card profile-card">
-          <div class="profile-pic">
-            <input
-              type="file"
-              #fileInput
-              (change)="onFileSelected($event)"
-              accept="image/*"
-              style="display: none"
-            />
-            <img [src]="userProfileImage" alt="Profile Picture" />
-            <div class="edit-icon" (click)="fileInput.click()">📷</div>
-          </div>
-
-          <h2>{{ formData.firstName }} {{ formData.lastName }}</h2>
-
-          <ul class="menu">
-            @for (item of menuItems; track item.label) {
-            <li
-              (click)="item.label === 'My vehicle' ? openVehicleModal() : null"
-              [routerLink]="item.label !== 'My vehicle' ? item.route : null"
-            >
-              <span class="icon">{{ item.icon }}</span>
-              {{ item.label }}
-            </li>
-            }
-          </ul>
-        </div>
-        @if (userRole === 'driver') {
-        <div class="work-hours-section">
-          <div class="semicircle-progress">
-            <svg viewBox="0 0 200 120" class="progress-svg">
-              <path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.1)"
-                stroke-width="20"
-                stroke-linecap="round"
-              />
-              <path
-                d="M 20 100 A 80 80 0 0 1 180 100"
-                fill="none"
-                [attr.stroke]="getProgressPercentage() > 80 ? '#4caf50' : '#ff9800'"
-                stroke-width="20"
-                stroke-linecap="round"
-                class="progress-arc"
-                [style.stroke-dasharray]="251.2"
-                [style.stroke-dashoffset]="251.2 - (251.2 * getProgressPercentage()) / 100"
-              />
-            </svg>
-            <div class="progress-text">
-              <div class="hours-big">{{ hoursWorkedToday }}</div>
-              <div class="hours-small">out of {{ maxHoursPerDay }}h</div>
-            </div>
-          </div>
-        </div>
-        }
-
-        <div class="card info-card">
-          <input type="text" [(ngModel)]="formData.firstName" placeholder="First Name" />
-          <input type="text" [(ngModel)]="formData.lastName" placeholder="Last Name" />
-          <input type="text" [(ngModel)]="formData.address" placeholder="Address" />
-          <input type="text" [(ngModel)]="formData.phone" placeholder="Phone" />
-          <input type="email" [(ngModel)]="formData.email" placeholder="Email" readonly />
-
-          @if (userRole === 'driver') {
-          <button class="send-changes" [disabled]="!hasChanges()" (click)="sendChanges()">
-            Send changes
-          </button>
-          } @else {
-          <button class="save-changes" [disabled]="!hasChanges()" (click)="saveChanges()">
-            Save changes
-          </button>
-          }
-        </div>
-        @if (successMessage) {
-        <div class="success">
-          {{ successMessage }}
-        </div>
-        }
+  <div class="account-wrapper">
+    <div class="card profile-card">
+      <div class="profile-pic">
+        <input
+          type="file"
+          #fileInput
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          style="display: none"
+        />
+        <img [src]="userProfileImage" alt="Profile Picture" />
+        <div class="edit-icon" (click)="fileInput.click()">📷</div>
       </div>
-      @if (showVehicleModal) {
-      <div class="modal-overlay" (click)="closeVehicleModal()">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h2>🚗 My Vehicle Information</h2>
-            <button class="close-btn" (click)="closeVehicleModal()">✕</button>
-          </div>
 
-          <div class="modal-body">
-            <input
-              type="text"
-              [(ngModel)]="vehicleData.model"
-              placeholder="Vehicle model (e.g. Toyota Corolla)"
-            />
-
-            <label class="input-label">Vehicle type</label>
-            <select [(ngModel)]="vehicleData.type" class="vehicle-select">
-              <option value="standard">Standard</option>
-              <option value="luxury">Luxury</option>
-              <option value="van">Van</option>
-            </select>
-
-            <input type="text" [(ngModel)]="vehicleData.licensePlate" placeholder="License plate" />
-
-            <label class="input-label">Number of seats</label>
-            <input
-              type="number"
-              [(ngModel)]="vehicleData.seats"
-              placeholder="Number of seats"
-              min="1"
-              max="9"
-            />
-
-            <div class="checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="vehicleData.babyTransport" />
-                <span class="checkbox-text"> 👶 Baby transport available </span>
-              </label>
-
-              <label class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="vehicleData.petTransport" />
-                <span class="checkbox-text"> 🐾 Pet transport available </span>
-              </label>
-            </div>
-            <button class="send-vehicle-changes" (click)="sendVehicleChanges()">
-              Send Changes
-            </button>
-          </div>
-        </div>
-        @if (successMessage) {
-        <div class="success">
-          {{ successMessage }}
-        </div>
-        }
-      </div>
+      @if (userFormData) {
+        <h2>{{ userFormData.firstName }} {{ userFormData.lastName }}</h2>
       }
+
+      <ul class="menu">
+        @for (item of menuItems; track item.label) {
+          <li
+            (click)="
+              item.label === 'My vehicle'
+                ? openVehicleModal()
+                : item.label === 'Vehicle price'
+                  ? openVehiclePriceModal()
+                  : item.label === 'Change password'
+                    ? openChangePassword()
+                    : item.label === 'Favorites'
+                      ? openFavorites()
+                      : null
+            "
+            [routerLink]="
+              item.label !== 'My vehicle' &&
+              item.label !== 'Vehicle price' &&
+              item.label !== 'Change password' &&
+              item.label !== 'Favorites'
+                ? item.route
+                : null
+            "
+          >
+            <span class="icon">{{ item.icon }}</span>
+            {{ item.label }}
+          </li>
+        }
+      </ul>
     </div>
 
-    <router-outlet></router-outlet>
-  </body>
-</html>
+    @if (isDriver()) {
+      <div class="work-hours-section">
+        <div class="semicircle-progress">
+          <svg viewBox="0 0 200 120" class="progress-svg">
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              stroke="rgba(255, 255, 255, 0.1)"
+              stroke-width="20"
+              stroke-linecap="round"
+            />
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              [attr.stroke]="getProgressPercentage() > 80 ? '#4caf50' : '#ff9800'"
+              stroke-width="20"
+              stroke-linecap="round"
+              class="progress-arc"
+              [style.stroke-dasharray]="251.2"
+              [style.stroke-dashoffset]="251.2 - (251.2 * getProgressPercentage()) / 100"
+            />
+          </svg>
+          <div class="progress-text">
+            <div class="hours-big">{{ hoursWorkedToday }}</div>
+            <div class="hours-small">out of {{ maxHoursPerDay }}h</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <app-user-form
+      [formData]="userFormData"
+      [originalData]="originalUserFormData"
+      [buttonLabel]="user?.role === 'driver' ? 'Send changes' : 'Save changes'"
+      [emailReadonly]="true"
+      [userProfileImage]="userProfileImage"
+      [isDriver]="isDriver()"
+      [isDriverActive]="isDriverActive"
+      [isDriverBlocked]="isDriverBlocked"
+      [reason]="reason"
+      (formSubmit)="onUserFormSubmit($event)"
+    ></app-user-form>
+
+    <app-vehicle-price *ngIf="showVehiclePriceModal" (closeModal)="closeVehiclePriceModal()">
+    </app-vehicle-price>
+  </div>
+
+  @if (successMessage) {
+    <div class="success">
+      {{ successMessage }}
+    </div>
+  }
+  @if (showVehicleModal) {
+    <app-vehicle-form
+      [vehicleData]="vehicleData"
+      [originalData]="originalVehicleData"
+      [buttonLabel]="'Send Changes'"
+      [showAsModal]="true"
+      (formSubmit)="onVehicleFormSubmit($event)"
+      (closeModal)="closeVehicleModal()"
+    ></app-vehicle-form>
+  }
+  @if (showChangePassword) {
+    <app-change-password
+      (closeModal)="closeChangePassword()"
+      (passwordChanged)="onPasswordChanged($event)"
+    ></app-change-password>
+  }
+  @if (showFavorites) {
+    <app-favorites-popup (closed)="closeFavorites()" [editMode]="true"></app-favorites-popup>
+  }
+</div>
+
+<router-outlet></router-outlet>

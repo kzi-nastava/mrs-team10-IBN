@@ -1,13 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Mandali&display=swap');
+
 body {
   background-color: #312e2e;
 }
 
-h1, p, label{
-    color: white;
+h1,
+p,
+label {
+  /* color: #312e2e; */
+  color: #f5f5f5;
 }
 
-p, label, h2, textarea{
-  font-family: "Mandali";
+p,
+label,
+h2,
+textarea {
+  font-family: 'Mandali';
 }
 
 button {
@@ -17,7 +25,7 @@ button {
   color: white;
   height: 40px;
   width: 100px;
-  font-family: "Mandali";
+  font-family: 'Mandali';
   font-size: 20px;
   font-weight: bold;
 }
@@ -42,12 +50,12 @@ select {
   border-radius: 20px;
   border: none;
   background-color: white;
-  font-family: "Mandali";
+  font-family: 'Mandali';
   font-size: 20px;
 }
 
-select{
-  height:50px;
+select {
+  height: 50px;
 }
 
 a {
@@ -68,9 +76,11 @@ input[type='file'] {
   border-radius: 3rem !important;
   background-color: #d3d3d3 !important;
 }
-/* 
-.dialog-container {
-  background-color: transparent !important;
-} */
 
-
+.errormsg {
+  font-size: 10px;
+  color: red;
+  font-family: 'Mandali';
+  padding: 0;
+  margin: 0;
+}

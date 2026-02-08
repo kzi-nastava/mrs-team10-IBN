@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/base_navigation"
-    app:startDestination="@id/ride_history">
+    app:startDestination="@id/routeFragment">
 
     <fragment
         android:id="@+id/ride_history"
@@ -22,6 +22,12 @@
         <action
             android:id="@+id/action_details_to_history"
             app:destination="@id/ride_history"/>
+        <action
+            android:id="@+id/action_details_to_complaints"
+            app:destination="@id/rideComplaintsFragment"/>
+        <action
+            android:id="@+id/action_details_to_reviews"
+            app:destination="@id/rideReviewsFragment"/>
     </fragment>
 
     <fragment
@@ -32,12 +38,25 @@
         <action
             android:id="@+id/action_account_to_changeRequests"
             app:destination="@id/changeRequestsFragment"/>
+        <action
+            android:id="@+id/action_account_to_driver_registration"
+            app:destination="@id/registerDriverFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/changeRequestsFragment"
         android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
         tools:layout="@layout/fragment_change_requests"/>
+
+    <fragment
+        android:id="@+id/vehiclePriceFragment"
+        android:name="com.example.ubercorp.fragments.VehiclePrices"
+        tools:layout="@layout/fragment_vehicle_prices"/>
+
+    <fragment
+        android:id="@+id/registerDriverFragment"
+        android:name="com.example.ubercorp.fragments.RegisterDriverFragment"
+        tools:layout="@layout/fragment_register_driver"/>
 
     <fragment
         android:id="@+id/rating"
@@ -49,4 +68,65 @@
         android:name="com.example.ubercorp.fragments.OrderRideFragment"
         tools:layout="@layout/fragment_order_ride"
         />
+
+    <fragment
+        android:id="@+id/rideComplaintsFragment"
+        android:name="com.example.ubercorp.fragments.RideComplaintsFragment"
+        tools:layout="@layout/fragment_ride_complaints"
+        />
+
+    <fragment
+        android:id="@+id/rideReviewsFragment"
+        android:name="com.example.ubercorp.fragments.RideReviewsFragment"
+        tools:layout="@layout/fragment_ride_reviews"
+        />
+
+    <fragment
+        android:id="@+id/trackingRouteFragment"
+        android:name="com.example.ubercorp.fragments.TrackingRouteFragment"
+        tools:layout="@layout/fragment_tracking_route">
+        <!-- promeniti kada dodamo home screen za vozače -->
+        <action
+            android:id="@+id/action_trackingRouteFragment_to_routeFragment"
+            app:destination="@id/routeFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/routeFragment"
+        android:name="com.example.ubercorp.fragments.RouteFragment"
+        tools:layout="@layout/fragment_route">
+    <action
+        android:id="@+id/action_routeFragment_to_orderRideFragment"
+        app:destination="@id/orderRideFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/incomingRideFragment"
+        android:name="com.example.ubercorp.fragments.IncomingRideFragment"
+        tools:layout="@layout/fragment_incoming_ride">
+        <action
+            android:id="@+id/action_incomingRideFragment_to_routeFragment"
+            app:destination="@id/routeFragment"/>
+        <action
+            android:id="@+id/action_incomingRideFragment_to_trackingRouteFragment"
+            app:destination="@id/trackingRouteFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/notification"
+        android:name="com.example.ubercorp.fragments.NotificationFragment"
+        android:label="Notifications"
+        tools:layout="@layout/fragment_notification" />
+
+    <fragment
+        android:id="@+id/rate_fragment"
+        android:name="com.example.ubercorp.fragments.RatingDriverAndVehicle"
+        android:label="Rate"
+        tools:layout="@layout/fragment_rating_driver_and_vehicle"
+        />
+
+    <fragment
+        android:id="@+id/driverHomeFragment"
+        android:name="com.example.ubercorp.fragments.DriverHomeFragment"
+        tools:layout="@layout/fragment_driver_home"/>
+
+
 </navigation>

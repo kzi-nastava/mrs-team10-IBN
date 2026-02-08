@@ -1,8 +1,11 @@
 package com.example.ubercorp.fragments;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,13 +23,39 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
-import java.util.ArrayList;
-import java.util.List;
 import com.example.ubercorp.R;
+import com.example.ubercorp.dto.CreateRideDTO;
+import com.example.ubercorp.dto.FavoriteRouteDTO;
+import com.example.ubercorp.dto.GetCoordinateDTO;
+import com.example.ubercorp.dto.PriceDTO;
+import com.example.ubercorp.dto.RideOrderResponseDTO;
+import com.example.ubercorp.managers.RideManager;
+import com.example.ubercorp.managers.RouteManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderRideFragment extends Fragment {
 
     // UI elements
+    private MapView mapView;
+
+
     private CardView locationDisplay;
     private TextView locationText;
     private TextView timeText;
@@ -64,17 +93,35 @@ public class OrderRideFragment extends Fragment {
     private TextView totalPriceText;
     private Button orderBtn;
 
+    // Managers
+    private RouteManager routeManager;
+    private RideManager rideManager;
+
     // Data
     private boolean isDropdownOpen = false;
-    private String fromLocation = "Kopernikova 23";
-    private String toLocation = "Železnička stanica";
+    private String fromLocation = "";
+    private String toLocation = "";
     private List<String> stops = new ArrayList<>();
     private String timeOption = "now";
     private String rideDate = "";
     private String rideTime = "";
-    private String selectedCar = "standard";
+    private String selectedCar = "STANDARD";
     private boolean isShareRideOpen = false;
     private List<String> passengerEmails = new ArrayList<>();
+
+    // Route data
+    private GeoPoint startPoint;
+    private GeoPoint endPoint;
+    private List<GeoPoint> stopPoints = new ArrayList<>();
+    private List<GeoPoint> routePoints = new ArrayList<>();
+    private double calculatedPrice = 0.0;
+    private int estimatedDuration = 0;
+    private double estimatedDistance = 0.0;
+    private Calendar selectedDateTime;
+    private Button btnFavorites;
+
+    private boolean isRouteConfirmed = false;
+
 
     @Nullable
     @Override
@@ -82,15 +129,27 @@ public class OrderRideFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_order_ride, container, false);
 
+        Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+
         initializeViews(view);
+        initializeManagers();
         setupListeners();
+        loadRouteFromArguments();
         updateLocationDisplay();
-        calculatePrice();
+
 
         return view;
     }
 
     private void initializeViews(View view) {
+        // Map
+        mapView = view.findViewById(R.id.map);
+        mapView.setMultiTouchControls(true);
+        mapView.getController().setZoom(12.75);
+        mapView.getController().setCenter(new GeoPoint(45.242, 19.8227));
+
+
+
         // Location display
         locationDisplay = view.findViewById(R.id.locationDisplay);
         locationText = view.findViewById(R.id.locationText);
@@ -133,23 +192,69 @@ public class OrderRideFragment extends Fragment {
 
         // Price and order
         totalPriceText = view.findViewById(R.id.totalPriceText);
-        orderBtn = view.findViewById(R.id.orderBtn);
+        orderBtn = view.findViewById(R.id.orderRideButton);
 
         // Set initial values
-        fromLocationInput.setText(fromLocation);
-        toLocationInput.setText(toLocation);
         radioNow.setChecked(true);
         dateTimePicker.setVisibility(View.GONE);
+        selectCar("STANDARD");
+
+        selectedDateTime = Calendar.getInstance();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        dateInput.setText(dateFormat.format(selectedDateTime.getTime()));
+        timeInput.setText(timeFormat.format(selectedDateTime.getTime()));
+        btnFavorites = view.findViewById(R.id.btnFavorites);
+    }
+
+    private void initializeManagers() {
+        routeManager = new RouteManager(mapView, requireContext());
+        rideManager = new RideManager(requireContext());
+    }
+
+    private void loadRouteFromArguments() {
+        Bundle args = getArguments();
+        if (args != null) {
+            fromLocation = args.getString("fromLocation", "");
+            toLocation = args.getString("toLocation", "");
+
+            estimatedDistance = args.getDouble("estimatedDistance", 0.0);
+            estimatedDuration = args.getInt("estimatedDuration", 0);
+
+            fromLocationInput.setText(fromLocation);
+            toLocationInput.setText(toLocation);
+
+            ArrayList<String> stopsList = args.getStringArrayList("stops");
+            if (stopsList != null) {
+                for (String stop : stopsList) {
+                    if (!stop.isEmpty()) {
+                        stops.add(stop);
+                        addStop();
+                        int lastIndex = stopsContainer.getChildCount() - 1;
+                        if (lastIndex >= 0) {
+                            View stopView = stopsContainer.getChildAt(lastIndex);
+                            EditText stopInput = stopView.findViewById(R.id.stopInput);
+                            stopInput.setText(stop);
+                        }
+                    }
+                }
+            }
+
+            if (!fromLocation.isEmpty() && !toLocation.isEmpty()) {
+                fetchAndDrawRoute(() -> {
+                    isRouteConfirmed = true;
+                    orderBtn.setEnabled(true);
+                });
+            }
+        }
     }
 
     private void setupListeners() {
-        // Location dropdown toggle
         locationDisplay.setOnClickListener(v -> toggleDropdown());
 
-        // Add stop button
         addStopBtn.setOnClickListener(v -> addStop());
 
-        // Time options
         radioNow.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 timeOption = "now";
@@ -164,25 +269,109 @@ public class OrderRideFragment extends Fragment {
             }
         });
 
-        // Confirm button
+        // Date picker
+        dateInput.setOnClickListener(v -> showDatePicker());
+        dateInput.setFocusable(false);
+        dateInput.setClickable(true);
+
+        // Time picker
+        timeInput.setOnClickListener(v -> showTimePicker());
+        timeInput.setFocusable(false);
+        timeInput.setClickable(true);
+
         confirmBtn.setOnClickListener(v -> confirmSelection());
 
-        // Car selection
-        standardCar.setOnClickListener(v -> selectCar("standard"));
-        luxuryCar.setOnClickListener(v -> selectCar("luxury"));
-        vanCar.setOnClickListener(v -> selectCar("van"));
+        standardCar.setOnClickListener(v -> selectCar("STANDARD"));
+        luxuryCar.setOnClickListener(v -> selectCar("LUXURY"));
+        vanCar.setOnClickListener(v -> selectCar("VAN"));
 
-        // Share ride
         shareRideCard.setOnClickListener(v -> toggleShareRide());
         addPassengerBtn.setOnClickListener(v -> addPassenger());
         confirmShareBtn.setOnClickListener(v -> confirmShareRide());
 
-        // Order button
         orderBtn.setOnClickListener(v -> placeOrder());
+        btnFavorites.setOnClickListener(v -> showFavoriteRoutesDialog());
+    }
 
-        // Checkboxes for price calculation
-        babyCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> calculatePrice());
-        petCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> calculatePrice());
+    private void showDatePicker() {
+        Calendar minDate = Calendar.getInstance();
+        Calendar maxDate = Calendar.getInstance();
+        maxDate.add(Calendar.DAY_OF_MONTH, 1);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                R.style.CustomDatePickerTheme,
+                (view, year, month, dayOfMonth) -> {
+                    selectedDateTime.set(Calendar.YEAR, year);
+                    selectedDateTime.set(Calendar.MONTH, month);
+                    selectedDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    dateInput.setText(dateFormat.format(selectedDateTime.getTime()));
+                    rideDate = dateFormat.format(selectedDateTime.getTime());
+
+                    validateScheduledDateTime();
+                },
+                selectedDateTime.get(Calendar.YEAR),
+                selectedDateTime.get(Calendar.MONTH),
+                selectedDateTime.get(Calendar.DAY_OF_MONTH)
+        );
+
+        datePickerDialog.getDatePicker().setMinDate(minDate.getTimeInMillis());
+        datePickerDialog.getDatePicker().setMaxDate(maxDate.getTimeInMillis());
+
+        datePickerDialog.show();
+    }
+
+    private void showTimePicker() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                requireContext(),
+                R.style.CustomTimePickerTheme,
+                (view, hourOfDay, minute) -> {
+                    selectedDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    selectedDateTime.set(Calendar.MINUTE, minute);
+                    selectedDateTime.set(Calendar.SECOND, 0);
+
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    timeInput.setText(timeFormat.format(selectedDateTime.getTime()));
+                    rideTime = timeFormat.format(selectedDateTime.getTime());
+
+                    validateScheduledDateTime();
+                },
+                selectedDateTime.get(Calendar.HOUR_OF_DAY),
+                selectedDateTime.get(Calendar.MINUTE),
+                true
+        );
+
+        timePickerDialog.show();
+    }
+
+    private boolean validateScheduledDateTime() {
+        if (timeOption.equals("now")) {
+            return true;
+        }
+
+        Calendar now = Calendar.getInstance();
+        Calendar scheduledTime = (Calendar) selectedDateTime.clone();
+
+        if (scheduledTime.before(now)) {
+            Toast.makeText(requireContext(),
+                    "Scheduled time cannot be in the past",
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Calendar maxTime = (Calendar) now.clone();
+        maxTime.add(Calendar.HOUR_OF_DAY, 5);
+
+        if (scheduledTime.after(maxTime)) {
+            Toast.makeText(requireContext(),
+                    "Scheduled time cannot be more than 5 hours from now",
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
     }
 
     private void toggleDropdown() {
@@ -224,7 +413,6 @@ public class OrderRideFragment extends Fragment {
             if (currentIndex >= 0 && currentIndex < stops.size()) {
                 stops.remove(currentIndex);
                 stopsContainer.removeView(stopLayout);
-                calculatePrice();
             }
         });
 
@@ -232,19 +420,39 @@ public class OrderRideFragment extends Fragment {
     }
 
     private void confirmSelection() {
-        fromLocation = fromLocationInput.getText().toString();
-        toLocation = toLocationInput.getText().toString();
+        fromLocation = fromLocationInput.getText().toString().trim();
+        toLocation = toLocationInput.getText().toString().trim();
+
+        if (fromLocation.isEmpty() || toLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter both start and end locations", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (timeOption.equals("now")) {
             timeText.setText("⌛ Leave now");
         } else {
             rideDate = dateInput.getText().toString();
             rideTime = timeInput.getText().toString();
-            timeText.setText("⌛ " + rideDate + " at " + rideTime);
+
+            if (rideDate.isEmpty() || rideTime.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter date and time", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!validateScheduledDateTime()) {
+                return;
+            }
+
+            SimpleDateFormat displayFormat = new SimpleDateFormat("MMM dd 'at' HH:mm", Locale.getDefault());
+            timeText.setText("⌛ " + displayFormat.format(selectedDateTime.getTime()));
         }
 
         updateLocationDisplay();
         toggleDropdown();
+        fetchAndDrawRoute(() -> {
+            isRouteConfirmed = true;
+            orderBtn.setEnabled(true);
+        });
     }
 
     private void updateLocationDisplay() {
@@ -270,7 +478,6 @@ public class OrderRideFragment extends Fragment {
     private void selectCar(String carType) {
         selectedCar = carType;
 
-        // Reset all backgrounds
         int defaultColor = ContextCompat.getColor(requireContext(), R.color.car_default);
         int selectedColor = ContextCompat.getColor(requireContext(), R.color.car_selected);
 
@@ -278,15 +485,14 @@ public class OrderRideFragment extends Fragment {
         luxuryCar.setCardBackgroundColor(defaultColor);
         vanCar.setCardBackgroundColor(defaultColor);
 
-        // Highlight selected
         switch (carType) {
-            case "standard":
+            case "STANDARD":
                 standardCar.setCardBackgroundColor(selectedColor);
                 break;
-            case "luxury":
+            case "LUXURY":
                 luxuryCar.setCardBackgroundColor(selectedColor);
                 break;
-            case "van":
+            case "VAN":
                 vanCar.setCardBackgroundColor(selectedColor);
                 break;
         }
@@ -340,7 +546,6 @@ public class OrderRideFragment extends Fragment {
     }
 
     private void confirmShareRide() {
-        // Remove empty emails
         passengerEmails.removeIf(String::isEmpty);
 
         if (!passengerEmails.isEmpty()) {
@@ -352,27 +557,372 @@ public class OrderRideFragment extends Fragment {
         }
 
         toggleShareRide();
-        calculatePrice();
+    }
+
+    private void fetchAndDrawRoute(Runnable onComplete) {
+        new Thread(() -> {
+            try {
+                startPoint = getCoordinatesFromAddress(fromLocation);
+                endPoint = getCoordinatesFromAddress(toLocation);
+
+                stopPoints.clear();
+                for (String stop : stops) {
+                    if (!stop.isEmpty()) {
+                        GeoPoint stopPoint = getCoordinatesFromAddress(stop);
+                        if (stopPoint != null) stopPoints.add(stopPoint);
+                    }
+                }
+
+                if (startPoint != null && endPoint != null) {
+                    List<GeoPoint> allPoints = new ArrayList<>();
+                    allPoints.add(startPoint);
+                    allPoints.addAll(stopPoints);
+                    allPoints.add(endPoint);
+
+                    routePoints = routeManager.getRoute(allPoints);
+
+                    requireActivity().runOnUiThread(() -> {
+                        if (routePoints != null && !routePoints.isEmpty()) {
+                            routeManager.drawRoute(routePoints, allPoints);
+
+                            estimatedDistance = routeManager.getEstimatedDistance();
+                            estimatedDuration = routeManager.getEstimatedDuration();
+
+                            calculatePrice();
+                        } else {
+                            Toast.makeText(requireContext(), "Unable to fetch route", Toast.LENGTH_SHORT).show();
+                        }
+                        if (onComplete != null) onComplete.run();
+                    });
+                } else {
+                    if (onComplete != null) requireActivity().runOnUiThread(onComplete);
+                }
+            } catch (Exception e) {
+                Log.e("OrderRideFragment", "Error: " + e.getMessage(), e);
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Error fetching route", Toast.LENGTH_SHORT).show();
+                    if (onComplete != null) onComplete.run();
+                });
+            }
+        }).start();
+    }
+
+    private GeoPoint getCoordinatesFromAddress(String address) throws Exception {
+        Thread.sleep(1000);
+        String encodedAddress = URLEncoder.encode(address + ", Novi Sad, Serbia", "UTF-8");
+        String urlString = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
+
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "UberCorp/1.0");
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        conn.connect();
+
+        int responseCode = conn.getResponseCode();
+        if (responseCode == 200) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            reader.close();
+
+            JSONArray results = new JSONArray(result.toString());
+            if (results.length() > 0) {
+                JSONObject resultObj = results.getJSONObject(0);
+                double lat = resultObj.getDouble("lat");
+                double lon = resultObj.getDouble("lon");
+                conn.disconnect();
+                return new GeoPoint(lat, lon);
+            }
+        }
+
+        conn.disconnect();
+        return null;
     }
 
     private void calculatePrice() {
+        if (startPoint == null || endPoint == null || routePoints.isEmpty()) {
+            return;
+        }
+
+        CreateRideDTO rideDTO = buildRideDTO();
+        rideDTO.setScheduled(null);
+
+        rideManager.calculatePrice(rideDTO, new Callback<PriceDTO>() {
+            @Override
+            public void onResponse(Call<PriceDTO> call, Response<PriceDTO> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    calculatedPrice = response.body().getPrice();
+                    totalPriceText.setText(String.format(Locale.getDefault(), "Total price: %.2f RSD", calculatedPrice));
+                } else {
+                    Toast.makeText(requireContext(), "Failed to calculate price", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PriceDTO> call, Throwable t) {
+                Log.e("OrderRideFragment", "Price calculation failed: " + t.getMessage());
+                Toast.makeText(requireContext(), "Error calculating price", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private CreateRideDTO buildRideDTO() {
+        CreateRideDTO rideDTO = new CreateRideDTO();
+
+        // Start i destination
+        rideDTO.setStartAddress(new GetCoordinateDTO(fromLocation, startPoint.getLatitude(), startPoint.getLongitude()));
+        rideDTO.setDestinationAddress(new GetCoordinateDTO(toLocation, endPoint.getLatitude(), endPoint.getLongitude()));
+
+        // Stops
+        List<GetCoordinateDTO> stopDTOs = new ArrayList<>();
+        for (int i = 0; i < stopPoints.size() && i < stops.size(); i++) {
+            GeoPoint point = stopPoints.get(i);
+            String stopAddress = stops.get(i);
+            stopDTOs.add(new GetCoordinateDTO(stopAddress, point.getLatitude(), point.getLongitude()));
+        }
+        rideDTO.setStops(stopDTOs);
+
+        // Passengers
+        List<String> validEmails = new ArrayList<>();
+        for (String email : passengerEmails) {
+            if (!email.isEmpty()) validEmails.add(email);
+        }
+        rideDTO.setPassengerEmails(validEmails);
+
+        // Vehicle
+        rideDTO.setVehicleType(selectedCar);
+
+        // Options
+        rideDTO.setBabySeat(babyCheckbox.isChecked());
+        rideDTO.setPetFriendly(petCheckbox.isChecked());
+
+        // Scheduled
+        if (timeOption.equals("schedule") && !rideDate.isEmpty() && !rideTime.isEmpty()) {
+            String scheduledDateTime = rideDate + " " + rideTime + ":00";
+            rideDTO.setScheduled(scheduledDateTime);
+        } else {
+            rideDTO.setScheduled(null);
+        }
+
+        // Distance & estimatedDuration
+        rideDTO.setDistance(estimatedDistance);
+        rideDTO.setEstimatedDuration(estimatedDuration);
+
+        // Price
+        rideDTO.setPrice(calculatedPrice);
+
+        return rideDTO;
     }
 
     private void placeOrder() {
-        boolean hasBaby = babyCheckbox.isChecked();
-        boolean hasPet = petCheckbox.isChecked();
-
-        String message = "Order placed!\nFrom: " + fromLocation +
-                "\nTo: " + toLocation +
-                "\nCar: " + selectedCar;
-
-        if (hasBaby) {
-            message += "\nWith baby seat";
-        }
-        if (hasPet) {
-            message += "\nPet-friendly";
+        if (!isRouteConfirmed) {
+            Toast.makeText(requireContext(), "Please confirm your route first", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+        if (calculatedPrice == 0.0) {
+            Toast.makeText(requireContext(), "Please wait for price calculation", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (timeOption.equals("schedule") && !validateScheduledDateTime()) {
+            return;
+        }
+
+        CreateRideDTO rideDTO = buildRideDTO();
+        rideDTO.setPrice(calculatedPrice);
+
+        orderBtn.setEnabled(false);
+        orderBtn.setText("Ordering...");
+
+        rideManager.createRide(rideDTO, new Callback<RideOrderResponseDTO>() {
+            @Override
+            public void onResponse(Call<RideOrderResponseDTO> call, Response<RideOrderResponseDTO> response) {
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
+
+                if (response.code() == 201 && response.body() != null) {
+                    showOrderConfirmation(response.body());
+                } else if (response.code() == 204) {
+                    Toast.makeText(requireContext(),
+                            "No available drivers at the moment.",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to create ride.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RideOrderResponseDTO> call, Throwable t) {
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
+                Log.e("OrderRideFragment", "Order failed: " + t.getMessage());
+                Toast.makeText(requireContext(), "Error creating ride: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
+    private void showOrderConfirmation(RideOrderResponseDTO response) {
+        StringBuilder message = new StringBuilder("Ride ordered successfully!\n\n");
+        message.append("Price: ").append(String.format(Locale.getDefault(), "%.2f RSD", response.getPrice())).append("\n");
+
+            message.append("\nDriver: ").append(response.getDriverName()).append("\n");
+            message.append("Phone: ").append(response.getDriverPhone()).append("\n");
+            message.append("Vehicle: ").append(response.getVehicleModel()).append("\n");
+
+            if (response.getEstimatedPickupMinutes() != -1L) {
+                message.append("Estimated pickup: ").append(response.getEstimatedPickupMinutes()).append(" minutes");
+            }
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Ride Confirmation")
+                .setMessage(message.toString())
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mapView != null) {
+            mapView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mapView != null) {
+            mapView.onPause();
+        }
+    }
+
+    private void showFavoriteRoutesDialog() {
+        FavoriteRoutesDialog dialog = FavoriteRoutesDialog.newInstance();
+
+        dialog.setLoading(true);
+        dialog.show(getParentFragmentManager(), FavoriteRoutesDialog.TAG);
+
+        dialog.setOnRouteSelectedListener(this::loadRouteIntoForm);
+
+        loadFavoriteRoutes(dialog);
+    }
+
+    private void loadFavoriteRoutes(FavoriteRoutesDialog dialog) {
+        rideManager.getFavoriteRoutes(new Callback<List<FavoriteRouteDTO>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteRouteDTO>> call,
+                                   Response<List<FavoriteRouteDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    dialog.setLoading(false);
+                    dialog.setRoutes(response.body());
+                } else {
+                    dialog.setLoading(false);
+                    Toast.makeText(requireContext(),
+                            "Failed to load favorites", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteRouteDTO>> call, Throwable t) {
+                dialog.setLoading(false);
+                Toast.makeText(requireContext(),
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loadRouteIntoForm(FavoriteRouteDTO route) {
+        if (route.getRouteDTO() == null ||
+                route.getRouteDTO().getStations() == null ||
+                route.getRouteDTO().getStations().isEmpty()) {
+            Toast.makeText(requireContext(), "Invalid route data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<GetCoordinateDTO> stations = route.getRouteDTO().getStations();
+
+        stops.clear();
+        stopsContainer.removeAllViews();
+        stopPoints.clear();
+
+        GetCoordinateDTO startStation = stations.get(0);
+        fromLocation = startStation.getAddress();
+        fromLocationInput.setText(fromLocation);
+        startPoint = new GeoPoint(startStation.getLat(), startStation.getLon());
+
+        GetCoordinateDTO endStation = stations.get(stations.size() - 1);
+        toLocation = endStation.getAddress();
+        toLocationInput.setText(toLocation);
+        endPoint = new GeoPoint(endStation.getLat(), endStation.getLon());
+
+        for (int i = 1; i < stations.size() - 1; i++) {
+            GetCoordinateDTO stopStation = stations.get(i);
+            String stopAddress = stopStation.getAddress();
+
+            stops.add(stopAddress);
+            stopPoints.add(new GeoPoint(stopStation.getLat(), stopStation.getLon()));
+
+            addStop();
+
+            int lastIndex = stopsContainer.getChildCount() - 1;
+            if (lastIndex >= 0) {
+                View stopView = stopsContainer.getChildAt(lastIndex);
+                EditText stopInput = stopView.findViewById(R.id.stopInput);
+                stopInput.setText(stopAddress);
+            }
+        }
+
+        updateLocationDisplay();
+
+        drawRouteFromPoints();
+    }
+
+    private void drawRouteFromPoints() {
+        new Thread(() -> {
+            try {
+                List<GeoPoint> allPoints = new ArrayList<>();
+                allPoints.add(startPoint);
+                allPoints.addAll(stopPoints);
+                allPoints.add(endPoint);
+
+                routePoints = routeManager.getRoute(allPoints);
+
+                requireActivity().runOnUiThread(() -> {
+                    if (routePoints != null && !routePoints.isEmpty()) {
+                        routeManager.drawRoute(routePoints, allPoints);
+
+                        estimatedDistance = routeManager.getEstimatedDistance();
+                        estimatedDuration = routeManager.getEstimatedDuration();
+
+                        calculatePrice();
+
+                        isRouteConfirmed = true;
+                        orderBtn.setEnabled(true);
+                    } else {
+                        Toast.makeText(requireContext(), "Unable to draw route", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("OrderRideFragment", "Error drawing route: " + e.getMessage(), e);
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Error drawing route", Toast.LENGTH_SHORT).show()
+                );
+            }
+        }).start();
+    }
+
+
+
 }

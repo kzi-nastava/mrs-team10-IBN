@@ -4,24 +4,45 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+        <item android:id="@+id/home"
+            android:title="@string/home"
+            android:icon="@drawable/ic_home"
+            android:orderInCategory="100"/>
+
         <item android:id="@+id/accountFragment"
             android:title="@string/my_account"
             android:icon="@drawable/ic_account"
-            android:orderInCategory="100" />
+            android:orderInCategory="200" />
 
         <item android:id="@+id/rating"
             android:title="@string/chat_support"
             android:icon="@drawable/ic_chat"
-            android:orderInCategory="200"/>
+            android:orderInCategory="300"/>
 
         <item android:id="@+id/ride_history"
             android:title="@string/history_of_rides"
             android:icon="@drawable/ic_map"
-            android:orderInCategory="300" />
+            android:orderInCategory="400" />
+
+        <item android:id="@+id/incoming_ride"
+            android:title="@string/incoming_ride"
+            android:icon="@drawable/incoming"
+            android:orderInCategory="500" />
 
         <item android:id="@+id/tracking_ride"
             android:title="@string/tracking_ride"
             android:icon="@drawable/ic_car"
-            android:orderInCategory="300" />
+            android:orderInCategory="600" />
+    </group>
+    <group android:id="@+id/auth_group">
+        <item android:id="@+id/login"
+            android:title="Login"
+            android:icon="@drawable/ic_account"
+            android:orderInCategory="700" />
+
+        <item android:id="@+id/logout"
+            android:title="Logout"
+            android:icon="@drawable/ic_logout"
+            android:orderInCategory="701" />
     </group>
 </menu>

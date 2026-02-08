@@ -1,0 +1,33 @@
+<div class="page-wrapper">
+    <app-nav-bar></app-nav-bar>
+
+    <div class="container" (scroll)="onScroll($event)">
+    @for (ride of scheduled_rides(); track ride.id) {
+        <div class="ride-card" >
+            <div class="locations">
+                <div class="location">
+                    <span class="pin red"></span>
+                    <input type="text" placeholder={{ride.startLocation}} readonly />
+                </div>
+
+                <div class="location">
+                    <span class="pin green"></span>
+                    <input type="text" placeholder="{{ride.endLocation}}" readonly />
+                </div>
+            </div>
+
+            <div class="avatars">
+                <img       *ngFor="let passenger of ride.passengers"
+                [src]="passenger.image || 'pfp.png'"
+                />
+            </div>
+
+            <div class="time">
+                <div class="time-box">{{ ride.startTime | date:'dd/MM/yyyy' }}</div>
+                <div class="time-box">{{ ride.startTime | date:'HH:mm' }}</div>
+                <div class="time-box">{{ ride.endTime | date:'HH:mm' }}</div>
+            </div>
+        </div>
+    }
+    </div>
+</div>

@@ -1,71 +1,84 @@
-div{
-    width:70%;
-    margin: auto;
-    align-items: center;
-    text-align: center;
+div {
+  width: 80%;
+  margin: auto;
+  padding-bottom: 2px;
+  align-items: center;
+  text-align: center;
 }
 
-#container{
-    padding-top: 5%;
+#places {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-#places{
-    padding-left:30%;
-    text-align: left;
-    margin-bottom: 5px;
+mat-icon,
+p {
+  color: white;
+  display: inline;
+  font-size: 20px;
 }
 
-mat-icon, p{
-    color:white;
-    display: inline;
-    font-size: 20px;
+img {
+  height: 300px;
+  width: auto;
 }
 
-img{
-    height:300px;
-    width: auto;
+h1,
+p {
+  line-height: 10px;
 }
 
-h1, p{
-    line-height: 10px;
+h2 {
+  margin: 0;
 }
 
-h2{
-    margin: 0;
+h1 {
+  margin: 20px;
+  font-family: 'Squada One';
+  font-size: 60px;
 }
 
-h1{
-    margin: 20px;
-    font-family: "Squada One";
-    font-size: 60px;
+dialog,
+textarea {
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  padding: 10px;
+  height: 50%;
 }
 
-#accept{
-    background-color: #A85F5F;
+dialog {
+  background-color: #d9d9d9;
+  text-align: center;
+  background-blend-mode: difference;
+  width: 40%;
+  height: 40%;
+  animation: enter-animation 0.3s;
 }
 
-button{
-    background-color: #691D1D;
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+  animation: enter-animation 0.3s;
 }
 
-dialog, textarea{
-    border-radius: 20px;
-    border: none;
-    outline: none;
-    padding:10px;
-    height:50%;
+textarea {
+  width: 70%;
+  display: block;
+  margin: auto;
 }
 
-dialog{
-    background-color: #D9D9D9;
-    text-align: center;
-    background-blend-mode: difference;
-    width:40%;
-    height: 40%;
+.no-ride {
+  text-align: center;
+  margin-top: 4rem;
+  color: #666;
 }
 
-textarea{
-    width:60%;
-    display:block;
-    margin: auto;
+@keyframes enter-animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

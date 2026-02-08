@@ -1,0 +1,47 @@
+<div class="overlay" (click)="close()">
+  <div class="popup" (click)="$event.stopPropagation()">
+    <div class="popup-header">
+      <h2>Favorite Routes</h2>
+      <button class="close-btn" (click)="close()">x</button>
+    </div>
+
+    <div class="routes-list">
+      @if (loading) {
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <p>Loading favorite routes...</p>
+        </div>
+      } @else if (favoriteRoutes.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">❤️</div>
+          <p>No favorite routes yet</p>
+          <span class="empty-hint">Save routes after ordering to quickly access them later</span>
+        </div>
+      } @else {
+        @for (route of favoriteRoutes; track route.id) {
+          <div class="route-card" (click)="editMode ? null : selectRoute(route)">
+            <div class="route-info">
+              <div class="route-path">
+                <span class="location-point">📍</span>
+                <span class="route-text">{{ route.from }}</span>
+                @if (route.stops.length > 0) {
+                  @for (stop of route.stops; track $index) {
+                    <span class="route-arrow">→</span>
+                    <span class="route-text">{{ stop }}</span>
+                  }
+                }
+                <span class="route-arrow">→</span>
+                <span class="route-text">{{ route.to }}</span>
+              </div>
+            </div>
+            @if (editMode) {
+              <div class="remove-icon" (click)="removeRoute(route)">x</div>
+            } @else {
+              <div class="select-icon">›</div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+package com.example.ubercorp.api;
+
+import com.example.ubercorp.dto.CoordinateDTO;
+import com.example.ubercorp.dto.DriverDTO;
+import com.example.ubercorp.dto.GetStatusDTO;
+import com.example.ubercorp.dto.UpdateDriverDTO;
+import com.example.ubercorp.dto.CreateDriverDTO;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+
+public interface DriverService {
+
+    @GET("api/drivers/me")
+    Call<DriverDTO> getDriverProfile(@Header("Authorization") String authToken);
+
+    @POST("api/drivers")
+    Call<DriverDTO> register(@Header("Authorization") String authToken, @Body CreateDriverDTO createDriverDTO);
+
+    @POST("api/drivers/me/change-request")
+    Call<Void> submitDriverChangeRequest(@Header("Authorization") String authToken, @Body UpdateDriverDTO changeRequest);
+
+    @PUT("api/drivers/me/toggle-status")
+    Call<Void> toggleDriverStatus(
+            @Header("Authorization") String token,
+            @retrofit2.http.Query("active") boolean active
+    );
+
+    @PUT("api/drivers/me/update-location")
+    Call<CoordinateDTO> updateLocation(
+            @Header("Authorization") String token,
+            @Body String address
+    );
+
+    @GET("api/drivers/me/status")
+    Call<GetStatusDTO> getStatus(
+            @Header("Authorization") String token
+    );
+}

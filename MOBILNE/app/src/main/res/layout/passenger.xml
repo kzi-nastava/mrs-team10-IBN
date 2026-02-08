@@ -21,7 +21,6 @@
             android:id="@+id/profile_pic"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/corgo1"
             app:shapeAppearanceOverlay="@style/CircleImageView"
             android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent"
@@ -33,6 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
+            android:gravity="center"
             app:layout_constraintTop_toBottomOf="@id/profile_pic"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -42,11 +42,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
+            android:gravity="center"
             app:layout_constraintTop_toBottomOf="@id/user_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

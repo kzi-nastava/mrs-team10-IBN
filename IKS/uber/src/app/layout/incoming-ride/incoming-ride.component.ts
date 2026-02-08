@@ -1,15 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { NavBarComponent } from "../nav-bar/nav-bar.component";
-import { RouterLink } from '@angular/router';
+import { NavBarComponent } from '../nav-bar/nav-bar.component';
+import { Router } from '@angular/router';
+import { MapComponent } from '../../maps/map-basic/map.component';
+import { RouteService, RidePayload, RideCancellation } from '../../service/route.service';
+import { Station } from '../../model/ride-history.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-incoming-ride',
-  imports: [MatIconModule, NavBarComponent, RouterLink],
+  imports: [MatIconModule, NavBarComponent, MapComponent, CommonModule],
   templateUrl: './incoming-ride.component.html',
-  styleUrl: './incoming-ride.component.css',
+  styleUrls: ['./incoming-ride.component.css'],
 })
 export class IncomingRideComponent {
-  startloc: String = "Bulevar Oslobođenja 3";
-  finaldest: String = "Hadži Ruvimova 7";
+  private routeService = inject(RouteService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
+
+  route: Station[] = [];
+  ride!: RidePayload;
+
+  constructor() {
+    this.routeService.getRide().subscribe({
+      next: (response) => {
+        if (!response) return;
+        this.ride = response;
+        this.route = [...response.route.stations];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error fetching ride:', err),
+    });
+  }
+
+  startRide() {
+    if (!this.ride) return;
+
+    const currentTime = new Date().toISOString();
+    this.routeService.startRide(this.ride.id, currentTime).subscribe({
+      next: () => {
+        this.router.navigate([`/tracking-route/${this.ride.token}`]);
+      },
+      error: (err) => console.error('Error starting ride:', err),
+    });
+  }
+
+  declineRide(reason: string) {
+    const cancelledRide: RideCancellation = {
+      id: this.ride.id,
+      cancellationReason: reason,
+      cancelledByDriver: true,
+    };
+    this.routeService.cancelRide(cancelledRide).subscribe({
+      next: (res) => this.router.navigate(['/home']),
+    });
+  }
 }

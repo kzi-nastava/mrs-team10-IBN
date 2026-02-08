@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Squada+One&display=swap');
 
 .requests-container {
-  min-height: 100vh;
+  min-height: 60vh;
   padding: 1.5rem;
   font-family: 'Arial', sans-serif;
   position: relative;
@@ -20,13 +20,17 @@
   font-weight: 400;
   color: #ffffff;
   margin: 0 0 0.5rem 0;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
   text-align: center;
 }
 
 .table-card {
   border-radius: 15px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   background-color: rgba(194, 190, 190, 0.893);
   backdrop-filter: blur(10px);
@@ -56,7 +60,9 @@
 
 .requests-table tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .requests-table tbody tr:hover {
@@ -308,5 +314,89 @@
   .arrow {
     padding-top: 0;
     transform: rotate(90deg);
+  }
+}
+
+.image-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.image-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.old-image-wrapper {
+  border: 3px solid rgba(220, 38, 38, 0.6);
+}
+
+.new-image-wrapper {
+  border: 3px solid rgba(76, 175, 80, 0.6);
+}
+
+.profile-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-arrow {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.8);
+  padding-top: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  margin-top: 2rem;
+}
+
+.empty-state p {
+  font-size: 1.3rem;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+}
+
+.empty-state p {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .image-comparison {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .image-arrow {
+    transform: rotate(90deg);
+  }
+
+  .image-wrapper {
+    width: 120px;
+    height: 120px;
   }
 }

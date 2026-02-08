@@ -1,16 +1,20 @@
 <div class="top">
-  <button mat-icon-button (click)="drawer.toggle()">
-      <mat-icon style="color: antiquewhite; ">menu</mat-icon>
+  <button mat-icon-button (click)="drawer.toggle()" [style.display]="loggedIn ? 'inline' : 'none'">
+    <mat-icon style="color: antiquewhite">menu</mat-icon>
   </button>
-  <img class="nav-logo" src="logo.svg" [routerLink] ="[ '/home']"/>
-  <span class="example-spacer"></span>
-
-  <div class="notification">
-    <mat-icon>notifications</mat-icon>
-  </div>
+  <img class="nav-logo" src="logo.svg" [routerLink]="['/home']" />
+  @if (!loggedIn) {
+    <button class="form-button-one" [routerLink]="['/login']">Login</button>
+    <button class="form-button-two" [routerLink]="['/register']">Register</button>
+  } @else {
+    <span class="example-spacer"></span>
+    <div class="notification">
+      <mat-icon [routerLink]="['/notifications']">notifications</mat-icon>
+    </div>
+  }
 </div>
 
-<mat-sidenav-container>
+<mat-sidenav-container [style.display]="loggedIn ? 'inline' : 'none'">
   <mat-sidenav #drawer mode="side" [opened]="false" class="sidebar">
     <div class="item" [routerLink]="['/account']">
       <mat-icon>account_circle</mat-icon>
@@ -19,32 +23,47 @@
 
     <div class="separator"></div>
 
-    <div class="item">
-      <mat-icon>chat_bubble</mat-icon>
-      <span>Chat support</span>
-    </div>
-
+    @if (role == 'administrator') {
+      <div class="item" [routerLink]="['/admin-chat']">
+        <mat-icon>chat_bubble</mat-icon>
+        <span>Chat support</span>
+      </div>
+    }
+    @if (role == 'driver' || role == 'passenger') {
+      <div class="item" [routerLink]="['/chat']">
+        <mat-icon>chat_bubble</mat-icon>
+        <span>Chat support</span>
+      </div>
+    }
     <div class="separator"></div>
 
     <div class="item" [routerLink]="['/ride-history']">
       <mat-icon>map</mat-icon>
-      <span>History of rides</span>
+      <span>Ride history</span>
     </div>
 
     <div class="separator"></div>
 
-    <div class="item">
+    <div class="item" [routerLink]="['/tracking-route']">
       <mat-icon>directions_car</mat-icon>
       <span>Tracking ride</span>
     </div>
 
     <div class="separator"></div>
 
-    <button class="logout-btn">Log out</button>
+    @if (role == 'driver') {
+      <div class="item" [routerLink]="['/incoming-ride']">
+        <mat-icon>access_time</mat-icon>
+        <span>Incoming ride</span>
+      </div>
+
+      <div class="separator"></div>
+    }
+    <button class="logout-btn" (click)="logout()">Log out</button>
   </mat-sidenav>
 
   <mat-sidenav-content class="content">
-<!--
+    <!--
     <mat-toolbar color="primary">
 
       <button mat-icon-button (click)="drawer.toggle()">
@@ -61,3 +80,13 @@
 -->
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<div *ngIf="successMessage()" class="message success-message">
+  {{ successMessage() }}
+</div>
+<div *ngIf="errorMessage()" class="message error-message">
+  {{ errorMessage() }}
+</div>
+<div *ngIf="panicMessage()" class="message panic-message">
+  {{ panicMessage() }}
+</div>

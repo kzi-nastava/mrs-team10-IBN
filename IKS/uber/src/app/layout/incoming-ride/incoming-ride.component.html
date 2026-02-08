@@ -1,20 +1,38 @@
 <app-nav-bar></app-nav-bar>
-<div id="container">
-    <h1>Incoming Ride</h1>
-    <div id="places">
-        <mat-icon>place</mat-icon><p>Start Location: {{ startloc }}</p>
-        <br/>
-        <mat-icon>place</mat-icon><p>Final Destination: {{ finaldest }}</p>
-        <br/>
-    </div>
-    <dialog #declineDialog>
-        <h2>Reason for decline</h2>
-        <textarea placeholder="Enter your reason for declining this ride..."></textarea>
-        <button [routerLink]="['/home']">Send</button>
-    </dialog>
-    <img src="map-example.png" alt="Map Example"/>
+<div *ngIf="ride; else noRide" id="container">
+  <h1>Incoming Ride</h1>
+  <div id="places">
     <div>
-        <button id="accept" [routerLink]="['/tracking-route']">Accept</button>
-        <button (click)="declineDialog.show()">Decline</button>
+      <mat-icon>place</mat-icon>
+      <p>Start Location: {{ route.at(0)?.address }}</p>
     </div>
+    @for (station of route.slice(1, -1); track station) {
+      <div>
+        <mat-icon>place</mat-icon>
+        <p>Station: {{ station.address }}</p>
+      </div>
+    }
+    <div>
+      <mat-icon>place</mat-icon>
+      <p>Final Destination: {{ route.at(-1)?.address }}</p>
+    </div>
+  </div>
+  <dialog animate.enter="enter-animation" animate.leave="leaving" #declineDialog>
+    <h2>Reason for decline</h2>
+    <textarea placeholder="Enter your reason for declining this ride..." #reason></textarea>
+    <button class="form-button-one" (click)="declineRide(reason.value)">Send</button>
+    <button class="form-button-two" (click)="declineDialog.close()">Close</button>
+  </dialog>
+  <app-map [locations]="route" [interactive]="false"></app-map>
+  <div>
+    <button class="form-button-one" (click)="startRide()">Start</button>
+    <button class="form-button-two" (click)="declineDialog.showModal()">Decline</button>
+  </div>
 </div>
+
+<ng-template #noRide>
+  <div id="container" class="no-ride">
+    <h2>No incoming ride 🚕</h2>
+    <p>Please wait for a new request.</p>
+  </div>
+</ng-template>

@@ -4,14 +4,14 @@
         <input type="text" formControlName="email" placeholder="E-mail">
         <br/>
         <input type="password" formControlName="password" placeholder="Password">
+        <p class="errormsg" [style.display]="errormsg != null ? 'block' : 'none'">{{ errormsg }}</p>
         <p>Forgot your password? <a [routerLink]="['/forgot-password']">Click Here!</a> </p>
         <hr/>
         <div id="loggedin-div">
             <input type="checkbox" id="loggedin">
             <label for="loggedin">Keep me logged in</label>
         </div>
-        <br/>
-        <button class="form-button-one">Sign In</button>
+        <button class="form-button-one" (click)="login()">Sign In</button>
         <p>You don't have an account? <a [routerLink]="['/register']">Sign Up!</a></p>
     </form>
 </div>

@@ -53,12 +53,13 @@
                     app:strokeColor="#FFFFFF"
                     app:cardBackgroundColor="#FFFFFF">
 
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/ivProfilePic"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/ic_account"
-                        android:scaleType="centerCrop"/>
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="#FFFFFF"/>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -89,7 +90,7 @@
                     android:id="@+id/tvUserName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bojana Paunovic"
+                    android:text=""
                     android:textColor="#FFFFFF"
                     android:textSize="26sp"
                     android:textStyle="bold"
@@ -100,7 +101,7 @@
                     android:id="@+id/tvUserEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="paunovicboka@gmail.com"
+                    android:text=""
                     android:textColor="#E0E0E0"
                     android:textSize="14sp"
                     android:layout_marginTop="2dp"/>
@@ -207,11 +208,11 @@
 
                     <include
                         layout="@layout/menu_item"
-                        android:id="@+id/menuChangePassword"/>
+                        android:id="@+id/vehiclePrices"/>
 
                     <include
                         layout="@layout/menu_item"
-                        android:id="@+id/menuDeleteAccount"/>
+                        android:id="@+id/menuChangePassword"/>
                 </LinearLayout>
 
             </LinearLayout>

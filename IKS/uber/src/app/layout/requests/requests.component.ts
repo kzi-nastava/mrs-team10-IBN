@@ -1,19 +1,23 @@
-// requests.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface Request {
   id: number;
-  type: 'profile' | 'vehicle';
+  type: 'profile' | 'vehicle' | 'both';
   driverName: string;
   requestDate: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'pending';
   changes: {
     oldData: { [key: string]: string };
     newData: { [key: string]: string };
   };
+  oldImage?: string;
+  newImage?: string;
 }
 
 @Component({
@@ -26,59 +30,35 @@ interface Request {
 export class RequestsComponent implements OnInit {
   requests: Request[] = [];
   selectedRequest: Request | null = null;
+  isLoading: boolean = false;
+
+  constructor(private http: HttpClient, private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.requests = [
-      {
-        id: 1,
-        type: 'profile',
-        driverName: 'Marko Petrovic',
-        requestDate: '2024-12-10',
-        status: 'pending',
-        changes: {
-          oldData: {
-            Phone: '+381 62 123 4567',
-            Email: 'marko@gmail.com',
-          },
-          newData: {
-            Phone: '+381 63 999 8888',
-            Email: 'marko.petrovic@gmail.com',
-          },
-        },
+    this.loadRequests();
+  }
+
+  loadRequests() {
+    this.isLoading = true;
+
+    this.http.get<Request[]>(`${environment.apiHost}/account/change-requests`).subscribe({
+      next: (requests) => {
+        this.requests = requests;
+        this.isLoading = false;
+        this.cd.detectChanges();
       },
-      {
-        id: 2,
-        type: 'vehicle',
-        driverName: 'Ana Jovanovic',
-        requestDate: '2024-12-11',
-        status: 'pending',
-        changes: {
-          oldData: {
-            License: 'BG-123-AB',
-            Model: 'VW Golf',
-          },
-          newData: {
-            License: 'NS-456-CD',
-            Model: 'VW Passat',
-          },
-        },
+      error: (error) => {
+        console.error('Error loading requests:', error);
+        this.isLoading = false;
       },
-      {
-        id: 3,
-        type: 'profile',
-        driverName: 'Stefan Nikolic',
-        requestDate: '2024-12-09',
-        status: 'pending',
-        changes: {
-          oldData: {
-            Adress: 'Bulevar Oslobodjenja 20',
-          },
-          newData: {
-            Adress: 'Cara Dusana 15',
-          },
-        },
-      },
-    ];
+    });
+  }
+
+  hasImageChange(): boolean {
+    return !!(
+      this.selectedRequest?.newImage &&
+      this.selectedRequest.newImage !== this.selectedRequest.oldImage
+    );
   }
 
   openRequestDetails(request: Request) {
@@ -90,11 +70,51 @@ export class RequestsComponent implements OnInit {
   }
 
   handleApprove(id: number) {
-    this.requests = this.requests.map((req) =>
-      req.id === id ? { ...req, status: 'approved' as const } : req
-    );
-    this.remove(id);
-    this.closeModal();
+    this.isLoading = true;
+    const requestId = id;
+
+    this.http
+      .post(
+        `${environment.apiHost}/account/approve-change/${requestId}`,
+        {},
+        { responseType: 'text' }
+      )
+      .subscribe({
+        next: () => {
+          this.remove(requestId);
+          this.closeModal();
+          this.isLoading = false;
+          this.cd.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error approving request:', error);
+          this.isLoading = false;
+        },
+      });
+  }
+
+  handleReject(id: number) {
+    this.isLoading = true;
+    const requestId = id;
+
+    this.http
+      .post(
+        `${environment.apiHost}/account/reject-change/${requestId}`,
+        {},
+        { responseType: 'text' }
+      )
+      .subscribe({
+        next: () => {
+          this.remove(requestId);
+          this.closeModal();
+          this.isLoading = false;
+          this.cd.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error rejecting request:', error);
+          this.isLoading = false;
+        },
+      });
   }
 
   remove(id: number) {
@@ -104,15 +124,16 @@ export class RequestsComponent implements OnInit {
     }
   }
 
-  handleReject(id: number) {
-    this.requests = this.requests.map((req) =>
-      req.id === id ? { ...req, status: 'rejected' as const } : req
-    );
-    this.remove(id);
-    this.closeModal();
+  getChangeKeys(): string[] {
+    if (!this.selectedRequest || !this.selectedRequest.changes) return [];
+
+    const oldKeys = Object.keys(this.selectedRequest.changes.oldData || {});
+    const newKeys = Object.keys(this.selectedRequest.changes.newData || {});
+
+    return Array.from(new Set([...oldKeys, ...newKeys]));
   }
 
-  getChangeKeys(): string[] {
-    return this.selectedRequest ? Object.keys(this.selectedRequest.changes.oldData) : [];
+  isPending() {
+    return this.selectedRequest?.status === 'PENDING' || this.selectedRequest?.status === 'pending';
   }
 }

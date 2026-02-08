@@ -16,7 +16,7 @@
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#212121"
-        android:layout_marginBottom="2dp"/>
+        android:layout_marginBottom="8dp"/>
 
     <!-- Comparison Container -->
     <LinearLayout
@@ -43,15 +43,17 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="#FFF3E0">
 
                 <TextView
                     android:id="@+id/tvOldValue"
                     android:layout_width="match_parent"
-                    android:layout_height="43dp"
-                    android:padding="5dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
                     android:text="Old Value"
                     android:textColor="#E65100"
                     android:textSize="14sp" />
@@ -87,15 +89,17 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
+                app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#CBEFCC">
+                app:cardBackgroundColor="#E8F5E9">
 
                 <TextView
                     android:id="@+id/tvNewValue"
                     android:layout_width="match_parent"
-                    android:layout_height="42dp"
-                    android:padding="5dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
                     android:text="New Value"
                     android:textColor="#2E7D32"
                     android:textSize="14sp" />

@@ -1,20 +1,42 @@
 package com.example.UberComp.model;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity(name = "app_user")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
+@DiscriminatorValue("User")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false)
     private String homeAddress;
+
+    @Column(nullable = false)
     private String phone;
+
+    @Column(columnDefinition = "TEXT")
     private String image;
-    private List<Route> favoriteRoutes;
+
+    @OneToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    @Column(name = "fcm_token")
+    private String fcmToken;
 }

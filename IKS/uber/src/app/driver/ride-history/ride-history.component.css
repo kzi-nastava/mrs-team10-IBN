@@ -1,22 +1,53 @@
+body,
+html {
+  overflow: hidden !important;
+  height: 100vh;
+  margin: 0;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 97vh;
+  overflow: hidden;
+}
+
 div.date-container {
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 5vh;
-  gap:5%;
+  height: 15vh;
+  gap: 5%;
+  z-index: 1;
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-mat-form-field, mat-select {
-  background-color: white;      
-  padding: 0.5rem 1rem;         
-  border-radius: 1rem;          
+.container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 4rem;
+  padding: 2rem 4rem 4rem 2rem;
+  box-sizing: border-box;
+}
+
+mat-form-field,
+mat-select {
+  background-color: white;
+  padding: 0.5rem;
+  border-radius: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  width: 15rem;
-  font-family: "Mandali" !important;
+  width: 12rem;
+  font-family: 'Mandali' !important;
 }
 
 mat-form-field input {
-  background-color: white;    
+  background-color: white;
   border-radius: 1rem;
 }
 
@@ -26,41 +57,32 @@ mat-form-field input {
 }
 
 .mat-datepicker-content {
-  background-color: white;      
+  background-color: white;
   border-radius: 1rem;
   height: 20rem;
 }
 
 ::ng-deep .mat-calendar {
   background-color: white !important;
-  color: black !important; 
-   min-height: 25rem;
+  color: black !important;
+  min-height: 25rem;
 }
 
 ::ng-deep .mat-calendar-body-cell-content {
-  color: black !important; 
+  color: black !important;
 }
 
 ::ng-deep .mat-calendar-header {
-  color: black !important; 
+  color: black !important;
 }
 
 ::ng-deep .mat-calendar-previous-button,
 ::ng-deep .mat-calendar-next-button {
-  color: black !important; 
+  color: black !important;
 }
 
 ::ng-deep .mat-calendar-table-header {
-  color: black !important; 
-}
-
-
-.container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 4rem;              
-  padding: 4rem 4rem 4rem 2rem;
-  box-sizing: border-box;
+  color: black !important;
 }
 
 .ride-card {
@@ -71,7 +93,7 @@ mat-form-field input {
   background: #d9d9d9;
   border-radius: 2rem;
   padding: 1rem;
-  font-family: "Mandali";
+  font-family: 'Mandali';
   margin: auto;
   cursor: pointer;
 }
@@ -117,8 +139,12 @@ mat-form-field input {
   flex-shrink: 0;
 }
 
-.pin.red { background: #d32f2f; }
-.pin.green { background: #388e3c; }
+.pin.red {
+  background: #d32f2f;
+}
+.pin.green {
+  background: #388e3c;
+}
 
 .avatars img {
   width: 3rem;
@@ -132,10 +158,10 @@ mat-form-field input {
   margin-left: 0;
 }
 
-.time{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.time {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .time-box {
@@ -147,7 +173,7 @@ mat-form-field input {
 }
 
 .price {
-  margin: 1.2rem ;
+  margin: 1.2rem;
   margin-left: 10rem;
   background: #7cb342;
   color: #000;
@@ -156,5 +182,3 @@ mat-form-field input {
   font-size: 1rem;
   font-weight: 600;
 }
-
-

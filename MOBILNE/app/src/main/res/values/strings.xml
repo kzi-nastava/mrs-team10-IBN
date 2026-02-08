@@ -5,6 +5,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="my_account">My account</string>
     <string name="history_of_rides">History of rides</string>
+    <string name="incoming_ride">Incoming ride</string>
     <string name="chat_support">Chat support</string>
     <string name="tracking_ride">Tracking ride</string>
     <string name="settings">Settings</string>
@@ -13,8 +14,11 @@
     <string name="divider">Divider</string>
     <string name="favorites">Favorites</string>
     <string name="order">Order</string>
+    <string name="cancel">Cancel</string>
     <string name="canceled">Canceled</string>
     <string name="panic">Panic</string>
+    <string name="view_reviews">View Reviews</string>
+    <string name="view_complaints">View Complaints</string>
     <string name="start_location">Start location</string>
     <string name="destination">Destination</string>
     <string name="describe_your_problem">Describe your problem</string>
@@ -25,4 +29,10 @@
     <string name="submit">Submit</string>
     <string name="driver">Driver:</string>
     <string name="vehicle">Vehicle:</string>
+    <string name="home">Home</string>
+    <string name="save">Save</string>
+    <string name="vehicle_prices">Vehicle prices</string>
+    <string name="vehicle_type">Vehicle type</string>
+    <string name="price">Price</string>
+    <string name="rate">Rate</string>
 </resources>

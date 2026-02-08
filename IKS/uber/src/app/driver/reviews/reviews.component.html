@@ -1,0 +1,30 @@
+<div id="container">
+    <h2>User Reviews</h2>
+    @if(data.reviews.length === 0){
+        <div class="review">
+            <p class="text">No available reviews 🚕</p>
+        </div>
+    }
+    @for(review of data.reviews; track review.id){
+        <div class="review">
+            <p class="username">{{ review.username }}</p>
+            <p class="text">{{ review.comment }}</p>
+            <span class="star-display">
+                Driver rating: 
+                @for(i of [1, 2, 3, 4, 5]; track $index){
+                    <mat-icon [ngStyle]="{'color': (i <= review.driverRating) ? 'gold' : 'black'}">
+                        {{ i <= review.driverRating ? 'star' : 'star_border' }}
+                    </mat-icon>
+                }
+            </span>
+            <span class="star-display">
+                Vehicle rating: 
+                @for(i of [1, 2, 3, 4, 5]; track $index){
+                    <mat-icon [ngStyle]="{'color': (i <= review.vehicleRating) ? 'gold' : 'black'}">
+                        {{ i <= review.vehicleRating ? 'star' : 'star_border' }}
+                    </mat-icon>
+                }
+            </span>
+        </div>
+    }
+</div>

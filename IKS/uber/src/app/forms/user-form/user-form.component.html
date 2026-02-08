@@ -1,0 +1,110 @@
+<div class="card info-card" [class.no-button]="!showButton">
+  @if (!showButton) {
+    <h3>👤 Driver Information</h3>
+  }
+  @if (isDriverBlocked) {
+    <h3
+      style="
+        color: red;
+        font-weight: 700;
+        padding: 5px;
+        margin: 0;
+        text-shadow:
+          -0.5px -0.5px 0 #fff,
+          0.5px -0.5px 0 #fff,
+          -0.5px 0.5px 0 #fff,
+          0.5px 0.5px 0 #fff;
+      "
+    >
+      ACCOUNT BLOCKED
+    </h3>
+    <p
+      style="
+        color: red;
+        font-weight: 700;
+        padding: 5px;
+        margin: 0;
+        text-shadow:
+          -0.5px -0.5px 0 #fff,
+          0.5px -0.5px 0 #fff,
+          -0.5px 0.5px 0 #fff,
+          0.5px 0.5px 0 #fff;
+      "
+    >
+      {{ reason }}
+    </p>
+  }
+  <form (ngSubmit)="onSubmit()">
+    @if (formData) {
+      <input
+        type="text"
+        name="firstName"
+        [(ngModel)]="formData.firstName"
+        placeholder="First Name"
+        (blur)="markFieldTouched('firstName')"
+        [class.invalid]="isFirstNameInvalid()"
+      />
+    }
+    @if (isFirstNameInvalid()) {
+      <div class="error">First name is required</div>
+    }
+    @if (formData) {
+      <input
+        type="text"
+        name="lastName"
+        [(ngModel)]="formData.lastName"
+        placeholder="Last Name"
+        (blur)="markFieldTouched('lastName')"
+        [class.invalid]="isLastNameInvalid()"
+      />
+    }
+    @if (isLastNameInvalid()) {
+      <div class="error">Last name is required</div>
+    }
+    @if (formData) {
+      <input
+        type="text"
+        name="address"
+        [(ngModel)]="formData.address"
+        placeholder="Address"
+        (blur)="markFieldTouched('address')"
+        [class.invalid]="isAddressInvalid()"
+      />
+    }
+    @if (isAddressInvalid()) {
+      <div class="error">Address is required</div>
+    }
+    @if (formData) {
+      <input
+        type="tel"
+        name="phone"
+        [(ngModel)]="formData.phone"
+        placeholder="Phone (9-15 digits)"
+        (blur)="markFieldTouched('phone')"
+        [class.invalid]="isPhoneInvalid()"
+      />
+    }
+    @if (isPhoneInvalid()) {
+      <div class="error">Phone must be 9-15 digits</div>
+    }
+    @if (formData) {
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="formData.email"
+        placeholder="Email"
+        [readonly]="emailReadonly"
+        (blur)="markFieldTouched('email')"
+        [class.invalid]="isEmailInvalid()"
+      />
+    }
+    @if (isEmailInvalid()) {
+      <div class="error">Valid email is required</div>
+    }
+    @if (showButton) {
+      <button class="save-changes" type="submit" [disabled]="!isFormValid() || !hasChanges()">
+        {{ buttonLabel }}
+      </button>
+    }
+  </form>
+</div>
