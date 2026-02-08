@@ -204,7 +204,7 @@ public class RideService {
     }
 
     public FinishedRideDTO stopRide(StopRideDTO stopRideDTO, boolean panic) {
-        Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow();
+        Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow(() -> new RuntimeException("Ride not found"));
         Route stoppedRoute = ride.getRoute();
         Coordinate newCoordinate = new Coordinate();
         newCoordinate.setLat(stopRideDTO.getLat());
