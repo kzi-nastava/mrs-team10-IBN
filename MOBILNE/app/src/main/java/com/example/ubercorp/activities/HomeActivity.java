@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -85,7 +86,11 @@ public class HomeActivity extends AppCompatActivity
         actionBar = getSupportActionBar();
         topLevelDestinations.add(R.id.nav_settings);
 
-        navController = Navigation.findNavController(this, R.id.fragment_nav_content_main);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.fragment_nav_content_main);
+
+        navController = navHostFragment.getNavController();
 
         navController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
             Log.i("UberComp", "Destination Changed");
@@ -98,24 +103,26 @@ public class HomeActivity extends AppCompatActivity
 
         SharedPreferences sharedPref = getSharedPreferences("uber_corp", MODE_PRIVATE);
         String token = sharedPref.getString("auth_token", null);
-        String role = JwtUtils.getRoleFromToken(token);
 
-        NavOptions navOptions = new NavOptions.Builder()
-                .setPopUpTo(R.id.routeFragment, true)
-                .setLaunchSingleTop(true)
-                .build();
+        if (token != null) {
+            String role = JwtUtils.getRoleFromToken(token);
+            
+            NavOptions navOptions = new NavOptions.Builder()
+                    .setPopUpTo(R.id.routeFragment, true)
+                    .setLaunchSingleTop(true)
+                    .build();
 
-        if (role != null)
-        switch(role){
-            case "driver":
-                HOME_FRAGMENT = R.id.driverHomeFragment;
-                navController.navigate(HOME_FRAGMENT, null, navOptions);
-                break;
-            case "administrator":
-                // dodati podešavanje kad se napravi administrator view
-                break;
-            default:
-                break;
+
+            switch(role){
+                case "driver":
+                    HOME_FRAGMENT = R.id.driverHomeFragment;
+                    navController.navigate(HOME_FRAGMENT, null, navOptions);
+                    break;
+                case "administrator":
+                    // dodati podešavanje kad se napravi administrator view
+                    break;
+                default:
+                    break;
         }
 
 

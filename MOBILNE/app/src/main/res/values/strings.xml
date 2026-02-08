@@ -34,4 +34,5 @@
     <string name="vehicle_prices">Vehicle prices</string>
     <string name="vehicle_type">Vehicle type</string>
     <string name="price">Price</string>
+    <string name="rate">Rate</string>
 </resources>

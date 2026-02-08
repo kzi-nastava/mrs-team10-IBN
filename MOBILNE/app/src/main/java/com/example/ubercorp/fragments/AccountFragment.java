@@ -67,6 +67,7 @@ public class AccountFragment extends Fragment implements
     private static final int SELECT_IMAGE = 200;
     private String ImagePermission;
     private String currentBase64Image = "";
+    private String originalBase64Image = "";
     private VehicleDTO currentVehicle;
     private DriverDTO currentDriver;
     private String userRole = "passenger";
@@ -168,7 +169,6 @@ public class AccountFragment extends Fragment implements
         }
     }
 
-    // ProfileManager callbacks
     @Override
     public void onProfileLoaded(CreateUserDTO user, AccountDTO account) {
         displayUserInfo(user, account);
@@ -197,7 +197,6 @@ public class AccountFragment extends Fragment implements
         Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
     }
 
-    // DriverManager callbacks
     @Override
     public void onDriverDataLoaded(DriverDTO driver) {
         currentDriver = driver;
@@ -236,9 +235,9 @@ public class AccountFragment extends Fragment implements
             if (etAddress != null) etAddress.setText(user.getHomeAddress());
             if (user.getImage() != null && !user.getImage().isEmpty()) {
                 existingImage = user.getImage();
+                originalBase64Image = user.getImage();
                 ImageHelper.setProfileImage(user.getImage(), ivProfilePic);
             }
-
         }
 
         if (account != null && account.getEmail() != null) {
@@ -550,6 +549,7 @@ public class AccountFragment extends Fragment implements
     }
 
     private void hideEditProfile() {
+        ImageHelper.setProfileImage(originalBase64Image, ivProfilePic);
         hideViews(editFormCard);
         showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress);
         fabEditProfile.setVisibility(View.VISIBLE);
@@ -582,7 +582,9 @@ public class AccountFragment extends Fragment implements
                 imageToSend
         );
 
+
         profileManager.updateProfile(updateDTO);
+        tvUserName.setText(firstName + " " + lastName);
     }
 
     private void sendProfileChanges() {
@@ -601,7 +603,7 @@ public class AccountFragment extends Fragment implements
             return;
         }
 
-        String imageToSend = currentBase64Image.isEmpty() ? "" : currentBase64Image;
+        String imageToSend = currentBase64Image.isEmpty() ? originalBase64Image : currentBase64Image;
 
         CreateUserDTO updateDTO = new CreateUserDTO(
                 firstName,
@@ -614,7 +616,10 @@ public class AccountFragment extends Fragment implements
         UpdateDriverDTO changeRequest = new UpdateDriverDTO(updateDTO, currentVehicle, null);
         driverManager.submitChangeRequest(changeRequest);
         hideEditProfile();
+
+        currentBase64Image = originalBase64Image;
     }
+
 
     private void showEditVehicle() {
         hideViews(userInfoSection, menuCard, driverProgress, tvDrivingHoursProgress);

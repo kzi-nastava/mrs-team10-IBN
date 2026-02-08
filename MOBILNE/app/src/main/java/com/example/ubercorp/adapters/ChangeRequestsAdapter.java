@@ -138,8 +138,7 @@ public class ChangeRequestsAdapter extends RecyclerView.Adapter<ChangeRequestsAd
             container.removeAllViews();
             LayoutInflater inflater = LayoutInflater.from(container.getContext());
 
-            if (request.getOldImage() != null && request.getNewImage() != null &&
-                    !request.getOldImage().isEmpty() && !request.getNewImage().isEmpty()) {
+            if (request.getNewImage() != null && !request.getNewImage().isEmpty()) {
                 View imageChangeView = inflater.inflate(R.layout.item_image_change, container, false);
 
                 ImageView ivOldImage = imageChangeView.findViewById(R.id.ivOldImage);

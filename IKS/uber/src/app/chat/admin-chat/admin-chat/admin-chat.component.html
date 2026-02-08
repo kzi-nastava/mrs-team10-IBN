@@ -1,0 +1,14 @@
+<div class="container">
+  <div class="left">
+    <div *ngFor="let box of chatInbox" class="box" (click)="loadChat(box.chatRoom)">
+      <div class="name">{{ box.user.name }} {{ box.user.lastName }}</div>
+      <div class="phone">
+        {{ box.user.phoneNumber }}
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <app-chat [chatRoomId]="selectedChatRoom"></app-chat>
+  </div>
+</div>
