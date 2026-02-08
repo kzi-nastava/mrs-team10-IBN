@@ -116,4 +116,11 @@
         android:label="Notifications"
         tools:layout="@layout/fragment_notification" />
 
+    <fragment
+        android:id="@+id/rate_fragment"
+        android:name="com.example.ubercorp.fragments.RatingDriverAndVehicle"
+        android:label="Rate"
+        tools:layout="@layout/fragment_rating_driver_and_vehicle"
+        />
+
 </navigation>
