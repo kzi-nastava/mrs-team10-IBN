@@ -9,9 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.util.Log;
@@ -26,7 +24,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.ubercorp.R;
 import com.example.ubercorp.activities.enums.RideStatus;
-import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.managers.RouteManager;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
@@ -37,11 +34,7 @@ import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.utils.JwtUtils;
 import com.google.android.material.imageview.ShapeableImageView;
-
-import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Polyline;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -90,6 +83,7 @@ public class RideDetailsFragment extends Fragment {
         Button cancelButton = view.findViewById(R.id.cancel_button);
         Button viewReviewsButton = view.findViewById(R.id.view_reviews_button);
         Button viewComplaintsButton = view.findViewById(R.id.view_complaints_button);
+        Button rateButton = view.findViewById(R.id.rate);
 
         SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
         String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
@@ -110,6 +104,12 @@ public class RideDetailsFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putLong("RideID", ride.getId());
             Navigation.findNavController(requireView()).navigate(R.id.action_details_to_complaints, bundle);
+        });
+
+        rateButton.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.rate_fragment, bundle);
         });
 
         rideManager.loadRideDetails(ride.getId(), new Callback<GetRideDetailsDTO>() {
@@ -179,6 +179,11 @@ public class RideDetailsFragment extends Fragment {
                     List<GeoPoint> routePoints = routeManager.getRoute(stations);
                     requireActivity().runOnUiThread(() -> routeManager.drawRoute(routePoints, stations));
                 }).start();
+
+                if (!role.equals("passenger")) {
+                    binding.order.setVisibility(GONE);
+                    binding.rate.setVisibility(GONE);
+                }
             }
 
             @Override
