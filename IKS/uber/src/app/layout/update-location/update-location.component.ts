@@ -26,6 +26,7 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
   isLoading: boolean = false;
   private http = inject(HttpClient);
   isDriverActive: boolean = false;
+  isDriverBlocked: boolean = false;
   successMessage: string | null = '';
   errorMessage: string | null = '';
   private cd = inject(ChangeDetectorRef);
@@ -61,10 +62,14 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
 
   loadDriverStatus() {
     this.http
-      .get<{ isActive: boolean }>(`${environment.apiHost}/drivers/me/status`, this.getAuthHeaders())
+      .get<{
+        isActive: boolean;
+        isBlocked: boolean;
+      }>(`${environment.apiHost}/drivers/me/status`, this.getAuthHeaders())
       .subscribe({
         next: (response) => {
           this.isDriverActive = response.isActive;
+          this.isDriverBlocked = response.isBlocked;
           this.cd.detectChanges();
         },
         error: (err) => {
@@ -78,13 +83,17 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
 
     this.isLoading = true;
     this.http
-      .put<CoordinateDTO>(`${environment.apiHost}/drivers/me/update-location`, this.address, this.getAuthHeaders())
+      .put<CoordinateDTO>(
+        `${environment.apiHost}/drivers/me/update-location`,
+        this.address,
+        this.getAuthHeaders(),
+      )
       .subscribe({
         next: (res) => {
           this.isLoading = false;
           this.showSuccess('Location updated successfully!');
           this.mapComponent.clearAll();
-          this.mapComponent.addSinglePin(res.lat, res.lon, res.address)
+          this.mapComponent.addSinglePin(res.lat, res.lon, res.address);
         },
         error: (err) => {
           console.error('Failed to update location', err);
@@ -104,6 +113,10 @@ export class UpdateLocationComponent implements AfterViewInit, OnInit {
   }
 
   goOnline() {
+    if (this.isDriverBlocked) {
+      this.showError('Your account is blocked');
+      return;
+    }
     const newStatus = !this.isDriverActive;
 
     this.http

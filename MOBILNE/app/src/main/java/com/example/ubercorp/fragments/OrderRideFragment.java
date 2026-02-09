@@ -587,14 +587,20 @@ public class OrderRideFragment extends Fragment {
                             "No available drivers at the moment.",
                             Toast.LENGTH_LONG).show();
                 } else if (response.code() == 403) {
-                    if (response.body() != null && response.body().getStatus() != null) {
-                        Toast.makeText(requireContext(),
-                                "Account blocked: " + response.body().getStatus(),
-                                Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(requireContext(),
-                                "Your account is blocked.",
-                                Toast.LENGTH_LONG).show();
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorJson = response.errorBody().string();
+
+                            JSONObject jsonObject = new JSONObject(errorJson);
+                            String status = jsonObject.optString("status");
+
+                            Toast.makeText(requireContext(),
+                                    "Account blocked: " + status,
+                                    Toast.LENGTH_LONG).show();
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } else if (response.code() == 400) {
                     Toast.makeText(requireContext(),

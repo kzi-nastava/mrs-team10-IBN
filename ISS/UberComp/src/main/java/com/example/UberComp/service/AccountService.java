@@ -8,6 +8,7 @@ import com.example.UberComp.dto.user.CreatedUserDTO;
 import com.example.UberComp.dto.user.GetProfileDTO;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.AccountType;
+import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.model.*;
 import com.example.UberComp.repository.*;
 import com.example.UberComp.utils.EmailUtils;
@@ -450,6 +451,13 @@ public class AccountService implements UserDetailsService {
         account.setAccountStatus(AccountStatus.BLOCKED);
         account.setBlockingReason(reason);
         accountRepository.save(account);
+        Optional<User> user = userRepository.findByAccountEmail(mail);
+        if (user.isEmpty()) return;
+        if (user.get() instanceof Driver) {
+            Driver d = ((Driver) user.get());
+            d.setStatus(DriverStatus.OFFLINE);
+            driverRepository.save(d);
+        }
     }
 
     public void unblockUser(String mail) {

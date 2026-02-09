@@ -47,6 +47,7 @@ public class DriverHomeFragment extends Fragment {
     private Button toggleOnlineButton;
     private Marker marker;
     private boolean isOnline;
+    private boolean isBlocked;
 
 
     @Nullable
@@ -76,12 +77,14 @@ public class DriverHomeFragment extends Fragment {
             @Override
             public void onResponse(Call<GetStatusDTO> call, Response<GetStatusDTO> response) {
                 isOnline = response.body().isActive();
+                isBlocked = response.body().isBlocked();
                 updateView();
             }
 
             @Override
             public void onFailure(Call<GetStatusDTO> call, Throwable t) {
                 isOnline = false;
+                isBlocked = false;
                 updateView();
                 Toast toast = Toast.makeText(DriverHomeFragment.this.getContext(), "Check your Internet connection and try again!", Toast.LENGTH_SHORT);
                 toast.show();
@@ -115,6 +118,10 @@ public class DriverHomeFragment extends Fragment {
 
         });
         toggleOnlineButton.setOnClickListener((v) -> {
+            if (isBlocked) {
+                Toast.makeText(getContext(), "Your account is blocked", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Call<Void> call = ApiClient.getInstance().createService(DriverService.class).toggleDriverStatus("Bearer " + token, !isOnline);
             call.enqueue(new Callback<Void>() {
                 @Override
@@ -154,7 +161,7 @@ public class DriverHomeFragment extends Fragment {
     //}
 
     private void updateView(){
-        if(isOnline){
+        if(isOnline && !isBlocked){
             indicator.setBackground(getResources().getDrawable(R.drawable.ic_circle));
             indicator.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.bright_green)));
             statusText.setText("ONLINE");
