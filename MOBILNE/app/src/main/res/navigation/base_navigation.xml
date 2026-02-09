@@ -132,6 +132,13 @@
         />
 
     <fragment
+        android:id="@+id/complaintForm"
+        android:name="com.example.ubercorp.fragments.ComplaintWhileDrivingFragment"
+        android:label="Complaint"
+        tools:layout="@layout/fragment_complaint_while_driving"
+        />
+
+    <fragment
         android:id="@+id/driverHomeFragment"
         android:name="com.example.ubercorp.fragments.DriverHomeFragment"
         tools:layout="@layout/fragment_driver_home"/>

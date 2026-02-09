@@ -2,12 +2,9 @@ package com.example.UberComp.dto.driver;
 
 import com.example.UberComp.dto.vehicle.VehicleLocationDTO;
 import com.example.UberComp.model.Ride;
-import com.example.UberComp.model.Route;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
