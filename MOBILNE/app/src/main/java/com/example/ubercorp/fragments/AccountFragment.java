@@ -101,9 +101,9 @@ public class AccountFragment extends Fragment implements
     private TextView tvDrivingHoursProgress;
 
     // Menu Items
-    private LinearLayout menuPlatformStats, menuRequests, menuManageUsers,
+    private LinearLayout menuRequests, menuManageUsers,
             menuChangePassword, menuFavorites,
-            menuUserStat, menuDriverStat, menuVehicle, vehiclePrices;
+            menuStat, menuVehicle, vehiclePrices;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -329,13 +329,11 @@ public class AccountFragment extends Fragment implements
         tvDrivingHoursProgress = view.findViewById(R.id.tvDrivingHoursProgress);
 
         // Menu Items
-        menuPlatformStats = view.findViewById(R.id.menuPlatformStats);
         menuRequests = view.findViewById(R.id.menuRequests);
         menuManageUsers = view.findViewById(R.id.menuManageUsers);
         menuChangePassword = view.findViewById(R.id.menuChangePassword);
         menuFavorites = view.findViewById(R.id.menuFavorites);
-        menuUserStat = view.findViewById(R.id.menuMyStatistics);
-        menuDriverStat = view.findViewById(R.id.menuDriverStatistics);
+        menuStat = view.findViewById(R.id.menuStatistics);
         menuVehicle = view.findViewById(R.id.menuVehicle);
         vehiclePrices = view.findViewById(R.id.vehiclePrices);
     }
@@ -365,22 +363,20 @@ public class AccountFragment extends Fragment implements
 
         vehiclePrices.setOnClickListener(v -> navigateToVehiclePrices());
 
-        // Navigate to Change Requests
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
         menuChangePassword.setOnClickListener(v -> showChangePassword());
         menuManageUsers.setOnClickListener(v -> navigateToManageUsers());
         menuFavorites.setOnClickListener(v -> showFavoriteRoutesDialog());
+        menuStat.setOnClickListener(v -> navigateToStatistics());
     }
 
     private MenuConfigurator.MenuViews createMenuViews() {
         MenuConfigurator.MenuViews menuViews = new MenuConfigurator.MenuViews();
-        menuViews.menuPlatformStats = menuPlatformStats;
         menuViews.menuRequests = menuRequests;
         menuViews.menuManageUsers = menuManageUsers;
         menuViews.menuChangePassword = menuChangePassword;
         menuViews.menuFavorites = menuFavorites;
-        menuViews.menuUserStat = menuUserStat;
-        menuViews.menuDriverStat = menuDriverStat;
+        menuViews.menuStat = menuStat;
         menuViews.menuVehicle = menuVehicle;
         menuViews.menuvehiclePrices = vehiclePrices;
         menuViews.drivingHoursSection = drivingHoursSection;
@@ -435,8 +431,6 @@ public class AccountFragment extends Fragment implements
     }
 
     private void setupMenuItems(View view) {
-        setupMenuItem(view.findViewById(R.id.menuPlatformStats), "📊",
-                "Platform Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuRequests), "📥",
                 "Requests", "Manage change requests", true);
         setupMenuItem(view.findViewById(R.id.menuManageUsers), "🚗",
@@ -445,10 +439,8 @@ public class AccountFragment extends Fragment implements
                 "Change Password", "Update your password", false);
         setupMenuItem(view.findViewById(R.id.menuFavorites), "❤️",
                 "Favorites", "Manage favorite routes", true);
-        setupMenuItem(view.findViewById(R.id.menuMyStatistics), "📊",
-                "My Statistics", "Get reports", true);
-        setupMenuItem(view.findViewById(R.id.menuDriverStatistics), "📊",
-                "Driver Statistics", "Get reports", true);
+        setupMenuItem(view.findViewById(R.id.menuStatistics), "📊",
+                "Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
                 "My Vehicle", "Manage your vehicle", true);
         setupMenuItem(view.findViewById(R.id.vehiclePrices), "💸",
@@ -470,6 +462,11 @@ public class AccountFragment extends Fragment implements
     private void navigateToChangeRequests() {
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_account_to_changeRequests);
+    }
+
+    private void navigateToStatistics() {
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_account_to_statistics);
     }
 
     private void navigateToManageUsers() {

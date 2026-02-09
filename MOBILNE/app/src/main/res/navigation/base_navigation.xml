@@ -41,12 +41,20 @@
         <action
             android:id="@+id/action_account_to_driver_registration"
             app:destination="@id/registerDriverFragment"/>
+        <action
+            android:id="@+id/action_account_to_statistics"
+            app:destination="@id/statisticsFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/changeRequestsFragment"
         android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
         tools:layout="@layout/fragment_change_requests"/>
+
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.example.ubercorp.fragments.StatisticsFragment"
+        tools:layout="@layout/fragment_statistics"/>
 
     <fragment
         android:id="@+id/vehiclePriceFragment"

@@ -76,4 +76,5 @@ dependencies {
     implementation libs.gson.v2132
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.messaging
+    implementation libs.mpandroidchart
 }
