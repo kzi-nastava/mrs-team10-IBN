@@ -99,6 +99,7 @@ public class TrackingRouteFragment extends Fragment {
             finishButton.setVisibility(GONE);
         }else{
             complaint.setVisibility(GONE);
+            view.findViewById(R.id.somethingWrong).setVisibility(GONE);
         }
 
         complaint.setOnClickListener((v) -> {
@@ -181,7 +182,7 @@ public class TrackingRouteFragment extends Fragment {
             return false;
         });
 
-        if (role == "driver") {
+        if (role.equals("driver")) {
             rideManager.getRideByToken(rideToken, new Callback<GetRideDetailsDTO>() {
                 @Override
                 public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
@@ -334,9 +335,12 @@ public class TrackingRouteFragment extends Fragment {
 
     private GeoPoint calculateProgressPosition() {
         long now = System.currentTimeMillis();
-
+        LocalDateTime endLdt;
         LocalDateTime startLdt = LocalDateTime.parse(ride.getStartTime());
-        LocalDateTime endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
+        if(role.equals("passenger"))
+            endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
+        else
+            endLdt = LocalDateTime.parse(ride.getEndTime());
 
         long start = startLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long end = endLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
