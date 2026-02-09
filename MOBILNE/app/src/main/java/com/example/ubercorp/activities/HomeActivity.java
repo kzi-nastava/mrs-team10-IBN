@@ -97,7 +97,7 @@ public class HomeActivity extends AppCompatActivity
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment, R.id.driverHomeFragment)
+                .Builder(R.id.accountFragment, R.id.rating, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment, R.id.driverHomeFragment, R.id.adminHomeFragment)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -119,7 +119,8 @@ public class HomeActivity extends AppCompatActivity
                     navController.navigate(HOME_FRAGMENT, null, navOptions);
                     break;
                 case "administrator":
-                    // dodati podešavanje kad se napravi administrator view
+                    HOME_FRAGMENT = R.id.adminHomeFragment;
+                    navController.navigate(HOME_FRAGMENT, null, navOptions);
                     break;
                 default:
                     break;

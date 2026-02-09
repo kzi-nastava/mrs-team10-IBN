@@ -4,6 +4,7 @@ import com.example.UberComp.dto.account.RegisterDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.Coordinate;
@@ -148,6 +149,7 @@ public class DriverController {
 
             Map<String, Boolean> response = new HashMap<>();
             response.put("isActive", !status.equals(DriverStatus.OFFLINE) && !status.equals(DriverStatus.PANIC));
+            response.put("isBlocked", account.getAccountStatus().equals(AccountStatus.BLOCKED));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

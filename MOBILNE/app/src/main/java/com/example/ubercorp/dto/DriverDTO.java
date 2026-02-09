@@ -6,7 +6,7 @@ public class DriverDTO {
     private VehicleDTO vehicleDTO;
     private Integer uptime;
     private boolean blocked;
-    private boolean reason;
+    private String reason;
 
     public AccountDTO getAccount() {
         return accountDTO;
@@ -48,11 +48,11 @@ public class DriverDTO {
         this.blocked = blocked;
     }
 
-    public boolean isReason() {
+    public String isReason() {
         return reason;
     }
 
-    public void setReason(boolean reason) {
+    public void setReason(String reason) {
         this.reason = reason;
     }
 }

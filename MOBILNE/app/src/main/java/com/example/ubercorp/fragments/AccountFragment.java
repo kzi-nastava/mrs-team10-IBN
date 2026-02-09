@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.net.Uri;
 import android.os.Build;
@@ -200,17 +201,24 @@ public class AccountFragment extends Fragment implements
     public void onDriverDataLoaded(DriverDTO driver) {
         currentDriver = driver;
         displayUserInfo(driver.getCreateUser(), driver.getAccount());
+
+        if (driver.isBlocked()) {
+            tvDrivingHoursProgress.setText("BLOCKED: " + driver.isReason());
+            tvDrivingHoursProgress.setTextColor(Color.RED);
+        } else {
+            if (driver.getUptime() != null) {
+                float hours = driver.getUptime() / 60f;
+                float roundedHours = Math.round(hours * 10f) / 10f;
+                updateDriverHours(roundedHours);
+            }
+        }
+
         if (driver.getVehicleDTO() != null) {
             currentVehicle = driver.getVehicleDTO();
             displayVehicleInfo(driver.getVehicleDTO());
         }
-        if (driver.getUptime() != null) {
-            float hours = driver.getUptime() / 60f;
-            float roundedHours = Math.round(hours * 10f) / 10f;
-            updateDriverHours(roundedHours);
-        }
-
     }
+
 
     @Override
     public void onVehicleUpdateSuccess() {

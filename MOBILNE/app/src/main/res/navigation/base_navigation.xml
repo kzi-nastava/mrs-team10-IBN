@@ -136,5 +136,8 @@
         android:name="com.example.ubercorp.fragments.DriverHomeFragment"
         tools:layout="@layout/fragment_driver_home"/>
 
-
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.example.ubercorp.fragments.AdminHomeFragment"
+        tools:layout="@layout/fragment_admin_home"/>
 </navigation>
