@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.http.ResponseEntity.notFound;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/rides")
@@ -142,8 +144,12 @@ public class RideController {
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride){
-        FinishedRideDTO finished = rideService.stopRide(ride, false);
-        return new ResponseEntity<>(finished, HttpStatus.OK);
+        try{
+            FinishedRideDTO finished = rideService.stopRide(ride, false);
+            return new ResponseEntity<>(finished, HttpStatus.OK);
+        } catch(RuntimeException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -258,7 +264,7 @@ public class RideController {
     public ResponseEntity<GetRideDetailsDTO> getRideByToken(@PathVariable String token) {
         Optional<Ride> ride = rideService.findByTrackingToken(token);
         if (ride.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return notFound().build();
         }
         if (ride.get().getStatus() != RideStatus.Ongoing) {
             return ResponseEntity.status(HttpStatus.GONE).build();
