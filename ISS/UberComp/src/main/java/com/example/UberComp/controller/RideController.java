@@ -9,6 +9,7 @@ import com.example.UberComp.model.*;
 import com.example.UberComp.repository.RideRepository;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,14 +164,14 @@ public class RideController {
 
     @PreAuthorize("hasAuthority('passenger')")
     @PostMapping(value = "/calculate-price", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PriceDTO> calculatePrice(@RequestBody CreateRideDTO dto) {
+    public ResponseEntity<PriceDTO> calculatePrice(@Valid @RequestBody CreateRideDTO dto) {
         PriceDTO priceDTO = rideService.calculatePrice(dto);
         return ResponseEntity.ok(priceDTO);
     }
 
     @PreAuthorize("hasAuthority('passenger')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+    public ResponseEntity<RideOrderResponseDTO> orderRide(@Valid @RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
         if (account.getAccountStatus().equals(AccountStatus.BLOCKED))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(

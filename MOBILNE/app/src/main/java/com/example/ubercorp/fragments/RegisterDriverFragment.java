@@ -128,12 +128,27 @@ public class RegisterDriverFragment extends Fragment {
         String phone = etPhone.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() ||
-                phone.isEmpty() || email.isEmpty()) {
+        if (firstName.isEmpty() || firstName.length() < 2) {
+            Toast.makeText(getContext(), "First name must be at least 2 characters", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        if (!email.contains("@")) {
+        if (lastName.isEmpty() || lastName.length() < 2) {
+            Toast.makeText(getContext(), "Last name must be at least 2 characters", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (address.isEmpty()) {
+            Toast.makeText(getContext(), "Address is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (phone.isEmpty() || !phone.matches("^\\d{9,15}$")) {
+            Toast.makeText(getContext(), "Phone must be 9-15 digits", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(getContext(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -146,14 +161,29 @@ public class RegisterDriverFragment extends Fragment {
         String plate = etPlate.getText().toString().trim();
         String seats = etNumberOfSeats.getText().toString().trim();
 
-        if (model.isEmpty() || plate.isEmpty() || seats.isEmpty()) {
-            Toast.makeText(getContext(), "Please fill in all vehicle information", Toast.LENGTH_SHORT).show();
+        if (model.isEmpty()) {
+            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        int seatCount = Integer.parseInt(seats);
-        if (seatCount < 1 || seatCount > 15) {
-            Toast.makeText(getContext(), "Number of seats must be between 1 and 15", Toast.LENGTH_SHORT).show();
+        if (plate.isEmpty()) {
+            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (seats.isEmpty()) {
+            Toast.makeText(getContext(), "Number of seats is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        try {
+            int seatCount = Integer.parseInt(seats);
+            if (seatCount < 1 || seatCount > 9) {
+                Toast.makeText(getContext(), "Number of seats must be between 1 and 9", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(), "Invalid number of seats", Toast.LENGTH_SHORT).show();
             return false;
         }
 

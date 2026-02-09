@@ -86,7 +86,6 @@ public class AccountFragment extends Fragment implements
     private ImageView ivProfilePic;
     private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
     private TextInputEditText etCurrentPassword, etNewPassword, etConfirmPassword;
-    private TextView tvReq1, tvReq2, tvReq3;
     private String existingImage;
 
     // Vehicle Edit
@@ -313,9 +312,6 @@ public class AccountFragment extends Fragment implements
         etCurrentPassword = view.findViewById(R.id.etCurrentPassword);
         etNewPassword = view.findViewById(R.id.etNewPassword);
         etConfirmPassword = view.findViewById(R.id.etConfirmPassword);
-        tvReq1 = view.findViewById(R.id.tvReq1);
-        tvReq2 = view.findViewById(R.id.tvReq2);
-        tvReq3 = view.findViewById(R.id.tvReq3);
 
         // Vehicle Edit
         tvVehicleModel = view.findViewById(R.id.etVehicleModel);
@@ -495,12 +491,12 @@ public class AccountFragment extends Fragment implements
 
     private void showChangePassword() {
         changePassword.setVisibility(View.VISIBLE);
-        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void hideChangePassword() {
         changePassword.setVisibility(View.GONE);
-        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void savePassword() {
@@ -518,18 +514,8 @@ public class AccountFragment extends Fragment implements
             return;
         }
 
-        if (newPassword.length() < 8) {
-            Toast.makeText(getContext(), "Password must be at least 8 characters", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!newPassword.matches(".*[A-Z].*")) {
-            Toast.makeText(getContext(), "Password must contain at least one uppercase letter", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!newPassword.matches(".*\\d.*")) {
-            Toast.makeText(getContext(), "Password must contain at least one number", Toast.LENGTH_SHORT).show();
+        if (newPassword.length() < 6) {
+            Toast.makeText(getContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -561,12 +547,23 @@ public class AccountFragment extends Fragment implements
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            Toast.makeText(getContext(), "Name and last name are required", Toast.LENGTH_SHORT).show();
+        if (firstName.isEmpty() || firstName.length() < 2) {
+            Toast.makeText(getContext(), "First name must be at least 2 characters", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (address.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
+
+        if (lastName.isEmpty() || lastName.length() < 2) {
+            Toast.makeText(getContext(), "Last name must be at least 2 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (address.isEmpty()) {
+            Toast.makeText(getContext(), "Address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (phone.isEmpty() || !phone.matches("^\\d{9,15}$")) {
+            Toast.makeText(getContext(), "Phone must be 9-15 digits", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -582,9 +579,12 @@ public class AccountFragment extends Fragment implements
                 imageToSend
         );
 
-
         profileManager.updateProfile(updateDTO);
         tvUserName.setText(firstName + " " + lastName);
+        if (!imageToSend.equals(originalBase64Image)) {
+            originalBase64Image = imageToSend;
+            ImageHelper.setProfileImage(originalBase64Image, ivProfilePic);
+        }
     }
 
     private void sendProfileChanges() {
@@ -593,13 +593,23 @@ public class AccountFragment extends Fragment implements
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            Toast.makeText(getContext(), "Name and last name are required", Toast.LENGTH_SHORT).show();
+        if (firstName.isEmpty() || firstName.length() < 2) {
+            Toast.makeText(getContext(), "First name must be at least 2 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (address.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
+        if (lastName.isEmpty() || lastName.length() < 2) {
+            Toast.makeText(getContext(), "Last name must be at least 2 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (address.isEmpty()) {
+            Toast.makeText(getContext(), "Address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (phone.isEmpty() || !phone.matches("^\\d{9,15}$")) {
+            Toast.makeText(getContext(), "Phone must be 9-15 digits", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -620,7 +630,6 @@ public class AccountFragment extends Fragment implements
         currentBase64Image = originalBase64Image;
     }
 
-
     private void showEditVehicle() {
         hideViews(userInfoSection, menuCard, driverProgress, tvDrivingHoursProgress);
         showViews(editVehicleCard);
@@ -636,6 +645,18 @@ public class AccountFragment extends Fragment implements
         String vehicleTypeName = selectedId == R.id.rbStandard ? "STANDARD" :
                 selectedId == R.id.rbLuxury ? "LUXURY" : "VAN";
 
+        String model = tvVehicleModel.getText().toString().trim();
+        if (model.isEmpty()) {
+            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String plate = tvVehiclePlate.getText().toString().trim();
+        if (plate.isEmpty()) {
+            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String seatsStr = etNumberOfSeats.getText().toString().trim();
         if (seatsStr.isEmpty()) {
             Toast.makeText(getContext(), "Number of seats is required", Toast.LENGTH_SHORT).show();
@@ -645,6 +666,10 @@ public class AccountFragment extends Fragment implements
         int seatNumber;
         try {
             seatNumber = Integer.parseInt(seatsStr);
+            if (seatNumber < 1 || seatNumber > 9) {
+                Toast.makeText(getContext(), "Number of seats must be between 1 and 9", Toast.LENGTH_SHORT).show();
+                return;
+            }
         } catch (NumberFormatException e) {
             Toast.makeText(getContext(), "Invalid number of seats", Toast.LENGTH_SHORT).show();
             return;
@@ -656,17 +681,6 @@ public class AccountFragment extends Fragment implements
         Long typeId = vehicleTypeName.equals("STANDARD") ? 1L :
                 vehicleTypeName.equals("LUXURY") ? 2L : 3L;
         VehicleTypeDTO vehicleType = new VehicleTypeDTO(typeId, vehicleTypeName, 0.0);
-
-        String model = tvVehicleModel.getText().toString().trim();
-        if (model.isEmpty()) {
-            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String plate = tvVehiclePlate.getText().toString().trim();
-        if (plate.isEmpty()) {
-            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         VehicleDTO updatedVehicle = new VehicleDTO(
                 vehicleType,

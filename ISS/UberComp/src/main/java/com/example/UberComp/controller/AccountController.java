@@ -12,6 +12,7 @@ import com.example.UberComp.enums.AccountType;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +43,7 @@ class AccountController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @PutMapping("/me/change-password")
-    public ResponseEntity<?> changePassword(Authentication auth, @RequestBody ChangePasswordDTO dto) {
+    public ResponseEntity<?> changePassword(Authentication auth, @Valid @RequestBody ChangePasswordDTO dto) {
         Account account = (Account) auth.getPrincipal();
         String message = accountService.changePassword(account.getId(), dto);
         if (!message.isEmpty())
