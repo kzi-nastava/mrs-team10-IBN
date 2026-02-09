@@ -106,14 +106,14 @@ public class HomeActivity extends AppCompatActivity
 
         if (token != null) {
             String role = JwtUtils.getRoleFromToken(token);
-            
+
             NavOptions navOptions = new NavOptions.Builder()
                     .setPopUpTo(R.id.routeFragment, true)
                     .setLaunchSingleTop(true)
                     .build();
 
 
-            switch(role){
+            switch (role) {
                 case "driver":
                     HOME_FRAGMENT = R.id.driverHomeFragment;
                     navController.navigate(HOME_FRAGMENT, null, navOptions);
@@ -123,9 +123,9 @@ public class HomeActivity extends AppCompatActivity
                     break;
                 default:
                     break;
+            }
+
         }
-
-
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
 
         updateMenuVisibility();

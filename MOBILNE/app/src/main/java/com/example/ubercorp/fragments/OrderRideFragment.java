@@ -526,8 +526,13 @@ public class OrderRideFragment extends Fragment {
         }
 
         if (startPoint == null || endPoint == null) {
-            Toast.makeText(requireContext(), "Invalid coordinates for start or destination", Toast.LENGTH_SHORT).show();
-            return;
+            try {
+                startPoint = getCoordinatesFromAddress(fromLocation);
+                endPoint = getCoordinatesFromAddress(toLocation);
+            } catch (Exception e) {
+                Toast.makeText(requireContext(), "Invalid coordinates for start or destination", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         if (estimatedDistance <= 0) {
@@ -805,7 +810,18 @@ public class OrderRideFragment extends Fragment {
 
     private GeoPoint getCoordinatesFromAddress(String address) throws Exception {
         Thread.sleep(1000);
-        String encodedAddress = URLEncoder.encode(address + ", Novi Sad, Serbia", "UTF-8");
+
+        String fullAddress = address;
+
+        String lower = address.toLowerCase();
+        if (!lower.contains("novi sad")) {
+            fullAddress += ", Novi Sad";
+        }
+        if (!lower.contains("serbia")) {
+            fullAddress += ", Serbia";
+        }
+
+        String encodedAddress = URLEncoder.encode(fullAddress, "UTF-8");
         String urlString = "https://nominatim.openstreetmap.org/search?format=json&q=" + encodedAddress;
 
         URL url = new URL(urlString);
@@ -816,8 +832,7 @@ public class OrderRideFragment extends Fragment {
         conn.setReadTimeout(30000);
         conn.connect();
 
-        int responseCode = conn.getResponseCode();
-        if (responseCode == 200) {
+        if (conn.getResponseCode() == 200) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder result = new StringBuilder();
             String line;

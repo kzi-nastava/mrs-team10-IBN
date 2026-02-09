@@ -491,12 +491,12 @@ public class AccountFragment extends Fragment implements
 
     private void showChangePassword() {
         changePassword.setVisibility(View.VISIBLE);
-        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void hideChangePassword() {
         changePassword.setVisibility(View.GONE);
-        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void savePassword() {
@@ -581,6 +581,10 @@ public class AccountFragment extends Fragment implements
 
         profileManager.updateProfile(updateDTO);
         tvUserName.setText(firstName + " " + lastName);
+        if (!imageToSend.equals(originalBase64Image)) {
+            originalBase64Image = imageToSend;
+            ImageHelper.setProfileImage(originalBase64Image, ivProfilePic);
+        }
     }
 
     private void sendProfileChanges() {
