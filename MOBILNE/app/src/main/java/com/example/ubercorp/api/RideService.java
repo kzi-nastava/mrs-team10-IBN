@@ -103,4 +103,7 @@ public interface RideService {
 
     @GET("api/rides/ongoing")
     Call<Boolean> getOngoingRide(@Header("Authorization") String token);
+
+    @GET("api/rides/trackingRidePassenger")
+    Call<GetRideDetailsDTO> getTrackingRidePassenger(@Header("Authorization") String token);
 }

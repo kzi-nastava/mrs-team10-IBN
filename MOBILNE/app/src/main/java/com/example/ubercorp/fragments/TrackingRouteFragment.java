@@ -24,6 +24,7 @@ import com.example.ubercorp.dto.RideMomentDTO;
 import com.example.ubercorp.dto.StopRideDTO;
 import com.example.ubercorp.managers.RideManager;
 import com.example.ubercorp.managers.RouteManager;
+import com.example.ubercorp.utils.JwtUtils;
 
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
@@ -62,6 +63,7 @@ public class TrackingRouteFragment extends Fragment {
     private int lastPassedStation;
     private boolean vehicleIsMoving = true;
     private boolean connected = true;
+    private String role;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,6 +71,8 @@ public class TrackingRouteFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_tracking_route, container, false);
         SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+        role = JwtUtils.getRoleFromToken(token);
         if(getArguments() != null) rideToken = getArguments().getString("RideToken");
         else rideToken = sharedPref.getString("RideToken", "");
         mapView = view.findViewById(R.id.map);
@@ -124,8 +128,6 @@ public class TrackingRouteFragment extends Fragment {
 
                             @Override
                             public void onFailure(Call<FinishedRideDTO> call, Throwable t) {
-                                Log.d("sta se koji k desilo", t.getMessage());
-                                t.printStackTrace();
                                 Toast toast = Toast.makeText(TrackingRouteFragment.this.getContext(), "Can't finish ride! Check your Internet connection and try again!", Toast.LENGTH_SHORT);
                                 toast.show();
                             }
@@ -164,44 +166,85 @@ public class TrackingRouteFragment extends Fragment {
             return false;
         });
 
-        rideManager.getRideByToken(rideToken, new Callback<GetRideDetailsDTO>() {
-            @Override
-            public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
-                if(response.isSuccessful()){
-                    ride = response.body();
-                    stations = new ArrayList<>();
-                    for (CoordinateDTO point : response.body().getRoute().getStations()){
-                        stations.add(point.toGeoPoint());
-                    }
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            route = routeManager.getRoute(stations);
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    routeManager.drawRoute(route, stations);
-                                    distance = routeManager.getEstimatedDistance();
-                                    marker.setPosition(stations.get(0));
-                                    marker.setVisible(true);
-                                    mapView.getOverlays().add(marker);
-                                    mapView.invalidate();
-                                    moveVehicle();
-                                }
-                            });
+        if (role == "driver") {
+            rideManager.getRideByToken(rideToken, new Callback<GetRideDetailsDTO>() {
+                @Override
+                public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
+                    if (response.isSuccessful()) {
+                        ride = response.body();
+                        stations = new ArrayList<>();
+                        for (CoordinateDTO point : response.body().getRoute().getStations()) {
+                            stations.add(point.toGeoPoint());
                         }
-                    });
-                    thread.start();
-                }else{
-                    infoText.setText("No active routes to track!");
+                        Thread thread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                route = routeManager.getRoute(stations);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        routeManager.drawRoute(route, stations);
+                                        distance = routeManager.getEstimatedDistance();
+                                        marker.setPosition(stations.get(0));
+                                        marker.setVisible(true);
+                                        mapView.getOverlays().add(marker);
+                                        mapView.invalidate();
+                                        moveVehicle();
+                                    }
+                                });
+                            }
+                        });
+                        thread.start();
+                    } else {
+                        infoText.setText("No active routes to track!");
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<GetRideDetailsDTO> call, Throwable t) {
-                infoText.setText("Route fetching failed! Check your Internet connection and try again!");
-            }
-        });
+                @Override
+                public void onFailure(Call<GetRideDetailsDTO> call, Throwable t) {
+                    infoText.setText("Route fetching failed! Check your Internet connection and try again!");
+                }
+            });
+        }else{
+            rideManager.getTrackingRidePassenger(new Callback<GetRideDetailsDTO>() {
+                @Override
+                public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
+                    if (response.isSuccessful() && response.body().getRoute() != null) {
+                        ride = response.body();
+                        stations = new ArrayList<>();
+                        for (CoordinateDTO point : response.body().getRoute().getStations()) {
+                            stations.add(point.toGeoPoint());
+                        }
+                        Thread thread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                route = routeManager.getRoute(stations);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        routeManager.drawRoute(route, stations);
+                                        distance = routeManager.getEstimatedDistance();
+                                        marker.setPosition(stations.get(0));
+                                        marker.setVisible(true);
+                                        mapView.getOverlays().add(marker);
+                                        mapView.invalidate();
+                                        moveVehicle();
+                                    }
+                                });
+                            }
+                        });
+                        thread.start();
+                    } else {
+                        infoText.setText("No active routes to track!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<GetRideDetailsDTO> call, Throwable t) {
+                    infoText.setText("Route fetching failed! Check your Internet connection and try again!");
+                }
+            });
+        }
 
         return view;
     }
@@ -224,7 +267,6 @@ public class TrackingRouteFragment extends Fragment {
                         if(response.isSuccessful()){
                             if(response.body().getStatus() == RideStatus.Finished){
                                 vehicleIsMoving = false;
-                                // pomocu ovoga ce se putnici vracati na homepage
                                 Navigation.findNavController(requireView()).navigate(
                                         R.id.action_trackingRouteFragment_to_routeFragment
                                 );
@@ -279,7 +321,7 @@ public class TrackingRouteFragment extends Fragment {
         long now = System.currentTimeMillis();
 
         LocalDateTime startLdt = LocalDateTime.parse(ride.getStartTime());
-        LocalDateTime endLdt = LocalDateTime.parse(ride.getEndTime());
+        LocalDateTime endLdt = LocalDateTime.parse(ride.getEstimatedTimeArrival());
 
         long start = startLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long end = endLdt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();

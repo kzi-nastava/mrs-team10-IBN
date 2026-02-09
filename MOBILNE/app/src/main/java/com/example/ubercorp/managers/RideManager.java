@@ -174,6 +174,15 @@ public class RideManager {
         call.enqueue(callback);
     }
 
+    public void getTrackingRidePassenger(Callback<GetRideDetailsDTO> callback){
+        String token = getToken();
+        if (token == null) return;
+
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        Call<GetRideDetailsDTO> call = api.getTrackingRidePassenger("Bearer " + token);
+        call.enqueue(callback);
+    }
+
     public void finishRide(Long rideID, RideMomentDTO finish, Callback<FinishedRideDTO> callback){
         String token = getToken();
         if (token == null) return;
