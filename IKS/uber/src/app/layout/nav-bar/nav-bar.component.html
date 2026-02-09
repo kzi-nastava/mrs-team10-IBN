@@ -1,15 +1,32 @@
+<!-- nav-bar.component.html -->
 <div class="top">
   <button mat-icon-button (click)="drawer.toggle()" [style.display]="loggedIn ? 'inline' : 'none'">
     <mat-icon style="color: antiquewhite">menu</mat-icon>
   </button>
+
   <img class="nav-logo" src="logo.svg" [routerLink]="['/home']" />
+
   @if (!loggedIn) {
     <button class="form-button-one" [routerLink]="['/login']">Login</button>
     <button class="form-button-two" [routerLink]="['/register']">Register</button>
   } @else {
     <span class="example-spacer"></span>
+
     <div class="notification">
-      <mat-icon [routerLink]="['/notifications']">notifications</mat-icon>
+      <button
+        mat-icon-button
+        [routerLink]="['/notifications']"
+        (click)="resetUnreadCount()"
+        [matBadge]="unreadCount()"
+        [matBadgeHidden]="unreadCount() === 0"
+        matBadgeColor="warn"
+        matBadgeSize="small"
+        [attr.aria-label]="
+          'View notifications' + (unreadCount() > 0 ? ', ' + unreadCount() + ' unread' : '')
+        "
+      >
+        <mat-icon aria-hidden="false">notifications</mat-icon>
+      </button>
     </div>
   }
 </div>
@@ -29,12 +46,14 @@
         <span>Chat support</span>
       </div>
     }
+
     @if (role == 'driver' || role == 'passenger') {
       <div class="item" [routerLink]="['/chat']">
         <mat-icon>chat_bubble</mat-icon>
         <span>Chat support</span>
       </div>
     }
+
     <div class="separator"></div>
 
     <div class="item" [routerLink]="['/ride-history']">
@@ -59,26 +78,11 @@
 
       <div class="separator"></div>
     }
+
     <button class="logout-btn" (click)="logout()">Log out</button>
   </mat-sidenav>
 
-  <mat-sidenav-content class="content">
-    <!--
-    <mat-toolbar color="primary">
-
-      <button mat-icon-button (click)="drawer.toggle()">
-        <mat-icon style="color: antiquewhite">menu</mat-icon>
-      </button>
-
-      <img class="nav-logo" src="logo.png" />
-      <span class="example-spacer"></span>
-
-      <div class="notification">
-        <mat-icon>notifications</mat-icon>
-      </div>
-    </mat-toolbar>
--->
-  </mat-sidenav-content>
+  <mat-sidenav-content class="content"></mat-sidenav-content>
 </mat-sidenav-container>
 
 <div *ngIf="successMessage()" class="message success-message">

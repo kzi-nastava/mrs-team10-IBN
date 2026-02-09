@@ -1,83 +1,108 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, DestroyRef, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { MatBadgeModule } from '@angular/material/badge';
+
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { AuthService } from '../../service/auth.service';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { UpdateLocationComponent } from '../update-location/update-location.component';
-import { signal } from '@angular/core';
 import { WebSocketService } from '../../service/websocket.service';
 import { AppNotification } from '../../service/notification.service';
-import { CommonModule } from '@angular/common';
 
-/**
- * @title Toolbar overview
- */
 @Component({
   selector: 'app-nav-bar',
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css',
+  standalone: true,
   imports: [
+    CommonModule,
+    RouterModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
     MatSidenavModule,
-    RouterModule,
-    CommonModule,
+    MatBadgeModule,
   ],
 })
 export class NavBarComponent implements OnInit {
-  authService: AuthService;
-  isDriver = false;
-  loggedIn: boolean;
-  role: string | null;
-  router: Router;
+  private destroyRef = inject(DestroyRef);
+
+  loggedIn = false;
+  role: string | null = null;
+
   successMessage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
   panicMessage = signal<string | null>(null);
-  cdr: ChangeDetectorRef;
+  unreadCount = signal<number>(0);
+
   constructor(
-    authService: AuthService,
-    router: Router,
-    cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
     private webSocketService: WebSocketService,
-  ) {
-    this.authService = authService;
-    this.loggedIn = authService.isLoggedIn();
-    this.role = authService.role();
-    this.router = router;
-    this.cdr = cdr;
-  }
+  ) {}
+
   ngOnInit(): void {
-    this.webSocketService.newNotification$.subscribe((notif: AppNotification) => {
-      console.log(notif);
-      if (notif.title.toLocaleUpperCase() === 'PANIC') this.showPanic(notif.content);
-      else this.showSuccess(notif.content);
-    });
+    this.loggedIn = this.authService.isLoggedIn();
+    this.role = this.authService.role();
+
+    this.webSocketService.newNotification$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((notif: AppNotification) => {
+        console.log('WS NOTIFICATION:', notif);
+
+        if (notif.title?.toUpperCase() === 'PANIC') {
+          this.showPanic(notif.content);
+        } else {
+          this.showSuccess(notif.content);
+        }
+
+        this.unreadCount.update((c) => c + 1);
+        this.cdr.detectChanges();
+      });
   }
 
-  logout() {
+  logout(): void {
     this.authService.logout();
     this.router.navigate(['']);
     this.loggedIn = false;
+    this.unreadCount.set(0);
     this.cdr.detectChanges();
   }
 
-  showSuccess(message: string) {
-    var audio = new Audio('youve-been-informed-345.mp3');
-    audio.play();
+  resetUnreadCount(): void {
+    this.unreadCount.set(0);
+  }
+
+  private playSound(src: string): void {
+    try {
+      const audio = new Audio(src);
+      audio.play().catch(() => {});
+    } catch {}
+  }
+
+  showSuccess(message: string): void {
+    this.playSound('youve-been-informed-345.mp3');
+
     this.successMessage.set(message);
     this.errorMessage.set(null);
+    this.panicMessage.set(null);
+
     setTimeout(() => this.successMessage.set(null), 10000);
   }
 
-  showPanic(message: string) {
-    var audio = new Audio('attention-required-127.mp3');
-    audio.play();
+  showPanic(message: string): void {
+    this.playSound('attention-required-127.mp3');
+
     this.panicMessage.set(message);
+    this.successMessage.set(null);
+    this.errorMessage.set(null);
+
     setTimeout(() => this.panicMessage.set(null), 10000);
   }
 }

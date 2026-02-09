@@ -11,6 +11,7 @@ import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
 import com.example.UberComp.service.DriverAvailabilityService;
 import com.example.UberComp.service.DriverService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class DriverController {
 
     @PreAuthorize("hasAuthority('administrator')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> register(@RequestBody CreateDriverDTO dto) {
+    public ResponseEntity<?> register(@Valid @RequestBody CreateDriverDTO dto) {
         try {
             User user = accountService.register(new RegisterDTO(dto.getAccountDTO(), dto.getCreateUserDTO()));
             DriverDTO newDriver = driverService.register(dto, user);

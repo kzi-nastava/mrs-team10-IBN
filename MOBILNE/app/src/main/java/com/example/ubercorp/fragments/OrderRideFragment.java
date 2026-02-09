@@ -423,9 +423,26 @@ public class OrderRideFragment extends Fragment {
         fromLocation = fromLocationInput.getText().toString().trim();
         toLocation = toLocationInput.getText().toString().trim();
 
-        if (fromLocation.isEmpty() || toLocation.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter both start and end locations", Toast.LENGTH_SHORT).show();
+        if (fromLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Start address is required", Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        if (toLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Destination address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        for (int i = 0; i < stops.size(); i++) {
+            String stop = stops.get(i);
+            if (stop != null && !stop.trim().isEmpty()) {
+            } else {
+                stops.remove(i);
+                if (i < stopsContainer.getChildCount()) {
+                    stopsContainer.removeViewAt(i);
+                }
+                i--;
+            }
         }
 
         if (timeOption.equals("now")) {
@@ -453,6 +470,199 @@ public class OrderRideFragment extends Fragment {
             isRouteConfirmed = true;
             orderBtn.setEnabled(true);
         });
+    }
+
+    private void confirmShareRide() {
+        List<String> invalidEmails = new ArrayList<>();
+
+        passengerEmails.removeIf(email -> {
+            if (email.isEmpty()) {
+                return true;
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                invalidEmails.add(email);
+                return true;
+            }
+            return false;
+        });
+
+        if (!invalidEmails.isEmpty()) {
+            Toast.makeText(requireContext(),
+                    "Invalid email format: " + invalidEmails.get(0),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!passengerEmails.isEmpty()) {
+            String text = "👥 Share a ride (" + passengerEmails.size() +
+                    " passenger" + (passengerEmails.size() > 1 ? "s" : "") + ")";
+            shareRideText.setText(text);
+        } else {
+            shareRideText.setText("👥 Share a ride");
+        }
+
+        toggleShareRide();
+    }
+
+    private void placeOrder() {
+        if (!isRouteConfirmed) {
+            Toast.makeText(requireContext(), "Please confirm your route first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (calculatedPrice == 0.0) {
+            Toast.makeText(requireContext(), "Please wait for price calculation", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (fromLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Start address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (toLocation.isEmpty()) {
+            Toast.makeText(requireContext(), "Destination address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (startPoint == null || endPoint == null) {
+            Toast.makeText(requireContext(), "Invalid coordinates for start or destination", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (estimatedDistance <= 0) {
+            Toast.makeText(requireContext(), "Invalid distance calculated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (estimatedDuration <= 0) {
+            Toast.makeText(requireContext(), "Invalid duration calculated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (selectedCar == null || selectedCar.isEmpty()) {
+            Toast.makeText(requireContext(), "Please select a vehicle type", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (timeOption.equals("schedule")) {
+            if (rideDate.isEmpty() || rideTime.isEmpty()) {
+                Toast.makeText(requireContext(), "Scheduled date and time are required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!validateScheduledDateTime()) {
+                return;
+            }
+        }
+
+        CreateRideDTO rideDTO = buildRideDTO();
+
+        if (rideDTO.getStartAddress() == null || rideDTO.getDestinationAddress() == null) {
+            Toast.makeText(requireContext(), "Invalid address data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        orderBtn.setEnabled(false);
+        orderBtn.setText("Ordering...");
+
+        rideManager.createRide(rideDTO, new Callback<RideOrderResponseDTO>() {
+            @Override
+            public void onResponse(Call<RideOrderResponseDTO> call, Response<RideOrderResponseDTO> response) {
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
+
+                if (response.code() == 201 && response.body() != null) {
+                    showOrderConfirmation(response.body());
+                } else if (response.code() == 204) {
+                    Toast.makeText(requireContext(),
+                            "No available drivers at the moment.",
+                            Toast.LENGTH_LONG).show();
+                } else if (response.code() == 403) {
+                    if (response.body() != null && response.body().getStatus() != null) {
+                        Toast.makeText(requireContext(),
+                                "Account blocked: " + response.body().getStatus(),
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Your account is blocked.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                } else if (response.code() == 400) {
+                    Toast.makeText(requireContext(),
+                            "Invalid ride data. Please check all fields.",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to create ride.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RideOrderResponseDTO> call, Throwable t) {
+                if (orderBtn != null) {
+                    orderBtn.setEnabled(true);
+                    orderBtn.setText("Order Ride");
+                }
+                Log.e("OrderRideFragment", "Order failed: " + t.getMessage());
+                Toast.makeText(requireContext(), "Error creating ride: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private CreateRideDTO buildRideDTO() {
+        CreateRideDTO rideDTO = new CreateRideDTO();
+
+        if (startPoint != null && !fromLocation.isEmpty()) {
+            rideDTO.setStartAddress(new GetCoordinateDTO(fromLocation, startPoint.getLatitude(), startPoint.getLongitude()));
+        }
+
+        if (endPoint != null && !toLocation.isEmpty()) {
+            rideDTO.setDestinationAddress(new GetCoordinateDTO(toLocation, endPoint.getLatitude(), endPoint.getLongitude()));
+        }
+
+        List<GetCoordinateDTO> stopDTOs = new ArrayList<>();
+        for (int i = 0; i < stopPoints.size() && i < stops.size(); i++) {
+            GeoPoint point = stopPoints.get(i);
+            String stopAddress = stops.get(i);
+            if (point != null && stopAddress != null && !stopAddress.trim().isEmpty()) {
+                stopDTOs.add(new GetCoordinateDTO(stopAddress, point.getLatitude(), point.getLongitude()));
+            }
+        }
+        rideDTO.setStops(stopDTOs);
+
+        List<String> validEmails = new ArrayList<>();
+        for (String email : passengerEmails) {
+            if (email != null && !email.trim().isEmpty() &&
+                    android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                validEmails.add(email.trim());
+            }
+        }
+
+        rideDTO.setPassengerEmails(validEmails);
+
+        rideDTO.setVehicleType(selectedCar != null && !selectedCar.isEmpty() ? selectedCar : "STANDARD");
+
+        rideDTO.setBabySeat(babyCheckbox != null && babyCheckbox.isChecked());
+        rideDTO.setPetFriendly(petCheckbox != null && petCheckbox.isChecked());
+
+        if (timeOption.equals("schedule") && !rideDate.isEmpty() && !rideTime.isEmpty()) {
+            String scheduledDateTime = rideDate + " " + rideTime + ":00";
+            rideDTO.setScheduled(scheduledDateTime);
+        } else {
+            rideDTO.setScheduled(null);
+        }
+
+        rideDTO.setDistance(estimatedDistance > 0 ? estimatedDistance : 0.0);
+        rideDTO.setEstimatedDuration(estimatedDuration > 0 ? estimatedDuration : 0);
+
+        rideDTO.setPrice(calculatedPrice >= 0 ? calculatedPrice : 0.0);
+
+        return rideDTO;
     }
 
     private void updateLocationDisplay() {
@@ -543,20 +753,6 @@ public class OrderRideFragment extends Fragment {
         });
 
         passengersContainer.addView(passengerLayout);
-    }
-
-    private void confirmShareRide() {
-        passengerEmails.removeIf(String::isEmpty);
-
-        if (!passengerEmails.isEmpty()) {
-            String text = "👥 Share a ride (" + passengerEmails.size() +
-                    " passenger" + (passengerEmails.size() > 1 ? "s" : "") + ")";
-            shareRideText.setText(text);
-        } else {
-            shareRideText.setText("👥 Share a ride");
-        }
-
-        toggleShareRide();
     }
 
     private void fetchAndDrawRoute(Runnable onComplete) {
@@ -670,109 +866,6 @@ public class OrderRideFragment extends Fragment {
             }
         });
     }
-
-    private CreateRideDTO buildRideDTO() {
-        CreateRideDTO rideDTO = new CreateRideDTO();
-
-        // Start i destination
-        rideDTO.setStartAddress(new GetCoordinateDTO(fromLocation, startPoint.getLatitude(), startPoint.getLongitude()));
-        rideDTO.setDestinationAddress(new GetCoordinateDTO(toLocation, endPoint.getLatitude(), endPoint.getLongitude()));
-
-        // Stops
-        List<GetCoordinateDTO> stopDTOs = new ArrayList<>();
-        for (int i = 0; i < stopPoints.size() && i < stops.size(); i++) {
-            GeoPoint point = stopPoints.get(i);
-            String stopAddress = stops.get(i);
-            stopDTOs.add(new GetCoordinateDTO(stopAddress, point.getLatitude(), point.getLongitude()));
-        }
-        rideDTO.setStops(stopDTOs);
-
-        // Passengers
-        List<String> validEmails = new ArrayList<>();
-        for (String email : passengerEmails) {
-            if (!email.isEmpty()) validEmails.add(email);
-        }
-        rideDTO.setPassengerEmails(validEmails);
-
-        // Vehicle
-        rideDTO.setVehicleType(selectedCar);
-
-        // Options
-        rideDTO.setBabySeat(babyCheckbox.isChecked());
-        rideDTO.setPetFriendly(petCheckbox.isChecked());
-
-        // Scheduled
-        if (timeOption.equals("schedule") && !rideDate.isEmpty() && !rideTime.isEmpty()) {
-            String scheduledDateTime = rideDate + " " + rideTime + ":00";
-            rideDTO.setScheduled(scheduledDateTime);
-        } else {
-            rideDTO.setScheduled(null);
-        }
-
-        // Distance & estimatedDuration
-        rideDTO.setDistance(estimatedDistance);
-        rideDTO.setEstimatedDuration(estimatedDuration);
-
-        // Price
-        rideDTO.setPrice(calculatedPrice);
-
-        return rideDTO;
-    }
-
-    private void placeOrder() {
-        if (!isRouteConfirmed) {
-            Toast.makeText(requireContext(), "Please confirm your route first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (calculatedPrice == 0.0) {
-            Toast.makeText(requireContext(), "Please wait for price calculation", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (timeOption.equals("schedule") && !validateScheduledDateTime()) {
-            return;
-        }
-
-        CreateRideDTO rideDTO = buildRideDTO();
-        rideDTO.setPrice(calculatedPrice);
-
-        orderBtn.setEnabled(false);
-        orderBtn.setText("Ordering...");
-
-        rideManager.createRide(rideDTO, new Callback<RideOrderResponseDTO>() {
-            @Override
-            public void onResponse(Call<RideOrderResponseDTO> call, Response<RideOrderResponseDTO> response) {
-                if (orderBtn != null) {
-                    orderBtn.setEnabled(true);
-                    orderBtn.setText("Order Ride");
-                }
-
-                if (response.code() == 201 && response.body() != null) {
-                    showOrderConfirmation(response.body());
-                } else if (response.code() == 204) {
-                    Toast.makeText(requireContext(),
-                            "No available drivers at the moment.",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(requireContext(),
-                            "Failed to create ride.",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RideOrderResponseDTO> call, Throwable t) {
-                if (orderBtn != null) {
-                    orderBtn.setEnabled(true);
-                    orderBtn.setText("Order Ride");
-                }
-                Log.e("OrderRideFragment", "Order failed: " + t.getMessage());
-                Toast.makeText(requireContext(), "Error creating ride: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
     private void showOrderConfirmation(RideOrderResponseDTO response) {
         StringBuilder message = new StringBuilder("Ride ordered successfully!\n\n");
         message.append("Price: ").append(String.format(Locale.getDefault(), "%.2f RSD", response.getPrice())).append("\n");
@@ -922,7 +1015,4 @@ public class OrderRideFragment extends Fragment {
             }
         }).start();
     }
-
-
-
 }
