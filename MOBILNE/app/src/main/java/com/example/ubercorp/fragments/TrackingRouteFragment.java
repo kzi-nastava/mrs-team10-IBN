@@ -1,5 +1,7 @@
 package com.example.ubercorp.fragments;
 
+import static android.view.View.GONE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -91,6 +93,19 @@ public class TrackingRouteFragment extends Fragment {
 
         Button finishButton = view.findViewById(R.id.finishButton);
         Button panicButton = view.findViewById(R.id.panicButton);
+        Button complaint = view.findViewById(R.id.reportHere);
+
+        if (role.equals("passenger")){
+            finishButton.setVisibility(GONE);
+        }else{
+            complaint.setVisibility(GONE);
+        }
+
+        complaint.setOnClickListener((v) -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("RideID", ride.getId());
+            Navigation.findNavController(requireView()).navigate(R.id.complaintForm, bundle);
+        });
 
         finishButton.setOnClickListener((v) -> {
             vehicleIsMoving = false;
