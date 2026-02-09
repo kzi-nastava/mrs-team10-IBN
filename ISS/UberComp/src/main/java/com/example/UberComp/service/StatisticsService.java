@@ -124,15 +124,7 @@ public class StatisticsService {
                 DailyData data = dailyDataMap.get(rideDate);
                 data.rideCount++;
                 data.distance += ride.getDistance();
-
-                if (isDriver) {
-                    data.money += ride.getPrice();
-                } else {
-                    int passengerCount = ride.getPassengers().size();
-                    if (passengerCount > 0) {
-                        data.money += ride.getPrice() / passengerCount;
-                    }
-                }
+                data.money += ride.getPrice();
             }
         }
 

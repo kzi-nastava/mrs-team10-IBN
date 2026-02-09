@@ -15,6 +15,7 @@ jwtdecode = "2.0.2"
 material = "1.13.0"
 activity = "1.12.1"
 constraintlayout = "2.2.1"
+mpandroidchart = "v3.1.0"
 navigation-fragment = "2.9.6"
 navigation-ui = "2.9.6"
 legacySupportV4 = "1.0.0"
@@ -51,6 +52,7 @@ jwtdecode = { module = "com.auth0.android:jwtdecode", version.ref = "jwtdecode" 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigation-fragment"}
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigation-ui"}
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }

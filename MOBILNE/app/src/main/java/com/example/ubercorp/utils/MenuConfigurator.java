@@ -24,21 +24,21 @@ public class MenuConfigurator {
     }
 
     private static void hideAllMenuItems(MenuViews views) {
-        hideViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
+        hideViews(views.menuRequests, views.menuManageUsers,
                 views.menuChangePassword, views.menuFavorites,
-                views.menuUserStat, views.menuVehicle, views.menuDriverStat,
+                views.menuStat, views.menuVehicle,
                 views.drivingHoursSection, views.menuvehiclePrices);
         views.btnSendChanges.setVisibility(View.GONE);
         views.changePassword.setVisibility(View.GONE);
     }
 
     private static void showAdminMenu(MenuViews views) {
-        showViews(views.menuPlatformStats, views.menuRequests, views.menuManageUsers,
-                views.menuChangePassword, views.menuvehiclePrices);
+        showViews(views.menuRequests, views.menuManageUsers,
+                views.menuChangePassword, views.menuvehiclePrices, views.menuStat);
     }
 
     private static void showDriverMenu(MenuViews views) {
-        showViews(views.menuVehicle, views.menuDriverStat, views.menuChangePassword);
+        showViews(views.menuVehicle, views.menuStat, views.menuChangePassword);
         views.tvUserEmail.setVisibility(View.GONE);
         views.drivingHoursSection.setVisibility(View.VISIBLE);
         views.btnSaveChanges.setVisibility(View.GONE);
@@ -46,7 +46,7 @@ public class MenuConfigurator {
     }
 
     private static void showPassengerMenu(MenuViews views) {
-        showViews(views.menuFavorites, views.menuUserStat, views.menuChangePassword);
+        showViews(views.menuFavorites, views.menuStat, views.menuChangePassword);
     }
 
     private static void showViews(View... views) {
@@ -62,13 +62,11 @@ public class MenuConfigurator {
     }
 
     public static class MenuViews {
-        public LinearLayout menuPlatformStats;
         public LinearLayout menuRequests;
         public LinearLayout menuManageUsers;
         public LinearLayout menuChangePassword;
         public LinearLayout menuFavorites;
-        public LinearLayout menuUserStat;
-        public LinearLayout menuDriverStat;
+        public LinearLayout menuStat;
         public LinearLayout menuVehicle;
         public LinearLayout drivingHoursSection;
         public LinearLayout menuvehiclePrices;

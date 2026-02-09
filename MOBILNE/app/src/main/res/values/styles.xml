@@ -22,4 +22,26 @@
         <item name="colorAccent">@color/btn_color_2</item>
     </style>
 
+    <style name="CustomDatePickerDialog" parent="Theme.Material3.Light.Dialog">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:colorBackground">@android:color/white</item>
+
+        <item name="colorPrimary">@color/btn_color_1</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@color/btn_color_1</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorSecondary">@color/btn_color_1</item>
+
+        <item name="buttonBarPositiveButtonStyle">@style/DatePickerButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DatePickerButton</item>
+    </style>
+
+    <style name="DatePickerButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/btn_color_1</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="rippleColor">@color/btn_color_1</item>
+    </style>
 </resources>
