@@ -25,6 +25,7 @@
                 "input": "public"
               }
             ],
+            "polyfills": ["src/polyfills.ts"],
             "styles": [
               "./node_modules/leaflet/dist/leaflet.css",
               "./node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.css",
@@ -74,9 +75,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "runner": "karma",
-            "include": [
-              "**/register.component.spec.ts"
-            ]
+            "include": ["**/register.component.spec.ts", "**/register-driver.component.spec.ts"]
           }
         }
       }
