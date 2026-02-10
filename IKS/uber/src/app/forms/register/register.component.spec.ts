@@ -2,34 +2,35 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../../service/auth.service';
 import { Router } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpResponse } from '@angular/common/http';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let mockAuthService: any;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
   let router: Router;
+  let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
   beforeEach(async () => {
-    mockAuthService = {
-      register: vi.fn()
-    };
+    // Create mock services
+    mockAuthService = jasmine.createSpyObj('AuthService', ['register']);
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule, RouterTestingModule],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
+        { provide: AuthService, useValue: mockAuthService }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router); 
-    vi.spyOn(router, 'navigate');
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
+    spyOn(component['cdr'], 'detectChanges');
     fixture.detectChanges();
   });
 
@@ -165,8 +166,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should call authService.register with correct data when form is valid', () => {
-      const mockResponse = new HttpResponse({ status: 200, body: {} });
-      mockAuthService.register.mockReturnValue(of(mockResponse));
+      mockAuthService.register.and.returnValue(of(new HttpResponse({ status: 200, body: {} })));
       
       component.register();
       
@@ -183,8 +183,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should navigate to login page on successful registration', () => {
-      const mockResponse = new HttpResponse({ status: 200, body: {} });
-      mockAuthService.register.mockReturnValue(of(mockResponse));
+      mockAuthService.register.and.returnValue(of(new HttpResponse({ status: 200, body: {} })));
       
       component.register();
       
@@ -192,23 +191,23 @@ describe('RegisterComponent', () => {
     });
 
     it('should set error message when registration fails', () => {
-      mockAuthService.register.mockReturnValue(
+      mockAuthService.register.and.returnValue(
         throwError(() => new Error('Registration failed'))
       );
       
       component.register();
       
       expect(component.errormsg).toBe('Account with this email address already exists!');
+      expect(component['cdr'].detectChanges).toHaveBeenCalled();
     });
 
     it('should include custom profile image if uploaded', () => {
-      const mockResponse = new HttpResponse({ status: 200, body: {} });
-      mockAuthService.register.mockReturnValue(of(mockResponse));
+      mockAuthService.register.and.returnValue(of(new HttpResponse({ status: 200, body: {} })));
       component.userProfileImage = 'data:image/png;base64,customimage';
       
       component.register();
       
-      const calledData = mockAuthService.register.mock.calls[0][0];
+      const calledData = mockAuthService.register.calls.mostRecent().args[0];
       expect(calledData.image).toBe('data:image/png;base64,customimage');
     });
   });
@@ -227,7 +226,7 @@ describe('RegisterComponent', () => {
       expect(component.filename).toBe('test-image.png');
     });
 
-    it('should convert uploaded file to base64 and update userProfileImage', async () => {
+    it('should convert uploaded file to base64 and update userProfileImage', (done) => {
       const mockFile = new File(['fake-content'], 'test-image.png', { type: 'image/png' });
       const mockEvent = {
         target: {
@@ -236,27 +235,19 @@ describe('RegisterComponent', () => {
       };
       
       const mockBase64 = 'data:image/png;base64,fakebase64data';
-      
-      // Create a promise to handle FileReader async behavior
-      const fileReadPromise = new Promise<void>((resolve) => {
-        const originalFileReader = FileReader;
-        vi.stubGlobal('FileReader', class {
-          onload: ((event: any) => void) | null = null;
-          readAsDataURL() {
-            setTimeout(() => {
-              if (this.onload) {
-                this.onload({ target: { result: mockBase64 } });
-              }
-              resolve();
-            }, 0);
-          }
-        });
+      spyOn(window as any, 'FileReader').and.returnValue({
+        readAsDataURL: function(file: File) {
+          this.onload({ target: { result: mockBase64 } });
+        }
       });
       
       component.onFileSelected(mockEvent);
-      await fileReadPromise;
       
-      expect(component.userProfileImage).toBe(mockBase64);
+      setTimeout(() => {
+        expect(component.userProfileImage).toBe(mockBase64);
+        expect(component['cdr'].detectChanges).toHaveBeenCalled();
+        done();
+      }, 100);
     });
 
     it('should not update anything if no file is selected', () => {
