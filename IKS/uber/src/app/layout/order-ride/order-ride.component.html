@@ -176,5 +176,9 @@
     {{ errorMessage }}
   </div>
 }
-
+@if (noErrorMessage) {
+  <div class="message no-error-message">
+    {{ noErrorMessage }}
+  </div>
+}
 <router-outlet></router-outlet>

@@ -414,6 +414,11 @@ app-map {
   color: white;
 }
 
+.no-error-message {
+  background: linear-gradient(135deg, #e56700 0%, #f34d16 100%);
+  color: white;
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
