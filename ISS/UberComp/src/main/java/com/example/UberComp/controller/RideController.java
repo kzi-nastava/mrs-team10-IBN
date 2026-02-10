@@ -135,8 +135,12 @@ public class RideController {
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/finish/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> finishRide(@RequestBody RideMomentDTO finish, @PathVariable("id") Long id) {
-         FinishedRideDTO finished = rideService.endRide(id, finish);
-         return new ResponseEntity<>(finished, HttpStatus.OK);
+        try {
+            FinishedRideDTO finished = rideService.endRide(id, finish);
+            return new ResponseEntity<>(finished, HttpStatus.OK);
+        }catch (RuntimeException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PreAuthorize("hasAuthority('driver')")

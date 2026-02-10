@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injectable, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { UserFormComponent, UserFormData } from '../../forms/user-form/user-form.component';
@@ -41,7 +41,10 @@ export class RegisterDriverComponent implements OnInit {
   errorMessage: string | null = null;
   isLoading: boolean = false;
 
-  constructor(private driverService: DriverService, private cd: ChangeDetectorRef) {}
+  constructor(
+    private driverService: DriverService,
+    private cd: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {}
 

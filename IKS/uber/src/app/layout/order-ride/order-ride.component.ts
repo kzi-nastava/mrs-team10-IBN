@@ -63,6 +63,7 @@ export class OrderRideComponent implements OnInit {
 
   successMessage: string | null = null;
   errorMessage: string | null = null;
+  noErrorMessage: string | null = null;
 
   private addressCoordinates = new Map<string, { lat: number; lon: number }>();
 
@@ -258,30 +259,27 @@ export class OrderRideComponent implements OnInit {
         if (response !== null) {
           //this.showSuccess('Ride ordered! Check notifications for details.');
         } else {
-          this.showError('No available drivers.');
+          this.showNoError('No available drivers at the moment.');
         }
       },
       error: (error) => {
         console.error('Error ordering ride:', error);
         this.isOrdering = false;
-        let errorMsg = 'Failed to order ride. ';
 
         if (error.status === 403) {
           const blockingReason = error.error?.status;
           if (blockingReason) {
-            errorMsg = `You are blocked: ${blockingReason}`;
+            this.showError(`You are blocked: ${blockingReason}`);
           } else {
-            errorMsg = 'You are blocked and cannot order a ride.';
+            this.showError('You are blocked and cannot order a ride.');
           }
         } else if (error.status === 204) {
-          errorMsg = 'No available drivers at the moment.';
+          this.showNoError('No available drivers at the moment.');
         } else if (error.error) {
-          errorMsg += error.error;
+          this.showError(error.error);
         } else {
-          errorMsg += 'Please try again.';
+          this.showError('Please try again.');
         }
-
-        this.showError(errorMsg);
       },
     });
   }
@@ -491,6 +489,17 @@ export class OrderRideComponent implements OnInit {
     this.cd.detectChanges();
     setTimeout(() => {
       this.errorMessage = null;
+      this.cd.detectChanges();
+    }, 5000);
+  }
+
+  showNoError(message: string) {
+    this.noErrorMessage = message;
+    this.successMessage = null;
+    this.errorMessage = null;
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.noErrorMessage = null;
       this.cd.detectChanges();
     }, 5000);
   }
