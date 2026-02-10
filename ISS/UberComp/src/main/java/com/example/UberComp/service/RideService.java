@@ -188,7 +188,7 @@ public class RideService {
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
 
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
-        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        Ride ride = rideRepository.findById(rideId).orElseThrow(() -> new NoSuchElementException("Ride not found"));
         ride.setStatus(RideStatus.Finished);
         Driver driver = ride.getDriver();
         if(driver.getStatus() == DriverStatus.OFFLINE_AFTER_RIDE) driver.setStatus(DriverStatus.OFFLINE);
