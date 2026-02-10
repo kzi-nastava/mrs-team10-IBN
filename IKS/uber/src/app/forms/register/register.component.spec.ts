@@ -16,7 +16,6 @@ describe('RegisterComponent', () => {
   let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
   beforeEach(async () => {
-    // Create mock services
     mockAuthService = jasmine.createSpyObj('AuthService', ['register']);
 
     await TestBed.configureTestingModule({
