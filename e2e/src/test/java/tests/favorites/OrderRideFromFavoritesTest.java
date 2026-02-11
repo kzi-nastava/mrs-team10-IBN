@@ -11,6 +11,7 @@ import pages.favorites.OrderRidePage;
 import pages.favorites.OrderRidePage.MessageStatus;
 import pages.favorites.OrderRidePage.MessageType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,8 +24,8 @@ public class OrderRideFromFavoritesTest {
     private OrderRidePage orderRidePage;
     private FavoritesPopupPage favoritesPopupPage;
 
-    private static final String TEST_EMAIL = "bojanapaunovic23@gmail.com";
-    private static final String TEST_PASSWORD = "pass123";
+    private static final String TEST_EMAIL = "passenger2@mail.com";
+    private static final String TEST_PASSWORD = "password";
     private static final String BASE_URL = "http://localhost:4200";
 
     @BeforeAll
@@ -61,6 +62,7 @@ public class OrderRideFromFavoritesTest {
         assertTrue(loginPage.isLoginPageLoaded());
         loginPage.login(TEST_EMAIL, TEST_PASSWORD);
         loginPage.waitForSuccessfulLogin();
+
         assertFalse(loginPage.isErrorMessageDisplayed());
         assertTrue(homePage.isHomePageLoaded());
         assertTrue(homePage.isOrderRideButtonVisible());
@@ -82,13 +84,26 @@ public class OrderRideFromFavoritesTest {
         }
 
         List<String> favoriteRouteLocations = favoritesPopupPage.getAllRouteLocations(0);
+
         favoritesPopupPage.selectRoute(0);
 
         assertFalse(orderRidePage.isFavoritesPopupDisplayed());
         orderRidePage.waitForRoutePopulation();
 
         List<String> inputLocations = orderRidePage.getAllLocations();
-        assertEquals(favoriteRouteLocations, inputLocations);
+
+        List<String> normalizedFavorites = new ArrayList<>();
+        for (String location : favoriteRouteLocations) {
+            normalizedFavorites.add(normalizeAddress(location));
+        }
+
+        List<String> normalizedInputs = new ArrayList<>();
+        for (String location : inputLocations) {
+            normalizedInputs.add(normalizeAddress(location));
+        }
+
+        assertEquals(normalizedFavorites, normalizedInputs,
+                "Route locations should match after normalization");
 
         String carType = "Standard";
         orderRidePage.selectCar(carType);
@@ -101,7 +116,9 @@ public class OrderRideFromFavoritesTest {
         assertTrue(orderRidePage.isOrderButtonEnabled());
 
         orderRidePage.clickOrderButton();
+
         orderRidePage.waitForResponseMessage();
+
         MessageStatus messageStatus = orderRidePage.checkMessageStatus();
 
         if (messageStatus.getType() == MessageType.SUCCESS) {

@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,11 +73,25 @@ public class FavoritesPopupPage {
 
     public List<String> getAllRouteLocations(int index) {
         WebElement card = getRouteCard(index);
-        List<WebElement> elements = card.findElements(By.cssSelector(".route-text"));
-        return elements.stream()
-                .map(WebElement::getText)
-                .map(String::trim)
-                .filter(s -> !s.equalsIgnoreCase("Novi Sad") && !s.equalsIgnoreCase("Serbia"))
-                .collect(Collectors.toList());
+
+        List<WebElement> routeTextElements = card.findElements(By.cssSelector(".route-path .route-text"));
+
+        List<String> locations = new ArrayList<>();
+        for (WebElement element : routeTextElements) {
+            String text = element.getText().trim();
+            if (!text.isEmpty() &&
+                    !text.equalsIgnoreCase("Novi Sad") &&
+                    !text.equalsIgnoreCase("Serbia")) {
+                locations.add(text);
+            }
+        }
+
+        return locations;
+    }
+
+    public String getRouteFullText(int index) {
+        WebElement card = getRouteCard(index);
+        WebElement routePath = card.findElement(By.cssSelector(".route-path"));
+        return routePath.getText().trim();
     }
 }
