@@ -268,15 +268,13 @@ export class OrderRideComponent implements OnInit {
 
         if (error.status === 403) {
           const blockingReason = error.error?.status;
-          if (blockingReason) {
-            this.showError(`You are blocked: ${blockingReason}`);
-          } else {
-            this.showError('You are blocked and cannot order a ride.');
-          }
-        } else if (error.status === 204) {
-          this.showNoError('No available drivers at the moment.');
-        } else if (error.error) {
-          this.showError(error.error);
+          this.showError(
+            blockingReason
+              ? `You are blocked: ${blockingReason}`
+              : 'You are blocked and cannot order a ride.',
+          );
+        } else if (error.error?.message) {
+          this.showError(error.error.message);
         } else {
           this.showError('Please try again.');
         }

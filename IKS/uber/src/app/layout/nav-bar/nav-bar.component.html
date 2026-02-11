@@ -1,4 +1,3 @@
-<!-- nav-bar.component.html -->
 <div class="top">
   <button mat-icon-button (click)="drawer.toggle()" [style.display]="loggedIn ? 'inline' : 'none'">
     <mat-icon style="color: antiquewhite">menu</mat-icon>
@@ -17,15 +16,12 @@
         mat-icon-button
         [routerLink]="['/notifications']"
         (click)="resetUnreadCount()"
-        [matBadge]="unreadCount()"
-        [matBadgeHidden]="unreadCount() === 0"
+        [matBadge]="unreadCount$ | async"
+        [matBadgeHidden]="(unreadCount$ | async) === 0"
         matBadgeColor="warn"
         matBadgeSize="small"
-        [attr.aria-label]="
-          'View notifications' + (unreadCount() > 0 ? ', ' + unreadCount() + ' unread' : '')
-        "
       >
-        <mat-icon aria-hidden="false">notifications</mat-icon>
+        <mat-icon>notifications</mat-icon>
       </button>
     </div>
   }
@@ -85,12 +81,12 @@
   <mat-sidenav-content class="content"></mat-sidenav-content>
 </mat-sidenav-container>
 
-<div *ngIf="successMessage()" class="message success-message">
-  {{ successMessage() }}
+<div *ngIf="successMessage$ | async as successMsg" class="message success-message">
+  {{ successMsg }}
 </div>
-<div *ngIf="errorMessage()" class="message error-message">
-  {{ errorMessage() }}
+<div *ngIf="errorMessage$ | async as errorMsg" class="message error-message">
+  {{ errorMsg }}
 </div>
-<div *ngIf="panicMessage()" class="message panic-message">
-  {{ panicMessage() }}
+<div *ngIf="panicMessage$ | async as panicMsg" class="message panic-message">
+  {{ panicMsg }}
 </div>
