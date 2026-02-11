@@ -64,8 +64,8 @@ public class RideHistoryPage {
     }
 
     public void clickOnSecondCard(){
-        wait.until(ExpectedConditions.elementToBeClickable(cards.get(1)));
-        cards.get(1).click();
+        wait.until(ExpectedConditions.elementToBeClickable(cards.get(2)));
+        cards.get(2).click();
     }
 
     public void rateButtonClick(){

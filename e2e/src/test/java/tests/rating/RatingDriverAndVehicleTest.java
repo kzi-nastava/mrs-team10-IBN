@@ -36,7 +36,7 @@ public class RatingDriverAndVehicleTest {
         rideHistoryPage = new RideHistoryPage(driver);
         ratePage = new RatePage(driver);
         driver.get(BASE_URL + "/login");
-        loginPage.login("putnik@mail.com", "pass123");
+        loginPage.login("passenger@mail.com", "password");
         loginPage.waitForSuccessfulLogin();
         assertFalse(loginPage.isErrorMessageDisplayed());
         assertTrue(homePage.isHomePageLoaded());

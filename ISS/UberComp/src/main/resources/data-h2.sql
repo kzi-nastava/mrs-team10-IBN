@@ -70,8 +70,14 @@ VALUES (6, 'User', 'Jane', 'Smith', 'Narodnih heroja 14, Novi Sad', '+3812345678
 
 INSERT INTO ride (route_id, driver_id, start, estimated_time_arrival, status, price, distance, babies, pets)
 VALUES (1, 1, '2026-02-11 12:00:00', '2026-02-11 12:15:00', 'Ongoing', 150.0, 5.0, false, false);
+INSERT INTO ride (route_id, driver_id, start, estimated_time_arrival, status, price, distance, babies, pets)
+VALUES (1, 1, '2026-02-7 12:00:00', '2026-02-7 12:15:00', 'Finished', 150.0, 5.0, false, false);
+INSERT INTO ride (route_id, driver_id, start, estimated_time_arrival, status, price, distance, babies, pets)
+VALUES (1, 1, '2026-02-19 12:00:00', '2026-02-19 12:15:00', 'Finished', 150.0, 5.0, false, false);
 
 INSERT INTO ride_passengers (passengers_id, ride_id) VALUES (6, 1);
+INSERT INTO ride_passengers (passengers_id, ride_id) VALUES (6, 2);
+INSERT INTO ride_passengers (passengers_id, ride_id) VALUES (6, 3);
 
 INSERT INTO account (account_type, account_status, email, password)
 VALUES ('PASSENGER', 'VERIFIED', 'passenger2@mail.com', '$2a$10$8xtcyxlP5VmjAw620SF70uLMvV6PhwTNydwZe1OeqJXoXGzgoqjRq');
