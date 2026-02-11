@@ -29,6 +29,10 @@ import { AppNotification } from '../../service/notification.service';
 })
 export class NavBarComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
+  private successAudio!: HTMLAudioElement;
+  private panicAudio!: HTMLAudioElement;
+  private audioInitialized = false;
+
   loggedIn = false;
   role: string | null = null;
 
@@ -42,11 +46,24 @@ export class NavBarComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private webSocketService: WebSocketService,
-  ) {}
+  ) {
+    this.initializeAudio();
+  }
 
   ngOnInit(): void {
     this.loggedIn = this.authService.isLoggedIn();
     this.role = this.authService.role();
+
+    if (!this.audioInitialized) {
+      const enableAudio = () => {
+        this.successAudio.load();
+        this.panicAudio.load();
+        this.audioInitialized = true;
+      };
+
+      document.addEventListener('click', enableAudio, { once: true });
+      document.addEventListener('keydown', enableAudio, { once: true });
+    }
 
     this.webSocketService.newNotification$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (notif: AppNotification) => {
@@ -60,9 +77,41 @@ export class NavBarComponent implements OnInit {
         this.unreadCount$.next(newCount);
         this.cdr.detectChanges();
       },
-      error: (err) => {},
-      complete: () => {},
+      error: (err) => {
+        console.error('WebSocket notification error:', err);
+      },
     });
+  }
+
+  private initializeAudio(): void {
+    this.successAudio = new Audio('youve-been-informed-345.mp3');
+    this.panicAudio = new Audio('attention-required-127.mp3');
+
+    this.successAudio.preload = 'auto';
+    this.panicAudio.preload = 'auto';
+
+    this.successAudio.onerror = (e) => console.error('Success audio load error:', e);
+    this.panicAudio.onerror = (e) => console.error('Panic audio load error:', e);
+  }
+
+  private async playSound(audio: HTMLAudioElement): Promise<void> {
+    try {
+      audio.pause();
+      audio.currentTime = 0;
+
+      await audio.play();
+    } catch (err) {
+      console.warn('Audio play failed:', err);
+
+      setTimeout(async () => {
+        try {
+          audio.currentTime = 0;
+          await audio.play();
+        } catch (retryErr) {
+          console.error('Audio retry failed:', retryErr);
+        }
+      }, 100);
+    }
   }
 
   logout(): void {
@@ -77,17 +126,8 @@ export class NavBarComponent implements OnInit {
     this.unreadCount$.next(0);
   }
 
-  private playSound(src: string): void {
-    try {
-      const audio = new Audio(src);
-      audio.play().catch((err) => console.log('Audio play failed:', err));
-    } catch (err) {
-      console.log('Audio error:', err);
-    }
-  }
-
   showSuccess(message: string): void {
-    this.playSound('youve-been-informed-345.mp3');
+    this.playSound(this.successAudio);
     this.successMessage$.next(message);
     this.errorMessage$.next(null);
     this.panicMessage$.next(null);
@@ -101,7 +141,7 @@ export class NavBarComponent implements OnInit {
   }
 
   showPanic(message: string): void {
-    this.playSound('attention-required-127.mp3');
+    this.playSound(this.panicAudio);
     this.panicMessage$.next(message);
     this.successMessage$.next(null);
     this.errorMessage$.next(null);
