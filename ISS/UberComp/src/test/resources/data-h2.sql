@@ -69,6 +69,6 @@ INSERT INTO app_user (account_id, dtype, name, last_name, home_address, phone)
 VALUES (6, 'User', 'Jane', 'Smith', 'Narodnih heroja 14, Novi Sad', '+381234567891');
 
 INSERT INTO ride (route_id, driver_id, start, estimated_time_arrival, status, price, distance, babies, pets)
-VALUES (1, 1, '2026-02-11 12:00:00', '2026-02-11 12:15:00', 'ONGOING', 150.0, 5.0, false, false);
+VALUES (1, 1, '2026-02-11 12:00:00', '2026-02-11 12:15:00', 'Ongoing', 150.0, 5.0, false, false);
 
 INSERT INTO ride_passengers (passengers_id, ride_id) VALUES (6, 1);
