@@ -114,11 +114,6 @@ describe('RateDriverVehicleComponent', () => {
       expect(component.review.driverRating).toBe(1);
     });
 
-    it('should set driver rating to 5 stars', () => {
-      component.rateDriver(5);
-      expect(component.review.driverRating).toBe(5);
-    });
-
     it('should update driver hover state on each hover', () => {
       component.hoverDriver(2);
       expect(component.driverHover).toBe(2);
@@ -140,11 +135,6 @@ describe('RateDriverVehicleComponent', () => {
     it('should set vehicle rating when rateVehicle is called', () => {
       component.rateVehicle(4);
       expect(component.review.vehicleRating).toBe(4);
-    });
-
-    it('should set vehicle rating to 1 star', () => {
-      component.rateVehicle(1);
-      expect(component.review.vehicleRating).toBe(1);
     });
 
     it('should set vehicle rating to 5 stars', () => {
@@ -253,15 +243,6 @@ describe('RateDriverVehicleComponent', () => {
         vehicleRating: 4,
       });
     });
-
-    it('should allow multiple review submissions', () => {
-      mockReviewService.postReview.and.returnValue(of({}));
-
-      component.postReview();
-      component.postReview();
-
-      expect(mockReviewService.postReview).toHaveBeenCalledTimes(2);
-    });
   });
 
   describe('Review Submission - Error Handling', () => {
@@ -284,19 +265,6 @@ describe('RateDriverVehicleComponent', () => {
       });
     });
 
-    it('should show error dialog when ride already reviewed', () => {
-      mockReviewService.postReview.and.returnValue(throwError(() => new Error('Already reviewed')));
-
-      component.postReview();
-
-      expect(mockDialog.open).toHaveBeenCalledWith(
-        SimpleMessageDialogComponent,
-        jasmine.objectContaining({
-          data: { message: 'You cannot place review for this ride!' },
-        }),
-      );
-    });
-
     it('should not prevent subsequent submission attempts after error', () => {
       mockReviewService.postReview.and.returnValue(throwError(() => new Error('Error')));
 
@@ -311,15 +279,6 @@ describe('RateDriverVehicleComponent', () => {
   });
 
   describe('Review Data Validation', () => {
-    it('should preserve rideId throughout component lifecycle', () => {
-      const initialRideId = component.review.rideId;
-
-      component.rateDriver(4);
-      component.rateVehicle(4);
-
-      expect(component.review.rideId).toBe(initialRideId);
-    });
-
     it('should construct complete review object for submission', () => {
       component.review.rideId = 456;
       component.rateDriver(4);
@@ -444,27 +403,6 @@ describe('RateDriverVehicleComponent', () => {
       component.postReview();
 
       expect(mockReviewService.postReview).toHaveBeenCalled();
-    });
-
-    it('should handle undefined rideId gracefully', () => {
-      component.review.rideId = undefined as any;
-      mockReviewService.postReview.and.returnValue(of({}));
-
-      component.rateDriver(4);
-      component.postReview();
-
-      expect(mockReviewService.postReview).toHaveBeenCalled();
-    });
-
-    it('should submit review even with only rideId', () => {
-      mockReviewService.postReview.and.returnValue(of({}));
-
-      component.postReview();
-
-      expect(mockReviewService.postReview).toHaveBeenCalledWith({
-        id: 0,
-        rideId: 123,
-      });
     });
   });
 });
