@@ -204,6 +204,7 @@ public class RideService {
         return new FinishedRideDTO(ride);
     }
 
+    @Transactional
     public FinishedRideDTO stopRide(StopRideDTO stopRideDTO, boolean panic) {
         Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow(() -> new RuntimeException("Ride not found"));
         Route stoppedRoute = ride.getRoute();
@@ -217,6 +218,7 @@ public class RideService {
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
         LocalDateTime now = LocalDateTime.parse(stopRideDTO.getFinishTime());
+        ride.setDistance(stopRideDTO.getDistance());
         ride.setFinish(now);
         Driver driver = ride.getDriver();
         if(panic) {
