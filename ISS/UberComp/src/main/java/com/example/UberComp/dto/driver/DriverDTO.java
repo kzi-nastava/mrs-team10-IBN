@@ -3,6 +3,7 @@ package com.example.UberComp.dto.driver;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.user.CreatedUserDTO;
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.model.Driver;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -28,4 +29,13 @@ public class DriverDTO {
     private Integer uptime;
     private boolean blocked;
     private String reason;
+
+    public DriverDTO(Driver driver) {
+        this.uptime = driver.getUptime();
+        this.reason = driver.getAccount().getBlockingReason();
+        this.blocked = driver.getAccount().getAccountStatus().equals(AccountStatus.BLOCKED);
+        this.vehicleDTO = new VehicleDTO(driver.getVehicle());
+        this.createUserDTO = new CreatedUserDTO(driver);
+        this.accountDTO = new AccountDTO(driver.getAccount());
+    }
 }

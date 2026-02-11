@@ -50,9 +50,7 @@ export class WebSocketService {
               try {
                 const notification: AppNotification = JSON.parse(message.body);
                 this.newNotification$.next(notification);
-              } catch (err) {
-                console.error('Error parsing notification:', err);
-              }
+              } catch (err) {}
             });
           });
 
@@ -75,7 +73,6 @@ export class WebSocketService {
             chatSubscription = '/topic/chat/admin';
           } else {
             chatSubscription = '/topic/chat/' + userEmail;
-            console.log(userEmail);
           }
           this.stompClient!.subscribe(chatSubscription, (message) => {
             this.zone.run(() => {
@@ -99,7 +96,6 @@ export class WebSocketService {
 
   sendMessage(message: ChatMessage) {
     if (!this.stompClient?.connected) {
-      console.warn('WebSocket not connected yet. Retrying in 500ms...');
       setTimeout(() => this.sendMessage(message), 500);
       return;
     }

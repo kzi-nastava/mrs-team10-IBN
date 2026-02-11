@@ -179,19 +179,19 @@ public class RideController {
                     new RideOrderResponseDTO(0L,0.0, account.getBlockingReason(), null, null, null, null, null, 0L, null));
 
         GetCoordinateDTO start = dto.getStartAddress();
-        if (start.getLon() == 0 || start.getLat() == 0) {
+        if (start.getLon() == 0.0 || start.getLat() == 0.0) {
             dto.setStartAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(start.getAddress())));
         }
 
         for (int i = 0; i < dto.getStops().size(); ++i) {
             GetCoordinateDTO stop = dto.getStops().get(i);
-            if (stop.getLon() == 0 || stop.getLat() == 0) {
+            if (stop.getLon() == 0.0 || stop.getLat() == 0.0) {
                 dto.getStops().set(i, new GetCoordinateDTO(driverService.geocodeAddressWithCache(stop.getAddress())));
             }
         }
 
         GetCoordinateDTO end = dto.getDestinationAddress();
-        if (end.getLon() == 0 || end.getLat() == 0) {
+        if (end.getLon() == 0.0 || end.getLat() == 0.0) {
             dto.setDestinationAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(end.getAddress())));
         }
 

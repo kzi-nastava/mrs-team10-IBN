@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,14 +60,6 @@ public class OrderRidePage {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public List<String> getAllLocations() {
-        String fullText = wait.until(ExpectedConditions.visibilityOf(locationText)).getText();
-        return Arrays.stream(fullText.split("→"))
-                .map(String::trim)
-                .filter(s -> !s.equalsIgnoreCase("Novi Sad") && !s.equalsIgnoreCase("Serbia"))
-                .toList();
     }
 
     public void selectCar(String carType) {
@@ -179,5 +172,23 @@ public class OrderRidePage {
 
     public enum MessageType {
         SUCCESS, ERROR, GENERIC, NONE
+    }
+
+    public List<String> getAllLocations() {
+        String fullText = wait.until(ExpectedConditions.visibilityOf(locationText)).getText();
+
+        List<String> locations = new ArrayList<>();
+        String[] parts = fullText.split("→");
+
+        for (String part : parts) {
+            String cleaned = part.trim();
+            if (!cleaned.isEmpty() &&
+                    !cleaned.equalsIgnoreCase("Novi Sad") &&
+                    !cleaned.equalsIgnoreCase("Serbia")) {
+                locations.add(cleaned);
+            }
+        }
+
+        return locations;
     }
 }
