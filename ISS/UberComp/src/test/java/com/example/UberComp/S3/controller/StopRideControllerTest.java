@@ -21,7 +21,7 @@ public class StopRideControllerTest {
     private TestRestTemplate testRestTemplate;
 
     @Test
-    public void shouldFailAuthorization(){
+    public void testWhenAuthorizationFails(){
         StopRideDTO stop = new StopRideDTO();
         stop.setId(1L);
         stop.setPassed(2);
@@ -42,7 +42,7 @@ public class StopRideControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFound(){
+    public void testWhenRideIsNotFound(){
         LogAccountDTO log = new LogAccountDTO("driver@mail.com", "password");
         ResponseEntity<AuthTokenDTO> authResponse = testRestTemplate.postForEntity(
                 "/auth/login",
@@ -70,7 +70,7 @@ public class StopRideControllerTest {
     }
 
     @Test
-    public void shouldReturnFinishedRide(){
+    public void testWhenFinishedRideReturns(){
         LogAccountDTO log = new LogAccountDTO("driver@mail.com", "password");
         ResponseEntity<AuthTokenDTO> authResponse = testRestTemplate.postForEntity(
                 "/auth/login",

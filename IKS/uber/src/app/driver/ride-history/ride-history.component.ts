@@ -46,9 +46,14 @@ export class RideHistoryComponent implements OnInit{
   }
 
   ngOnInit(): void {
+  this.router.navigate(["/ride-history"], {
+    queryParams: {},
+    replaceUrl: true 
+  }).then(() => {
     this.rideService.resetRides();
-    this.rideService.loadRides(window.location.search);
-  }
+    this.rideService.loadRides(''); 
+  });
+}
 
   onScroll(event: any) {
     const element = event.target as HTMLElement;
@@ -71,28 +76,46 @@ export class RideHistoryComponent implements OnInit{
     });
   }
 
-  onFromDateChange(event: any){
-    const fromDate = event.target.value.toISOString();
-    
-    this.router.navigate(["/ride-history"], {
-      queryParams: { startFrom: fromDate },
-      queryParamsHandling: 'merge'
-    }).then(() => {
-      this.rideService.resetRides();
-      this.rideService.loadRides(window.location.search);
-    });
+  onFromDateChange(event: any) {
+    const fromDate = event.value; 
+    if (fromDate) {
+      this.router.navigate(["/ride-history"], {
+        queryParams: { startFrom: fromDate.toISOString() },
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        this.rideService.resetRides();
+        this.rideService.loadRides(window.location.search);
+      });
+    } else {
+      this.router.navigate(["/ride-history"], {
+        queryParams: { startFrom: null },
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        this.rideService.resetRides();
+        this.rideService.loadRides(window.location.search);
+      });
+    }
   }
 
-  onToDateChange(event: any){
-    const toDate = event.target.value.toISOString();
-    
-    this.router.navigate(["/ride-history"], {
-      queryParams: { startTo: toDate },
-      queryParamsHandling: 'merge'
-    }).then(() => {
-      this.rideService.resetRides();
-      this.rideService.loadRides(window.location.search);
-    });
+  onToDateChange(event: any) {
+    const toDate = event.value; 
+    if (toDate) {
+      this.router.navigate(["/ride-history"], {
+        queryParams: { startTo: toDate.toISOString() },
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        this.rideService.resetRides();
+        this.rideService.loadRides(window.location.search);
+      });
+    } else {
+      this.router.navigate(["/ride-history"], {
+        queryParams: { startTo: null },
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        this.rideService.resetRides();
+        this.rideService.loadRides(window.location.search);
+      });
+    }
   }
 
   openRideDialog(ride: Ride) {
