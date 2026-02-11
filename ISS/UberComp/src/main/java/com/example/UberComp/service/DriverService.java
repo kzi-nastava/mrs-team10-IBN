@@ -253,9 +253,11 @@ public class DriverService {
                 scheduledTime.isAfter(LocalDateTime.now().plusHours(MAX_SCHEDULE_HOURS))) {
             return null;
         }
+        Coordinate pickupLocation = new Coordinate(rideDTO.getStartAddress());
+        Coordinate dropoffLocation = new Coordinate(rideDTO.getDestinationAddress());
 
-        Coordinate pickupLocation = geocodeAddressWithCache(rideDTO.getStartAddress().getAddress());
-        Coordinate dropoffLocation = geocodeAddressWithCache(rideDTO.getDestinationAddress().getAddress());
+//        Coordinate pickupLocation = geocodeAddressWithCache(rideDTO.getStartAddress().getAddress());
+//        Coordinate dropoffLocation = geocodeAddressWithCache(rideDTO.getDestinationAddress().getAddress());
 
         if (pickupLocation == null || dropoffLocation == null) {
             return null;
