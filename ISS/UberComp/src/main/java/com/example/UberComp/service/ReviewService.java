@@ -49,7 +49,7 @@ public class ReviewService {
         return new CreatedReviewDTO(saved);    }
 
     public List<GetReviewDTO> getReviewsForRide(Long RideId){
-        List<Review> rawReviews = reviewRepository.findAllByRideId(RideId);
+        List<Review> rawReviews = reviewRepository.findAllByRideIdOrderByIdDesc(RideId);
         List<GetReviewDTO> reviews = rawReviews.stream().map(GetReviewDTO::new).toList();
         return reviews;
     }

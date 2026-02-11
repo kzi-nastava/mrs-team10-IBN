@@ -18,6 +18,10 @@ public class HomePage {
     @FindBy(css = "app-map")
     private WebElement mapComponent;
 
+    @FindBy(xpath = "//*[text()='menu']")
+    public WebElement navigation;
+
+
     public HomePage(WebDriver driver) {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         PageFactory.initElements(driver, this);
@@ -47,4 +51,7 @@ public class HomePage {
             return false;
         }
     }
+
+    public void waitForMenuToBeClickable(){wait.until(ExpectedConditions.elementToBeClickable(navigation)); }
+
 }
