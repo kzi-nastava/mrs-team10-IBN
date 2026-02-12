@@ -15,11 +15,12 @@ public class GetCurrentRideDTO {
     private String name;
     private String lastname;
     private String startLocation;
+    private String email;
     private String endLocation;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    public GetCurrentRideDTO(GetRideDTO ride, String name, String lastname){
+    public GetCurrentRideDTO(GetRideDTO ride, String name, String lastname, String email){
         this.id = ride.getId();
         this.startLocation = ride.getStartLocation();
         this.endLocation = ride.getEndLocation();
@@ -27,5 +28,6 @@ public class GetCurrentRideDTO {
         this.endTime = ride.getEndTime();
         this.name = name;
         this.lastname = lastname;
+        this.email = email;
     }
 }

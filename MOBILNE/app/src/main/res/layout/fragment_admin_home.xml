@@ -138,6 +138,7 @@
                 android:text="@string/next"
                 android:backgroundTint="@color/btn_color_2"/>
         </LinearLayout>
+    </LinearLayout>
 
         <LinearLayout
             android:id="@+id/currentRidesContainer"
@@ -192,6 +193,5 @@
                     android:text="@string/next"
                     android:backgroundTint="@color/btn_color_2"/>
             </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
