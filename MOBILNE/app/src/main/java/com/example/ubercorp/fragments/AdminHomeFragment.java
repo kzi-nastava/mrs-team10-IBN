@@ -3,6 +3,8 @@ package com.example.ubercorp.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,8 +92,23 @@ public class AdminHomeFragment extends Fragment {
 
         loadDrivers();
         loadPassengers();
-        loadCurrentRides();
+        loadCurrentRides("");
+
+        binding.searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                ridesPageIndex = 0;
+                loadCurrentRides(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
+
 
     private void setupDriversRecyclerView() {
         driversAdapter = new DriversAdapter(driversList, new DriversAdapter.OnDriverActionListener() {
@@ -205,14 +222,14 @@ public class AdminHomeFragment extends Fragment {
         binding.ridesPrevButton.setOnClickListener(v -> {
             if (ridesPageIndex > 0) {
                 ridesPageIndex--;
-                loadCurrentRides();
+                loadCurrentRides("");
             }
         });
 
         binding.ridesNextButton.setOnClickListener(v -> {
             if ((ridesPageIndex + 1) * ridesPageSize < ridesTotalElements) {
                 ridesPageIndex++;
-                loadCurrentRides();
+                loadCurrentRides("");
             }
         });
     }
@@ -273,10 +290,10 @@ public class AdminHomeFragment extends Fragment {
                 });
     }
 
-    private void loadCurrentRides(){
+    private void loadCurrentRides(String search){
         binding.ridesProgressBar.setVisibility(View.VISIBLE);
 
-        rideService.getCurrentRides(authToken, ridesPageIndex, ridesPageSize).enqueue(new Callback<>() {
+        rideService.getCurrentRides(authToken, ridesPageIndex, ridesPageSize, search).enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<PageDTO<DriversRidesDTO>> call, Response<PageDTO<DriversRidesDTO>> response) {
                 binding.ridesProgressBar.setVisibility(View.GONE);

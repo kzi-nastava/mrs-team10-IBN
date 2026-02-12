@@ -112,5 +112,6 @@ public interface RideService {
     @GET("api/rides/adminView")
     Call<PageDTO<DriversRidesDTO>> getCurrentRides(@Header("Authorization") String token,
                                                   @Query("page") int page,
-                                                  @Query("size") int size);
+                                                  @Query("size") int size,
+                                                   @Query("search") String search);
 }

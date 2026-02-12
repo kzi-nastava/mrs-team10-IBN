@@ -52,4 +52,5 @@
     <string name="lastname">Lastname</string>
     <string name="john">John</string>
     <string name="name">Name</string>
+    <string name="search_by_name">Search by name</string>
 </resources>
