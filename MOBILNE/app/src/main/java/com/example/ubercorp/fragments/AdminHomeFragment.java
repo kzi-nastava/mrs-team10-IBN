@@ -3,6 +3,8 @@ package com.example.ubercorp.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +16,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.ubercorp.adapters.CurrentRidesAdapter;
 import com.example.ubercorp.adapters.DriversAdapter;
 import com.example.ubercorp.adapters.PassengersAdapter;
+import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.api.UserService;
 import com.example.ubercorp.databinding.FragmentAdminHomeBinding;
 import com.example.ubercorp.dialogs.BlockUserDialog;
 import com.example.ubercorp.dialogs.UnblockUserDialog;
+import com.example.ubercorp.dto.DriversRidesDTO;
 import com.example.ubercorp.dto.PageDTO;
 import com.example.ubercorp.dto.UserDTO;
 import com.example.ubercorp.api.ApiClient;
@@ -38,21 +43,26 @@ public class AdminHomeFragment extends Fragment {
 
     private FragmentAdminHomeBinding binding;
     private UserService userService;
+    private RideService rideService;
     private String authToken;
 
-    // Drivers data
     private DriversAdapter driversAdapter;
     private List<UserDTO> driversList = new ArrayList<>();
     private int driversPageIndex = 0;
     private int driversPageSize = 5;
     private long driversTotalElements = 0;
 
-    // Passengers data
     private PassengersAdapter passengersAdapter;
     private List<UserDTO> passengersList = new ArrayList<>();
     private int passengersPageIndex = 0;
     private int passengersPageSize = 5;
     private long passengersTotalElements = 0;
+
+    private CurrentRidesAdapter currentRidesAdapter;
+    private List<DriversRidesDTO> currentRidesList = new ArrayList<>();
+    private int ridesPageIndex = 0;
+    private int ridesPageSize = 2;
+    private long ridesTotalElements = 0;
 
     @Nullable
     @Override
@@ -72,15 +82,33 @@ public class AdminHomeFragment extends Fragment {
         authToken = "Bearer " + token;
 
         userService = ApiClient.getInstance().createService(UserService.class);
+        rideService = ApiClient.getInstance().createService(RideService.class);
 
         setupDriversRecyclerView();
         setupPassengersRecyclerView();
+        setupCurrentRidesRecyclerView();
         setupTabLayout();
         setupPagination();
 
         loadDrivers();
         loadPassengers();
+        loadCurrentRides("");
+
+        binding.searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                ridesPageIndex = 0;
+                loadCurrentRides(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
+
 
     private void setupDriversRecyclerView() {
         driversAdapter = new DriversAdapter(driversList, new DriversAdapter.OnDriverActionListener() {
@@ -114,6 +142,12 @@ public class AdminHomeFragment extends Fragment {
         binding.passengersRecyclerView.setAdapter(passengersAdapter);
     }
 
+    private void setupCurrentRidesRecyclerView(){
+        currentRidesAdapter = new CurrentRidesAdapter(currentRidesList);
+        binding.ridesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.ridesRecyclerView.setAdapter(currentRidesAdapter);
+    }
+
     private void setupTabLayout() {
         binding.usersTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -122,10 +156,17 @@ public class AdminHomeFragment extends Fragment {
                     case 0:
                         binding.driversContainer.setVisibility(View.VISIBLE);
                         binding.passengersContainer.setVisibility(View.GONE);
+                        binding.currentRidesContainer.setVisibility(View.GONE);
                         break;
                     case 1:
                         binding.driversContainer.setVisibility(View.GONE);
+                        binding.currentRidesContainer.setVisibility(View.GONE);
                         binding.passengersContainer.setVisibility(View.VISIBLE);
+                        break;
+                    case 2:
+                        binding.currentRidesContainer.setVisibility(View.VISIBLE);
+                        binding.passengersContainer.setVisibility(View.GONE);
+                        binding.driversContainer.setVisibility(View.GONE);
                         break;
                 }
             }
@@ -146,6 +187,9 @@ public class AdminHomeFragment extends Fragment {
 
         binding.passengersPrevButton.setEnabled(false);
         binding.passengersNextButton.setEnabled(false);
+
+        binding.ridesNextButton.setEnabled(false);
+        binding.ridesPrevButton.setEnabled(false);
 
         binding.driversPrevButton.setOnClickListener(v -> {
             if (driversPageIndex > 0) {
@@ -172,6 +216,20 @@ public class AdminHomeFragment extends Fragment {
             if ((passengersPageIndex + 1) * passengersPageSize < passengersTotalElements) {
                 passengersPageIndex++;
                 loadPassengers();
+            }
+        });
+
+        binding.ridesPrevButton.setOnClickListener(v -> {
+            if (ridesPageIndex > 0) {
+                ridesPageIndex--;
+                loadCurrentRides("");
+            }
+        });
+
+        binding.ridesNextButton.setOnClickListener(v -> {
+            if ((ridesPageIndex + 1) * ridesPageSize < ridesTotalElements) {
+                ridesPageIndex++;
+                loadCurrentRides("");
             }
         });
     }
@@ -208,7 +266,7 @@ public class AdminHomeFragment extends Fragment {
         binding.passengersProgressBar.setVisibility(View.VISIBLE);
 
         userService.getPassengers(authToken, passengersPageIndex, passengersPageSize)
-                .enqueue(new Callback<PageDTO<UserDTO>>() {
+                .enqueue(new Callback<>() {
                     @Override
                     public void onResponse(Call<PageDTO<UserDTO>> call, Response<PageDTO<UserDTO>> response) {
                         binding.passengersProgressBar.setVisibility(View.GONE);
@@ -230,6 +288,34 @@ public class AdminHomeFragment extends Fragment {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void loadCurrentRides(String search){
+        binding.ridesProgressBar.setVisibility(View.VISIBLE);
+
+        rideService.getCurrentRides(authToken, ridesPageIndex, ridesPageSize, search).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<PageDTO<DriversRidesDTO>> call, Response<PageDTO<DriversRidesDTO>> response) {
+                binding.ridesProgressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    currentRidesList.clear();
+                    currentRidesList.addAll(response.body().getContent());
+                    ridesTotalElements = response.body().getTotalElements();
+                    currentRidesAdapter.notifyDataSetChanged();
+                    updateCurrentRidesPaginationButtons();
+                } else {
+                    Toast.makeText(getContext(), "Failed to load rides", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PageDTO<DriversRidesDTO>> call, Throwable t) {
+                binding.ridesProgressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error loading rides: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     private void showBlockDialog(UserDTO user, boolean isDriver) {
@@ -314,6 +400,13 @@ public class AdminHomeFragment extends Fragment {
         binding.passengersNextButton.setEnabled((passengersPageIndex + 1) * passengersPageSize < passengersTotalElements);
         binding.passengersPageInfo.setText(String.format("Page %d of %d",
                 passengersPageIndex + 1, (passengersTotalElements + passengersPageSize - 1) / passengersPageSize));
+    }
+
+    private void updateCurrentRidesPaginationButtons() {
+        binding.ridesPrevButton.setEnabled(ridesPageIndex > 0);
+        binding.ridesNextButton.setEnabled((ridesPageIndex + 1) * ridesPageSize < ridesTotalElements);
+        binding.ridesPageInfo.setText(String.format("Page %d of %d",
+                ridesPageIndex + 1, (ridesTotalElements + ridesPageSize - 1) / ridesPageSize));
     }
 
     @Override
