@@ -20,27 +20,27 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './rate-driver-vehicle.component.html',
   styleUrls: ['./rate-driver-vehicle.component.css'],
 })
-
 export class RateDriverVehicleComponent {
-  protected review: Review = {
-        id: 0,
-        rideId: 0,
+  public review: Review = {
+    id: 0,
+    rideId: 0,
   };
 
-  constructor(private reviewService: ReviewService,
-        @Optional() private dialogRef: MatDialogRef<RateDriverVehicleComponent>,
-        @Optional() @Inject(MAT_DIALOG_DATA) public data: {rideId: number} | null,
-        private dialog: MatDialog,
-        private route: ActivatedRoute,
-        private router: Router
-){
-  if (this.data?.rideId) {
-    this.review.rideId = this.data.rideId;
-  }else{
-    const rideIdFromRoute = Number(this.route.snapshot.paramMap.get('rideId'));
-    this.review.rideId = rideIdFromRoute;
+  constructor(
+    private reviewService: ReviewService,
+    @Optional() private dialogRef: MatDialogRef<RateDriverVehicleComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: { rideId: number } | null,
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {
+    if (this.data?.rideId) {
+      this.review.rideId = this.data.rideId;
+    } else {
+      const rideIdFromRoute = Number(this.route.snapshot.paramMap.get('rideId'));
+      this.review.rideId = rideIdFromRoute;
+    }
   }
-}
   stars = [1, 2, 3, 4, 5];
   driverHover = 0;
   vehicleHover = 0;
@@ -61,23 +61,20 @@ export class RateDriverVehicleComponent {
     this.vehicleHover = value;
   }
 
-  postReview(){
+  postReview() {
     this.reviewService.postReview(this.review).subscribe({
-    next: () => {
-      this.dialog.open(SimpleMessageDialogComponent, {
-      width: '300px',
-      data: { message: "Your review is submitted." }
+      next: () => {
+        this.dialog.open(SimpleMessageDialogComponent, {
+          width: '300px',
+          data: { message: 'Your review is submitted.' },
+        });
+      },
+      error: () => {
+        this.dialog.open(SimpleMessageDialogComponent, {
+          width: '300px',
+          data: { message: 'You cannot place review for this ride!' },
+        });
+      },
     });
-    },
-    error: () => {
-      this.dialog.open(SimpleMessageDialogComponent, {
-        width: '300px',
-        data: { message: "You cannot place review for this ride!"}
-      })
-    }
-  });
   }
 }
-
-
-

@@ -75,7 +75,11 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "runner": "karma",
-            "include": ["**/register.component.spec.ts", "**/register-driver.component.spec.ts"]
+            "include": [
+              "**/register.component.spec.ts",
+              "**/register-driver.component.spec.ts",
+              "**/rate-driver-vehicle.component.spec.ts"
+            ]
           }
         }
       }
