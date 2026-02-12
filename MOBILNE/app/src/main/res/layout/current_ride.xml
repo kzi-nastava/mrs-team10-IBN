@@ -140,13 +140,95 @@
             </LinearLayout>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/actionButton"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <View
+            android:id="@+id/startDot"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/ic_circle_red"
+            app:layout_constraintTop_toTopOf="@id/startInput"
+            app:layout_constraintBottom_toBottomOf="@id/startInput"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/startInput"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:background="@color/white"
+            android:hint="@string/start_location"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/startDot"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/endDot"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/ic_circle_green"
+            app:layout_constraintTop_toTopOf="@id/endInput"
+            app:layout_constraintBottom_toBottomOf="@id/endInput"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/endInput"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:hint="@string/destination"
+            android:background="@color/white"
+            android:padding="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="5dp"
+            app:layout_constraintStart_toEndOf="@id/endDot"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startInput"/>
+
+        <LinearLayout
+            android:id="@+id/avatars"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/block"
-            android:textFontWeight="600"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/white"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/endInput"
+            app:layout_constraintStart_toStartOf="parent">
+
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/startTime"
+            android:layout_width="60dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:background="@color/white"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/avatars"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+
+        <TextView
+            android:id="@+id/endTime"
+            android:layout_width="60dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:background="@color/white"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/startTime"
+            app:layout_constraintTop_toTopOf="@id/startTime"/>
+
+        <TextView
+            android:id="@+id/startDate"
+            android:layout_width="80dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:background="@color/white"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/endTime"
+            app:layout_constraintTop_toTopOf="@id/startTime"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -35,4 +35,21 @@
     <string name="vehicle_type">Vehicle type</string>
     <string name="price">Price</string>
     <string name="rate">Rate</string>
+    <string name="drivers">Drivers</string>
+    <string name="passengers">Passengers</string>
+    <string name="current_rides">Current rides</string>
+    <string name="previous">Previous</string>
+    <string name="page_1_of_1">Page 1 of 1</string>
+    <string name="next">Next</string>
+    <string name="block">Block</string>
+    <string name="active">ACTIVE</string>
+    <string name="status">Status</string>
+    <string name="_1234567890">+1234567890</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="john_doe_example_com">john.doe@example.com</string>
+    <string name="email">Email</string>
+    <string name="doe">Doe</string>
+    <string name="lastname">Lastname</string>
+    <string name="john">John</string>
+    <string name="name">Name</string>
 </resources>

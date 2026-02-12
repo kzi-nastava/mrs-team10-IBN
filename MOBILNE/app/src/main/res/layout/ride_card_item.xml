@@ -16,7 +16,6 @@
         android:id="@+id/ride_card_item"
         >
 
-        <!-- HEART ICON -->
         <ImageView
             android:id="@+id/heartIcon"
             android:layout_width="32dp"
@@ -27,7 +26,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- START PIN -->
         <View
             android:id="@+id/startDot"
             android:layout_width="20dp"
@@ -37,7 +35,6 @@
             app:layout_constraintBottom_toBottomOf="@id/startInput"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- START LOCATION -->
         <TextView
             android:id="@+id/startInput"
             android:layout_width="200dp"
@@ -50,7 +47,6 @@
             app:layout_constraintStart_toEndOf="@id/startDot"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- DESTINATION PIN -->
         <View
             android:id="@+id/endDot"
             android:layout_width="20dp"
@@ -60,7 +56,6 @@
             app:layout_constraintBottom_toBottomOf="@id/endInput"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- DESTINATION -->
         <TextView
             android:id="@+id/endInput"
             android:layout_width="200dp"
@@ -74,7 +69,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/startInput"/>
 
-        <!-- AVATARS -->
         <LinearLayout
             android:id="@+id/avatars"
             android:layout_width="wrap_content"
@@ -87,7 +81,6 @@
 
         </LinearLayout>
 
-        <!-- START TIME -->
         <TextView
             android:id="@+id/startTime"
             android:layout_width="60dp"
@@ -98,7 +91,6 @@
             app:layout_constraintTop_toBottomOf="@id/avatars"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- END TIME -->
         <TextView
             android:id="@+id/endTime"
             android:layout_width="60dp"
@@ -119,7 +111,6 @@
             app:layout_constraintStart_toEndOf="@id/endTime"
             app:layout_constraintTop_toTopOf="@id/startTime"/>
 
-        <!-- PRICE -->
         <TextView
             android:id="@+id/price"
             android:layout_width="wrap_content"
