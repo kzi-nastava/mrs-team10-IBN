@@ -13,7 +13,6 @@ describe('RegisterComponent', () => {
   let fixture: ComponentFixture<RegisterComponent>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let router: Router;
-  let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
   beforeEach(async () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['register']);

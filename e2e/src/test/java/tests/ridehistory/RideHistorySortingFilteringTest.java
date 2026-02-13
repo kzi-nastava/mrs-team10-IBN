@@ -1,10 +1,7 @@
 package tests.ridehistory;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -17,6 +14,7 @@ import pages.ridehistory.RideHistoryPage;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +38,7 @@ public class RideHistorySortingFilteringTest {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.presenceOfElementLocated(new By.ByCssSelector("button.form-button-one")));
         LoginPage login = new LoginPage(driver);
-        login.enterEmail("admin1@mail.com");
+        login.enterEmail("admin@mail.com");
         login.enterPassword("password");
         login.clickSignIn();
 
@@ -145,7 +143,7 @@ public class RideHistorySortingFilteringTest {
     @Test
     public void testFilterByFromDate() {
         rideHistoryPage.clearDateFields();
-        LocalDate filterDate = LocalDate.now().minusDays(10);
+        LocalDate filterDate = getTestDate();
         rideHistoryPage.setFromDate(filterDate);
         rideHistoryPage.scrollToBottom();
 
@@ -163,7 +161,7 @@ public class RideHistorySortingFilteringTest {
     @Test
     public void testFilterByToDate() {
         rideHistoryPage.clearDateFields();
-        LocalDate filterDate = LocalDate.now().minusDays(10);
+        LocalDate filterDate = getTestDate().plusDays(5);
         rideHistoryPage.setToDate(filterDate);
         rideHistoryPage.scrollToBottom();
 
@@ -181,8 +179,8 @@ public class RideHistorySortingFilteringTest {
     @Test
     public void testFilterByDateRange() {
         rideHistoryPage.clearDateFields();
-        LocalDate fromDate = LocalDate.now().minusDays(10);
-        LocalDate toDate = LocalDate.now().minusDays(5);
+        LocalDate fromDate = getTestDate().minusDays(5);
+        LocalDate toDate = getTestDate().plusDays(5);
         rideHistoryPage.setDateRange(fromDate, toDate);
         rideHistoryPage.scrollToBottom();
 
@@ -201,7 +199,7 @@ public class RideHistorySortingFilteringTest {
     @Test
     public void testFilterAndSortCombined() {
         rideHistoryPage.clearDateFields();
-        LocalDate fromDate = LocalDate.now().minusDays(10);
+        LocalDate fromDate = getTestDate();
         rideHistoryPage.setFromDate(fromDate);
         rideHistoryPage.sortBy("price-desc");
         rideHistoryPage.scrollToBottom();
@@ -220,6 +218,10 @@ public class RideHistorySortingFilteringTest {
             assertTrue(prices.get(i) >= prices.get(i + 1),
                     "Price sorting not maintained with filter");
         }
+    }
+
+    private LocalDate getTestDate(){
+        return LocalDate.of(2026, Month.FEBRUARY, 1);
     }
 
     @AfterAll
