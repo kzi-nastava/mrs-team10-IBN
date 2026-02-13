@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.example.ubercorp.dto.AppNotificationDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
+import com.example.ubercorp.dto.ChatMessageDTO;
 import com.example.ubercorp.utils.AppForegroundChecker;
 import com.google.gson.Gson;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -181,6 +183,46 @@ public class MyNotificationManager {
                         Log.e(TAG, "Error parsing ride message", e);
                     }
                 }, throwable -> Log.e(TAG, "Error subscribing to ride updates", throwable));
+    }
+
+    public void subscribeToChat(Long chatRoomId, Consumer<ChatMessageDTO> callback) {
+        Log.d(TAG, "Subscribing to /topic/chat/" + chatRoomId);
+
+        stompClient.topic("/topic/chat/" + chatRoomId)
+                .subscribe(
+                        stompMessage -> {
+                            Log.d(TAG, "✅ Message received on /topic/chat/" + chatRoomId);
+                            Log.d(TAG, "Payload: " + stompMessage.getPayload());
+
+                            try {
+                                ChatMessageDTO msg = new Gson().fromJson(stompMessage.getPayload(), ChatMessageDTO.class);
+                                Log.d(TAG, "Parsed message: " + msg.getContent());
+                                callback.accept(msg);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing message", e);
+                            }
+                        },
+                        error -> Log.e(TAG, "Error subscribing to chat", error)
+                );
+    }
+
+    public void sendMessage(ChatMessageDTO message) {
+
+        if (stompClient == null || !stompClient.isConnected()) {
+            Log.e(TAG, "StompClient not connected!");
+            return;
+        }
+
+        String jsonMessage = new Gson().toJson(message);
+
+        stompClient.send("/ws/send-message", jsonMessage)
+                .subscribe(
+                        () -> Log.d(TAG, "Message sent successfully"),
+                        error -> {
+                            Log.e(TAG, "Error sending message: " + error.getMessage(), error);
+                            error.printStackTrace();
+                        }
+                );
     }
 
     public void disconnect() {
