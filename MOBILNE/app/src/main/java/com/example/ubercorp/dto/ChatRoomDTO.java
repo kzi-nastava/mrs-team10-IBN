@@ -1,10 +1,8 @@
-package com.example.ubercorp.model;
-
-import com.example.ubercorp.dto.ChatMessageDTO;
+package com.example.ubercorp.dto;
 
 import java.util.List;
 
-public class ChatRoom {
+public class ChatRoomDTO {
     private Long id;
     private String currentUserEmail;
     private Long receiver;

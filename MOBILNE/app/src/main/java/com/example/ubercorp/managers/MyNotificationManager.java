@@ -185,24 +185,34 @@ public class MyNotificationManager {
                 }, throwable -> Log.e(TAG, "Error subscribing to ride updates", throwable));
     }
 
-    public void subscribeToChat(Long chatRoomId, Consumer<ChatMessageDTO> callback) {
-        Log.d(TAG, "Subscribing to /topic/chat/" + chatRoomId);
-
-        stompClient.topic("/topic/chat/" + chatRoomId)
+    public void subscribeToAdminChat(Consumer<ChatMessageDTO> callback) {
+        stompClient.topic("/topic/chat/admin")
                 .subscribe(
                         stompMessage -> {
-                            Log.d(TAG, "✅ Message received on /topic/chat/" + chatRoomId);
-                            Log.d(TAG, "Payload: " + stompMessage.getPayload());
-
                             try {
                                 ChatMessageDTO msg = new Gson().fromJson(stompMessage.getPayload(), ChatMessageDTO.class);
-                                Log.d(TAG, "Parsed message: " + msg.getContent());
                                 callback.accept(msg);
                             } catch (Exception e) {
                                 Log.e(TAG, "Error parsing message", e);
                             }
                         },
-                        error -> Log.e(TAG, "Error subscribing to chat", error)
+                        error -> Log.e(TAG, "Error subscribing to admin chat", error)
+                );
+    }
+
+    public void subscribeToTopicByEmail(String userEmail, Consumer<ChatMessageDTO> callback) {
+        String topic = "/topic/chat/" + userEmail;
+        stompClient.topic(topic)
+                .subscribe(
+                        stompMessage -> {
+                            try {
+                                ChatMessageDTO msg = new Gson().fromJson(stompMessage.getPayload(), ChatMessageDTO.class);
+                                callback.accept(msg);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error parsing message", e);
+                            }
+                        },
+                        error -> Log.e(TAG, "Error subscribing to topic " + topic, error)
                 );
     }
 

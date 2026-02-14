@@ -9,15 +9,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ubercorp.R;
 import com.example.ubercorp.dto.ChatMessageDTO;
 
+import java.util.ArrayList;
 import java.util.List;
+
 public class ChatAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
-    private List<ChatMessageDTO> messages;
-    private String currentUserEmail;
+    private final List<ChatMessageDTO> messages = new ArrayList<>();
+    private final String currentUserEmail;
 
-    public ChatAdapter(List<ChatMessageDTO> messages, String email) {
-        this.messages = messages;
+    public ChatAdapter(String email) {
         this.currentUserEmail = email;
+    }
+
+    public void setMessages(List<ChatMessageDTO> msgs) {
+        messages.clear();
+        if (msgs != null) messages.addAll(msgs);
+        notifyDataSetChanged();
+    }
+
+    public void addMessage(ChatMessageDTO msg) {
+        messages.add(msg);
+        notifyItemInserted(messages.size() - 1);
     }
 
     @Override
@@ -42,4 +54,3 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         return messages.size();
     }
 }
-

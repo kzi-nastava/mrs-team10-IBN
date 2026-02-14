@@ -1,8 +1,6 @@
-package com.example.ubercorp.model;
+package com.example.ubercorp.dto;
 
-import com.example.ubercorp.dto.UserDTO;
-
-public class ChatInbox {
+public class ChatInboxDTO {
     private Long chatRoom;
     private UserDTO user;
 

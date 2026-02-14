@@ -97,7 +97,7 @@ public class HomeActivity extends AppCompatActivity
         });
 
         mAppBarConfiguration = new AppBarConfiguration
-                .Builder(R.id.accountFragment, R.id.chat_layout, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment, R.id.driverHomeFragment, R.id.adminHomeFragment)
+                .Builder(R.id.accountFragment, R.id.ride_history, R.id.tracking_ride, R.id.nav_settings, R.id.notification, R.id.routeFragment, R.id.incomingRideFragment, R.id.trackingRouteFragment, R.id.driverHomeFragment, R.id.adminHomeFragment)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -265,9 +265,9 @@ public class HomeActivity extends AppCompatActivity
         if (rideHistoryItem != null) {
             rideHistoryItem.setVisible(isLoggedIn);
         }
-        if(chat_support != null)
-            chat_support.setVisible(isLoggedIn);
-
+        if(chat_support != null) {
+            chat_support.setVisible(false);
+        }
         MenuItem incoming = menu.findItem(R.id.incoming_ride);
         if (incoming != null) {
             incoming.setVisible(false);
@@ -299,6 +299,8 @@ public class HomeActivity extends AppCompatActivity
                 navController.navigate(R.id.accountFragment);
             } else if(id == R.id.chat_layout){
                 navController.navigate(R.id.chat_layout);
+            }else if (id == R.id.admin_chat){
+                navController.navigate(R.id.admin_chat);
             } else if (id == R.id.ride_history) {
                 navController.navigate(R.id.ride_history);
             } else if (id == R.id.incoming_ride) {
@@ -327,6 +329,7 @@ public class HomeActivity extends AppCompatActivity
         String role = JwtUtils.getRoleFromToken(token);
         MenuItem tracking = menu.findItem(R.id.tracking_ride);
         MenuItem chat_support = menu.findItem(R.id.chat_layout);
+        MenuItem admin_chat = menu.findItem(R.id.admin_chat);
 
         switch(role){
             case "passenger":
@@ -336,21 +339,32 @@ public class HomeActivity extends AppCompatActivity
                 if (chat_support != null) {
                     chat_support.setVisible(true);
                 }
+                if (admin_chat != null){
+                    admin_chat.setVisible(false);
+                }
                 break;
             case "driver":
                 MenuItem incoming = menu.findItem(R.id.incoming_ride);
                 if (incoming != null) {
                     incoming.setVisible(true);
                 }
-                chat_support = menu.findItem(R.id.chat_layout);
                 if (chat_support != null) {
-                    chat_support.setVisible(false);
+                    chat_support.setVisible(true);
                 }
                 if (tracking != null) {
                     tracking.setVisible(true);
                 }
+                if (admin_chat != null){
+                    admin_chat.setVisible(false);
+                }
                 break;
             case "administrator":
+                if (chat_support != null) {
+                    chat_support.setVisible(false);
+                }
+                if (admin_chat != null){
+                    admin_chat.setVisible(true);
+                }
                 break;
         }
     }

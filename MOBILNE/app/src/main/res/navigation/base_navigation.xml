@@ -152,4 +152,9 @@
         android:id="@+id/chat_layout"
         android:name="com.example.ubercorp.fragments.ChatFragment"
         tools:layout="@layout/chat_fragment"/>
+
+    <fragment
+        android:id="@+id/admin_chat"
+        android:name="com.example.ubercorp.fragments.AdminChatFragment"
+        tools:layout="@layout/fragment_admin_chat"/>
 </navigation>
