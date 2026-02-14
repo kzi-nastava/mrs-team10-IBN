@@ -137,7 +137,17 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: ['administrator', 'passenger', 'driver'] },
   },
-  { path: 'home', component: HomeComponent },
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' },
+  { 
+    path: 'home', 
+    component: HomeComponent 
+  },
+  { 
+    path: '', 
+    redirectTo: 'home', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: '**', 
+    redirectTo: 'home' 
+  }
 ];

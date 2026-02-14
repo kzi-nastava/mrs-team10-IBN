@@ -46,6 +46,6 @@ export class App implements OnInit {
   private clearExpiredToken(): void {
     localStorage.removeItem('auth_token');
     console.warn('Token expired or invalid - cleared from storage');
-    this.router.navigate(['/login']);
+    //this.router.navigate(['/login']);
   }
 }

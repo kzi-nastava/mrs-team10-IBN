@@ -38,6 +38,10 @@ button {
   background-color: #ad2d2d;
 }
 
+.form-button-one:hover, .form-button-two:hover{
+  transform: translateY(-1px);
+}
+
 input[type='text'],
 input[type='file'],
 input[type='password'],
