@@ -612,7 +612,8 @@ public class RideService {
                 .map(ride -> new GetCurrentRideDTO(
                         new GetRideDTO(ride),
                         ride.getDriver().getName(),
-                        ride.getDriver().getLastName()
+                        ride.getDriver().getLastName(),
+                        ride.getDriver().getAccount().getEmail()
                 ))
                 .toList();
 
