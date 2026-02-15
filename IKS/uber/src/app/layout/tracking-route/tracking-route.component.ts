@@ -13,9 +13,6 @@ import { ComplaintDialogComponent } from '../../passenger/complaint-dialog/compl
 import { RouteService } from '../../service/route.service';
 import { Station } from '../../model/ride-history.model';
 import { HttpClient } from '@angular/common/http';
-import * as Stomp from 'stompjs';
-import SockJS from 'sockjs-client';
-import { AppNotification, AppNotificationDTO } from '../../service/notification.service';
 import { WebSocketService } from '../../service/websocket.service';
 
 @Component({
@@ -45,8 +42,7 @@ export class TrackingRouteComponent {
   constructor(
     authService: AuthService,
     private http: HttpClient,
-    private dialog: MatDialog,
-    private webSocketService: WebSocketService,
+    private dialog: MatDialog
   ) {
     this.role = authService.role();
     this.loadRoute();
@@ -68,8 +64,13 @@ export class TrackingRouteComponent {
         },
       });
     } else {
-      const token = this.urlRoute.snapshot.paramMap.get('token');
+      let token = this.urlRoute.snapshot.paramMap.get('token');
+      if(token === null) {
+        token = localStorage.getItem('rideToken')
+        if(token !== null) this.router.navigate(['tracking-route', token])
+      }
       if (token) {
+        localStorage.setItem('rideToken', token);
         this.routeService.getOngoingRide(token).subscribe({
           next: (response) => {
             this.route = response.route?.stations || [];
@@ -116,6 +117,7 @@ export class TrackingRouteComponent {
 
   changeState(location: TrackingData) {
     const now = new Date();
+    localStorage.removeItem('rideToken')
     if (this.passed == this.route.length) {
       this.routeService.finishRide(this.rideId!, now.toISOString()).subscribe({
         next: (res) => {
