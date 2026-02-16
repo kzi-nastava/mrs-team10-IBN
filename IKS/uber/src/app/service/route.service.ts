@@ -26,7 +26,7 @@ export class RouteService {
 
   finishRide(id: number, time: string) {
     const body = {
-      isotime: time,
+      isotime: time.replace('Z', ''),
     };
     return this.http.put(`${environment.apiHost}/rides/finish/${id}`, body);
   }
