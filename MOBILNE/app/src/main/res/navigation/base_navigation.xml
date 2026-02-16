@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_details_to_reviews"
             app:destination="@id/rideReviewsFragment"/>
+        <action
+            android:id="@+id/action_details_to_order"
+            app:destination="@id/orderRideFragment"/>
     </fragment>
 
     <fragment
