@@ -30,6 +30,10 @@ button{
     background-color: #691D1D;
 }
 
+button:hover{
+  transform: translateY(-1px);
+}
+
 .top-bar {
   display: flex;
   align-items: center;
