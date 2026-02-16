@@ -14,10 +14,7 @@ import com.example.UberComp.repository.*;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.NotificationService;
 import com.example.UberComp.service.RideService;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -437,5 +434,124 @@ public class OrderRideServiceTest {
 
         verify(rideRepository).findById(1L);
         verify(driverRepository).findById(driver.getId());
+    }
+
+    @Test
+    public void test_coordinate_reuse_from_database() {
+        when(driverRepository.findById(driver.getId())).thenReturn(Optional.of(driver));
+        when(userRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
+
+        when(coordinateRepository.findByLatAndLon(45.2396, 19.8227))
+                .thenReturn(Optional.of(startCoordinate));
+        when(coordinateRepository.findByLatAndLon(45.2551, 19.8451))
+                .thenReturn(Optional.of(destinationCoordinate));
+
+        Route savedRoute = new Route();
+        when(routeRepository.save(any(Route.class))).thenReturn(savedRoute);
+
+        Ride savedRide = new Ride();
+        when(rideRepository.saveAndFlush(any(Ride.class))).thenReturn(savedRide);
+        when(driverRepository.save(any(Driver.class))).thenReturn(driver);
+
+        doNothing().when(notificationService).sendImmediateRideNotifications(
+                any(Ride.class), any(User.class), anyLong());
+
+        rideService.createRide(createRideDTO, passenger.getId(), driver.getId(), 5L, null);
+
+        verify(coordinateRepository, never()).save(any(Coordinate.class));
+        verify(coordinateRepository, times(2)).findByLatAndLon(any(), any());
+    }
+
+    @Test
+    public void test_new_coordinate_creation_when_not_exists() {
+
+        when(driverRepository.findById(driver.getId())).thenReturn(Optional.of(driver));
+        when(userRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
+
+        when(coordinateRepository.findByLatAndLon(45.2396, 19.8227))
+                .thenReturn(Optional.empty());
+        when(coordinateRepository.findByLatAndLon(45.2551, 19.8451))
+                .thenReturn(Optional.empty());
+
+        when(coordinateRepository.save(any(Coordinate.class)))
+                .thenReturn(startCoordinate)
+                .thenReturn(destinationCoordinate);
+
+        Route savedRoute = new Route();
+        when(routeRepository.save(any(Route.class))).thenReturn(savedRoute);
+
+        Ride savedRide = new Ride();
+        when(rideRepository.saveAndFlush(any(Ride.class))).thenReturn(savedRide);
+        when(driverRepository.save(any(Driver.class))).thenReturn(driver);
+
+        doNothing().when(notificationService).sendImmediateRideNotifications(
+                any(Ride.class), any(User.class), anyLong());
+
+        rideService.createRide(createRideDTO, passenger.getId(), driver.getId(), 5L, null);
+
+        verify(coordinateRepository, times(2)).save(any(Coordinate.class));
+    }
+
+    @Test
+    public void test_route_stations_order_with_stops() {
+        Coordinate stop1 = new Coordinate();
+        stop1.setId(3L);
+        stop1.setLat(45.2450);
+        stop1.setLon(19.8250);
+        stop1.setAddress("Dunavska 1, Novi Sad");
+
+        Coordinate stop2 = new Coordinate();
+        stop2.setId(4L);
+        stop2.setLat(45.2480);
+        stop2.setLon(19.8280);
+        stop2.setAddress("Zmaj Jovina 5, Novi Sad");
+
+        GetCoordinateDTO stopDTO1 = new GetCoordinateDTO();
+        stopDTO1.setAddress("Dunavska 1, Novi Sad");
+        stopDTO1.setLat(45.2450);
+        stopDTO1.setLon(19.8250);
+
+        GetCoordinateDTO stopDTO2 = new GetCoordinateDTO();
+        stopDTO2.setAddress("Zmaj Jovina 5, Novi Sad");
+        stopDTO2.setLat(45.2480);
+        stopDTO2.setLon(19.8280);
+
+        createRideDTO.setStops(Arrays.asList(stopDTO1, stopDTO2));
+
+        when(driverRepository.findById(driver.getId())).thenReturn(Optional.of(driver));
+        when(userRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
+        when(coordinateRepository.findByLatAndLon(45.2396, 19.8227))
+                .thenReturn(Optional.of(startCoordinate));
+        when(coordinateRepository.findByLatAndLon(45.2450, 19.8250))
+                .thenReturn(Optional.of(stop1));
+        when(coordinateRepository.findByLatAndLon(45.2480, 19.8280))
+                .thenReturn(Optional.of(stop2));
+        when(coordinateRepository.findByLatAndLon(45.2551, 19.8451))
+                .thenReturn(Optional.of(destinationCoordinate));
+
+        ArgumentCaptor<Route> routeCaptor = ArgumentCaptor.forClass(Route.class);
+        when(routeRepository.save(routeCaptor.capture())).thenReturn(new Route());
+
+        Ride savedRide = new Ride();
+        when(rideRepository.saveAndFlush(any(Ride.class))).thenReturn(savedRide);
+        when(driverRepository.save(any(Driver.class))).thenReturn(driver);
+
+        doNothing().when(notificationService).sendImmediateRideNotifications(
+                any(Ride.class), any(User.class), anyLong());
+
+        rideService.createRide(createRideDTO, passenger.getId(), driver.getId(), 5L, null);
+
+        Route capturedRoute = routeCaptor.getValue();
+        List<Coordinate> stations = capturedRoute.getStations();
+
+        assertEquals(4, stations.size());
+        assertEquals(startCoordinate, stations.get(0));
+        assertEquals("Bulevar Oslobodjenja 1, Novi Sad", stations.get(0).getAddress());
+        assertEquals(stop1, stations.get(1));
+        assertEquals("Dunavska 1, Novi Sad", stations.get(1).getAddress());
+        assertEquals(stop2, stations.get(2));
+        assertEquals("Zmaj Jovina 5, Novi Sad", stations.get(2).getAddress());
+        assertEquals(destinationCoordinate, stations.get(3));
+        assertEquals("Narodnih heroja 14, Novi Sad", stations.get(3).getAddress());
     }
 }

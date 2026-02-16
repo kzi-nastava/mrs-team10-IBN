@@ -45,6 +45,16 @@ public class CreateRideDTO {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime scheduled;
 
+    @AssertTrue(message = "Scheduled time must be within 5 hours from now")
+    private boolean isScheduledTimeValid() {
+        if (scheduled == null) {
+            return true;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime maxTime = now.plusHours(5);
+        return scheduled.isAfter(now) && scheduled.isBefore(maxTime);
+    }
+
     @NotNull(message = "Price is required")
     @PositiveOrZero(message = "Price must be zero or positive")
     private Double price;
