@@ -285,7 +285,7 @@ public class TrackingRouteFragment extends Fragment {
     private void moveVehicle() {
         new Thread(() -> {
             while(vehicleIsMoving){
-                rideManager.getRideByToken(rideToken, new Callback<GetRideDetailsDTO>() {
+                rideManager.getRide(ride.getId(), new Callback<GetRideDetailsDTO>() {
                     @Override
                     public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
                         if(response.isSuccessful()){
@@ -299,8 +299,6 @@ public class TrackingRouteFragment extends Fragment {
                                 vehicleIsMoving = false;
                                 infoText.setText("Panic signal has been broadcast. Help is on the way. Please remain calm.");
                             }
-                        } else {
-                            Log.d("Request failed", "Your request has failed");
                         }
                         connected = true;
 
