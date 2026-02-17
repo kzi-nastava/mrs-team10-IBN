@@ -4,6 +4,7 @@ import com.example.UberComp.dto.account.RegisterDTO;
 import com.example.UberComp.dto.user.CreateUserDTO;
 import com.example.UberComp.dto.account.AccountDTO;
 import com.example.UberComp.dto.driver.*;
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.Coordinate;
@@ -11,6 +12,7 @@ import com.example.UberComp.model.User;
 import com.example.UberComp.service.AccountService;
 import com.example.UberComp.service.DriverAvailabilityService;
 import com.example.UberComp.service.DriverService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,7 +46,7 @@ public class DriverController {
 
     @PreAuthorize("hasAuthority('administrator')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> register(@RequestBody CreateDriverDTO dto) {
+    public ResponseEntity<?> register(@Valid @RequestBody CreateDriverDTO dto) {
         try {
             User user = accountService.register(new RegisterDTO(dto.getAccountDTO(), dto.getCreateUserDTO()));
             DriverDTO newDriver = driverService.register(dto, user);
@@ -147,6 +149,7 @@ public class DriverController {
 
             Map<String, Boolean> response = new HashMap<>();
             response.put("isActive", !status.equals(DriverStatus.OFFLINE) && !status.equals(DriverStatus.PANIC));
+            response.put("isBlocked", account.getAccountStatus().equals(AccountStatus.BLOCKED));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

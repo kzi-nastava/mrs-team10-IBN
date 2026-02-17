@@ -88,8 +88,9 @@
             <!-- FAVORITES -->
             <Button
                 android:id="@+id/favorites"
-                android:layout_width="50dp"
+                android:layout_width="120dp"
                 android:layout_height="50dp"
+                android:text="@string/favorites"
                 android:layout_marginTop="24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/passengers"/>
@@ -105,7 +106,8 @@
                 android:textStyle="bold"
                 app:layout_constraintTop_toTopOf="@id/favorites"
                 app:layout_constraintStart_toEndOf="@id/favorites"
-                />
+                app:layout_constraintEnd_toStartOf="@id/order"
+                android:layout_marginHorizontal="8dp"/>
 
             <!-- ORDER -->
             <Button
@@ -114,18 +116,7 @@
                 android:layout_height="50dp"
                 android:text="@string/order"
                 app:layout_constraintTop_toTopOf="@id/favorites"
-                app:layout_constraintStart_toEndOf="@id/rate"
                 app:layout_constraintEnd_toEndOf="parent"
-               />
-
-            <Button
-                android:id="@+id/rate"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:text="@string/rate"
-                app:layout_constraintTop_toTopOf="@id/favorites"
-                app:layout_constraintStart_toEndOf="@id/priceDetail"
-                android:backgroundTint="@color/background"
                 />
 
             <Button
@@ -157,6 +148,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_weight="1"
                 />
+
+            <Button
+                android:id="@+id/rate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/rate"
+                app:layout_constraintTop_toBottomOf="@id/view_reviews_button"
+                />
+
 
 
 

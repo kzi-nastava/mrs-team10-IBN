@@ -2,6 +2,7 @@ package com.example.ubercorp.api;
 
 import com.example.ubercorp.dto.CancelRideDTO;
 import com.example.ubercorp.dto.CreateRideDTO;
+import com.example.ubercorp.dto.DriversRidesDTO;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.dto.FinishedRideDTO;
 import com.example.ubercorp.dto.GetComplaintDTO;
@@ -9,6 +10,7 @@ import com.example.ubercorp.dto.GetReviewDTO;
 import com.example.ubercorp.dto.GetRideDTO;
 import com.example.ubercorp.dto.GetRideDetailsDTO;
 import com.example.ubercorp.dto.IncomingRideDTO;
+import com.example.ubercorp.dto.PageDTO;
 import com.example.ubercorp.dto.PriceDTO;
 import com.example.ubercorp.dto.RideDTO;
 import com.example.ubercorp.dto.RideMomentDTO;
@@ -103,4 +105,13 @@ public interface RideService {
 
     @GET("api/rides/ongoing")
     Call<Boolean> getOngoingRide(@Header("Authorization") String token);
+
+    @GET("api/rides/trackingRidePassenger")
+    Call<GetRideDetailsDTO> getTrackingRidePassenger(@Header("Authorization") String token);
+
+    @GET("api/rides/adminView")
+    Call<PageDTO<DriversRidesDTO>> getCurrentRides(@Header("Authorization") String token,
+                                                  @Query("page") int page,
+                                                  @Query("size") int size,
+                                                   @Query("search") String search);
 }

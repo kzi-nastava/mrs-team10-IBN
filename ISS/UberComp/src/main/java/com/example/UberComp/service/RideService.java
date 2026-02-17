@@ -188,13 +188,13 @@ public class RideService {
     public UpdatedStatusRideDTO updateRideStatus(UpdateStatusRideDTO updateRideDTO){ return new UpdatedStatusRideDTO();}
 
     public FinishedRideDTO endRide(Long rideId, RideMomentDTO finish){
-        Ride ride = rideRepository.findById(rideId).orElseThrow();
+        Ride ride = rideRepository.findById(rideId).orElseThrow(() -> new NoSuchElementException("Ride not found"));
         ride.setStatus(RideStatus.Finished);
         Driver driver = ride.getDriver();
         if(driver.getStatus() == DriverStatus.OFFLINE_AFTER_RIDE) driver.setStatus(DriverStatus.OFFLINE);
         else driver.setStatus(DriverStatus.ONLINE);
-        Instant instant = Instant.parse(finish.getIsotime());
-        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
+        LocalDateTime now = LocalDateTime.parse(finish.getIsotime());        // ride.setPrice(); price calculation
+        ride.setFinish(now);
         rideRepository.save(ride);
         Vehicle vehicle = driver.getVehicle();
         vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));
@@ -204,8 +204,9 @@ public class RideService {
         return new FinishedRideDTO(ride);
     }
 
+    @Transactional
     public FinishedRideDTO stopRide(StopRideDTO stopRideDTO, boolean panic) {
-        Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow();
+        Ride ride = rideRepository.findById(stopRideDTO.getId()).orElseThrow(() -> new RuntimeException("Ride not found"));
         Route stoppedRoute = ride.getRoute();
         Coordinate newCoordinate = new Coordinate();
         newCoordinate.setLat(stopRideDTO.getLat());
@@ -217,6 +218,7 @@ public class RideService {
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
         LocalDateTime now = LocalDateTime.parse(stopRideDTO.getFinishTime());
+        ride.setDistance(stopRideDTO.getDistance());
         ride.setFinish(now);
         Driver driver = ride.getDriver();
         if(panic) {
@@ -610,7 +612,8 @@ public class RideService {
                 .map(ride -> new GetCurrentRideDTO(
                         new GetRideDTO(ride),
                         ride.getDriver().getName(),
-                        ride.getDriver().getLastName()
+                        ride.getDriver().getLastName(),
+                        ride.getDriver().getAccount().getEmail()
                 ))
                 .toList();
 

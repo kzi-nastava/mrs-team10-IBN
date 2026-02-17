@@ -9,6 +9,7 @@
 mat-sidenav-container {
   position: absolute;
   height: 90vh;
+  z-index: 2;
 }
 
 .sidebar {
@@ -44,6 +45,12 @@ mat-toolbar mat-icon {
   padding-left: 2rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
+  transition: background-color 0.3s;
+}
+
+.item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
 }
 
 .item mat-icon {
@@ -57,6 +64,7 @@ mat-toolbar mat-icon {
 }
 
 .logout-btn {
+  display: flex;
   background: #a43434;
   border: none;
   color: white;
@@ -65,16 +73,19 @@ mat-toolbar mat-icon {
   cursor: pointer;
   width: 10vw;
   text-align: center;
-  margin: 1rem 3rem 1rem 3rem;
+  margin: 0 auto;
+  margin-top: 2rem;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #8b2c2c;
 }
 
 button {
   font-size: 14px;
-}
-
-mat-sidenav-container {
-  position: absolute;
-  z-index: 2;
 }
 
 .nav-logo {
@@ -82,6 +93,7 @@ mat-sidenav-container {
   width: auto;
   object-fit: contain;
   display: block;
+  cursor: pointer;
 }
 
 .top {
@@ -92,8 +104,54 @@ mat-sidenav-container {
 }
 
 .notification {
-  color: yellow;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.notification button {
+  color: rgb(255, 200, 0);
+}
+
+::ng-deep .mat-badge-warn .mat-badge-content {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+::ng-deep .mat-badge-content {
+  background-color: #f44336 !important;
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  font-family: 'Roboto', sans-serif !important;
+  width: 22px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+  border-radius: 50% !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .mat-badge-small .mat-badge-content {
+  width: 22px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+  font-size: 12px !important;
+}
+
+::ng-deep .mat-badge-medium .mat-badge-content {
+  width: 22px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+}
+
+::ng-deep .mat-badge-above .mat-badge-content {
+  top: -6px !important;
+  right: -6px !important;
+}
+
+.notification button:hover {
+  background-color: rgba(250, 235, 215, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -105,10 +163,11 @@ mat-sidenav-container {
 
   .item {
     font-size: 0.9rem;
+    padding-left: 1rem;
   }
 
   .item mat-icon {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   .mat-toolbar {
@@ -121,6 +180,11 @@ mat-sidenav-container {
 
   .logout-btn {
     width: 25vw;
+    font-size: 0.9rem;
+  }
+
+  .top {
+    height: 56px;
   }
 }
 
@@ -133,23 +197,29 @@ mat-sidenav-container {
   font-size: 1rem;
   font-weight: bold;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  z-index: 100001;
-  animation: slideInFade 0.3s ease;
+  z-index: 3;
+  animation: slideInFade 0.5s ease;
+  min-width: 280px;
+  max-width: 400px;
 }
 
-.message.success-message {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: bold;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  z-index: 100001;
-  animation: slideInFade 0.3s ease;
+.success-message {
   background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: white;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+}
+
+.panic-message {
+  background: linear-gradient(135deg, #9e0b00 0%, #ff0000 100%);
+  color: white;
+  border: 2px solid #fff;
+  animation:
+    slideInFade 0.5s ease,
+    pulsePanic 1.5s infinite;
 }
 
 @keyframes slideInFade {
@@ -174,12 +244,14 @@ mat-sidenav-container {
   }
 }
 
-.error-message {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  color: white;
-}
-
-.panic-message{
-  background: linear-gradient(135deg, #9e0b00 0%, #ff0000 100%);
-  color: white;
+@keyframes pulsePanic {
+  0%,
+  100% {
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(255, 0, 0, 0.8);
+    transform: scale(1.02);
+  }
 }

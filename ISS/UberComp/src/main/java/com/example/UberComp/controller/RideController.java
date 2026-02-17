@@ -6,13 +6,11 @@ import com.example.UberComp.dto.ride.*;
 import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.*;
-import com.example.UberComp.repository.RideRepository;
 import com.example.UberComp.service.DriverService;
 import com.example.UberComp.service.RideService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.NotFound;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,6 +25,8 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.ResponseEntity.notFound;
 
 @RestController
 @AllArgsConstructor
@@ -135,15 +135,23 @@ public class RideController {
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/finish/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> finishRide(@RequestBody RideMomentDTO finish, @PathVariable("id") Long id) {
-         FinishedRideDTO finished = rideService.endRide(id, finish);
-         return new ResponseEntity<>(finished, HttpStatus.OK);
+        try {
+            FinishedRideDTO finished = rideService.endRide(id, finish);
+            return new ResponseEntity<>(finished, HttpStatus.OK);
+        }catch (RuntimeException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PreAuthorize("hasAuthority('driver')")
     @PutMapping(value = "/stop", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<FinishedRideDTO> stopRide(@RequestBody StopRideDTO ride){
-        FinishedRideDTO finished = rideService.stopRide(ride, false);
-        return new ResponseEntity<>(finished, HttpStatus.OK);
+        try{
+            FinishedRideDTO finished = rideService.stopRide(ride, false);
+            return new ResponseEntity<>(finished, HttpStatus.OK);
+        } catch(RuntimeException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -157,33 +165,33 @@ public class RideController {
 
     @PreAuthorize("hasAuthority('passenger')")
     @PostMapping(value = "/calculate-price", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PriceDTO> calculatePrice(@RequestBody CreateRideDTO dto) {
+    public ResponseEntity<PriceDTO> calculatePrice(@Valid @RequestBody CreateRideDTO dto) {
         PriceDTO priceDTO = rideService.calculatePrice(dto);
         return ResponseEntity.ok(priceDTO);
     }
 
     @PreAuthorize("hasAuthority('passenger')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RideOrderResponseDTO> orderRide(@RequestBody CreateRideDTO dto, Authentication auth) {
+    public ResponseEntity<RideOrderResponseDTO> orderRide(@Valid @RequestBody CreateRideDTO dto, Authentication auth) {
         Account account = (Account) auth.getPrincipal();
         if (account.getAccountStatus().equals(AccountStatus.BLOCKED))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                     new RideOrderResponseDTO(0L,0.0, account.getBlockingReason(), null, null, null, null, null, 0L, null));
 
         GetCoordinateDTO start = dto.getStartAddress();
-        if (start.getLon() == 0 || start.getLat() == 0) {
+        if (start.getLon() == 0.0 || start.getLat() == 0.0) {
             dto.setStartAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(start.getAddress())));
         }
 
         for (int i = 0; i < dto.getStops().size(); ++i) {
             GetCoordinateDTO stop = dto.getStops().get(i);
-            if (stop.getLon() == 0 || stop.getLat() == 0) {
+            if (stop.getLon() == 0.0 || stop.getLat() == 0.0) {
                 dto.getStops().set(i, new GetCoordinateDTO(driverService.geocodeAddressWithCache(stop.getAddress())));
             }
         }
 
         GetCoordinateDTO end = dto.getDestinationAddress();
-        if (end.getLon() == 0 || end.getLat() == 0) {
+        if (end.getLon() == 0.0 || end.getLat() == 0.0) {
             dto.setDestinationAddress(new GetCoordinateDTO(driverService.geocodeAddressWithCache(end.getAddress())));
         }
 
@@ -259,7 +267,7 @@ public class RideController {
     public ResponseEntity<GetRideDetailsDTO> getRideByToken(@PathVariable String token) {
         Optional<Ride> ride = rideService.findByTrackingToken(token);
         if (ride.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return notFound().build();
         }
         if (ride.get().getStatus() != RideStatus.Ongoing) {
             return ResponseEntity.status(HttpStatus.GONE).build();

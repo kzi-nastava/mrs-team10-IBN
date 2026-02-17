@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.net.Uri;
 import android.os.Build;
@@ -86,7 +87,6 @@ public class AccountFragment extends Fragment implements
     private ImageView ivProfilePic;
     private MaterialButton btnCancel, btnSaveChanges, btnSendChanges, btnSavePassword, btnCancelPassword;
     private TextInputEditText etCurrentPassword, etNewPassword, etConfirmPassword;
-    private TextView tvReq1, tvReq2, tvReq3;
     private String existingImage;
 
     // Vehicle Edit
@@ -102,9 +102,9 @@ public class AccountFragment extends Fragment implements
     private TextView tvDrivingHoursProgress;
 
     // Menu Items
-    private LinearLayout menuPlatformStats, menuRequests, menuManageUsers,
+    private LinearLayout menuRequests, menuManageUsers,
             menuChangePassword, menuFavorites,
-            menuUserStat, menuDriverStat, menuVehicle, vehiclePrices;
+            menuStat, menuVehicle, vehiclePrices;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -201,17 +201,24 @@ public class AccountFragment extends Fragment implements
     public void onDriverDataLoaded(DriverDTO driver) {
         currentDriver = driver;
         displayUserInfo(driver.getCreateUser(), driver.getAccount());
+
+        if (driver.isBlocked()) {
+            tvDrivingHoursProgress.setText("BLOCKED: " + driver.isReason());
+            tvDrivingHoursProgress.setTextColor(Color.RED);
+        } else {
+            if (driver.getUptime() != null) {
+                float hours = driver.getUptime() / 60f;
+                float roundedHours = Math.round(hours * 10f) / 10f;
+                updateDriverHours(roundedHours);
+            }
+        }
+
         if (driver.getVehicleDTO() != null) {
             currentVehicle = driver.getVehicleDTO();
             displayVehicleInfo(driver.getVehicleDTO());
         }
-        if (driver.getUptime() != null) {
-            float hours = driver.getUptime() / 60f;
-            float roundedHours = Math.round(hours * 10f) / 10f;
-            updateDriverHours(roundedHours);
-        }
-
     }
+
 
     @Override
     public void onVehicleUpdateSuccess() {
@@ -313,9 +320,6 @@ public class AccountFragment extends Fragment implements
         etCurrentPassword = view.findViewById(R.id.etCurrentPassword);
         etNewPassword = view.findViewById(R.id.etNewPassword);
         etConfirmPassword = view.findViewById(R.id.etConfirmPassword);
-        tvReq1 = view.findViewById(R.id.tvReq1);
-        tvReq2 = view.findViewById(R.id.tvReq2);
-        tvReq3 = view.findViewById(R.id.tvReq3);
 
         // Vehicle Edit
         tvVehicleModel = view.findViewById(R.id.etVehicleModel);
@@ -333,13 +337,11 @@ public class AccountFragment extends Fragment implements
         tvDrivingHoursProgress = view.findViewById(R.id.tvDrivingHoursProgress);
 
         // Menu Items
-        menuPlatformStats = view.findViewById(R.id.menuPlatformStats);
         menuRequests = view.findViewById(R.id.menuRequests);
         menuManageUsers = view.findViewById(R.id.menuManageUsers);
         menuChangePassword = view.findViewById(R.id.menuChangePassword);
         menuFavorites = view.findViewById(R.id.menuFavorites);
-        menuUserStat = view.findViewById(R.id.menuMyStatistics);
-        menuDriverStat = view.findViewById(R.id.menuDriverStatistics);
+        menuStat = view.findViewById(R.id.menuStatistics);
         menuVehicle = view.findViewById(R.id.menuVehicle);
         vehiclePrices = view.findViewById(R.id.vehiclePrices);
     }
@@ -369,22 +371,20 @@ public class AccountFragment extends Fragment implements
 
         vehiclePrices.setOnClickListener(v -> navigateToVehiclePrices());
 
-        // Navigate to Change Requests
         menuRequests.setOnClickListener(v -> navigateToChangeRequests());
         menuChangePassword.setOnClickListener(v -> showChangePassword());
         menuManageUsers.setOnClickListener(v -> navigateToManageUsers());
         menuFavorites.setOnClickListener(v -> showFavoriteRoutesDialog());
+        menuStat.setOnClickListener(v -> navigateToStatistics());
     }
 
     private MenuConfigurator.MenuViews createMenuViews() {
         MenuConfigurator.MenuViews menuViews = new MenuConfigurator.MenuViews();
-        menuViews.menuPlatformStats = menuPlatformStats;
         menuViews.menuRequests = menuRequests;
         menuViews.menuManageUsers = menuManageUsers;
         menuViews.menuChangePassword = menuChangePassword;
         menuViews.menuFavorites = menuFavorites;
-        menuViews.menuUserStat = menuUserStat;
-        menuViews.menuDriverStat = menuDriverStat;
+        menuViews.menuStat = menuStat;
         menuViews.menuVehicle = menuVehicle;
         menuViews.menuvehiclePrices = vehiclePrices;
         menuViews.drivingHoursSection = drivingHoursSection;
@@ -439,8 +439,6 @@ public class AccountFragment extends Fragment implements
     }
 
     private void setupMenuItems(View view) {
-        setupMenuItem(view.findViewById(R.id.menuPlatformStats), "📊",
-                "Platform Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuRequests), "📥",
                 "Requests", "Manage change requests", true);
         setupMenuItem(view.findViewById(R.id.menuManageUsers), "🚗",
@@ -449,10 +447,8 @@ public class AccountFragment extends Fragment implements
                 "Change Password", "Update your password", false);
         setupMenuItem(view.findViewById(R.id.menuFavorites), "❤️",
                 "Favorites", "Manage favorite routes", true);
-        setupMenuItem(view.findViewById(R.id.menuMyStatistics), "📊",
-                "My Statistics", "Get reports", true);
-        setupMenuItem(view.findViewById(R.id.menuDriverStatistics), "📊",
-                "Driver Statistics", "Get reports", true);
+        setupMenuItem(view.findViewById(R.id.menuStatistics), "📊",
+                "Statistics", "Get reports", true);
         setupMenuItem(view.findViewById(R.id.menuVehicle), "🚗",
                 "My Vehicle", "Manage your vehicle", true);
         setupMenuItem(view.findViewById(R.id.vehiclePrices), "💸",
@@ -476,6 +472,11 @@ public class AccountFragment extends Fragment implements
                 .navigate(R.id.action_account_to_changeRequests);
     }
 
+    private void navigateToStatistics() {
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_account_to_statistics);
+    }
+
     private void navigateToManageUsers() {
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_account_to_driver_registration);
@@ -495,12 +496,12 @@ public class AccountFragment extends Fragment implements
 
     private void showChangePassword() {
         changePassword.setVisibility(View.VISIBLE);
-        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        hideViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void hideChangePassword() {
         changePassword.setVisibility(View.GONE);
-        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, ivProfilePic);
+        showViews(userInfoSection, menuCard, tvDrivingHoursProgress, driverProgress, fabEditProfile);
     }
 
     private void savePassword() {
@@ -518,18 +519,8 @@ public class AccountFragment extends Fragment implements
             return;
         }
 
-        if (newPassword.length() < 8) {
-            Toast.makeText(getContext(), "Password must be at least 8 characters", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!newPassword.matches(".*[A-Z].*")) {
-            Toast.makeText(getContext(), "Password must contain at least one uppercase letter", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!newPassword.matches(".*\\d.*")) {
-            Toast.makeText(getContext(), "Password must contain at least one number", Toast.LENGTH_SHORT).show();
+        if (newPassword.length() < 6) {
+            Toast.makeText(getContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -561,12 +552,23 @@ public class AccountFragment extends Fragment implements
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            Toast.makeText(getContext(), "Name and last name are required", Toast.LENGTH_SHORT).show();
+        if (firstName.isEmpty() || firstName.length() < 2) {
+            Toast.makeText(getContext(), "First name must be at least 2 characters", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (address.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
+
+        if (lastName.isEmpty() || lastName.length() < 2) {
+            Toast.makeText(getContext(), "Last name must be at least 2 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (address.isEmpty()) {
+            Toast.makeText(getContext(), "Address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (phone.isEmpty() || !phone.matches("^\\d{9,15}$")) {
+            Toast.makeText(getContext(), "Phone must be 9-15 digits", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -582,9 +584,12 @@ public class AccountFragment extends Fragment implements
                 imageToSend
         );
 
-
         profileManager.updateProfile(updateDTO);
         tvUserName.setText(firstName + " " + lastName);
+        if (!imageToSend.equals(originalBase64Image)) {
+            originalBase64Image = imageToSend;
+            ImageHelper.setProfileImage(originalBase64Image, ivProfilePic);
+        }
     }
 
     private void sendProfileChanges() {
@@ -593,13 +598,23 @@ public class AccountFragment extends Fragment implements
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            Toast.makeText(getContext(), "Name and last name are required", Toast.LENGTH_SHORT).show();
+        if (firstName.isEmpty() || firstName.length() < 2) {
+            Toast.makeText(getContext(), "First name must be at least 2 characters", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (address.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(getContext(), "Address and phone number are required", Toast.LENGTH_SHORT).show();
+        if (lastName.isEmpty() || lastName.length() < 2) {
+            Toast.makeText(getContext(), "Last name must be at least 2 characters", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (address.isEmpty()) {
+            Toast.makeText(getContext(), "Address is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (phone.isEmpty() || !phone.matches("^\\d{9,15}$")) {
+            Toast.makeText(getContext(), "Phone must be 9-15 digits", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -620,7 +635,6 @@ public class AccountFragment extends Fragment implements
         currentBase64Image = originalBase64Image;
     }
 
-
     private void showEditVehicle() {
         hideViews(userInfoSection, menuCard, driverProgress, tvDrivingHoursProgress);
         showViews(editVehicleCard);
@@ -636,6 +650,18 @@ public class AccountFragment extends Fragment implements
         String vehicleTypeName = selectedId == R.id.rbStandard ? "STANDARD" :
                 selectedId == R.id.rbLuxury ? "LUXURY" : "VAN";
 
+        String model = tvVehicleModel.getText().toString().trim();
+        if (model.isEmpty()) {
+            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String plate = tvVehiclePlate.getText().toString().trim();
+        if (plate.isEmpty()) {
+            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String seatsStr = etNumberOfSeats.getText().toString().trim();
         if (seatsStr.isEmpty()) {
             Toast.makeText(getContext(), "Number of seats is required", Toast.LENGTH_SHORT).show();
@@ -645,6 +671,10 @@ public class AccountFragment extends Fragment implements
         int seatNumber;
         try {
             seatNumber = Integer.parseInt(seatsStr);
+            if (seatNumber < 1 || seatNumber > 9) {
+                Toast.makeText(getContext(), "Number of seats must be between 1 and 9", Toast.LENGTH_SHORT).show();
+                return;
+            }
         } catch (NumberFormatException e) {
             Toast.makeText(getContext(), "Invalid number of seats", Toast.LENGTH_SHORT).show();
             return;
@@ -656,17 +686,6 @@ public class AccountFragment extends Fragment implements
         Long typeId = vehicleTypeName.equals("STANDARD") ? 1L :
                 vehicleTypeName.equals("LUXURY") ? 2L : 3L;
         VehicleTypeDTO vehicleType = new VehicleTypeDTO(typeId, vehicleTypeName, 0.0);
-
-        String model = tvVehicleModel.getText().toString().trim();
-        if (model.isEmpty()) {
-            Toast.makeText(getContext(), "Vehicle model is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String plate = tvVehiclePlate.getText().toString().trim();
-        if (plate.isEmpty()) {
-            Toast.makeText(getContext(), "License plate is required", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         VehicleDTO updatedVehicle = new VehicleDTO(
                 vehicleType,

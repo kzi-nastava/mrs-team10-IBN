@@ -14,7 +14,12 @@
             android:icon="@drawable/ic_account"
             android:orderInCategory="200" />
 
-        <item android:id="@+id/rating"
+        <item android:id="@+id/chat_layout"
+            android:title="@string/chat_support"
+            android:icon="@drawable/ic_chat"
+            android:orderInCategory="300"/>
+
+        <item android:id="@+id/admin_chat"
             android:title="@string/chat_support"
             android:icon="@drawable/ic_chat"
             android:orderInCategory="300"/>

@@ -23,6 +23,7 @@ export class RideApproxFormComponent {
   });
 
   routeOutput = output<Location[]>();
+  clearEvent = output<void>();
 
   private addressCoordinates = new Map<string, { lat: number; lon: number }>();
 
@@ -104,6 +105,7 @@ export class RideApproxFormComponent {
     this.stations.clear();
     this.addressCoordinates.clear();
     this.getRoute();
+    this.clearEvent.emit();
   }
 
   public getRoute() {

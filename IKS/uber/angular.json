@@ -25,6 +25,7 @@
                 "input": "public"
               }
             ],
+            "polyfills": ["src/polyfills.ts"],
             "styles": [
               "./node_modules/leaflet/dist/leaflet.css",
               "./node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.css",
@@ -71,7 +72,15 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "runner": "karma",
+            "include": [
+              "**/register.component.spec.ts",
+              "**/register-driver.component.spec.ts",
+              "**/rate-driver-vehicle.component.spec.ts"
+            ]
+          }
         }
       }
     }

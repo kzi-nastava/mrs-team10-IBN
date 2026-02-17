@@ -1,5 +1,6 @@
 package com.example.UberComp.service;
 
+import com.example.UberComp.enums.AccountStatus;
 import com.example.UberComp.enums.DriverStatus;
 import com.example.UberComp.enums.RideStatus;
 import com.example.UberComp.model.Driver;
@@ -25,6 +26,10 @@ public class DriverAvailabilityService {
     public void setDriverStatus(Long driverId, boolean active) {
         Driver driver = driverRepository.findById(driverId).orElseThrow();
 
+        if (driver.getAccount() != null && driver.getAccount().getAccountStatus().equals(AccountStatus.BLOCKED)) {
+            return;
+        }
+
         resetIfNewDay(driver);
 
         if (active && driver.getTotalWorkMinutesToday() >= MAX_WORK_MINUTES_PER_DAY) {
@@ -34,6 +39,10 @@ public class DriverAvailabilityService {
         if (active && driver.getStatus().equals(DriverStatus.OFFLINE)) {
             driver.setDailyWorkStart(LocalDateTime.now());
             driver.setStatus(DriverStatus.ONLINE);
+        }
+        else if (active && driver.getStatus().equals(DriverStatus.OFFLINE_AFTER_RIDE)) {
+            driver.setDailyWorkStart(LocalDateTime.now());
+            driver.setStatus(DriverStatus.DRIVING);
         }
         else if (!active && driver.getStatus().equals(DriverStatus.ONLINE)) {
             updateWorkMinutes(driver);

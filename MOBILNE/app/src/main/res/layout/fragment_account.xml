@@ -184,10 +184,6 @@
 
                     <include
                         layout="@layout/menu_item"
-                        android:id="@+id/menuPlatformStats"/>
-
-                    <include
-                        layout="@layout/menu_item"
                         android:id="@+id/menuRequests"/>
 
                     <include
@@ -200,11 +196,7 @@
 
                     <include
                         layout="@layout/menu_item"
-                        android:id="@+id/menuMyStatistics"/>
-
-                    <include
-                        layout="@layout/menu_item"
-                        android:id="@+id/menuDriverStatistics"/>
+                        android:id="@+id/menuStatistics"/>
 
                     <include
                         layout="@layout/menu_item"

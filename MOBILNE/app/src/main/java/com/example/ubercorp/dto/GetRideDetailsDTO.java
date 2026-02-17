@@ -9,6 +9,7 @@ public class GetRideDetailsDTO {
     private Long id;
     private String startTime;
     private String endTime;
+    private String estimatedTimeArrival;
     private RouteDTO route;
     private Set<CreatedUserDTO> passengers;
     private Double price;
@@ -38,6 +39,14 @@ public class GetRideDetailsDTO {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public String getEstimatedTimeArrival() {
+        return estimatedTimeArrival;
+    }
+
+    public void setEstimatedTimeArrival(String estimatedTimeArrival) {
+        this.estimatedTimeArrival = estimatedTimeArrival;
     }
 
     public RouteDTO getRoute() {

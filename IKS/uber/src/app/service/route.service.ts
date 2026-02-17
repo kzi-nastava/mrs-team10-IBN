@@ -26,7 +26,7 @@ export class RouteService {
 
   finishRide(id: number, time: string) {
     const body = {
-      isotime: time,
+      isotime: time.replace('Z', ''),
     };
     return this.http.put(`${environment.apiHost}/rides/finish/${id}`, body);
   }
@@ -49,7 +49,7 @@ export class RouteService {
       lon: location.lon,
       address: location.address,
       distance: distance,
-      finishTime: time,
+      finishTime: time.replace('Z', ''),
     };
     return this.http.put(`${environment.apiHost}/rides/stop`, body);
   }

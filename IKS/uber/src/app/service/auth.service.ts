@@ -1,8 +1,9 @@
-import { computed, inject, Injectable, Signal, signal } from '@angular/core';
+import { computed, inject, Injectable, Injector, Signal, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { catchError, map, tap } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { WebSocketService } from './websocket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,8 +14,46 @@ export class AuthService {
 
   public readonly role = signal<string | null>(this.getRole());
 
-  login(creds: LoginCreds) {
-    return this.http.post<any>(`${environment.authHost}/login`, creds, { observe: 'response' });
+  private webSocketService?: WebSocketService;
+
+  constructor(private injector: Injector) {}
+
+  private getWebSocketService(): WebSocketService {
+    if (!this.webSocketService) {
+      this.webSocketService = this.injector.get(WebSocketService);
+    }
+    return this.webSocketService;
+  }
+
+  login(creds: LoginCreds): Observable<any> {
+    return this.http
+      .post<any>(`${environment.authHost}/login`, creds, { observe: 'response' })
+      .pipe(
+        tap((response) => {
+          const token = response.body?.token || response.body?.accessToken;
+
+          if (token) {
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('user_email', creds.email);
+
+            const wsService = this.getWebSocketService();
+
+            if (wsService.isConnected()) {
+              wsService.disconnect();
+            }
+
+            setTimeout(() => {
+              wsService.connect(creds.email);
+            }, 500);
+          } else {
+            console.error('No token in login response!');
+          }
+        }),
+        catchError((error) => {
+          console.error('Login failed:', error);
+          return throwError(() => error);
+        }),
+      );
   }
 
   register(data: RegistrationData) {
@@ -52,8 +91,7 @@ export class AuthService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    console.log(this.getRole())
-    if(this.getRole() === "driver"){
+    if (this.getRole() === 'driver') {
       this.http
         .put(`${environment.apiHost}/drivers/me/toggle-status?active=false`, null, { headers })
         .subscribe({

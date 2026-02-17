@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_details_to_reviews"
             app:destination="@id/rideReviewsFragment"/>
+        <action
+            android:id="@+id/action_details_to_order"
+            app:destination="@id/orderRideFragment"/>
     </fragment>
 
     <fragment
@@ -41,12 +44,20 @@
         <action
             android:id="@+id/action_account_to_driver_registration"
             app:destination="@id/registerDriverFragment"/>
+        <action
+            android:id="@+id/action_account_to_statistics"
+            app:destination="@id/statisticsFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/changeRequestsFragment"
         android:name="com.example.ubercorp.fragments.ChangeRequestsFragment"
         tools:layout="@layout/fragment_change_requests"/>
+
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.example.ubercorp.fragments.StatisticsFragment"
+        tools:layout="@layout/fragment_statistics"/>
 
     <fragment
         android:id="@+id/vehiclePriceFragment"
@@ -85,7 +96,9 @@
         android:id="@+id/trackingRouteFragment"
         android:name="com.example.ubercorp.fragments.TrackingRouteFragment"
         tools:layout="@layout/fragment_tracking_route">
-        <!-- promeniti kada dodamo home screen za vozače -->
+        <action
+            android:id="@+id/action_trackingRouteFragment_to_driverHome"
+            app:destination="@id/driverHomeFragment"/>
         <action
             android:id="@+id/action_trackingRouteFragment_to_routeFragment"
             app:destination="@id/routeFragment"/>
@@ -124,9 +137,29 @@
         />
 
     <fragment
+        android:id="@+id/complaintForm"
+        android:name="com.example.ubercorp.fragments.ComplaintWhileDrivingFragment"
+        android:label="Complaint"
+        tools:layout="@layout/fragment_complaint_while_driving"
+        />
+
+    <fragment
         android:id="@+id/driverHomeFragment"
         android:name="com.example.ubercorp.fragments.DriverHomeFragment"
         tools:layout="@layout/fragment_driver_home"/>
 
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.example.ubercorp.fragments.AdminHomeFragment"
+        tools:layout="@layout/fragment_admin_home"/>
 
+    <fragment
+        android:id="@+id/chat_layout"
+        android:name="com.example.ubercorp.fragments.ChatFragment"
+        tools:layout="@layout/chat_fragment"/>
+
+    <fragment
+        android:id="@+id/admin_chat"
+        android:name="com.example.ubercorp.fragments.AdminChatFragment"
+        tools:layout="@layout/fragment_admin_chat"/>
 </navigation>

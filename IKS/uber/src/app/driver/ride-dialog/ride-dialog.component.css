@@ -227,3 +227,19 @@
   border-radius: 0.5rem;
   font-weight: bold;
 }
+
+.error-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  animation: slideInRight 0.3s ease;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
