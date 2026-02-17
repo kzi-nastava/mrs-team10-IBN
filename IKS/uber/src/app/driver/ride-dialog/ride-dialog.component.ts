@@ -168,6 +168,7 @@ export class RideDialogComponent implements OnInit {
       const ongoing = await firstValueFrom(this.rideService.hasOngoingRide());
       const numStations = this.ride.route.stations.length
       if (!ongoing) {
+        this.dialogRef.close()
         this.router.navigate(['/order-ride'], {
           state: {
             locations: this.ride.route.stations.map((station, index) => ({
@@ -179,7 +180,6 @@ export class RideDialogComponent implements OnInit {
             }))
           },
         });
-        this.dialog.closeAll()
       } else {
         this.showError('Please finish your ongoing ride before starting a new one.');
       }
