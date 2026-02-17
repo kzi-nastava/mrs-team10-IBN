@@ -9,10 +9,11 @@ import { RateDriverVehicleComponent } from '../../passenger/rate-driver-vehicle/
 import { SimpleMessageDialogComponent } from '../../layout/simple-message-dialog/simple-message-dialog.component';
 import { AuthService } from '../../service/auth.service';
 import { RideService } from '../../service/ride-history.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { RideCancellation, RouteService } from '../../service/route.service';
 import { ReviewsComponent } from '../reviews/reviews.component';
 import { ComplaintsComponent } from '../complaints/complaints.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-ride-dialog',
@@ -25,6 +26,7 @@ import { ComplaintsComponent } from '../complaints/complaints.component';
 export class RideDialogComponent implements OnInit {
   protected role: string | null;
   private isFavoriteSubject = new BehaviorSubject<boolean>(false);
+  errorMessage: string | null = null;
   isFavorite$ = this.isFavoriteSubject.asObservable();
 
   constructor(
@@ -35,6 +37,7 @@ export class RideDialogComponent implements OnInit {
     private rideService: RideService,
     private routeService: RouteService,
     private cdr: ChangeDetectorRef,
+    private router: Router
   ) {
     this.role = authService.role();
   }
@@ -158,5 +161,40 @@ export class RideDialogComponent implements OnInit {
         });
       },
     });
+  }
+
+  async goToOrder() {
+    try {
+      const ongoing = await firstValueFrom(this.rideService.hasOngoingRide());
+      const numStations = this.ride.route.stations.length
+      if (!ongoing) {
+        this.router.navigate(['/order-ride'], {
+          state: {
+            locations: this.ride.route.stations.map((station, index) => ({
+              address: station.address,
+              lat: station.lat,
+              lon: station.lon,
+              type: index === 0 ? 'pickup' : index === numStations - 1 ? 'destination' : 'stop',
+              index
+            }))
+          },
+        });
+        this.dialog.closeAll()
+      } else {
+        this.showError('Please finish your ongoing ride before starting a new one.');
+      }
+    } catch (err) {
+      console.error('Failed to check ongoing ride', err);
+      this.showError('Could not verify ongoing ride. Please try again.');
+    }
+  }
+
+  public showError(message: string) {
+    this.errorMessage = message;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.errorMessage = null;
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

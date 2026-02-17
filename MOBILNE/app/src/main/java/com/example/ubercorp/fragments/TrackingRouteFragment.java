@@ -34,6 +34,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -111,23 +112,32 @@ public class TrackingRouteFragment extends Fragment {
         finishButton.setOnClickListener((v) -> {
             vehicleIsMoving = false;
             if(lastPassedStation == stations.size()){
-                RideMomentDTO finished = new RideMomentDTO(LocalDateTime.now().toString());
-                rideManager.finishRide(ride.getId(), finished, new Callback<FinishedRideDTO>() {
+                Thread thread = new Thread(new Runnable() {
                     @Override
-                    public void onResponse(Call<FinishedRideDTO> call, Response<FinishedRideDTO> response) {
-                        // notifikacije o završetku vožnje
-                        // promeniti kada dodamo home screen za vozače
-                        Navigation.findNavController(requireView()).navigate(
-                                R.id.action_incomingRideFragment_to_trackingRouteFragment
-                        );
-                    }
+                    public void run() {
+                        RideMomentDTO finished = new RideMomentDTO(LocalDateTime.now().toString());
+                        rideManager.finishRide(ride.getId(), finished, new Callback<FinishedRideDTO>() {
+                            @Override
+                            public void onResponse(Call<FinishedRideDTO> call, Response<FinishedRideDTO> response) {
+                                if(response.isSuccessful()){
+                                    Navigation.findNavController(requireView()).navigate(
+                                            R.id.action_trackingRouteFragment_to_driverHome
+                                    );
+                                }
+                                else {
+                                    Log.d("Request failed", ride.getId().toString());
+                                }
+                            }
 
-                    @Override
-                    public void onFailure(Call<FinishedRideDTO> call, Throwable t) {
-                        Toast toast = Toast.makeText(TrackingRouteFragment.this.getContext(), "Can't finish ride! Check your Internet connection and try again!", Toast.LENGTH_SHORT);
-                        toast.show();
+                            @Override
+                            public void onFailure(Call<FinishedRideDTO> call, Throwable t) {
+                                Toast toast = Toast.makeText(TrackingRouteFragment.this.getContext(), "Can't finish ride! Check your Internet connection and try again!", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        });
                     }
                 });
+                thread.start();
             } else {
                 Thread thread = new Thread(new Runnable() {
                     @Override
@@ -135,10 +145,8 @@ public class TrackingRouteFragment extends Fragment {
                         rideManager.stopRide(getStopRideDTO(), new Callback<FinishedRideDTO>() {
                             @Override
                             public void onResponse(Call<FinishedRideDTO> call, Response<FinishedRideDTO> response) {
-                                // notifikacije o završetku vožnje
-                                // promeniti kada dodamo home screen za vozače
                                 Navigation.findNavController(requireView()).navigate(
-                                        R.id.action_trackingRouteFragment_to_routeFragment
+                                        R.id.action_trackingRouteFragment_to_driverHome
                                 );
                             }
 
@@ -277,7 +285,7 @@ public class TrackingRouteFragment extends Fragment {
     private void moveVehicle() {
         new Thread(() -> {
             while(vehicleIsMoving){
-                rideManager.getRideByToken(rideToken, new Callback<GetRideDetailsDTO>() {
+                rideManager.getRide(ride.getId(), new Callback<GetRideDetailsDTO>() {
                     @Override
                     public void onResponse(Call<GetRideDetailsDTO> call, Response<GetRideDetailsDTO> response) {
                         if(response.isSuccessful()){
@@ -288,11 +296,12 @@ public class TrackingRouteFragment extends Fragment {
                                 );
                             }
                             if(response.body().getStatus() == RideStatus.Panic){
-                                vehicleIsMoving =  false;
+                                vehicleIsMoving = false;
                                 infoText.setText("Panic signal has been broadcast. Help is on the way. Please remain calm.");
                             }
                         }
                         connected = true;
+
                     }
 
                     @Override
@@ -301,7 +310,7 @@ public class TrackingRouteFragment extends Fragment {
                         connected = false;
                     }
                 });
-                if(connected){
+                if(connected && vehicleIsMoving){
                     updateVehicleLocation();
                     checkPassedStation();
                 }

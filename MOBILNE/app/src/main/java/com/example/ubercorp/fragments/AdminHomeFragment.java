@@ -45,6 +45,11 @@ public class AdminHomeFragment extends Fragment {
     private UserService userService;
     private RideService rideService;
     private String authToken;
+    private Call<PageDTO<UserDTO>> driversCall;
+    private Call<PageDTO<UserDTO>> passengersCall;
+    private Call<PageDTO<DriversRidesDTO>> ridesCall;
+    private Call<String> blockUserCall;
+    private Call<String> unblockUserCall;
 
     private DriversAdapter driversAdapter;
     private List<UserDTO> driversList = new ArrayList<>();
@@ -235,67 +240,100 @@ public class AdminHomeFragment extends Fragment {
     }
 
     private void loadDrivers() {
+        if (binding == null) return;
+
         binding.driversProgressBar.setVisibility(View.VISIBLE);
 
-        userService.getDrivers(authToken, driversPageIndex, driversPageSize)
-                .enqueue(new Callback<PageDTO<UserDTO>>() {
-                    @Override
-                    public void onResponse(Call<PageDTO<UserDTO>> call, Response<PageDTO<UserDTO>> response) {
-                        binding.driversProgressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null) {
-                            driversList.clear();
-                            driversList.addAll(response.body().getContent());
-                            driversTotalElements = response.body().getTotalElements();
-                            driversAdapter.notifyDataSetChanged();
-                            updateDriversPaginationButtons();
-                        } else {
-                            Toast.makeText(getContext(), "Failed to load drivers", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+        if (driversCall != null && !driversCall.isCanceled()) {
+            driversCall.cancel();
+        }
 
-                    @Override
-                    public void onFailure(Call<PageDTO<UserDTO>> call, Throwable t) {
-                        binding.driversProgressBar.setVisibility(View.GONE);
-                        Toast.makeText(getContext(), "Error loading drivers: " + t.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+        driversCall = userService.getDrivers(authToken, driversPageIndex, driversPageSize);
+        driversCall.enqueue(new Callback<PageDTO<UserDTO>>() {
+            @Override
+            public void onResponse(Call<PageDTO<UserDTO>> call, Response<PageDTO<UserDTO>> response) {
+                if (binding == null || !isAdded()) return;
+
+                binding.driversProgressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    driversList.clear();
+                    driversList.addAll(response.body().getContent());
+                    driversTotalElements = response.body().getTotalElements();
+                    driversAdapter.notifyDataSetChanged();
+                    updateDriversPaginationButtons();
+                } else {
+                    Toast.makeText(getContext(), "Failed to load drivers", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PageDTO<UserDTO>> call, Throwable t) {
+                if (binding == null || !isAdded()) return;
+
+                binding.driversProgressBar.setVisibility(View.GONE);
+                if (!call.isCanceled()) {
+                    Toast.makeText(getContext(), "Error loading drivers: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void loadPassengers() {
+        if (binding == null) return;
+
         binding.passengersProgressBar.setVisibility(View.VISIBLE);
 
-        userService.getPassengers(authToken, passengersPageIndex, passengersPageSize)
-                .enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(Call<PageDTO<UserDTO>> call, Response<PageDTO<UserDTO>> response) {
-                        binding.passengersProgressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null) {
-                            passengersList.clear();
-                            passengersList.addAll(response.body().getContent());
-                            passengersTotalElements = response.body().getTotalElements();
-                            passengersAdapter.notifyDataSetChanged();
-                            updatePassengersPaginationButtons();
-                        } else {
-                            Toast.makeText(getContext(), "Failed to load passengers", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+        if (passengersCall != null && !passengersCall.isCanceled()) {
+            passengersCall.cancel();
+        }
 
-                    @Override
-                    public void onFailure(Call<PageDTO<UserDTO>> call, Throwable t) {
-                        binding.passengersProgressBar.setVisibility(View.GONE);
-                        Toast.makeText(getContext(), "Error loading passengers: " + t.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+        passengersCall = userService.getPassengers(authToken, passengersPageIndex, passengersPageSize);
+        passengersCall.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<PageDTO<UserDTO>> call, Response<PageDTO<UserDTO>> response) {
+                if (binding == null || !isAdded()) return;
+
+                binding.passengersProgressBar.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    passengersList.clear();
+                    passengersList.addAll(response.body().getContent());
+                    passengersTotalElements = response.body().getTotalElements();
+                    passengersAdapter.notifyDataSetChanged();
+                    updatePassengersPaginationButtons();
+                } else {
+                    Toast.makeText(getContext(), "Failed to load passengers", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PageDTO<UserDTO>> call, Throwable t) {
+                if (binding == null || !isAdded()) return;
+
+                binding.passengersProgressBar.setVisibility(View.GONE);
+                if (!call.isCanceled()) {
+                    Toast.makeText(getContext(), "Error loading passengers: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void loadCurrentRides(String search){
+        if (binding == null) return;
+
         binding.ridesProgressBar.setVisibility(View.VISIBLE);
 
-        rideService.getCurrentRides(authToken, ridesPageIndex, ridesPageSize, search).enqueue(new Callback<>() {
+        if (ridesCall != null && !ridesCall.isCanceled()) {
+            ridesCall.cancel();
+        }
+
+        ridesCall = rideService.getCurrentRides(authToken, ridesPageIndex, ridesPageSize, search);
+        ridesCall.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<PageDTO<DriversRidesDTO>> call, Response<PageDTO<DriversRidesDTO>> response) {
+                if (binding == null || !isAdded()) return;
+
                 binding.ridesProgressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     currentRidesList.clear();
@@ -310,12 +348,15 @@ public class AdminHomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<PageDTO<DriversRidesDTO>> call, Throwable t) {
+                if (binding == null || !isAdded()) return;
+
                 binding.ridesProgressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Error loading rides: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                if (!call.isCanceled()) {
+                    Toast.makeText(getContext(), "Error loading rides: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
     }
 
     private void showBlockDialog(UserDTO user, boolean isDriver) {
@@ -324,32 +365,42 @@ public class AdminHomeFragment extends Fragment {
             body.put("mail", user.getEmail());
             body.put("reason", reason);
 
-            userService.blockUser(authToken, body)
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(Call<String> call, Response<String> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(getContext(),
-                                        (isDriver ? "Driver" : "Passenger") + " blocked successfully",
-                                        Toast.LENGTH_SHORT).show();
-                                if (isDriver) {
-                                    loadDrivers();
-                                } else {
-                                    loadPassengers();
-                                }
-                            } else {
-                                Toast.makeText(getContext(), "Failed to block user",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
+            if (blockUserCall != null && !blockUserCall.isCanceled()) {
+                blockUserCall.cancel();
+            }
 
-                        @Override
-                        public void onFailure(Call<String> call, Throwable t) {
-                            Toast.makeText(getContext(), "Error blocking user: " + t.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            Log.d("AdminHomeFragment","Error blocking user: " + t.getMessage());
+            blockUserCall = userService.blockUser(authToken, body);
+            blockUserCall.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if (!isAdded()) return;
+
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(),
+                                (isDriver ? "Driver" : "Passenger") + " blocked successfully",
+                                Toast.LENGTH_SHORT).show();
+                        if (isDriver) {
+                            loadDrivers();
+                        } else {
+                            loadPassengers();
                         }
-                    });
+                    } else {
+                        Toast.makeText(getContext(), "Failed to block user",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    if (!isAdded()) return;
+
+                    if (!call.isCanceled()) {
+                        Toast.makeText(getContext(), "Error blocking user: " + t.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        Log.d("AdminHomeFragment","Error blocking user: " + t.getMessage());
+                    }
+                }
+            });
         });
         dialog.show(getChildFragmentManager(), "BlockUserDialog");
     }
@@ -359,36 +410,48 @@ public class AdminHomeFragment extends Fragment {
             Map<String, String> body = new HashMap<>();
             body.put("mail", user.getEmail());
 
-            userService.unblockUser(authToken, body)
-                    .enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(Call<String> call, Response<String> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(getContext(),
-                                        (isDriver ? "Driver" : "Passenger") + " unblocked successfully",
-                                        Toast.LENGTH_SHORT).show();
-                                if (isDriver) {
-                                    loadDrivers();
-                                } else {
-                                    loadPassengers();
-                                }
-                            } else {
-                                Toast.makeText(getContext(), "Failed to unblock user",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
+            if (unblockUserCall != null && !unblockUserCall.isCanceled()) {
+                unblockUserCall.cancel();
+            }
 
-                        @Override
-                        public void onFailure(Call<String> call, Throwable t) {
-                            Toast.makeText(getContext(), "Error unblocking user: " + t.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
+            unblockUserCall = userService.unblockUser(authToken, body);
+            unblockUserCall.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if (!isAdded()) return;
+
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(),
+                                (isDriver ? "Driver" : "Passenger") + " unblocked successfully",
+                                Toast.LENGTH_SHORT).show();
+                        if (isDriver) {
+                            loadDrivers();
+                        } else {
+                            loadPassengers();
                         }
-                    });
+                    } else {
+                        Toast.makeText(getContext(), "Failed to unblock user",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    if (!isAdded()) return;
+
+                    if (!call.isCanceled()) {
+                        Toast.makeText(getContext(), "Error unblocking user: " + t.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         });
         dialog.show(getChildFragmentManager(), "UnblockUserDialog");
     }
 
     private void updateDriversPaginationButtons() {
+        if (binding == null) return;
+
         binding.driversPrevButton.setEnabled(driversPageIndex > 0);
         binding.driversNextButton.setEnabled((driversPageIndex + 1) * driversPageSize < driversTotalElements);
         binding.driversPageInfo.setText(String.format("Page %d of %d",
@@ -396,6 +459,8 @@ public class AdminHomeFragment extends Fragment {
     }
 
     private void updatePassengersPaginationButtons() {
+        if (binding == null) return;
+
         binding.passengersPrevButton.setEnabled(passengersPageIndex > 0);
         binding.passengersNextButton.setEnabled((passengersPageIndex + 1) * passengersPageSize < passengersTotalElements);
         binding.passengersPageInfo.setText(String.format("Page %d of %d",
@@ -403,6 +468,8 @@ public class AdminHomeFragment extends Fragment {
     }
 
     private void updateCurrentRidesPaginationButtons() {
+        if (binding == null) return;
+
         binding.ridesPrevButton.setEnabled(ridesPageIndex > 0);
         binding.ridesNextButton.setEnabled((ridesPageIndex + 1) * ridesPageSize < ridesTotalElements);
         binding.ridesPageInfo.setText(String.format("Page %d of %d",
@@ -412,6 +479,23 @@ public class AdminHomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        if (driversCall != null && !driversCall.isCanceled()) {
+            driversCall.cancel();
+        }
+        if (passengersCall != null && !passengersCall.isCanceled()) {
+            passengersCall.cancel();
+        }
+        if (ridesCall != null && !ridesCall.isCanceled()) {
+            ridesCall.cancel();
+        }
+        if (blockUserCall != null && !blockUserCall.isCanceled()) {
+            blockUserCall.cancel();
+        }
+        if (unblockUserCall != null && !unblockUserCall.isCanceled()) {
+            unblockUserCall.cancel();
+        }
+
         binding = null;
     }
 }

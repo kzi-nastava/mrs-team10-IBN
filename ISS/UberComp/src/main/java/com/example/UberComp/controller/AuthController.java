@@ -48,9 +48,11 @@ public class AuthController {
         Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authRequest.getEmail(), authRequest.getPassword()));
 
+        Account user = (Account) authentication.getPrincipal();
+        if(user.getAccountStatus() == AccountStatus.UNVERIFIED) return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Account user = (Account) authentication.getPrincipal();
         if (user.getAccountType().equals(AccountType.DRIVER))
             driverAvailabilityService.setDriverStatus(user.getId(), true);
         String jwt = tokenUtils.generateToken(user);

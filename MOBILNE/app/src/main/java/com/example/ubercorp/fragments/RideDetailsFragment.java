@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.ubercorp.R;
 import com.example.ubercorp.activities.enums.RideStatus;
+import com.example.ubercorp.api.ApiClient;
+import com.example.ubercorp.api.RideService;
 import com.example.ubercorp.dto.FavoriteRouteDTO;
 import com.example.ubercorp.managers.RouteManager;
 import com.example.ubercorp.databinding.FragmentRideDetailsBinding;
@@ -84,6 +87,7 @@ public class RideDetailsFragment extends Fragment {
         Button viewReviewsButton = view.findViewById(R.id.view_reviews_button);
         Button viewComplaintsButton = view.findViewById(R.id.view_complaints_button);
         Button rateButton = view.findViewById(R.id.rate);
+        Button orderButton = view.findViewById(R.id.order);
 
         SharedPreferences sharedPref = this.getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
         String role = JwtUtils.getRoleFromToken(sharedPref.getString("auth_token", null));
@@ -105,6 +109,8 @@ public class RideDetailsFragment extends Fragment {
             bundle.putLong("RideID", ride.getId());
             Navigation.findNavController(requireView()).navigate(R.id.action_details_to_complaints, bundle);
         });
+
+        orderButton.setOnClickListener((v) -> checkOngoingRideAndNavigate());
 
         rateButton.setOnClickListener((v) -> {
             Bundle bundle = new Bundle();
@@ -307,6 +313,63 @@ public class RideDetailsFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void checkOngoingRideAndNavigate() {
+        RideService api = ApiClient.getInstance().createService(RideService.class);
+        SharedPreferences sharedPref = getContext().getSharedPreferences("uber_corp", Context.MODE_PRIVATE);
+        String token = sharedPref.getString("auth_token", null);
+        api.getOngoingRide("Bearer " + token).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    boolean hasOngoingRide = response.body();
+
+                    if (hasOngoingRide) {
+                        Toast.makeText(requireContext(),
+                                "You already have an ongoing ride!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        navigateToOrderRide();
+                    }
+                } else {
+                    Toast.makeText(requireContext(),
+                            "Failed to check ongoing ride",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Toast.makeText(requireContext(),
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void navigateToOrderRide() {
+        List<CoordinateDTO> stations = rideDetails.getRoute().getStations();
+
+        String startAddress = stations.get(0).getAddress();
+        String endAddress = stations.get(stations.size() - 1).getAddress();
+
+        Bundle args = new Bundle();
+        args.putString("fromLocation", startAddress);
+        args.putString("toLocation", endAddress);
+
+        ArrayList<String> stopsList = new ArrayList<>();
+        for (int i = 1; i < stations.size() - 1; i++) {
+            String stop = stations.get(i).getAddress();
+            if (!stop.isEmpty()) {
+                stopsList.add(stop);
+            }
+        }
+        args.putStringArrayList("stops", stopsList);
+
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_details_to_order, args);
     }
 
     private void updateFavoriteButton() {

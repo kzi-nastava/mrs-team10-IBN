@@ -58,7 +58,7 @@
       
       
       @if (role === 'passenger') {
-        <button class="order-btn">Order</button>
+        <button class="order-btn" (click)="goToOrder()">Order</button>
       }
       
       @if (role == 'passenger') {
@@ -73,4 +73,7 @@
       }
     </div>
   </div>
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
 </div>

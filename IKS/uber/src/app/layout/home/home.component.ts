@@ -69,6 +69,10 @@ export class HomeComponent {
     this.rideForm.showError('You need to be logged in to add more than 2 locations');
   }
 
+  clearFormEvent(){
+    this.estimatedTimeOutput = '';
+  }
+
   async goToOrder() {
     try {
       const ongoing = await firstValueFrom(this.rideService.hasOngoingRide());

@@ -193,8 +193,8 @@ public class RideService {
         Driver driver = ride.getDriver();
         if(driver.getStatus() == DriverStatus.OFFLINE_AFTER_RIDE) driver.setStatus(DriverStatus.OFFLINE);
         else driver.setStatus(DriverStatus.ONLINE);
-        Instant instant = Instant.parse(finish.getIsotime());
-        ride.setFinish(instant.atZone(ZoneId.of("UTC")).toLocalDateTime());        // ride.setPrice(); price calculation
+        LocalDateTime now = LocalDateTime.parse(finish.getIsotime());        // ride.setPrice(); price calculation
+        ride.setFinish(now);
         rideRepository.save(ride);
         Vehicle vehicle = driver.getVehicle();
         vehicle.setLocation(ride.getRoute().getStations().get(ride.getRoute().getStations().size()-1));

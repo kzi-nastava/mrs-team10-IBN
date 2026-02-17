@@ -11,6 +11,7 @@
         <app-ride-approx-form
           #rideForm
           (routeOutput)="routeOutputEvent($event)"
+          (clearEvent)="clearFormEvent()"
         ></app-ride-approx-form>
         <p class="estimated-time">Estimated time: {{ estimatedTimeOutput }}</p>
         @if (isUserLoggedIn()) {

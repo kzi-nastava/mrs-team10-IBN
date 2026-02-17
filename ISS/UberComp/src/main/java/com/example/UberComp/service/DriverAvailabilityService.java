@@ -40,6 +40,10 @@ public class DriverAvailabilityService {
             driver.setDailyWorkStart(LocalDateTime.now());
             driver.setStatus(DriverStatus.ONLINE);
         }
+        else if (active && driver.getStatus().equals(DriverStatus.OFFLINE_AFTER_RIDE)) {
+            driver.setDailyWorkStart(LocalDateTime.now());
+            driver.setStatus(DriverStatus.DRIVING);
+        }
         else if (!active && driver.getStatus().equals(DriverStatus.ONLINE)) {
             updateWorkMinutes(driver);
             driver.setStatus(DriverStatus.OFFLINE);
