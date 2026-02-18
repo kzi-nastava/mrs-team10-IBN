@@ -6,6 +6,7 @@ import com.example.UberComp.dto.review.GetReviewDTO;
 import com.example.UberComp.model.Account;
 import com.example.UberComp.model.Review;
 import com.example.UberComp.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,7 +26,7 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('passenger')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CreatedReviewDTO> createReview(Authentication auth, @RequestBody CreateReviewDTO createReviewDTO) {
+    public ResponseEntity<CreatedReviewDTO> createReview(Authentication auth,@Valid @RequestBody CreateReviewDTO createReviewDTO) {
         Account acc = (Account) auth.getPrincipal();
         createReviewDTO.setUserId(acc.getUser().getId());
         CreatedReviewDTO savedReview = reviewService.createReview(createReviewDTO);
