@@ -166,18 +166,21 @@ export class RideDialogComponent implements OnInit {
   async goToOrder() {
     try {
       const ongoing = await firstValueFrom(this.rideService.hasOngoingRide());
-      const numStations = this.ride.route.stations.length
+      const numStations = this.ride.route.stations.length;
       if (!ongoing) {
-        this.dialogRef.close()
+        this.dialogRef.close();
         this.router.navigate(['/order-ride'], {
           state: {
             locations: this.ride.route.stations.map((station, index) => ({
-              address: station.address,
+              address: station.address
+                .replace(/,?\sNovi Sad\b/gi, '')
+                .replace(/,?\sSerbia\b/gi, '')
+                .trim(),
               lat: station.lat,
               lon: station.lon,
               type: index === 0 ? 'pickup' : index === numStations - 1 ? 'destination' : 'stop',
-              index
-            }))
+              index,
+            })),
           },
         });
       } else {
