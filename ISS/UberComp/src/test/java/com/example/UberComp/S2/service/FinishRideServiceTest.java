@@ -75,7 +75,7 @@ public class FinishRideServiceTest {
 
 
         RideMomentDTO dto = new RideMomentDTO();
-        dto.setIsotime("2026-10-10T12:15:00Z");
+        dto.setIsotime("2026-10-10T12:15:00");
 
         rideService.endRide(VALID_ID, dto);
 
@@ -105,7 +105,7 @@ public class FinishRideServiceTest {
 
 
         RideMomentDTO dto = new RideMomentDTO();
-        dto.setIsotime("2026-10-10T12:15:00Z");
+        dto.setIsotime("2026-10-10T12:15:00");
 
         rideService.endRide(VALID_ID, dto);
 
@@ -133,7 +133,7 @@ public class FinishRideServiceTest {
                 .thenReturn(Optional.of(ride));
 
         RideMomentDTO dto = new RideMomentDTO();
-        dto.setIsotime("2026-10-10T12:15:00Z");
+        dto.setIsotime("2026-10-10T12:15:00");
 
         rideService.endRide(VALID_ID, dto);
 

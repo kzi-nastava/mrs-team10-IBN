@@ -75,7 +75,7 @@ public class FinishRideControllerTest {
         headers.setBearerAuth(token);
 
         RideMomentDTO finish = new RideMomentDTO();
-        finish.setIsotime("2026-10-10T12:15:00Z");
+        finish.setIsotime("2026-10-10T12:15:00");
 
         ResponseEntity<FinishedRideDTO> response = testRestTemplate.exchange(
                 "/api/rides/finish/1",
