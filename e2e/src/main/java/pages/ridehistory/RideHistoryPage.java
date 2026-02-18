@@ -35,6 +35,13 @@ public class RideHistoryPage {
     @FindBy(css = ".ride-card")
     private List<WebElement> rideCards;
 
+    @FindBy(css = ".dialog-container")
+    private WebElement rideDialog;
+
+    @FindBy(css = ".favorite-btn")
+    private WebElement favoriteButton;
+
+
     public RideHistoryPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -142,5 +149,27 @@ public class RideHistoryPage {
         }
 
         return endTimes;
+    }
+
+    public void openRideDetails(int index) {
+        List<WebElement> cards = getRideCards();
+        wait.until(ExpectedConditions.elementToBeClickable(cards.get(index)));
+        cards.get(index).click();
+
+        wait.until(ExpectedConditions.visibilityOf(rideDialog));
+    }
+
+    public void addToFavorites() {
+        wait.until(ExpectedConditions.elementToBeClickable(favoriteButton));
+        favoriteButton.click();
+
+        wait.until(ExpectedConditions.textToBePresentInElement(favoriteButton, "In Favorites"));
+    }
+
+    public void openRideAndAddToFavorites(int index) {
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(
+                By.className("ride-card"), 0));
+        openRideDetails(index);
+        addToFavorites();
     }
 }
