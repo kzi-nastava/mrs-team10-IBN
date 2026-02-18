@@ -117,6 +117,7 @@ export class TrackingRouteComponent {
 
   changeState(location: TrackingData) {
     const now = new Date();
+    now.setHours(now.getHours() + 1)
     localStorage.removeItem('rideToken')
     if (this.passed == this.route.length) {
       this.routeService.finishRide(this.rideId!, now.toISOString()).subscribe({

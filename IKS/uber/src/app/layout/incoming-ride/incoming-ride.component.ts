@@ -26,7 +26,14 @@ export class IncomingRideComponent {
       next: (response) => {
         if (!response) return;
         this.ride = response;
-        this.route = [...response.route.stations];
+        this.route = [...response.route.stations.map((station) => ({
+              id: station.id,
+              address: station.address
+                .replace(/,?\sNovi Sad\b/gi, '')
+                .replace(/,?\sSerbia\b/gi, '')
+                .trim(),
+              lat: station.lat,
+              lon: station.lon}))];
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching ride:', err),

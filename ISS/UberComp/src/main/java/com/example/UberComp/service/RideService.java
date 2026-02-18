@@ -218,6 +218,7 @@ public class RideService {
         stoppedRoute.setStations(newStations);
         routeRepository.save(stoppedRoute);
         LocalDateTime now = LocalDateTime.parse(stopRideDTO.getFinishTime());
+        if(now.isBefore(ride.getStart())) throw new RuntimeException("Ride Finish before Ride Start");
         ride.setDistance(stopRideDTO.getDistance());
         ride.setFinish(now);
         Driver driver = ride.getDriver();
