@@ -358,7 +358,7 @@ public class TrackingRouteFragment extends Fragment {
         progress = Math.max(0f, Math.min(1f, progress));
 
         String remainingTime = String.format("Estimated time arrival in: %d minutes", (end - now) / 60000);
-        requireActivity().runOnUiThread(() -> infoText.setText(remainingTime));
+        if(this.getActivity() != null) requireActivity().runOnUiThread(() -> infoText.setText(remainingTime));
 
         int index = (int)(progress * (route.size() - 1));
         passedDistance = distance * ((double) index / route.size());
