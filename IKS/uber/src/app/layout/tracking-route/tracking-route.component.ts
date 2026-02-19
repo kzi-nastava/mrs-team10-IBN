@@ -150,6 +150,7 @@ export class TrackingRouteComponent {
 
   panic() {
     const now = new Date();
+    now.setHours(now.getHours() + 1)
     this.routeService
       .panic(this.rideId!, this.passed, now.toISOString(), this.currentLocation!)
       .subscribe({

@@ -5,6 +5,7 @@ import com.example.UberComp.model.User;
 import com.example.UberComp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ public class FcmController {
 
     private final UserRepository userRepository;
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @PostMapping("/token")
     public ResponseEntity<Void> updateFcmToken(
             Authentication authentication,
@@ -30,6 +32,7 @@ public class FcmController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @DeleteMapping("/token")
     public ResponseEntity<Void> deleteFcmToken(Authentication authentication) {
         String email = authentication.getName();

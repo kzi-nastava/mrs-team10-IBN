@@ -35,11 +35,6 @@ class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteAccount(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver', 'administrator')")
     @PutMapping("/me/change-password")
